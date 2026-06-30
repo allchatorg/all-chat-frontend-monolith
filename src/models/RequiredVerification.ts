@@ -1,0 +1,1 @@
+export type RequiredVerification = 'EMAIL' | 'PHONE' | 'NONE';

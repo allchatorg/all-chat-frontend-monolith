@@ -1,0 +1,62 @@
+"use client"
+
+import {ChartAreaInteractive} from "@ads/components/chart-area-interactive"
+import {AdsTable} from "@ads/components/ads-table"
+import {SectionCards} from "@ads/components/section-cards"
+import {SiteHeader} from "@ads/components/site-header"
+import {
+    useGetAdStatusCountsByUserQuery,
+    useGetUserAdViewsDailyBreakdownQuery,
+    useSearchAdsQuery
+} from "@ads/store/services/adsApi"
+import {AdStatus} from "@ads/models/ad"
+import {useUser} from "@ads/hooks/use-user"
+
+export default function Page() {
+    const {currentUserId} = useUser();
+
+    // Fetch ad status counts for the current user
+    const {data: statusCounts, isLoading: isLoadingCounts} = useGetAdStatusCountsByUserQuery();
+
+    // Fetch user's daily views for the chart
+    const {data: dailyViewsData, isLoading: isLoadingChart} = useGetUserAdViewsDailyBreakdownQuery();
+
+    // Fetch active ads for the table
+    const {data: activeAdsData, isLoading: isLoadingAds} = useSearchAdsQuery({
+        status: AdStatus.ACTIVE,
+        page: 0,
+        size: 10,
+        userId: currentUserId,
+    });
+
+    const activeAds = activeAdsData?.content ?? [];
+
+    return (
+        <div>
+            <SiteHeader title={'Dashboard'} description={'Overview of your ads performance'}/>
+            <div className="flex flex-1 flex-col">
+                <div className="@container/main flex flex-1 flex-col gap-2">
+                    <div className="flex flex-col gap-4 py-4 md:gap-6 md:py-6">
+                        <SectionCards statusCounts={statusCounts} isLoading={isLoadingCounts}/>
+                        <div className="px-4 lg:px-6">
+                            <ChartAreaInteractive
+                                dailyViews={dailyViewsData?.dailyViews?.slice().reverse() ?? []}
+                                isLoading={isLoadingChart}
+                            />
+                        </div>
+                        <div className="px-4 lg:px-6">
+                            <h2 className="text-xl font-semibold mb-3">Active ads</h2>
+                            {isLoadingAds ? (
+                                <div className="text-muted-foreground">Loading ads...</div>
+                            ) : activeAds.length === 0 ? (
+                                <div className="text-muted-foreground">No active ads found.</div>
+                            ) : (
+                                <AdsTable ads={activeAds}/>
+                            )}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    )
+}

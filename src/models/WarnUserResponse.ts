@@ -1,0 +1,3 @@
+interface WarnUserResponse {
+    description: string;
+}
