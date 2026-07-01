@@ -20,7 +20,7 @@ export const ClickableStepper = ({
     const progressValue = (currentStep / (steps.length - 1)) * 100;
 
     return (
-        <div className="w-full flex flex-col gap-4">
+        <div className="w-full flex flex-col gap-4 pb-8">
             <div className="relative flex items-center justify-between w-full">
 
                 {/* Background Progress Bar */}

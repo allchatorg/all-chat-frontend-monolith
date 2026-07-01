@@ -32,7 +32,7 @@ function CampaignContent() {
     }
 
     return (
-        <div className="w-full flex flex-col items-center mx-auto max-w-5xl space-y-8 p-6 md:p-12 ">
+        <div className="w-full flex flex-col items-center mx-auto max-w-5xl space-y-6 px-6 py-8 md:px-12 md:py-10">
 
             {/* Pass hook logic to Stepper */}
             <ClickableStepper
@@ -43,7 +43,7 @@ function CampaignContent() {
             />
 
             {/* Step 0: Ad Type Selection */}
-            <div className="mt-6 w-full">
+            <div className="w-full">
                 {currentStep === 0 && (
                     <AdCampaignSelector
                         adFormats={adFormats}
