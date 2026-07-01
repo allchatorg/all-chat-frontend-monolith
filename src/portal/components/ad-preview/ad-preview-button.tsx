@@ -1,6 +1,7 @@
 "use client";
 
 import React from "react";
+import {useTheme} from "next-themes";
 import {Eye} from "lucide-react";
 import {Button} from "@ads/components/ui/button";
 import {useDialog} from "@ads/components/providers/DialogProvider";
@@ -30,9 +31,12 @@ export function AdPreviewButton({
                                     size = "default",
                                 }: AdPreviewButtonProps) {
     const {open} = useDialog();
-    const previewUrl = buildPreviewUrl(ad);
+    const {resolvedTheme} = useTheme();
 
     const handleOpen = () => {
+        // Render the preview in the platform's current theme so it reflects how
+        // the ad will actually look on allchat (which supports dark mode).
+        const previewUrl = buildPreviewUrl(ad, resolvedTheme === "dark" ? "dark" : "light");
         open(
             <PreviewDialogContent
                 previewUrl={previewUrl}

@@ -7,7 +7,7 @@ interface PreviewDialogContentProps {
 
 export function PreviewDialogContent({previewUrl, title}: PreviewDialogContentProps) {
     return (
-        <div className="flex flex-col bg-white h-full">
+        <div className="flex flex-col bg-card h-full">
             <div className="border-b border-border px-5 py-2 sm:px-6">
                 <p className="text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">
                     Preview type
@@ -22,7 +22,7 @@ export function PreviewDialogContent({previewUrl, title}: PreviewDialogContentPr
                 src={previewUrl}
                 title={`${title} iframe preview`}
                 loading="lazy"
-                className="h-full min-h-[520px] w-full bg-white"
+                className="h-full min-h-[520px] w-full bg-background"
             />
         </div>
     );

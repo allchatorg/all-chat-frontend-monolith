@@ -194,6 +194,46 @@ html, body {
     }
 }
 
+/*
+ * Ads Portal surface tokens (scoped via `data-portal` on <body>, set by
+ * AppShell on /portal routes). The chat theme deliberately sets the solid
+ * surface tokens equal to --background because chat paints with translucent
+ * glass, not solid cards. The portal's shadcn components use solid `bg-card`,
+ * so they need distinct surfaces to have contrast — especially in dark mode.
+ * These overrides are scoped to the portal only and never touch chat.
+ */
+@layer base {
+    body[data-portal="true"] {
+        --card: 0 0% 100%;
+        --card-foreground: 222.2 84% 4.9%;
+        --popover: 0 0% 100%;
+        --popover-foreground: 222.2 84% 4.9%;
+        --brand: 213 100% 94%;          /* light-blue page, ~#E0EEFF */
+        --border: 214.3 31.8% 91.4%;
+    }
+
+    /* Slate dashboard dark theme — cards clearly lighter than the page */
+    .dark body[data-portal="true"] {
+        --brand: 222 47% 9%;            /* deep slate page (the inset bg) */
+        --background: 222 47% 11%;
+        --card: 215 28% 17%;            /* lighter slate -> cards pop */
+        --card-foreground: 210 40% 98%;
+        --popover: 215 28% 17%;
+        --popover-foreground: 210 40% 98%;
+        --muted: 217 33% 20%;
+        --muted-foreground: 215 20% 65%;
+        --accent: 217 33% 22%;
+        --accent-foreground: 210 40% 98%;
+        --secondary: 217 33% 20%;
+        --secondary-foreground: 210 40% 98%;
+        --border: 215 20% 26%;          /* visible card/section borders */
+        --input: 215 20% 26%;
+        --sidebar: 222 47% 9%;          /* align sidebar with page hue */
+        --sidebar-accent: 215 28% 17%;
+        --sidebar-border: 215 20% 26%;
+    }
+}
+
 @layer components {
     .app-background {
         background-color: hsl(var(--primary-blue-bg));

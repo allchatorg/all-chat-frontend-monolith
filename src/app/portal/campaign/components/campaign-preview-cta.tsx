@@ -27,12 +27,12 @@ export default function CampaignPreviewCta({
                     animate={{opacity: 1, y: 0, scale: 1}}
                     exit={{opacity: 0, y: -10, scale: 0.98}}
                     transition={{duration: 0.28, ease: "easeOut"}}
-                    className="rounded-2xl border border-border bg-[linear-gradient(135deg,#ffffff_0%,#f7faff_100%)] p-4 shadow-sm sm:p-5"
+                    className="rounded-2xl border border-border bg-[linear-gradient(135deg,#ffffff_0%,#f7faff_100%)] dark:bg-[linear-gradient(135deg,#0f172a_0%,#0b1120_100%)] p-4 shadow-sm sm:p-5"
                 >
                     <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                         <div className="flex items-start gap-3">
                             <div
-                                className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-indigo-50 text-indigo-600 shadow-sm">
+                                className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-indigo-50 text-indigo-600 dark:bg-indigo-500/15 dark:text-indigo-400 shadow-sm">
                                 {isWaitingForMedia && !canPreview ? (
                                     <Loader2 className="h-5 w-5 animate-spin"/>
                                 ) : (

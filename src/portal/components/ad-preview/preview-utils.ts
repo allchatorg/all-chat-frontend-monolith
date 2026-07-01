@@ -50,13 +50,14 @@ export function resolvePreviewAttachmentUrl(value?: string | null) {
     }
 }
 
-export function buildPreviewUrl(ad: PreviewAdData, baseUrl = AD_PREVIEW_BASE_URL) {
+export function buildPreviewUrl(ad: PreviewAdData, theme?: string | null, baseUrl = AD_PREVIEW_BASE_URL) {
     const previewUrl = new URL(baseUrl);
     const params = new URLSearchParams();
 
     appendParam(params, "brandName", ad.brandName);
     appendParam(params, "content", ad.content);
     appendParam(params, "color", "#E0EEFF");
+    appendParam(params, "theme", theme);
     appendParam(params, "attachmentUrl", resolvePreviewAttachmentUrl(ad.attachmentUrl));
     appendParam(params, "chatRoomName", ad.chatRoomName);
     appendParam(params, "senderCountryCode", ad.senderCountryCode);

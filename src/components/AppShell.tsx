@@ -20,11 +20,17 @@ export function AppShell({children}: { children: React.ReactNode }) {
     // chat's full-screen background image (`.app-background` on <body>). Chat's
     // AppInitializer normally toggles `data-app-background`, but it isn't rendered
     // on /portal routes, so hide the image here and restore it on the way out.
+    // We also tag the body with `data-portal` so globals.css can scope the
+    // portal's solid-surface tokens (card/popover/border) — including for
+    // body-portaled overlays (dialogs, dropdowns, toasts) — without touching
+    // chat's shared theme.
     useEffect(() => {
         if (!isPortalRoute) return;
         document.body.dataset.appBackground = "hidden";
+        document.body.dataset.portal = "true";
         return () => {
             document.body.removeAttribute("data-app-background");
+            document.body.removeAttribute("data-portal");
         };
     }, [isPortalRoute]);
 

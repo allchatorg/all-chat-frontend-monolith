@@ -700,6 +700,20 @@ function createConversation(advertMessage: Message): Message[] {
 
 export default function AdPreviewPage() {
     const searchParams = useSearchParams();
+
+    // Honor an explicit `theme` param so the preview renders in the same theme as
+    // the platform that opened it. We toggle the `dark` class on <html> directly
+    // (rather than next-themes' setTheme) because this page is loaded same-origin
+    // in an iframe and would otherwise overwrite the parent app's stored theme.
+    const themeParam = searchParams.get("theme");
+    React.useEffect(() => {
+        if (themeParam === "dark") {
+            document.documentElement.classList.add("dark");
+        } else if (themeParam === "light") {
+            document.documentElement.classList.remove("dark");
+        }
+    }, [themeParam]);
+
     const preview = buildPreviewData(searchParams);
     const previewMessages = createConversation(preview.advertMessage);
     const totalMessages = 125000 + preview.advertMessage.chatRoomId;
