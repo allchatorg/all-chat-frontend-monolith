@@ -3,12 +3,13 @@
 import {useEffect} from 'react';
 import {useRouter} from 'next/navigation';
 import {useAppSelector} from '@ads/store/hooks';
-import {selectCurrentToken, selectIsAdmin, selectIsAuthenticated} from '@ads/store/slices/authSlice';
+import {selectCurrentToken, selectIsAdmin, selectIsAuthenticated, selectIsSuperAdmin} from '@ads/store/slices/authSlice';
 import {selectIsUserLoading} from '@/redux/user/userSelectors';
 
 interface UseAuthReturn {
     isAuthenticated: boolean;
     isAdmin: boolean;
+    isSuperAdmin: boolean;
     isLoading: boolean;
     token: string | null;
 }
@@ -21,6 +22,7 @@ interface UseAuthReturn {
 export function useAuth(): UseAuthReturn {
     const isAuthenticated = useAppSelector(selectIsAuthenticated);
     const isAdminUser = useAppSelector(selectIsAdmin);
+    const isSuperAdminUser = useAppSelector(selectIsSuperAdmin);
     const token = useAppSelector(selectCurrentToken);
     const userLoading = useAppSelector(selectIsUserLoading);
 
@@ -29,6 +31,7 @@ export function useAuth(): UseAuthReturn {
     return {
         isAuthenticated,
         isAdmin: isAdminUser,
+        isSuperAdmin: isSuperAdminUser,
         isLoading,
         token,
     };
@@ -93,14 +96,47 @@ export function AdminRoute({children, fallback = null}: RouteGuardProps) {
 }
 
 /**
+ * Component to protect super-admin-only routes (e.g. the admin dashboard).
+ * Regular admins are sent to the ads list; unauthenticated users to login.
+ */
+export function SuperAdminRoute({children, fallback = null}: RouteGuardProps) {
+    const router = useRouter();
+    const {isAuthenticated, isSuperAdmin, isLoading} = useAuth();
+
+    useEffect(() => {
+        if (!isLoading) {
+            if (!isAuthenticated) {
+                router.replace('/auth?view=login');
+            } else if (!isSuperAdmin) {
+                router.replace('/portal/admin/ads');
+            }
+        }
+    }, [isAuthenticated, isSuperAdmin, isLoading, router]);
+
+    if (isLoading) {
+        return <>{fallback}</>;
+    }
+
+    if (!isAuthenticated || !isSuperAdmin) {
+        return null;
+    }
+
+    return <>{children}</>;
+}
+
+/**
  * Component to protect auth routes (login, register)
  * Redirects to dashboard if user is already authenticated
  */
 export function AuthRoute({children, fallback = null, redirectTo}: RouteGuardProps) {
     const router = useRouter();
-    const {isAuthenticated, isAdmin, isLoading} = useAuth();
+    const {isAuthenticated, isAdmin, isSuperAdmin, isLoading} = useAuth();
 
-    const HOME_ROUTE = isAdmin ? '/portal/admin/dashboard' : (redirectTo ?? '/portal/dashboard');
+    const HOME_ROUTE = isSuperAdmin
+        ? '/portal/admin/dashboard'
+        : isAdmin
+            ? '/portal/admin/ads'
+            : (redirectTo ?? '/portal/dashboard');
 
     useEffect(() => {
         if (!isLoading && isAuthenticated) {

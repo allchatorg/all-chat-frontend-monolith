@@ -59,12 +59,15 @@ const regularUserNavSecondary = [
     }
 ]
 
+const adminDashboardNav = {
+    title: "Dashboard",
+    url: "/portal/admin/dashboard",
+    icon: IconDashboard,
+}
+
+// Ads + Users are available to all admins; the Dashboard is super-admin-only and
+// prepended separately below.
 const adminNavMain = [
-    {
-        title: "Dashboard",
-        url: "/portal/admin/dashboard",
-        icon: IconDashboard,
-    },
     {
         title: "Ads",
         url: "/portal/admin/ads",
@@ -86,7 +89,7 @@ const adminNavSecondary = [
 ]
 
 export function AppSidebar({...props}: React.ComponentProps<typeof Sidebar>) {
-    const {user} = useUser()
+    const {user, isSuperAdmin} = useUser()
     const isAdmin = user.role === UserRole.ADMIN
 
     const dispatch = useDispatch<AppDispatch>()
@@ -103,7 +106,10 @@ export function AppSidebar({...props}: React.ComponentProps<typeof Sidebar>) {
         }
     }
 
-    const navMain = isAdmin ? adminNavMain : regularUserNavMain
+    // Super admins additionally see the analytics Dashboard entry.
+    const navMain = isAdmin
+        ? (isSuperAdmin ? [adminDashboardNav, ...adminNavMain] : adminNavMain)
+        : regularUserNavMain
     const navSecondary = isAdmin ? adminNavSecondary : regularUserNavSecondary
 
     const legalItems = [

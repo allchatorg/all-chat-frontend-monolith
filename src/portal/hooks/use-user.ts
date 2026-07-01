@@ -1,6 +1,6 @@
 import {UserRole} from "@ads/models/user-role";
 import {useAppSelector} from "@ads/store/hooks";
-import {selectCurrentUser, selectIsAdmin, selectIsAuthenticated} from "@ads/store/slices/authSlice";
+import {selectCurrentUser, selectIsAdmin, selectIsAuthenticated, selectIsSuperAdmin} from "@ads/store/slices/authSlice";
 import {Role} from "@ads/store/services/userApi";
 
 export interface User {
@@ -23,6 +23,7 @@ export function useUser() {
     const currentUser = useAppSelector(selectCurrentUser);
     const isAuthenticated = useAppSelector(selectIsAuthenticated);
     const isAdmin = useAppSelector(selectIsAdmin);
+    const isSuperAdmin = useAppSelector(selectIsSuperAdmin);
 
     // Build a UI-friendly user object. Provide a safe fallback when unauthenticated.
     const user: User = currentUser
@@ -48,5 +49,6 @@ export function useUser() {
         isLoading,
         isAuthenticated,
         isAdmin,
+        isSuperAdmin,
     };
 }

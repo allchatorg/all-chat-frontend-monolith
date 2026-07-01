@@ -26,6 +26,12 @@ const isAdminLevel = (chatRole: unknown): boolean => {
     return typeof level === 'number' && level >= RoleLevel.ADMIN;
 };
 
+const isSuperAdminLevel = (chatRole: unknown): boolean => {
+    if (!chatRole || typeof chatRole !== 'string') return false;
+    const level = getRoleLevel(chatRole as any);
+    return typeof level === 'number' && level >= RoleLevel.SUPER_ADMIN;
+};
+
 const toAuthUser = (u: any): AuthUser | null => {
     if (!u) return null;
     return {
@@ -44,6 +50,7 @@ export const selectCurrentToken = (_state: RootState): string | null =>
     (typeof window !== 'undefined' ? getSessionToken()?.token ?? null : null);
 export const selectIsAuthenticated = (state: RootState) => !!chatUser(state);
 export const selectIsAdmin = (state: RootState) => isAdminLevel(chatUser(state)?.role);
+export const selectIsSuperAdmin = (state: RootState) => isSuperAdminLevel(chatUser(state)?.role);
 
 // No-op action creators kept for backwards compatibility with any remaining
 // imports. Auth mutations now go through the chat auth thunks.
