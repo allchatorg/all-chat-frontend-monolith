@@ -4,6 +4,7 @@ import {ChartAreaInteractive} from "@ads/components/chart-area-interactive"
 import {AdsTable} from "@ads/components/ads-table"
 import {SectionCards} from "@ads/components/section-cards"
 import {SiteHeader} from "@ads/components/site-header"
+import {Card, CardContent, CardHeader, CardTitle} from "@ads/components/ui/card"
 import {
     useGetAdStatusCountsByUserQuery,
     useGetUserAdViewsDailyBreakdownQuery,
@@ -45,14 +46,20 @@ export default function Page() {
                             />
                         </div>
                         <div className="px-4 lg:px-6">
-                            <h2 className="text-xl font-semibold mb-3">Active ads</h2>
-                            {isLoadingAds ? (
-                                <div className="text-muted-foreground">Loading ads...</div>
-                            ) : activeAds.length === 0 ? (
-                                <div className="text-muted-foreground">No active ads found.</div>
-                            ) : (
-                                <AdsTable ads={activeAds}/>
-                            )}
+                            <Card>
+                                <CardHeader>
+                                    <CardTitle>Active ads</CardTitle>
+                                </CardHeader>
+                                <CardContent>
+                                    {isLoadingAds ? (
+                                        <div className="text-muted-foreground">Loading ads...</div>
+                                    ) : activeAds.length === 0 ? (
+                                        <div className="text-muted-foreground">No active ads found.</div>
+                                    ) : (
+                                        <AdsTable ads={activeAds} bare/>
+                                    )}
+                                </CardContent>
+                            </Card>
                         </div>
                     </div>
                 </div>

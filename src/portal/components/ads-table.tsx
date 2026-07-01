@@ -30,6 +30,8 @@ interface AdsTableProps {
     }
     viewDetailsPath?: string
     isAdmin?: boolean
+    /** Drop the table's own border/card surface when it is already inside a Card. */
+    bare?: boolean
     startDate?: Date
     endDate?: Date
     searchQuery?: string
@@ -55,6 +57,7 @@ export function AdsTable({
                              counts,
                              viewDetailsPath,
                              isAdmin = false,
+                             bare = false,
                              startDate,
                              endDate,
                              searchQuery,
@@ -238,7 +241,7 @@ export function AdsTable({
                 </div>
             )}
 
-            <div className="rounded-md border bg-card text-card-foreground overflow-hidden">
+            <div className={bare ? "overflow-hidden rounded-md" : "rounded-md border bg-card text-card-foreground overflow-hidden"}>
                 <Table>
                     <TableHeader>
                         <TableRow>
