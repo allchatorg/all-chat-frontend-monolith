@@ -128,18 +128,18 @@ export default function UserAdsPage() {
                 </CardHeader>
                 <CardContent>
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                        <div className="flex flex-col items-center justify-center p-4 border rounded-lg">
-                            <p className="text-2xl font-bold">{user.totalPurchasedAdsCount}</p>
+                        <div className="flex flex-col items-center justify-center p-4 border border-border rounded-lg bg-muted/30">
+                            <p className="text-2xl font-bold text-foreground">{user.totalPurchasedAdsCount}</p>
                             <p className="text-sm text-muted-foreground">Total Ads</p>
                         </div>
-                        <div className="flex flex-col items-center justify-center p-4 border rounded-lg">
-                            <p className="text-2xl font-bold text-green-600">
+                        <div className="flex flex-col items-center justify-center p-4 border border-border rounded-lg bg-muted/30">
+                            <p className="text-2xl font-bold text-green-600 dark:text-green-400">
                                 {counts.active}
                             </p>
                             <p className="text-sm text-muted-foreground">Active Ads</p>
                         </div>
-                        <div className="flex flex-col items-center justify-center p-4 border rounded-lg">
-                            <p className="text-2xl font-bold text-orange-600">
+                        <div className="flex flex-col items-center justify-center p-4 border border-border rounded-lg bg-muted/30">
+                            <p className="text-2xl font-bold text-orange-600 dark:text-orange-400">
                                 {counts.submitted}
                             </p>
                             <p className="text-sm text-muted-foreground">Submitted Ads</p>

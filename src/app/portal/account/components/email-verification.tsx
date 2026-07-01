@@ -50,11 +50,11 @@ export const EmailVerification: React.FC<EmailVerificationProps> = ({
                 </CardHeader>
 
                 <CardContent>
-                    <div className="flex items-center gap-3 rounded-xl border border-green-300 bg-green-50 p-3">
-                        <CheckCircle className="h-6 w-6 text-green-600"/>
+                    <div className="flex items-center gap-3 rounded-xl border border-green-300 bg-green-50 p-3 dark:border-green-800 dark:bg-green-950/40">
+                        <CheckCircle className="h-6 w-6 text-green-600 dark:text-green-400"/>
                         <div>
-                            <p className="font-medium text-green-700">Email Verified</p>
-                            <p className="text-sm text-green-600">{email}</p>
+                            <p className="font-medium text-green-700 dark:text-green-300">Email Verified</p>
+                            <p className="text-sm text-green-600 dark:text-green-400">{email}</p>
                         </div>
                         <Badge variant="default" className="ml-auto">
                             Verified

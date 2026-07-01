@@ -171,11 +171,11 @@ export const PhoneSettings: React.FC<PhoneSettingsProps> = ({
                         </div>
 
                         {isVerified ? (
-                            <div className="flex items-center gap-3 rounded-xl border border-green-300 bg-green-50 p-3">
-                                <CheckCircle className="h-6 w-6 text-green-600"/>
+                            <div className="flex items-center gap-3 rounded-xl border border-green-300 bg-green-50 p-3 dark:border-green-800 dark:bg-green-950/40">
+                                <CheckCircle className="h-6 w-6 text-green-600 dark:text-green-400"/>
                                 <div>
-                                    <p className="font-medium text-green-700">Phone Verified</p>
-                                    <p className="text-sm text-green-600">Your phone number is verified.</p>
+                                    <p className="font-medium text-green-700 dark:text-green-300">Phone Verified</p>
+                                    <p className="text-sm text-green-600 dark:text-green-400">Your phone number is verified.</p>
                                 </div>
                                 <Badge variant="default" className="ml-auto">
                                     Verified
@@ -183,10 +183,10 @@ export const PhoneSettings: React.FC<PhoneSettingsProps> = ({
                             </div>
                         ) : (
                             <div
-                                className="flex items-center justify-between gap-3 rounded-xl border border-yellow-300 bg-yellow-50 p-3">
+                                className="flex items-center justify-between gap-3 rounded-xl border border-yellow-300 bg-yellow-50 p-3 dark:border-yellow-800 dark:bg-yellow-950/40">
                                 <div>
-                                    <p className="font-medium text-yellow-800">Phone Not Verified</p>
-                                    <p className="text-sm text-yellow-700">Verify this number before using phone
+                                    <p className="font-medium text-yellow-800 dark:text-yellow-300">Phone Not Verified</p>
+                                    <p className="text-sm text-yellow-700 dark:text-yellow-400">Verify this number before using phone
                                         recovery.</p>
                                 </div>
                                 <Button
@@ -229,8 +229,8 @@ export const PhoneSettings: React.FC<PhoneSettingsProps> = ({
                     </div>
                 ) : (
                     <div className="space-y-4">
-                        <div className="rounded-lg border border-blue-200 bg-blue-50 p-3">
-                            <p className="text-sm text-blue-800">
+                        <div className="rounded-lg border border-blue-200 bg-blue-50 p-3 dark:border-blue-800 dark:bg-blue-950/40">
+                            <p className="text-sm text-blue-800 dark:text-blue-300">
                                 A verification code has been sent to {phoneNumber}
                             </p>
                         </div>

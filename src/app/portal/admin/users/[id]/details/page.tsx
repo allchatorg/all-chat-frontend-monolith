@@ -70,12 +70,12 @@ export default function UserDetailsPage() {
                 </CardHeader>
                 <CardContent>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <div className="flex flex-col items-center justify-center p-6 border rounded-lg">
-                            <p className="text-3xl font-bold text-blue-600">{user.totalPurchasedAdsCount}</p>
+                        <div className="flex flex-col items-center justify-center p-6 border border-border rounded-lg bg-muted/30">
+                            <p className="text-3xl font-bold text-blue-600 dark:text-blue-400">{user.totalPurchasedAdsCount}</p>
                             <p className="text-sm text-muted-foreground mt-1">Total Ads Purchased</p>
                         </div>
-                        <div className="flex flex-col items-center justify-center p-6 border rounded-lg">
-                            <p className="text-3xl font-bold text-green-600">${(user.totalSpent && user.totalSpent.toFixed(2))}</p>
+                        <div className="flex flex-col items-center justify-center p-6 border border-border rounded-lg bg-muted/30">
+                            <p className="text-3xl font-bold text-green-600 dark:text-green-400">${(user.totalSpent && user.totalSpent.toFixed(2))}</p>
                             <p className="text-sm text-muted-foreground mt-1">Total Spent</p>
                         </div>
                     </div>

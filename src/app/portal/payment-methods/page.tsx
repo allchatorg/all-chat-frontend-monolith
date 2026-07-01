@@ -52,11 +52,11 @@ export default function Page() {
             <div className="flex flex-col space-y-8 p-6 md:p-12 max-w-5xl mx-auto">
 
                 {/* Security Banner */}
-                <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 flex items-start space-x-3 max-w-3xl">
-                    <IconShieldCheck className="h-6 w-6 text-blue-600 mt-0.5"/>
+                <div className="bg-blue-50 dark:bg-blue-950 border border-blue-200 dark:border-blue-900 rounded-lg p-4 flex items-start space-x-3 max-w-3xl">
+                    <IconShieldCheck className="h-6 w-6 text-blue-600 dark:text-blue-400 mt-0.5"/>
                     <div>
-                        <h4 className="text-sm font-semibold text-blue-900">Secure Payment Processing</h4>
-                        <p className="text-sm text-blue-700 mt-1">
+                        <h4 className="text-sm font-semibold text-blue-900 dark:text-blue-100">Secure Payment Processing</h4>
+                        <p className="text-sm text-blue-700 dark:text-blue-300 mt-1">
                             AllChat does not store your payment details. Your cards are securely saved by our payment
                             provider, Stripe. You can remove them at any time.
                         </p>

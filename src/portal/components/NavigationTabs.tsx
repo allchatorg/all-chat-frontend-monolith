@@ -16,8 +16,8 @@ export function NavigationTabs({
                                    tabs,
                                    activeValue,
                                    className = "flex h-full w-full ",
-                                   tabsListClassName = "flex w-full rounded-none border-b h-12 bg-transparent p-0 flex-shrink-0",
-                                   tabTriggerClassName = "rounded-none border-b-2 data-[state=active]:border-primary overflow-hidden",
+                                   tabsListClassName = "flex w-full rounded-none border-b border-border h-12 bg-card p-0 flex-shrink-0",
+                                   tabTriggerClassName = "rounded-none border-b-2 border-transparent text-muted-foreground data-[state=active]:border-primary data-[state=active]:text-foreground overflow-hidden",
                                    children
                                }: NavigationTabsProps) {
 

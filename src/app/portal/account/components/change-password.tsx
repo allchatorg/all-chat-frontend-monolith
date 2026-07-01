@@ -111,7 +111,7 @@ export const ChangePassword: React.FC<ChangePasswordProps> = ({onChangePassword,
                     </div>
 
                     {success && (
-                        <p className="text-sm text-green-600">Password changed successfully.</p>
+                        <p className="text-sm text-green-600 dark:text-green-400">Password changed successfully.</p>
                     )}
 
                     <Button type="submit" disabled={loading}>

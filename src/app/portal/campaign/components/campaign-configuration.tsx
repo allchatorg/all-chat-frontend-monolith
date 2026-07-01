@@ -287,7 +287,7 @@ export default function CampaignConfiguration({
                                                             <div
                                                                 onDragOver={(e) => e.preventDefault()}
                                                                 onDrop={(e) => handleDrop(e, field.onChange)}
-                                                                className={`border-2 border-dashed ${form.formState.errors.media ? 'border-red-300 bg-red-50' : 'border-border bg-muted hover:bg-muted'} rounded-xl p-8 text-center transition-colors cursor-pointer relative`}
+                                                                className={`border-2 border-dashed ${form.formState.errors.media ? 'border-red-300 bg-red-50 dark:border-red-500/50 dark:bg-red-500/10' : 'border-border bg-muted hover:bg-muted'} rounded-xl p-8 text-center transition-colors cursor-pointer relative`}
                                                             >
                                                                 <input
                                                                     type="file"

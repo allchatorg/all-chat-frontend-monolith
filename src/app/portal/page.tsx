@@ -121,7 +121,7 @@ export default function Home() {
 
                         <Link href="/auth?view=login" className="w-full sm:w-auto">
                             <button
-                                className="w-full inline-flex items-center justify-center rounded-xl border border-white/60 bg-card/50 backdrop-blur-sm px-8 py-4 text-base font-bold text-foreground shadow-sm transition-all duration-200 hover:bg-card/80 active:scale-95">
+                                className="w-full inline-flex items-center justify-center rounded-xl border border-border bg-card/50 backdrop-blur-sm px-8 py-4 text-base font-bold text-foreground shadow-sm transition-all duration-200 hover:bg-card/80 active:scale-95">
                                 Log in
                             </button>
                         </Link>
@@ -200,7 +200,7 @@ export default function Home() {
                     {/* Legal links */}
                     <div className="mt-16 w-full max-w-md sm:max-w-none pb-16">
                         <div
-                            className="flex flex-col sm:flex-row items-stretch justify-center gap-3 sm:gap-0 rounded-2xl bg-card/60 backdrop-blur-sm border border-white/80 shadow-sm p-3 sm:p-2">
+                            className="flex flex-col sm:flex-row items-stretch justify-center gap-3 sm:gap-0 rounded-2xl bg-card/60 backdrop-blur-sm border border-border shadow-sm p-3 sm:p-2">
                             <button
                                 onClick={() => open(<div className="max-w-4xl"><TermsOfService/></div>)}
                                 className="flex items-center justify-center gap-2.5 rounded-xl px-5 py-3 text-sm font-medium text-muted-foreground transition-all duration-200 hover:bg-blue-50 hover:text-blue-600 active:scale-[0.98]"

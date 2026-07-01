@@ -48,7 +48,7 @@ export default function CostEstimationCard({
                     <div className="space-y-4">
                         <div className="flex items-center justify-between">
                             <Label className="text-base font-semibold text-foreground">Target Views</Label>
-                            <div className="bg-indigo-50 text-indigo-700 px-3 py-1 rounded-full text-sm font-bold">
+                            <div className="bg-indigo-50 text-indigo-700 dark:bg-indigo-500/15 dark:text-indigo-300 px-3 py-1 rounded-full text-sm font-bold">
                                 {details.views.toLocaleString()}
                             </div>
                         </div>

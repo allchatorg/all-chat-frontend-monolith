@@ -18,7 +18,7 @@ export function VerticalBarCard({
                                     current,
                                     max,
                                     fillColor = "#3b82f6",
-                                    backgroundColor = "#e0e7ff",
+                                    backgroundColor = "hsl(var(--muted-foreground) / 0.2)",
                                     className
                                 }: VerticalBarCardProps) {
     const percentage = Math.round((current / max) * 100);
