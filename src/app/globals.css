@@ -303,6 +303,18 @@ html, body {
         color: var(--glass-sidebar-muted) !important;
     }
 
+    /* Mobile bottom-sheet side panels (top-reacted / active rooms / search).
+       Match the chat section's light/glassy feel. The scrim behind them is kept
+       light in light mode (see LeftPanel/RightPanel), so a white-leaning frosted
+       glass reads as light/transparent rather than grey. */
+    .glass-panel.glass-sheet-mobile {
+        background: linear-gradient(135deg, rgba(255, 255, 255, 0.55), rgba(239, 246, 255, 0.4)) !important;
+    }
+
+    .dark .glass-panel.glass-sheet-mobile {
+        background: linear-gradient(135deg, rgba(15, 23, 42, 0.6), rgba(2, 6, 23, 0.55)) !important;
+    }
+
     .navbar-floating {
         color: rgba(15, 23, 42, 0.92);
     }

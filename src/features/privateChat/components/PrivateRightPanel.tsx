@@ -117,7 +117,7 @@ const PrivateRightPanel: React.FC = () => {
                     animate={{opacity: 1}}
                     exit={{opacity: 0}}
                     onClick={handleClose}
-                    className="lg:hidden fixed inset-0 bg-black/50 z-40 backdrop-blur-sm"
+                    className="lg:hidden fixed inset-0 bg-slate-950/15 dark:bg-black/50 z-40 backdrop-blur-sm"
                 />
                 <motion.div
                     initial={{y: "100%"}}
