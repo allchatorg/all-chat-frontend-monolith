@@ -242,7 +242,7 @@ export function AdsTable({
                 </div>
             )}
 
-            <div className="rounded-md border">
+            <div className="rounded-md border bg-card text-card-foreground overflow-hidden">
                 <Table>
                     <TableHeader>
                         <TableRow>
