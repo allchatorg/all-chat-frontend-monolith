@@ -8,7 +8,7 @@ import {Ad, AdFormatType, AdStatus} from "@ads/models/ad"
 import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue} from "@ads/components/ui/select"
 import {Button} from "@ads/components/ui/button"
 import {Input} from "@ads/components/ui/input"
-import {DateRangePicker} from "@ads/components/ui/date-range-picker"
+import {DatePicker} from "@ads/components/ui/date-picker"
 import {ArrowUpDown, Eye, Search, X} from "lucide-react"
 import {useRouter} from "next/navigation"
 
@@ -212,15 +212,19 @@ export function AdsTable({
                             className="h-9 pl-9 w-full"
                         />
                     </div>
-                    <div className="w-full lg:w-auto">
-                        <DateRangePicker
-                            value={startDate || endDate ? {from: startDate, to: endDate} : undefined}
-                            onChange={(range) => {
-                                onStartDateChange?.(range?.from)
-                                onEndDateChange?.(range?.to)
-                            }}
-                            placeholder="Start Date – End Date"
-                            className="w-full sm:w-[260px]"
+                    <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2 w-full lg:w-auto">
+                        <DatePicker
+                            value={startDate}
+                            onChange={(date) => onStartDateChange?.(date)}
+                            placeholder="Start Date"
+                            className="w-full sm:w-[150px]"
+                        />
+                        <span className="hidden sm:inline text-sm text-muted-foreground">to</span>
+                        <DatePicker
+                            value={endDate}
+                            onChange={(date) => onEndDateChange?.(date)}
+                            placeholder="End Date"
+                            className="w-full sm:w-[150px]"
                         />
                     </div>
 
