@@ -8,7 +8,7 @@ import {ProtectedRoute} from "@ads/components/route-guards"
 import {useUser} from "@ads/hooks/use-user"
 
 const PUBLIC_PATHS = ["/", "/auth", "/login", "/signup"] as const
-const SHARED_AUTHENTICATED_PATHS = ["/portal/account"] as const
+const SHARED_AUTHENTICATED_PATHS = [] as const
 const ADMIN_HOME_ROUTE = "/portal/admin/dashboard"
 const USER_HOME_ROUTE = "/portal/dashboard"
 

@@ -1,8 +1,6 @@
 "use client"
 
-import {useEffect, useState} from "react"
-import {useTheme} from "next-themes"
-import {IconLogout, IconMoon, IconSun} from "@tabler/icons-react"
+import {IconLogout} from "@tabler/icons-react"
 import {Avatar, AvatarFallback, AvatarImage,} from "@ads/components/ui/avatar"
 import {SidebarMenu, SidebarMenuButton, SidebarMenuItem,} from "@ads/components/ui/sidebar"
 
@@ -17,12 +15,6 @@ export function NavUser({
     }
     onLogout?: () => void
 }) {
-    const {resolvedTheme, setTheme} = useTheme()
-    // Avoid a hydration mismatch: the resolved theme is only known on the client.
-    const [mounted, setMounted] = useState(false)
-    useEffect(() => setMounted(true), [])
-    const isDark = resolvedTheme === "dark"
-
     // Extract initials from user name
     const getInitials = (name: string) => {
         const nameParts = name.trim().split(' ')
@@ -52,20 +44,6 @@ export function NavUser({
                         </span>
                     </div>
                     <div className="ml-auto flex items-center gap-2">
-                        {mounted && (
-                            <button
-                                type="button"
-                                aria-label={isDark ? "Switch to light mode" : "Switch to dark mode"}
-                                title={isDark ? "Switch to light mode" : "Switch to dark mode"}
-                                className="cursor-pointer text-muted-foreground hover:text-foreground"
-                                onClick={(e) => {
-                                    e.stopPropagation();
-                                    setTheme(isDark ? "light" : "dark");
-                                }}
-                            >
-                                {isDark ? <IconSun className="w-4 h-4"/> : <IconMoon className="w-4 h-4"/>}
-                            </button>
-                        )}
                         <IconLogout
                             className="cursor-pointer w-4 h-4"
                             onClick={(e) => {
