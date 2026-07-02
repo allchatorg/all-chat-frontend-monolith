@@ -3,6 +3,7 @@ import localFont from "next/font/local";
 import "./globals.css";
 import {AppProviders} from "@/components/providers/AppProviders";
 import {AppShell} from "@/components/AppShell";
+import RouteProgressBar from "@/components/RouteProgressBar";
 
 const geistSans = localFont({
     src: "./fonts/GeistVF.woff",
@@ -35,6 +36,7 @@ export default function RootLayout({
     return (
         <html lang="en" className="h-full">
         <body className={`${geistSans.variable} ${geistMono.variable} app-background flex flex-col h-full`}>
+        <RouteProgressBar/>
         <AppProviders>
             <AppShell>
                 {children}
