@@ -37,7 +37,7 @@ const ReportCard: React.FC<ReportCardProps> = ({report}) => {
             {report.description && (
                 <CardContent className="pt-0">
                     <div
-                        className="rounded-md border bg-muted/50 p-3 text-sm text-foreground/80 whitespace-pre-wrap break-words">
+                        className="rounded-md border bg-muted/50 p-3 text-sm text-foreground/80 whitespace-pre-wrap wrap-break-word">
                         {report.description}
                     </div>
                 </CardContent>

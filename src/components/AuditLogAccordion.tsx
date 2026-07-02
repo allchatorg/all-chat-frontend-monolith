@@ -111,7 +111,7 @@ const renderLogDetails = (log: AuditLogUnion) => {
                     />
                     {log.description && (
                         <div
-                            className="rounded border-l-4 border-red-300 bg-red-50 p-3 text-sm text-red-800 break-words dark:border-red-700 dark:bg-red-900/10 dark:text-red-300">
+                            className="rounded border-l-4 border-red-300 bg-red-50 p-3 text-sm text-red-800 wrap-break-word dark:border-red-700 dark:bg-red-900/10 dark:text-red-300">
                             {log.description}
                         </div>
                     )}

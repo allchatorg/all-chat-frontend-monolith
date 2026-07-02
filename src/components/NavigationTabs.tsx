@@ -16,7 +16,7 @@ export function NavigationTabs({
                                    tabs,
                                    activeValue,
                                    className = "flex h-full w-full flex-col",
-                                   tabsListClassName = "grid w-full rounded-none border-b h-12 bg-transparent p-0 flex-shrink-0",
+                                   tabsListClassName = "grid w-full rounded-none border-b h-12 bg-transparent p-0 shrink-0",
                                    tabTriggerClassName = "rounded-none border-b-2 border-transparent data-[state=active]:border-blue-600 data-[state=active]:bg-transparent",
                                    children
                                }: NavigationTabsProps) {
@@ -24,7 +24,7 @@ export function NavigationTabs({
     return (
         <Tabs value={activeValue} className={className}>
             <TabsList
-                className="flex h-12 w-full flex-shrink-0 justify-start overflow-x-auto rounded-none border-b bg-transparent p-0"
+                className="flex h-12 w-full shrink-0 justify-start overflow-x-auto rounded-none border-b bg-transparent p-0"
             >
                 {tabs.map((tab) => (
                     <TabsTrigger

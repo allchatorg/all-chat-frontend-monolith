@@ -121,7 +121,7 @@ const renderLogDetails = (log: AuditLogUnion) => {
                     {log.description && (
                         <div
                             className="rounded border-l-4 border-red-300 bg-red-50 p-3 dark:border-red-700 dark:bg-red-900/10">
-                            <span className="text-sm text-red-800 break-words dark:text-red-300">
+                            <span className="text-sm text-red-800 wrap-break-word dark:text-red-300">
                                 {log.description}
                             </span>
                         </div>
@@ -356,7 +356,7 @@ export const AuditLogCard = ({log}: { log: AuditLogUnion }) => {
             <CardContent className="space-y-4">
                 {renderLogDetails(log)}
                 <div
-                    className="flex flex-col gap-2 border-t border-[color:var(--glass-border)] pt-3 text-sm text-muted-foreground sm:flex-row sm:items-center sm:justify-between">
+                    className="flex flex-col gap-2 border-t border-(--glass-border) pt-3 text-sm text-muted-foreground sm:flex-row sm:items-center sm:justify-between">
                     <div className="flex items-center gap-2">
                         <User className="h-4 w-4"/>
                         <span>by {actorLabel}</span>

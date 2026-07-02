@@ -60,7 +60,7 @@ export default function UserAuditLogsPage() {
                         </ScrollArea>
                     </div>
 
-                    <div className="border-t bg-background flex-shrink-0">
+                    <div className="border-t bg-background shrink-0">
                         <PaginationFooter
                             totalPages={logsPage.totalPages}
                             currentPage={currentPage}

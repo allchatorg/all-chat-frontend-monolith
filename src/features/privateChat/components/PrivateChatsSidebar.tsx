@@ -119,7 +119,7 @@ function ConversationRowContent({
                     />
                 ) : unread > 0 ? (
                     <span
-                        className="flex h-5 items-center justify-center rounded-full bg-red-500 text-xs font-medium text-white min-w-[1.25rem] px-1.5 py-0.5"
+                        className="flex h-5 items-center justify-center rounded-full bg-red-500 text-xs font-medium text-white min-w-5 px-1.5 py-0.5"
                         title="Unread messages"
                     >
                         {unread}

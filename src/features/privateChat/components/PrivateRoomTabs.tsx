@@ -77,7 +77,7 @@ function PrivateRoomTabContent({
             {...attributes}
             {...listeners}
             className={`
-                mt-4 ml-1 group relative flex flex-col items-center justify-center min-w-0 flex-shrink-0 cursor-grab active:cursor-grabbing
+                mt-4 ml-1 group relative flex flex-col items-center justify-center min-w-0 shrink-0 cursor-grab active:cursor-grabbing
                 gap-1 whitespace-nowrap px-4 py-0 transition-all duration-200
                 room-tab rounded-t-xl
                 ${isDragging ? 'opacity-30' : 'opacity-100'}
@@ -90,7 +90,7 @@ function PrivateRoomTabContent({
                     e.stopPropagation();
                     onCloseClick(e);
                 }}
-                className="z-20 border-primary border-[1px] absolute -top-1 -left-1 flex items-center justify-center w-[18px] h-[18px] bg-red-600 text-white hover:bg-red-700 transition-colors rounded-full shadow-md"
+                className="z-20 border-primary border absolute -top-1 -left-1 flex items-center justify-center w-[18px] h-[18px] bg-red-600 text-white hover:bg-red-700 transition-colors rounded-full shadow-md"
                 title="Close tab"
                 onPointerDown={(e) => e.stopPropagation()}
             >
@@ -114,7 +114,7 @@ function PrivateRoomTabContent({
                         <span className="h-2 w-2 rounded-full bg-red-500" title="Unread messages"/>
                     ) : unread && unread > 0 ? (
                         <span
-                            className="flex h-5 items-center justify-center rounded-full bg-red-500 text-xs font-medium text-white min-w-[1.25rem] px-1.5 py-0.5"
+                            className="flex h-5 items-center justify-center rounded-full bg-red-500 text-xs font-medium text-white min-w-5 px-1.5 py-0.5"
                             title="Unread messages"
                         >
                             {unread}
@@ -122,7 +122,7 @@ function PrivateRoomTabContent({
                     ) : null}
                     <button
                         onClick={onToggleSound}
-                        className="rounded-full flex-shrink-0 p-1 transition-colors text-muted-foreground hover:bg-sky-100/35 hover:text-sky-700 dark:hover:bg-white/15 dark:hover:text-white"
+                        className="rounded-full shrink-0 p-1 transition-colors text-muted-foreground hover:bg-sky-100/35 hover:text-sky-700 dark:hover:bg-white/15 dark:hover:text-white"
                         title={isSoundOn ? "Mute notifications" : "Unmute notifications"}
                         onPointerDown={(e) => e.stopPropagation()}
                     >

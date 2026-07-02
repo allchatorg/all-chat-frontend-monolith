@@ -163,7 +163,7 @@ const PrivateChatSearchBar: React.FC = () => {
                     onBlur={() => {
                         setTimeout(() => setIsFocused(false), 200);
                     }}
-                    className="flex-1 min-w-[80px] bg-transparent outline-none placeholder:text-muted-foreground text-base sm:text-sm"
+                    className="flex-1 min-w-[80px] bg-transparent outline-hidden placeholder:text-muted-foreground text-base sm:text-sm"
                 />
 
                 {(inputValue || filters.length > 0) && (

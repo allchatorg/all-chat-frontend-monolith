@@ -45,18 +45,18 @@ const TagSelection: React.FC<TagSelectionProps> = ({
 
     return (
         <div className="glass-popover box-border flex flex-col rounded-lg text-foreground p-6 w-[300px] max-h-[80vh]">
-            <div className="mb-4 flex flex-shrink-0 items-center">
+            <div className="mb-4 flex shrink-0 items-center">
                 <TagIcon className="mr-2 h-5 w-5"/>
                 <h2 className="text-lg font-semibold">
                     {isEditing ? 'Edit Tags' : 'Select Tags'}
                 </h2>
             </div>
 
-            <div className="mb-4 flex-shrink-0">
+            <div className="mb-4 shrink-0">
                 <p className="text-sm text-muted-foreground">Select tags that apply to this file:</p>
             </div>
 
-            <div className="mb-6 flex-grow overflow-y-auto space-y-2">
+            <div className="mb-6 grow overflow-y-auto space-y-2">
                 {availableTags.map((tag) => {
                     const isSelected = isTagSelected(tag);
                     const isRestricted = tag.restrictedToAdults && !user?.isOver18;
@@ -94,7 +94,7 @@ const TagSelection: React.FC<TagSelectionProps> = ({
 
             </div>
 
-            <div className="flex flex-shrink-0 justify-end gap-2">
+            <div className="flex shrink-0 justify-end gap-2">
                 <Button variant="outline" className="glass-control" onClick={onCancel}>
                     Cancel
                 </Button>

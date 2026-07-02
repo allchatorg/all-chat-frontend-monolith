@@ -13,7 +13,7 @@ export const SplashOffline = () => {
 
     return (
         <div
-            className="fixed inset-0 z-[9999] flex flex-col items-center justify-center bg-primary-blue-bg transition-opacity duration-300 p-6">
+            className="fixed inset-0 z-9999 flex flex-col items-center justify-center bg-primary-blue-bg transition-opacity duration-300 p-6">
             <div
                 className="flex flex-col items-center text-center space-y-8 animate-in fade-in zoom-in duration-500 max-w-md w-full">
                 <div className="flex items-center justify-center p-6 bg-muted/30 dark:bg-muted/10 rounded-full">

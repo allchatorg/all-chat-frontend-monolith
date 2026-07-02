@@ -95,7 +95,7 @@ export default function AuditLogsPage() {
             </div>
 
             <Card className="flex min-h-0 flex-1 flex-col p-0">
-                <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 p-4 flex-shrink-0">
+                <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 p-4 shrink-0">
                     <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
                         <Popover>
                             <PopoverTrigger asChild>
@@ -236,7 +236,7 @@ export default function AuditLogsPage() {
                             </ScrollArea>
 
                             {logsPage.content && logsPage.content.length > 0 && (
-                                <div className="flex-shrink-0 border-t pt-4 mt-4">
+                                <div className="shrink-0 border-t pt-4 mt-4">
                                     <PaginationFooter
                                         totalPages={logsPage.totalPages}
                                         currentPage={currentPage}

@@ -67,7 +67,7 @@ const AdvertMessageItem: React.FC<{
         return parts.map((part, index) => {
             if (part.match(urlRegex)) {
                 if (interactionsDisabled) {
-                    return <span key={index} className="[overflow-wrap:anywhere]">{part}</span>;
+                    return <span key={index} className="wrap-anywhere">{part}</span>;
                 }
 
                 return (
@@ -76,7 +76,7 @@ const AdvertMessageItem: React.FC<{
                         href={part}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="underline hover:opacity-80 [overflow-wrap:anywhere]"
+                        className="underline hover:opacity-80 wrap-anywhere"
                         onClick={(e) => e.stopPropagation()}
                     >
                         {part}
@@ -99,7 +99,7 @@ const AdvertMessageItem: React.FC<{
                 <div className="flex flex-col items-start max-w-full min-w-0">
                     <div
                         className={clsx(
-                            "shadow rounded-lg px-3 py-2 break-words max-w-full min-w-0",
+                            "shadow-sm rounded-lg px-3 py-2 wrap-break-word max-w-full min-w-0",
                             className
                         )}
                         style={{
@@ -108,7 +108,7 @@ const AdvertMessageItem: React.FC<{
                         }}
                     >
                         <div
-                            className="text-sm font-normal whitespace-pre-wrap [word-break:break-word] [overflow-wrap:anywhere] min-w-0 max-w-full">
+                            className="text-sm font-normal whitespace-pre-wrap [word-break:break-word] wrap-anywhere min-w-0 max-w-full">
                             {linkifyText(message.content)}
                         </div>
                     </div>

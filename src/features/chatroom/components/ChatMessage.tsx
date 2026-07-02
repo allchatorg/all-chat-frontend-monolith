@@ -197,7 +197,7 @@ const ChatMessage: React.FC<ChatMessageProps> = ({
                         {!interactionsDisabled && (
                             <button
                                 onClick={() => setIsRevealed(true)}
-                                className="cursor-pointer text-xs font-medium text-primary hover:underline focus:outline-none"
+                                className="cursor-pointer text-xs font-medium text-primary hover:underline focus:outline-hidden"
                             >
                                 Show Message
                             </button>

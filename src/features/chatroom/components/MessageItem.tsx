@@ -298,7 +298,7 @@ const MessageItem: React.FC<{
                 <div className={clsx("flex flex-col max-w-full min-w-0", isOwn ? "items-end" : "items-start")}>
                     <div
                         className={clsx(
-                            "shadow rounded-lg px-3 py-2 break-words max-w-full min-w-0",
+                            "shadow-sm rounded-lg px-3 py-2 wrap-break-word max-w-full min-w-0",
                             className,
                             message.deleted && "italic"
                         )}

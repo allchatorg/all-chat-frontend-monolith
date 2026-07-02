@@ -16,7 +16,7 @@ const AuditLogCardList: React.FC<AuditLogCardListProps> = ({logs, title, height 
         <Card className="glass-surface flex w-full flex-col overflow-hidden rounded-lg"
               style={{minHeight: height, maxHeight}}>
             {title && (
-                <CardHeader className="border-b border-[color:var(--glass-border)]">
+                <CardHeader className="border-b border-(--glass-border)">
                     <h2 className="text-lg font-semibold text-foreground">{title}</h2>
                 </CardHeader>
             )}

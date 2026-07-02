@@ -72,11 +72,11 @@ function BannedPageContent() {
         <div className="flex min-h-screen items-center justify-center p-3 sm:p-4 md:p-6">
             <div className="w-full max-w-md">
                 <div
-                    className="relative overflow-hidden rounded-xl sm:rounded-2xl border border-red-100 /80 p-4 sm:p-6 md:p-8 text-center shadow-2xl backdrop-blur-sm space-y-4 sm:space-y-6">
-                    <div className="absolute top-0 left-0 h-1 w-full bg-gradient-to-r from-red-500 to-orange-500"></div>
+                    className="relative overflow-hidden rounded-xl sm:rounded-2xl border border-red-100 /80 p-4 sm:p-6 md:p-8 text-center shadow-2xl backdrop-blur-xs space-y-4 sm:space-y-6">
+                    <div className="absolute top-0 left-0 h-1 w-full bg-linear-to-r from-red-500 to-orange-500"></div>
 
                     <div
-                        className="mx-auto flex h-16 w-16 sm:h-20 sm:w-20 items-center justify-center rounded-full border-4 border-red-50 bg-gradient-to-br from-red-100 to-red-200 shadow-lg">
+                        className="mx-auto flex h-16 w-16 sm:h-20 sm:w-20 items-center justify-center rounded-full border-4 border-red-50 bg-linear-to-br from-red-100 to-red-200 shadow-lg">
                         {isPermanent ? (
                             <Shield className="h-8 w-8 sm:h-10 sm:w-10 text-red-600"/>
                         ) : (
@@ -86,12 +86,12 @@ function BannedPageContent() {
 
                     <div className="space-y-3 sm:space-y-4">
                         <div className="space-y-2">
-                            <h1 className="bg-gradient-to-r from-red-600 to-orange-600 bg-clip-text text-2xl sm:text-3xl font-bold text-transparent">
+                            <h1 className="bg-linear-to-r from-red-600 to-orange-600 bg-clip-text text-2xl sm:text-3xl font-bold text-transparent">
                                 Access Restricted
                             </h1>
 
                             <div className="flex items-center justify-center gap-2">
-                                <AlertTriangle className="h-4 w-4 sm:h-5 sm:w-5 text-red-500 flex-shrink-0"/>
+                                <AlertTriangle className="h-4 w-4 sm:h-5 sm:w-5 text-red-500 shrink-0"/>
                                 <p className="text-base sm:text-xl font-semibold text-red-600">
                                     Account {isPermanent ? "Permanently" : "Temporarily"} Suspended
                                 </p>
@@ -104,7 +104,7 @@ function BannedPageContent() {
                                     <div>
                                         <span
                                             className="text-xs sm:text-sm font-semibold uppercase tracking-wide text-gray-600">Reason</span>
-                                        <p className="text-sm sm:text-base font-medium text-gray-900 break-words">
+                                        <p className="text-sm sm:text-base font-medium text-gray-900 wrap-break-word">
                                             {getReportTypeLabel(banInfo.reportType)}
                                         </p>
                                     </div>
@@ -121,7 +121,7 @@ function BannedPageContent() {
                                                 className="text-xs sm:text-sm font-semibold uppercase tracking-wide text-gray-600">
                                                 Expires At
                                             </span>
-                                            <p className="text-sm sm:text-base font-medium text-gray-900 break-words">
+                                            <p className="text-sm sm:text-base font-medium text-gray-900 wrap-break-word">
                                                 {new Date(banInfo.expiresAt).toLocaleString()}
                                             </p>
                                         </div>
@@ -130,9 +130,9 @@ function BannedPageContent() {
 
                                 {isTemporary && timeRemaining && (
                                     <div
-                                        className="rounded-lg border border-orange-200 bg-gradient-to-r from-orange-50 to-yellow-50 p-3 sm:p-4">
+                                        className="rounded-lg border border-orange-200 bg-linear-to-r from-orange-50 to-yellow-50 p-3 sm:p-4">
                                         <div className="mb-2 flex items-center justify-center gap-2">
-                                            <Clock className="h-4 w-4 sm:h-5 sm:w-5 text-orange-600 flex-shrink-0"/>
+                                            <Clock className="h-4 w-4 sm:h-5 sm:w-5 text-orange-600 shrink-0"/>
                                             <span
                                                 className="text-xs sm:text-sm font-semibold uppercase tracking-wide text-orange-800">
                                                 Time Remaining
@@ -153,7 +153,7 @@ function BannedPageContent() {
                                             className="mb-2 block text-xs sm:text-sm font-semibold uppercase tracking-wide text-blue-700">
                                             Additional Information
                                         </span>
-                                        <p className="text-sm sm:text-base leading-relaxed text-blue-900 break-words">{banInfo.description}</p>
+                                        <p className="text-sm sm:text-base leading-relaxed text-blue-900 wrap-break-word">{banInfo.description}</p>
                                     </div>
                                 )}
                             </div>
@@ -177,13 +177,13 @@ function BannedPageFallback() {
         <div className="flex min-h-screen items-center justify-center p-3 sm:p-4 md:p-6">
             <div className="w-full max-w-md">
                 <div
-                    className="rounded-xl sm:rounded-2xl border border-red-100 /80 p-4 sm:p-6 md:p-8 text-center shadow-2xl backdrop-blur-sm space-y-4 sm:space-y-6">
+                    className="rounded-xl sm:rounded-2xl border border-red-100 /80 p-4 sm:p-6 md:p-8 text-center shadow-2xl backdrop-blur-xs space-y-4 sm:space-y-6">
                     <div
-                        className="mx-auto flex h-16 w-16 sm:h-20 sm:w-20 animate-pulse items-center justify-center rounded-full border-4 border-red-50 bg-gradient-to-br from-red-100 to-red-200 shadow-lg">
+                        className="mx-auto flex h-16 w-16 sm:h-20 sm:w-20 animate-pulse items-center justify-center rounded-full border-4 border-red-50 bg-linear-to-br from-red-100 to-red-200 shadow-lg">
                         <Shield className="h-8 w-8 sm:h-10 sm:w-10 text-red-600"/>
                     </div>
                     <div className="space-y-3 sm:space-y-4">
-                        <h1 className="bg-gradient-to-r from-red-600 to-orange-600 bg-clip-text text-2xl sm:text-3xl font-bold text-transparent">
+                        <h1 className="bg-linear-to-r from-red-600 to-orange-600 bg-clip-text text-2xl sm:text-3xl font-bold text-transparent">
                             Loading...
                         </h1>
                         <div className="rounded-lg bg-gray-50 p-3 sm:p-4">

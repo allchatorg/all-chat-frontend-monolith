@@ -74,14 +74,14 @@ export const ColorPicker: React.FC<ColorPickerProps> = ({
     if (isLoading) {
         return (
             <div
-                className="space-y-4 p-4 border rounded-lg bg-card text-card-foreground shadow-sm flex items-center justify-center min-h-[200px]">
+                className="space-y-4 p-4 border rounded-lg bg-card text-card-foreground shadow-xs flex items-center justify-center min-h-[200px]">
                 <Spinner size={32}/>
             </div>
         );
     }
 
     return (
-        <div className="space-y-4 p-4 border rounded-lg bg-card text-card-foreground shadow-sm">
+        <div className="space-y-4 p-4 border rounded-lg bg-card text-card-foreground shadow-xs">
             <div className="flex items-center justify-between">
                 <div className="space-y-1">
                     <Label className="text-sm font-medium">Color Selection</Label>
@@ -124,7 +124,7 @@ export const ColorPicker: React.FC<ColorPickerProps> = ({
                         style={{backgroundColor: isEditing ? tempColor : currentColor}}
                     />
                     <div
-                        className="absolute inset-0 rounded-lg bg-gradient-to-tr from-transparent via-transparent to-white/20 pointer-events-none"/>
+                        className="absolute inset-0 rounded-lg bg-linear-to-tr from-transparent via-transparent to-white/20 pointer-events-none"/>
                     <div className="mt-2 flex items-center justify-between">
                         <span className="text-sm font-mono text-gray-600 dark:text-gray-400">
                             {(isEditing ? tempColor : currentColor).toUpperCase()}

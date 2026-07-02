@@ -107,7 +107,7 @@ export const ReactionButton: React.FC<ReactionButtonProps> = ({
                             ? 'text-blue-700 dark:text-blue-200 bg-blue-100/80 dark:bg-blue-500/25 ring-1 ring-blue-400/70 dark:ring-blue-400/50'
                             : 'text-gray-700 dark:text-zinc-300'
                         }
-                            hover:shadow-sm active:scale-95
+                            hover:shadow-xs active:scale-95
                         `}
                     >
                         <span className="text-base leading-none">{reaction.emoji}</span>

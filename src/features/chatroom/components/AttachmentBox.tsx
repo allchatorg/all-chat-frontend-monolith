@@ -113,11 +113,11 @@ const AttachmentBox: React.FC<AttachmentBoxProps> = ({
             if (isUnsupportedInlinePreview) {
                 return (
                     <div
-                        className={`relative h-36 w-36 overflow-hidden rounded bg-gradient-to-br from-slate-900 via-slate-800 to-slate-700 text-white ${blurredClass}`}
+                        className={`relative h-36 w-36 overflow-hidden rounded bg-linear-to-br from-slate-900 via-slate-800 to-slate-700 text-white ${blurredClass}`}
                     >
                         <div className="flex h-full flex-col justify-between p-3">
                             <div className="flex items-start justify-between gap-2">
-                                <div className="rounded-full bg-white/10 p-2 backdrop-blur-sm">
+                                <div className="rounded-full bg-white/10 p-2 backdrop-blur-xs">
                                     <Video className="h-5 w-5 text-white"/>
                                 </div>
                                 <div
@@ -180,7 +180,7 @@ const AttachmentBox: React.FC<AttachmentBoxProps> = ({
                     />
                     <div className="absolute inset-0 flex items-center justify-center rounded bg-black/40">
                         <div
-                            className="flex items-center justify-center w-10 h-10 rounded-full bg-white/85 shadow-lg backdrop-blur-sm">
+                            className="flex items-center justify-center w-10 h-10 rounded-full bg-white/85 shadow-lg backdrop-blur-xs">
                             <svg className="w-5 h-5 text-gray-900 ml-0.5" fill="currentColor" viewBox="0 0 24 24">
                                 <path d="M8 5v14l11-7z"/>
                             </svg>

@@ -21,7 +21,7 @@ const OnionLinkWarning: React.FC<OnionLinkWarningProps> = ({onClose}) => {
                         Tor (.onion) links are not permitted in the chat for security and safety reasons.
                     </p>
                     <div className="flex items-start gap-2 text-sm bg-destructive/10 p-3 rounded-md">
-                        <Shield className="h-4 w-4 mt-0.5 flex-shrink-0"/>
+                        <Shield className="h-4 w-4 mt-0.5 shrink-0"/>
                         <p>
                             Please remove the .onion link from your message before sending.
                         </p>

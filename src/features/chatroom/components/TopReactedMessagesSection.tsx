@@ -56,7 +56,7 @@ export const TopReactedMessagesSection: React.FC = () => {
     };
 
     return (
-        <Card className="!bg-transparent flex h-full w-full flex-col border-0 shadow-none">
+        <Card className="bg-transparent! flex h-full w-full flex-col border-0 shadow-none">
             <CardHeader className="pb-3">
                 <div className="flex justify-between items-center">
                     <div className="w-6 h-6"></div>

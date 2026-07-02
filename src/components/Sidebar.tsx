@@ -74,7 +74,7 @@ export const Sidebar: React.FC<SidebarProps> = ({className = "", onClose}) => {
 
     const renderContent = () => (
         <>
-            <div className="flex items-center border-b border-border p-3 -mt-[1px]">
+            <div className="flex items-center border-b border-border p-3 -mt-px">
                 <Image
                     src={logoSrc}
                     alt="AllChat"
@@ -97,7 +97,7 @@ export const Sidebar: React.FC<SidebarProps> = ({className = "", onClose}) => {
                                     : "text-muted-foreground hover:bg-accent hover:text-accent-foreground"
                                 }`}
                             >
-                                <span className="flex-shrink-0">{item.icon}</span>
+                                <span className="shrink-0">{item.icon}</span>
                                 <span className="font-medium">{item.label}</span>
                             </button>
                         </li>

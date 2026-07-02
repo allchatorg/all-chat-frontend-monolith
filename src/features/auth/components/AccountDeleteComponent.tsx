@@ -66,7 +66,7 @@ export function AccountDeleteComponent({userId}: AccountDeleteComponentProps) {
                         <Button
                             variant="destructive"
                             onClick={handleDeleteClick}
-                            className="bg-red-600 px-6 py-2 text-white shadow-sm hover:bg-red-700 dark:bg-red-700 dark:hover:bg-red-800"
+                            className="bg-red-600 px-6 py-2 text-white shadow-xs hover:bg-red-700 dark:bg-red-700 dark:hover:bg-red-800"
                         >
                             Delete Account
                         </Button>
@@ -111,7 +111,7 @@ export function AccountDeleteComponent({userId}: AccountDeleteComponentProps) {
                             <Button
                                 variant="outline"
                                 onClick={handleCancel}
-                                className="border-gray-300 px-6 py-2 font-medium text-gray-700 shadow-sm hover:bg-gray-50 dark:border-gray-700 dark:text-gray-200 dark:hover:bg-gray-800 dark:bg-transparent"
+                                className="border-gray-300 px-6 py-2 font-medium text-gray-700 shadow-xs hover:bg-gray-50 dark:border-gray-700 dark:text-gray-200 dark:hover:bg-gray-800 dark:bg-transparent"
                             >
                                 Cancel
                             </Button>
@@ -119,7 +119,7 @@ export function AccountDeleteComponent({userId}: AccountDeleteComponentProps) {
                                 variant="destructive"
                                 disabled={!isConfirmValid || deleteAccountLoading}
                                 onClick={handleFinalDelete}
-                                className="flex items-center gap-2 bg-red-600 px-6 py-2 font-medium text-white shadow-sm hover:bg-red-700 disabled:bg-red-300 dark:bg-red-700 dark:hover:bg-red-800 dark:disabled:bg-red-900/50 dark:disabled:text-gray-400"
+                                className="flex items-center gap-2 bg-red-600 px-6 py-2 font-medium text-white shadow-xs hover:bg-red-700 disabled:bg-red-300 dark:bg-red-700 dark:hover:bg-red-800 dark:disabled:bg-red-900/50 dark:disabled:text-gray-400"
                             >
                                 {deleteAccountLoading && (
                                     <Loader2 className="h-4 w-4 animate-spin"/>

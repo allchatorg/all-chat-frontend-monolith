@@ -89,7 +89,7 @@ const MediaOverlay: React.FC<MediaOverlayProps> = ({
         };
 
         window.addEventListener("blur", restoreOverlayFocus);
-        return () => window.removeEventListener("blur", restoreOverlayFocus);
+        return () => window.removeEventListener("blur-sm", restoreOverlayFocus);
     }, [isOpen, isExternalVideo]);
 
     if (!isOpen || !media) return null;
@@ -227,7 +227,7 @@ const MediaOverlay: React.FC<MediaOverlayProps> = ({
 
                 return (
                     <div
-                        className="flex items-center justify-center w-full h-[100%] min-h-0 min-w-0 max-h-full overflow-hidden">
+                        className="flex items-center justify-center w-full h-full min-h-0 min-w-0 max-h-full overflow-hidden">
                         <video
                             ref={videoRef}
                             src={attachment.url}
@@ -275,7 +275,7 @@ const MediaOverlay: React.FC<MediaOverlayProps> = ({
 
     return (
         <div ref={overlayRef}
-             className="fixed inset-0 z-[100] flex items-center justify-center bg-black bg-opacity-90 p-4 sm:p-8"
+             className="fixed inset-0 z-100 flex items-center justify-center bg-black bg-opacity-90 p-4 sm:p-8"
              style={{
                  height: "100dvh",
                  width: "100vw"

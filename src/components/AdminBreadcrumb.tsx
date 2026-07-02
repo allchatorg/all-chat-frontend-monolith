@@ -49,11 +49,11 @@ export function AdminBreadcrumb({items, className}: AdminBreadcrumbProps) {
                         <Fragment key={`${item.label}-${index}`}>
                             <BreadcrumbItem className={index === 0 ? "shrink-0" : "min-w-0"}>
                                 {isLast || !href ? (
-                                    <BreadcrumbPage className="block max-w-[12rem] truncate sm:max-w-[22rem]">
+                                    <BreadcrumbPage className="block max-w-48 truncate sm:max-w-88">
                                         {item.label}
                                     </BreadcrumbPage>
                                 ) : (
-                                    <BreadcrumbLink asChild className="block max-w-[12rem] truncate sm:max-w-[22rem]">
+                                    <BreadcrumbLink asChild className="block max-w-48 truncate sm:max-w-88">
                                         <Link href={href}>{item.label}</Link>
                                     </BreadcrumbLink>
                                 )}

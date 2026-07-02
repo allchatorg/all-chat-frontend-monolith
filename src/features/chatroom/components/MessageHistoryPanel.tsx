@@ -25,10 +25,10 @@ export const MessageHistoryPanel: React.FC<MessageHistoryPanelProps> = ({
 
     return (
         <div
-            className="flex h-[80vh] w-[92vw] max-w-[700px] overflow-hidden rounded-lg text-[color:var(--glass-panel-fg)] sm:h-[600px] sm:w-[80vw]">
+            className="flex h-[80vh] w-[92vw] max-w-[700px] overflow-hidden rounded-lg text-(--glass-panel-fg) sm:h-[600px] sm:w-[80vw]">
             <div className="flex-1 flex flex-col">
                 {/* Header */}
-                <div className="border-b border-[color:var(--glass-border)] bg-white/10 p-4 pr-12 dark:bg-white/[0.03]">
+                <div className="border-b border-(--glass-border) bg-white/10 p-4 pr-12 dark:bg-white/3">
                     <div className="flex items-center justify-between">
                         <div>
                             <h2 className="text-lg font-semibold text-foreground">
@@ -38,7 +38,7 @@ export const MessageHistoryPanel: React.FC<MessageHistoryPanelProps> = ({
                                 {sortedMessages.length} {sortedMessages.length === 1 ? 'version' : 'versions'}
                             </p>
                         </div>
-                        <Badge variant="secondary" className="glass-pill text-xs text-[color:var(--glass-panel-fg)]">
+                        <Badge variant="secondary" className="glass-pill text-xs text-(--glass-panel-fg)">
                             {currentMessage.senderUsername}
                         </Badge>
                     </div>
@@ -57,15 +57,15 @@ export const MessageHistoryPanel: React.FC<MessageHistoryPanelProps> = ({
                                         className="relative"
                                     >
                                         <div
-                                            className="absolute bottom-0 left-4 top-12 w-0.5 bg-[color:var(--glass-border)]"/>
+                                            className="absolute bottom-0 left-4 top-12 w-0.5 bg-(--glass-border)"/>
 
                                         <div className="flex gap-3">
                                             {/* Timeline dot */}
-                                            <div className="relative flex-shrink-0 mt-2">
+                                            <div className="relative shrink-0 mt-2">
                                                 <div
                                                     className={`h-3 w-3 rounded-full ${isCurrentVersion || isOriginalVersion
                                                         ? 'bg-sky-400 ring-4 ring-sky-400/20 shadow-[0_0_14px_rgba(56,189,248,0.36)]'
-                                                        : 'bg-white/40 ring-1 ring-[color:var(--glass-border)] dark:bg-white/25'
+                                                        : 'bg-white/40 ring-1 ring-(--glass-border) dark:bg-white/25'
                                                     }`}/>
                                             </div>
 
@@ -78,7 +78,7 @@ export const MessageHistoryPanel: React.FC<MessageHistoryPanelProps> = ({
                                                     </span>
                                                     {isOriginalVersion && (
                                                         <Badge variant="outline"
-                                                               className="glass-pill text-xs text-[color:var(--glass-panel-fg)]">
+                                                               className="glass-pill text-xs text-(--glass-panel-fg)">
                                                             Original
                                                         </Badge>
                                                     )}

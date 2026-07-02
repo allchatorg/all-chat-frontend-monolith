@@ -48,7 +48,7 @@ export default function GoogleAnalytics() {
                     <div className="mx-auto max-w-xl pointer-events-auto">
                         <div
                             className="
-                                relative rounded-lg border shadow-lg backdrop-blur
+                                relative rounded-lg border shadow-lg backdrop-blur-sm
                                 bg-white/90 border-gray-200
                                 dark:bg-gray-900/90 dark:border-gray-700
                             "
@@ -67,7 +67,7 @@ export default function GoogleAnalytics() {
 
                             <div className="p-6 pr-12">
                                 <div className="flex items-start gap-4 mb-3">
-                                    <div className="flex-shrink-0">
+                                    <div className="shrink-0">
                                         <div className="rounded-full p-2 bg-blue-50 dark:bg-blue-500/10">
                                             <Cookie className="h-5 w-5 text-blue-600"/>
                                         </div>
@@ -90,7 +90,7 @@ export default function GoogleAnalytics() {
                                             flex-1 px-4 py-2.5 text-sm font-medium rounded-md transition-colors
                                             text-gray-700 border border-gray-300 hover:bg-gray-50
                                             dark:text-gray-300 dark:border-gray-600 dark:hover:bg-gray-800
-                                            focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500
+                                            focus:outline-hidden focus:ring-2 focus:ring-offset-2 focus:ring-blue-500
                                             dark:focus:ring-offset-gray-900
                                         "
                                     >
@@ -101,7 +101,7 @@ export default function GoogleAnalytics() {
                                         className="
                                             flex-1 px-4 py-2.5 text-sm font-medium text-white rounded-md
                                             bg-blue-600 hover:bg-blue-700 transition-colors
-                                            focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500
+                                            focus:outline-hidden focus:ring-2 focus:ring-offset-2 focus:ring-blue-500
                                             dark:focus:ring-offset-gray-900
                                         "
                                     >

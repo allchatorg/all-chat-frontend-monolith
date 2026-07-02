@@ -25,7 +25,7 @@ export function ForgotPasswordMethodPicker({
                             key={method}
                             type="button"
                             onClick={() => onMethodSelect(method)}
-                            className="group flex w-full items-center gap-3 rounded-lg border bg-background p-4 text-left shadow-sm transition hover:border-primary/40 hover:bg-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                            className="group flex w-full items-center gap-3 rounded-lg border bg-background p-4 text-left shadow-xs transition hover:border-primary/40 hover:bg-accent focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
                         >
                             <span
                                 className="flex h-10 w-10 shrink-0 items-center justify-center rounded-md bg-muted text-foreground transition group-hover:bg-primary group-hover:text-primary-foreground">

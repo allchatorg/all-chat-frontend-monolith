@@ -106,13 +106,13 @@ const RufflePlayer: React.FC<RufflePlayerProps> = ({swfUrl, linkText = "View Fla
         <div className="relative h-full w-full min-h-full">
             {!showPlayer ? (
                 <div
-                    className="flex h-full w-full items-center justify-center rounded-xl border border-slate-300/50 bg-gradient-to-br from-slate-100 to-slate-200 shadow-inner">
+                    className="flex h-full w-full items-center justify-center rounded-xl border border-slate-300/50 bg-linear-to-br from-slate-100 to-slate-200 shadow-inner">
                     <div
                         className="absolute inset-0 opacity-5 bg-[radial-gradient(circle_at_50%_50%,rgba(59,130,246,0.3),transparent_70%)]"></div>
 
                     <div className="relative flex flex-col items-center justify-center space-y-4">
                         <button
-                            className="flex h-24 w-24 transform items-center justify-center rounded-full bg-gradient-to-br from-blue-500 to-blue-600 shadow-xl transition-all duration-300 group hover:scale-105 hover:from-blue-600 hover:to-blue-700 hover:shadow-2xl active:scale-95"
+                            className="flex h-24 w-24 transform items-center justify-center rounded-full bg-linear-to-br from-blue-500 to-blue-600 shadow-xl transition-all duration-300 group hover:scale-105 hover:from-blue-600 hover:to-blue-700 hover:shadow-2xl active:scale-95"
                             onClick={handleToggle}
                             aria-label="Play Flash content"
                         >
@@ -138,7 +138,7 @@ const RufflePlayer: React.FC<RufflePlayerProps> = ({swfUrl, linkText = "View Fla
                 <div className="relative h-full w-full overflow-hidden rounded-xl shadow-lg">
                     {isLoading && (
                         <div
-                            className="absolute inset-0 z-10 flex items-center justify-center bg-gradient-to-br from-gray-50 to-gray-100">
+                            className="absolute inset-0 z-10 flex items-center justify-center bg-linear-to-br from-gray-50 to-gray-100">
                             <div className="text-center">
                                 <div
                                     className="mx-auto mb-4 h-12 w-12 animate-spin rounded-full border-4 border-blue-200 border-t-blue-600"></div>
@@ -149,7 +149,7 @@ const RufflePlayer: React.FC<RufflePlayerProps> = ({swfUrl, linkText = "View Fla
                     )}
                     {error && (
                         <div
-                            className="absolute inset-0 z-10 flex items-center justify-center bg-gradient-to-br from-red-50 to-red-100">
+                            className="absolute inset-0 z-10 flex items-center justify-center bg-linear-to-br from-red-50 to-red-100">
                             <div className="rounded-lg border border-red-200  p-6 text-center shadow-lg">
                                 <div
                                     className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-red-100">

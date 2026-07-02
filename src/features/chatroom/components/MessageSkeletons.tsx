@@ -11,7 +11,7 @@ export const MessageSkeletons: React.FC<MessageSkeletonsProps> = ({count = 8, cl
             {[...Array(count)].map((_, index) => (
                 <div key={index} className="flex w-full items-start gap-3 py-1 pr-2">
                     {/* Avatar skeleton */}
-                    <div className="glass-surface w-8 h-8 rounded-full animate-pulse flex-shrink-0"></div>
+                    <div className="glass-surface w-8 h-8 rounded-full animate-pulse shrink-0"></div>
 
                     <div className="flex-1 space-y-2">
                         {/* Username and timestamp skeleton */}

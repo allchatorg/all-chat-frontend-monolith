@@ -53,7 +53,7 @@ const AttachmentPreview: React.FC<AttachmentPreviewProps> = ({
     return (
         <div className="glass-surface mb-3 rounded-lg p-2">
             <div className="flex items-center gap-3">
-                <div className="relative flex-shrink-0">
+                <div className="relative shrink-0">
                     {file.type.startsWith('image/') ? (
                         <img
                             src={previewUrl}

@@ -44,13 +44,13 @@ const SearchMessagesDisplay: React.FC<Props> = ({
         <Card className="glass-panel flex h-full min-h-0 w-full flex-1 flex-col border-0">
             {showTitle && (
                 <>
-                    <CardHeader className="flex flex-shrink-0 flex-row items-center justify-between p-4">
+                    <CardHeader className="flex shrink-0 flex-row items-center justify-between p-4">
                         <CardTitle>{title}</CardTitle>
                         <Button variant="ghost" size="sm" className="glass-control" onClick={onClose}>
                             <X className="h-4 w-4"/>
                         </Button>
                     </CardHeader>
-                    <Separator className="flex-shrink-0"/>
+                    <Separator className="shrink-0"/>
                 </>
             )}
 
@@ -97,7 +97,7 @@ const SearchMessagesDisplay: React.FC<Props> = ({
                 </div>
             )}
 
-            <div className="flex-shrink-0 border-t border-white/20 dark:border-white/10">
+            <div className="shrink-0 border-t border-white/20 dark:border-white/10">
                 <PaginationFooter
                     totalPages={totalPages}
                     currentPage={currentPage}

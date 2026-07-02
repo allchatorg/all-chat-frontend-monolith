@@ -56,7 +56,7 @@ export const BlockedSearchMessageItem: React.FC<{
                             e.stopPropagation();
                             setIsRevealed(true);
                         }}
-                        className="text-xs font-medium text-primary hover:underline focus:outline-none"
+                        className="text-xs font-medium text-primary hover:underline focus:outline-hidden"
                     >
                         Show Message
                     </button>

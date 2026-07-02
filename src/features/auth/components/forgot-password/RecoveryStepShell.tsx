@@ -33,7 +33,7 @@ export function RecoveryStepShell({
             <div className="rounded-lg border bg-muted/40 p-4">
                 <div className="flex items-center gap-3">
                     <span
-                        className="flex h-10 w-10 shrink-0 items-center justify-center rounded-md bg-background text-foreground shadow-sm">
+                        className="flex h-10 w-10 shrink-0 items-center justify-center rounded-md bg-background text-foreground shadow-xs">
                         <Icon className="h-5 w-5"/>
                     </span>
                     <div>

@@ -117,8 +117,8 @@ const SearchRooms: React.FC = () => {
                                 }
                             }}
                             className="glass-input box-border h-9 min-h-9 w-full rounded-md py-2 pr-10 pl-10 text-sm
-                             text-slate-900 placeholder:text-slate-600/80 shadow-sm transition-colors
-                             focus:border-ring focus:ring-0 focus:outline-none dark:text-white dark:placeholder:text-white/80"
+                             text-slate-900 placeholder:text-slate-600/80 shadow-xs transition-colors
+                             focus:border-ring focus:ring-0 focus:outline-hidden dark:text-white dark:placeholder:text-white/80"
                         />
                         {searchTerm && (
                             <button
@@ -139,7 +139,7 @@ const SearchRooms: React.FC = () => {
                 <PopoverContent
                     align="start"
                     side="bottom"
-                    className="glass-popover w-[var(--radix-popover-trigger-width)] p-0"
+                    className="glass-popover w-(--radix-popover-trigger-width) p-0"
                     onOpenAutoFocus={(e) => e.preventDefault()}
                 >
                     <SearchRoomsResults

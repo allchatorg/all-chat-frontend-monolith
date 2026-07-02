@@ -59,7 +59,7 @@ export const UserActionPopup: React.FC<UserActionPopupProps> = ({
             {children}
             {showShield && (
                 <span title={formatRoleName(role)} className="cursor-help flex items-center">
-                    <ShieldCheck className="h-4 w-4 outline-none" style={{shapeRendering: 'crispEdges'}}/>
+                    <ShieldCheck className="h-4 w-4 outline-hidden" style={{shapeRendering: 'crispEdges'}}/>
                 </span>
             )}
         </span>
@@ -119,7 +119,7 @@ export const UserActionPopup: React.FC<UserActionPopupProps> = ({
                             variant="destructive"
                             size="sm"
                             onClick={handleBlock}
-                            className="w-full gap-2 hover:bg-red-600 dark:hover:bg-red-700 transition-all duration-200 shadow-sm"
+                            className="w-full gap-2 hover:bg-red-600 dark:hover:bg-red-700 transition-all duration-200 shadow-xs"
                         >
                             <ShieldBan className="h-4 w-4"/>
                             Block User

@@ -186,7 +186,7 @@ export function Navbar() {
                     />
                     {user && isOnHomePage && (
                         <div
-                            className="md:order-none w-auto md:w-auto md:absolute md:left-1/2 max-w-md md:mx-0 md:-translate-x-1/2">
+                            className="md:order-0 w-auto md:w-auto md:absolute md:left-1/2 max-w-md md:mx-0 md:-translate-x-1/2">
                             <div className="relative flex items-center gap-2">
                                 {shouldShowModButton && (
                                     <>
@@ -215,7 +215,7 @@ export function Navbar() {
                     )}
                     {user && isOnPrivateChatPage && canUsePrivateChat && (
                         <div
-                            className="md:order-none w-auto md:w-auto md:absolute md:left-1/2 max-w-md md:mx-0 md:-translate-x-1/2">
+                            className="md:order-0 w-auto md:w-auto md:absolute md:left-1/2 max-w-md md:mx-0 md:-translate-x-1/2">
                             <SearchUsers/>
                         </div>
                     )}

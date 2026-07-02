@@ -95,7 +95,7 @@ export const UploadDragAndDropButton: React.FC<
             className={clsx(
                 `
                         inline-flex items-center justify-center gap-1
-                        px-3 h-10 rounded-md border-input border-[1px] transition-all duration-200 cursor-pointer select-none
+                        px-3 h-10 rounded-md border-input border transition-all duration-200 cursor-pointer select-none
                         ${disabled ? "opacity-50 cursor-not-allowed" : "hover:bg-white/35 dark:hover:bg-white/10"}
                         ${isDragging ? "glass-surface-strong" : ""}`, className)}
         >

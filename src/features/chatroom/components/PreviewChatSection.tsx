@@ -94,7 +94,7 @@ export function PreviewChatSection({
                     >
                         <div className="sticky top-0 z-10 flex justify-center px-4 pb-2 pt-3">
                             <div
-                                className="pointer-events-none rounded-full border border-border/70 bg-background/90 px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.18em] text-muted-foreground shadow-sm backdrop-blur">
+                                className="pointer-events-none rounded-full border border-border/70 bg-background/90 px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.18em] text-muted-foreground shadow-xs backdrop-blur-sm">
                                 Preview Only • Message Interactions Disabled
                             </div>
                         </div>

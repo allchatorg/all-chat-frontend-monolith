@@ -60,7 +60,7 @@ export default function Page() {
 
     return (
         <div className="flex h-full min-h-0 flex-col space-y-4">
-            <Card className="flex-shrink-0">
+            <Card className="shrink-0">
                 <CardHeader>
                     <CardTitle>Search Messages</CardTitle>
                     <CardDescription>

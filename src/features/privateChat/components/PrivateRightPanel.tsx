@@ -67,13 +67,13 @@ const PrivateRightPanelContent: React.FC = () => {
 
     return (
         <Card className="glass-panel flex h-full min-h-0 w-full flex-1 flex-col border-0">
-            <CardHeader className="flex flex-shrink-0 flex-row items-center justify-between gap-2 p-4">
+            <CardHeader className="flex shrink-0 flex-row items-center justify-between gap-2 p-4">
                 <CardTitle className="text-sm">Search messages with {counterpartName}</CardTitle>
                 <Button variant="ghost" size="sm" className="glass-control" onClick={handleClose} aria-label="Close">
                     <X className="h-4 w-4"/>
                 </Button>
             </CardHeader>
-            <Separator className="flex-shrink-0"/>
+            <Separator className="shrink-0"/>
             <div className="flex-1 overflow-hidden">
                 <SearchMessagesDisplay
                     title=""
@@ -117,7 +117,7 @@ const PrivateRightPanel: React.FC = () => {
                     animate={{opacity: 1}}
                     exit={{opacity: 0}}
                     onClick={handleClose}
-                    className="lg:hidden fixed inset-0 bg-slate-950/15 dark:bg-black/50 z-40 backdrop-blur-sm"
+                    className="lg:hidden fixed inset-0 bg-slate-950/15 dark:bg-black/50 z-40 backdrop-blur-xs"
                 />
                 <motion.div
                     initial={{y: "100%"}}

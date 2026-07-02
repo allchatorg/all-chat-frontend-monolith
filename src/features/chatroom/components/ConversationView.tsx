@@ -174,12 +174,12 @@ const ConversationView: React.FC<ConversationViewProps> = ({
                                 <div key={message.id} data-message-id={message.id}>
                                     {unreadDividerMessageId === message.id && (
                                         <div className="flex items-center my-4 px-4">
-                                            <div className="flex-grow border-t border-red-500 opacity-60"></div>
+                                            <div className="grow border-t border-red-500 opacity-60"></div>
                                             <span
                                                 className="shrink-0 mx-4 text-[10px] font-bold text-red-500 uppercase tracking-widest">
                                             New Messages
                                         </span>
-                                            <div className="flex-grow border-t border-red-500 opacity-60"></div>
+                                            <div className="grow border-t border-red-500 opacity-60"></div>
                                         </div>
                                     )}
                                     <div

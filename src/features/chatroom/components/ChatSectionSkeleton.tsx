@@ -31,13 +31,13 @@ const ChatSectionSkeleton = () => {
                 <div className="mt-4 space-y-2">
                     <div className="flex items-end gap-2">
                         {/* Attachment button skeleton */}
-                        <div className="glass-surface h-10 w-10 rounded animate-pulse flex-shrink-0"></div>
+                        <div className="glass-surface h-10 w-10 rounded animate-pulse shrink-0"></div>
 
                         {/* Input field skeleton */}
                         <div className="glass-surface flex-1 h-10 rounded animate-pulse"></div>
 
                         {/* Send button skeleton */}
-                        <div className="glass-surface h-10 w-10 rounded animate-pulse flex-shrink-0"></div>
+                        <div className="glass-surface h-10 w-10 rounded animate-pulse shrink-0"></div>
                     </div>
                 </div>
             </CardContent>

@@ -73,7 +73,7 @@ export const EditHistoryButton: React.FC<EditHistoryButtonProps> = ({message}) =
                         className="
                             glass-control inline-flex h-5 items-center gap-1.5 rounded-full px-2 text-[11px] font-medium leading-none
                             transition-all duration-200 ease-in-out
-                            text-[color:var(--glass-control-fg)] hover:text-[color:var(--glass-control-fg)]
+                            text-(--glass-control-fg) hover:text-(--glass-control-fg)
                             active:scale-95
                         "
                         aria-label="View edit history"

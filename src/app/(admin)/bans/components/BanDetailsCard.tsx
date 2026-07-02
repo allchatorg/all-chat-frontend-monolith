@@ -72,7 +72,7 @@ export const BanDetailsCard: React.FC<BanDetailsProps> = ({ban}) => {
                 {ban.description && (
                     <div>
                         <h3 className="mb-2 font-semibold">Description</h3>
-                        <p className="rounded-md bg-gray-50 p-3 text-sm text-gray-600 break-words dark:bg-zinc-900 dark:text-zinc-400">
+                        <p className="rounded-md bg-gray-50 p-3 text-sm text-gray-600 wrap-break-word dark:bg-zinc-900 dark:text-zinc-400">
                             {ban.description}
                         </p>
                     </div>

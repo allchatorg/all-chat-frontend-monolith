@@ -36,7 +36,7 @@ export function ModPanelAuditLogView(props: Props) {
     return (
         <div className="flex h-full w-full flex-col justify-between">
             <AuditLogCardList height={"100%"} logs={auditLogsPage.content}/>
-            <div className="flex-shrink-0 border-t">
+            <div className="shrink-0 border-t">
                 <PaginationFooter
                     totalPages={auditLogsPage.totalPages}
                     currentPage={currentPage}
