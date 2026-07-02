@@ -8,8 +8,9 @@ import {
     IconCreditCard,
     IconDashboard,
     IconListDetails,
+    IconMessageCircle,
+    IconSettings,
     IconShield,
-    IconUser,
     IconUsers
 } from "@tabler/icons-react"
 import {NavMain} from "@ads/components/nav-main"
@@ -17,12 +18,17 @@ import {NavSecondary} from "@ads/components/nav-secondary"
 import {NavUser} from "@ads/components/nav-user"
 import {Sidebar, SidebarContent, SidebarFooter, SidebarHeader,} from "@ads/components/ui/sidebar"
 import {useUser} from "@ads/hooks/use-user"
+import {useUser as useChatUser} from "@/lib/hooks/useUser"
+import {useRoleAccess} from "@/lib/hooks/useRoleAccess"
 import {UserRole} from "@ads/models/user-role"
+import {Role} from "@/models/Role"
 import {useDispatch} from "react-redux"
 import type {AppDispatch} from "@/redux/store"
 import {logoutThunk} from "@/redux/auth/authThunk"
 import {useRouter} from "next/navigation"
 import {useDialog} from "@ads/components/providers/DialogProvider"
+import {useDialog as useChatDialog} from "@/components/providers/DialogProvider"
+import {SettingsComponent} from "@/features/auth/components/SettingsComponent"
 import TermsOfService from "@ads/components/TermsOfService"
 import PrivacyPolicy from "@ads/components/PrivacyPolicy"
 import AdvertiserTerms from "@ads/components/AdvertiserPolicy"
@@ -51,11 +57,6 @@ const regularUserNavSecondary = [
         title: "Payment Methods",
         url: "/portal/payment-methods",
         icon: IconCreditCard,
-    },
-    {
-        title: "My Account",
-        url: "/portal/account",
-        icon: IconUser,
     }
 ]
 
@@ -80,21 +81,36 @@ const adminNavMain = [
     },
 ]
 
-const adminNavSecondary = [
-    {
-        title: "My Account",
-        url: "/portal/account",
-        icon: IconUser,
-    }
-]
+const adminNavSecondary: { title: string; url?: string; onClick?: () => void; icon: typeof IconSettings }[] = []
 
 export function AppSidebar({...props}: React.ComponentProps<typeof Sidebar>) {
     const {user, isSuperAdmin} = useUser()
     const isAdmin = user.role === UserRole.ADMIN
 
+    // Non-staff users who have never created an ad only get "Start a Campaign";
+    // Dashboard + My Campaigns are hidden until they have at least one ad.
+    const {user: chatUser} = useChatUser()
+    const {isStaffMember} = useRoleAccess()
+    const hasAd = (chatUser?.purchasedAdsCount ?? 0) > 0
+    const showFullNav = isStaffMember() || hasAd
+    const regularNav = showFullNav
+        ? regularUserNavMain
+        : regularUserNavMain.filter((item) => item.url === "/portal/campaign")
+
     const dispatch = useDispatch<AppDispatch>()
     const router = useRouter()
     const {open} = useDialog()
+    const {open: openChatDialog} = useChatDialog()
+
+    // Reuse the chat app's Settings modal (superset of the old portal account page).
+    // Opened via the chat DialogProvider so its nested flows (e.g. account deletion,
+    // which uses the chat useDialog) target the same dialog instance.
+    const openSettings = () =>
+        openChatDialog(
+            <div className="w-[80vw] md:min-w-[800px] md:max-w-[800px] max-h-[500px]">
+                <SettingsComponent/>
+            </div>
+        )
 
     const handleLogout = async () => {
         try {
@@ -109,8 +125,27 @@ export function AppSidebar({...props}: React.ComponentProps<typeof Sidebar>) {
     // Super admins additionally see the analytics Dashboard entry.
     const navMain = isAdmin
         ? (isSuperAdmin ? [adminDashboardNav, ...adminNavMain] : adminNavMain)
-        : regularUserNavMain
-    const navSecondary = isAdmin ? adminNavSecondary : regularUserNavSecondary
+        : regularNav
+    // Throwaway accounts see a lock badge on pages gated by ClaimAccountGate.
+    const isUnclaimed = chatUser?.role === Role.UNCLAIMED_USER
+    const navSecondary = isAdmin
+        ? adminNavSecondary
+        : regularUserNavSecondary.map((item) => ({...item, locked: isUnclaimed}))
+
+    // Bottom action group shared by all roles: open the chat Settings modal and
+    // jump back to the chat app.
+    const bottomActions = [
+        {
+            title: "Settings",
+            icon: IconSettings,
+            onClick: openSettings,
+        },
+        {
+            title: "Back to Chat",
+            icon: IconMessageCircle,
+            onClick: () => router.push("/"),
+        },
+    ]
 
     const legalItems = [
         {
@@ -149,6 +184,7 @@ export function AppSidebar({...props}: React.ComponentProps<typeof Sidebar>) {
                 <NavMain items={navMain}/>
                 <NavLegal items={legalItems}/>
                 <NavSecondary items={navSecondary} className="mt-auto"/>
+                <NavSecondary items={bottomActions}/>
             </SidebarContent>
 
             <SidebarFooter>

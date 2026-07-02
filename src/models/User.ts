@@ -14,6 +14,7 @@ export interface User {
     verified: boolean;
     subscribedToMarketingEmails?: boolean;
     role: Role;
+    purchasedAdsCount?: number;
     totalUploadUsage?: number;
     blurredContentTags: Tag[];
     timeFormatSetting: TimeFormat;

@@ -26,7 +26,7 @@ export default function ClaimAccountBanner() {
                     onClick={() =>
                         open(
                             <div
-                                className="w-[80vw] md:min-w-[800px] md:max-w-[800px] h-[500px] bg-background rounded-lg overflow-hidden border dark:border-zinc-800">
+                                className="w-[80vw] md:min-w-[800px] md:max-w-[800px] h-[500px] overflow-hidden">
                                 <SettingsComponent defaultTab="account"/>
                             </div>
                         )

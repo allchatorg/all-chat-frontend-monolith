@@ -14,6 +14,9 @@ import {AdFormatDto, AdFormatType} from '@ads/data/adFormats';
 import {CampaignDetails} from '@ads/hooks/use-campaign-creator';
 import {PaymentMethodSelector} from './payment-method-selector';
 import {useRouter} from 'next/navigation';
+import {useDispatch} from 'react-redux';
+import type {AppDispatch} from '@/redux/store';
+import {fetchMe} from '@/redux/user/usersThunk';
 
 // Make sure to call `loadStripe` outside of a component’s render to avoid
 // recreating the `Stripe` object on every render.
@@ -28,8 +31,10 @@ interface StripePaymentProps {
 
 const PaymentCard = ({details, selectedFormat, adFormats, onBack}: StripePaymentProps) => {
     const [selectedPaymentMethodId, setSelectedPaymentMethodId] = React.useState<string | undefined>();
+    const [isFinalizing, setIsFinalizing] = React.useState(false);
     const [createAd, {isLoading}] = useCreateAdMutation();
     const router = useRouter();
+    const dispatch = useDispatch<AppDispatch>();
 
     const {totalCost} = calculateAdCost(selectedFormat, details.text.length, details.views, adFormats);
 
@@ -59,7 +64,20 @@ const PaymentCard = ({details, selectedFormat, adFormats, onBack}: StripePayment
             const paid = result.receipt?.amountPaid ?? totalCost;
             const card = result.receipt?.cardLast4 ? ` • card ending ${result.receipt.cardLast4}` : '';
             toast.success(`Payment of $${paid.toFixed(2)} authorized${card}. Ad submitted for approval.`);
-            router.push('/portal/ads');
+
+            setIsFinalizing(true);
+            try {
+                // Refresh the shared chat user so purchasedAdsCount includes the
+                // new ad BEFORE navigating — the portal layout and sidebar gate
+                // on this count and would bounce back to /portal/campaign.
+                await dispatch(fetchMe()).unwrap();
+                router.push('/portal/ads');
+            } catch (refreshError) {
+                console.error('User refresh after ad creation failed', refreshError);
+                // Full page load re-hydrates the user from the backend, so the
+                // layout gate sees the new ad count on arrival.
+                window.location.assign('/portal/ads');
+            }
         } catch (error) {
             console.error("Ad creation failed", error);
             toast.error("Failed to create ad. Please try again.");
@@ -123,12 +141,12 @@ const PaymentCard = ({details, selectedFormat, adFormats, onBack}: StripePayment
                     Back
                 </Button>
                 <ActionButton
-                    disabled={!selectedPaymentMethodId || isLoading}
+                    disabled={!selectedPaymentMethodId || isLoading || isFinalizing}
                     type="submit"
                     icon={Lock}
                     onClick={handleSubmit}
                 >
-                    {isLoading ? 'Processing...' : `Pay $${totalCost.toFixed(2)}`}
+                    {isLoading || isFinalizing ? 'Processing...' : `Pay $${totalCost.toFixed(2)}`}
                 </ActionButton>
             </CardFooter>
         </Card>
