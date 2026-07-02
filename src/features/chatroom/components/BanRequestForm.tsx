@@ -22,6 +22,7 @@ import {BanRequest} from "@/models/BanRequest";
 import {ReportType} from "@/models/ReportTypeEnum";
 import {getReportTypeLabel} from "@/lib/reportUtils";
 import {ReportTypeUtils} from "@/lib/utils";
+import BanAdsPurchaseInfo from "./BanAdsPurchaseInfo";
 
 const durationOptions = ["1h", "1d", "7d", "30d"];
 const deleteDurationOptions = ["1h", "1d", "7d", "30d"];
@@ -150,6 +151,8 @@ export default function BanRequestForm({
         <div className="p-2 w-[80vw] md:w-[500px]">
             <Form {...form}>
                 <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
+
+                    <BanAdsPurchaseInfo userId={userId} banType={watchBanType}/>
 
                     <FormField
                         control={form.control}

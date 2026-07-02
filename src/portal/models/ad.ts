@@ -72,6 +72,19 @@ export interface AdStatusCount {
     count: number;
 }
 
+// Per-user summary shown in the staff ban form: counts by status plus the
+// pending (SUBMITTED + payment authorized) purchases a permanent ban refunds.
+export interface BanAdsSummary {
+    totalAds: number;
+    submittedCount: number;
+    activeCount: number;
+    completedCount: number;
+    rejectedCount: number;
+    pendingRefundCount: number;
+    pendingRefundTotal: number;
+    currency: string;
+}
+
 export interface ServeAdRequest {
     userId?: number;
     ipAddress?: string;

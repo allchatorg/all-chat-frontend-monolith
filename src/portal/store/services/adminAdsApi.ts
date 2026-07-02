@@ -4,6 +4,7 @@ import {
     Ad,
     AdSearchRequest,
     AdStatusCount,
+    BanAdsSummary,
     MonthlyRevenueResponseDto,
     PaginatedResponse,
     PurchasedAdsDailyCountDto,
@@ -55,6 +56,14 @@ export const adminAdsApi = createApi({
         getAdStatusCountsByUserId: builder.query<AdStatusCount[], number>({
             query: (userId) => ({
                 url: `/admin/ads/status-counts/${userId}`,
+                method: 'GET',
+            }),
+            providesTags: ['AdminAds'],
+        }),
+        // Get Ban Ads Summary (Staff) — counts + pending-refund total for the ban form
+        getBanAdsSummary: builder.query<BanAdsSummary, number>({
+            query: (userId) => ({
+                url: `/admin/ads/ban-summary/${userId}`,
                 method: 'GET',
             }),
             providesTags: ['AdminAds'],
@@ -134,6 +143,7 @@ export const {
     useLazySearchAdsQuery,
     useGetAdStatusCountsQuery,
     useGetAdStatusCountsByUserIdQuery,
+    useGetBanAdsSummaryQuery,
     useGetPurchasedAdsCountsQuery,
     useGetDailyRevenueQuery,
     useGetMonthlyRevenueQuery,
