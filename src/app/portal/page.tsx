@@ -114,7 +114,7 @@ export default function Home() {
                         <Link href="/auth?view=register" className="w-full sm:w-auto">
                             <button
                                 className="w-full inline-flex items-center justify-center rounded-xl bg-blue-600 px-8 py-4 text-base font-bold text-white shadow-md transition-all duration-200 hover:bg-blue-700 active:scale-95">
-                                Create Ad Account
+                                Create Account
                                 <ArrowRight className="ml-2 h-4 w-4"/>
                             </button>
                         </Link>
