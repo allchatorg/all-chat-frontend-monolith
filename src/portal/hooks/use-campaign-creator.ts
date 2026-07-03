@@ -7,7 +7,10 @@ export interface CampaignDetails {
     name: string;
     text: string;
     media: File | null;
+    // Renderable URL for previews (blob: while uploading, then CDN/presigned URL)
     mediaUrl: string | null;
+    // Bare storage object key returned by the upload endpoint; sent in the create-ad request
+    mediaKey: string | null;
     views: number;
 }
 
@@ -55,6 +58,7 @@ export function useCampaignCreator() {
         text: '',
         media: null,
         mediaUrl: null,
+        mediaKey: null,
         views: 1000
     });
     const [errors, setErrors] = useState<ValidationErrors>({});
@@ -118,7 +122,8 @@ export function useCampaignCreator() {
                 name: '',
                 text: '',
                 media: null,
-                mediaUrl: null
+                mediaUrl: null,
+                mediaKey: null
             }));
             setErrors({});
         }

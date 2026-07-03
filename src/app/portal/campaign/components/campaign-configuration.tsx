@@ -53,6 +53,9 @@ export default function CampaignConfiguration({
         mediaUrl: selectedFormat.type !== AdFormatType.TEXT
             ? z.string().nullable()
             : z.string().nullable().optional(),
+        mediaKey: selectedFormat.type !== AdFormatType.TEXT
+            ? z.string().nullable()
+            : z.string().nullable().optional(),
         views: z.number().min(100)
     }).refine((data) => {
         if (selectedFormat.type !== AdFormatType.TEXT && !data.media && !data.mediaUrl) {
@@ -71,6 +74,7 @@ export default function CampaignConfiguration({
             text: details.text,
             media: details.media,
             mediaUrl: details.mediaUrl,
+            mediaKey: details.mediaKey,
             views: details.views,
         },
         mode: "onChange", // Validate on change for immediate feedback
@@ -88,6 +92,7 @@ export default function CampaignConfiguration({
                 text: value.text || '',
                 media: value.media as File | null,
                 mediaUrl: value.mediaUrl || null,
+                mediaKey: value.mediaKey || null,
                 views: value.views || 1000,
             }));
         });
@@ -102,13 +107,15 @@ export default function CampaignConfiguration({
             const objectUrl = URL.createObjectURL(file);
             fieldChange(file);
             form.setValue('mediaUrl', objectUrl);
+            form.setValue('mediaKey', null);
 
             try {
                 // 2. Upload to server
-                const serverUrl = await uploadFile(file).unwrap();
+                const res = await uploadFile(file).unwrap();
 
-                // 3. Update with real URL on success
-                form.setValue('mediaUrl', serverUrl);
+                // 3. Update with real URL + storage key on success
+                form.setValue('mediaUrl', res.url);
+                form.setValue('mediaKey', res.key);
                 toast.success("Media uploaded successfully");
             } catch (error) {
                 console.error("Upload failed", error);
@@ -127,13 +134,15 @@ export default function CampaignConfiguration({
             const objectUrl = URL.createObjectURL(file);
             fieldChange(file);
             form.setValue('mediaUrl', objectUrl);
+            form.setValue('mediaKey', null);
 
             try {
                 // 2. Upload to server
-                const serverUrl = await uploadFile(file).unwrap();
+                const res = await uploadFile(file).unwrap();
 
-                // 3. Update with real URL on success
-                form.setValue('mediaUrl', serverUrl);
+                // 3. Update with real URL + storage key on success
+                form.setValue('mediaUrl', res.url);
+                form.setValue('mediaKey', res.key);
                 toast.success("Media uploaded successfully");
             } catch (error) {
                 console.error("Upload failed", error);
@@ -145,6 +154,7 @@ export default function CampaignConfiguration({
     const removeMedia = () => {
         form.setValue('media', null);
         form.setValue('mediaUrl', null);
+        form.setValue('mediaKey', null);
     };
 
     const onSubmit = () => {
@@ -158,6 +168,11 @@ export default function CampaignConfiguration({
             }
 
             if (currentMediaUrl.startsWith('blob:')) {
+                toast.error("Please wait for media upload to complete");
+                return;
+            }
+
+            if (!form.getValues('mediaKey')) {
                 toast.error("Please wait for media upload to complete");
                 return;
             }

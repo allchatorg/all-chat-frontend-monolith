@@ -56,6 +56,8 @@ export interface CreateAdRequest {
     title: string;
     adType: AdFormatType;
     text: string;
+    // imageUrl/videoUrl carry bare storage object keys (from the upload
+    // endpoint), not URLs; the backend resolves URLs at read time.
     imageUrl?: string;
     videoUrl?: string;
     stripeId: string;

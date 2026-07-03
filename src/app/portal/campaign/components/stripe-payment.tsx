@@ -45,8 +45,9 @@ const PaymentCard = ({details, selectedFormat, adFormats, onBack}: StripePayment
 
         console.log('[PaymentMethod]', selectedPaymentMethodId);
 
-        const imageUrl = selectedFormat.type === AdFormatType.PHOTO ? (details.mediaUrl || undefined) : undefined;
-        const videoUrl = selectedFormat.type === AdFormatType.VIDEO ? (details.mediaUrl || undefined) : undefined;
+        // The backend expects bare storage keys, not the preview URLs
+        const imageUrl = selectedFormat.type === AdFormatType.PHOTO ? (details.mediaKey || undefined) : undefined;
+        const videoUrl = selectedFormat.type === AdFormatType.VIDEO ? (details.mediaKey || undefined) : undefined;
 
         try {
             const result = await createAd({
