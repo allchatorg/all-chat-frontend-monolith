@@ -108,6 +108,9 @@ export function Navbar() {
     const isGuest = user?.role === Role.GUEST;
     const isStaffOrHigher = user ? user.role === Role.MODERATOR || user.role === Role.ADMIN || user.role === Role.SUPER_ADMIN : false;
     const canUsePrivateChat = Boolean(user && user.claimed && !isGuest);
+    const hasAd = (user?.purchasedAdsCount ?? 0) > 0;
+    const advertiseLabel = hasAd ? "My Ads" : "Advertise";
+    const advertiseTitle = hasAd ? "My ads on allchat" : "Advertise on allchat";
 
     // Show if they are logged in, not staff, and haven't applied
     const shouldShowModButton = Boolean(
@@ -225,16 +228,18 @@ export function Navbar() {
                     {user && (
                         <div className="flex items-center gap-2 md:gap-4">
                             <div className="hidden md:flex items-center gap-2">
-                                <Button
-                                    variant="outline"
-                                    aria-label="Advertise on allchat"
-                                    title="Advertise on allchat"
-                                    className="glass-control h-9 w-9 px-0 xl:w-auto xl:px-3 text-foreground hover:text-foreground"
-                                    onClick={handleAdvertiseClick}
-                                >
-                                    <Megaphone className="h-4 w-4"/>
-                                    <span className="hidden xl:inline">Advertise</span>
-                                </Button>
+                                {!isStaffOrHigher && (
+                                    <Button
+                                        variant="outline"
+                                        aria-label={advertiseTitle}
+                                        title={advertiseTitle}
+                                        className="glass-control h-9 w-9 px-0 xl:w-auto xl:px-3 text-foreground hover:text-foreground"
+                                        onClick={handleAdvertiseClick}
+                                    >
+                                        <Megaphone className="h-4 w-4"/>
+                                        <span className="hidden xl:inline">{advertiseLabel}</span>
+                                    </Button>
+                                )}
                                 <Button
                                     variant="outline"
                                     aria-label="Report a bug"
@@ -275,11 +280,13 @@ export function Navbar() {
                                     </Button>
                                 </DropdownMenuTrigger>
                                 <DropdownMenuContent align="end" className="glass-popover">
-                                    <DropdownMenuItem className="cursor-pointer gap-2 md:hidden"
-                                                      onSelect={handleAdvertiseClick}>
-                                        <Megaphone className="h-4 w-4"/>
-                                        Advertise on allchat
-                                    </DropdownMenuItem>
+                                    {!isStaffOrHigher && (
+                                        <DropdownMenuItem className="cursor-pointer gap-2 md:hidden"
+                                                          onSelect={handleAdvertiseClick}>
+                                            <Megaphone className="h-4 w-4"/>
+                                            {advertiseTitle}
+                                        </DropdownMenuItem>
+                                    )}
                                     <DropdownMenuItem className="cursor-pointer gap-2 md:hidden"
                                                       onSelect={() => {
                                                           void handleBugReportsClick();

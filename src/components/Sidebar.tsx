@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import {Ban, FileText, Flag, MessageCircle, MessageSquare, UsersIcon} from "lucide-react";
+import {Ban, FileText, Flag, Megaphone, MessageCircle, MessageSquare, UsersIcon} from "lucide-react";
 import Image from "next/image";
 import {useRoleAccess} from "@/lib/hooks/useRoleAccess";
 import {usePathname, useRouter} from "next/navigation";
@@ -20,7 +20,7 @@ interface NavItem {
 }
 
 export const Sidebar: React.FC<SidebarProps> = ({className = "", onClose}) => {
-    const {isStaffMember} = useRoleAccess();
+    const {isStaffMember, isAdmin} = useRoleAccess();
     const router = useRouter();
     const pathname = usePathname();
     const logoSrc = useThemedLogo();
@@ -63,6 +63,13 @@ export const Sidebar: React.FC<SidebarProps> = ({className = "", onClose}) => {
             label: "Audit Logs",
             href: ROUTES.AUDIT_LOGS,
         },
+        ...(isAdmin()
+            ? [{
+                icon: <Megaphone className="h-5 w-5"/>,
+                label: "Ads Portal",
+                href: "/portal",
+            }]
+            : []),
     ];
 
     const isActiveRoute = (href: string) => {
