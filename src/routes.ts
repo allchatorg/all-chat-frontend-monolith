@@ -55,3 +55,15 @@ export function isStaffRoute(pathname: string) {
 export function isAuthFlowRoute(pathname: string) {
     return pathname.startsWith(ROUTES.AUTH) || pathname.startsWith(ROUTES.RESET_PASSWORD) || pathname.startsWith(ROUTES.BANNED);
 }
+
+/**
+ * Validates a `redirect` query param used to return the user to where they
+ * came from after login/registration. Only same-app absolute paths are
+ * allowed ("/…" but not "//host" or full URLs) to prevent open redirects.
+ */
+export function sanitizeRedirectParam(value: string | null): string | null {
+    if (!value || !value.startsWith("/") || value.startsWith("//")) {
+        return null;
+    }
+    return value;
+}

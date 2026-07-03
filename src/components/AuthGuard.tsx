@@ -1,9 +1,9 @@
 'use client';
 
-import {usePathname, useRouter} from 'next/navigation';
+import {usePathname, useRouter, useSearchParams} from 'next/navigation';
 import {useEffect} from 'react';
 import {useUser} from "@/lib/hooks/useUser";
-import {isAuthFlowRoute, isProtectedRoute, isStaffRoute, ROUTES} from "@/routes";
+import {isAuthFlowRoute, isProtectedRoute, isStaffRoute, ROUTES, sanitizeRedirectParam} from "@/routes";
 import {isStaff, Role} from "@/models/Role";
 import {Spinner} from './Spinner';
 import {useIpDetails} from "@/lib/hooks/useIpDetails";
@@ -12,7 +12,9 @@ export default function AuthGuard({children}: { children: React.ReactNode }) {
     const {user, error, isInitializing} = useUser();
     const {ipDetails, isLoading: isIpDetailsLoading} = useIpDetails();
     const pathname = usePathname();
+    const searchParams = useSearchParams();
     const router = useRouter();
+    const redirectAfterAuth = sanitizeRedirectParam(searchParams.get("redirect"));
 
     const isAuthenticated = !!user;
     const hasFlaggedIp = ipDetails?.requiredVerification !== 'NONE';
@@ -28,13 +30,14 @@ export default function AuthGuard({children}: { children: React.ReactNode }) {
             isGuest,
             isVerified,
             pathname,
-            userRole: user?.role
+            userRole: user?.role,
+            redirectAfterAuth
         });
 
         if (redirectConfig) {
             router.push(redirectConfig);
         }
-    }, [isInitializing, user, pathname, router, ipDetails]);
+    }, [isInitializing, user, pathname, router, ipDetails, redirectAfterAuth]);
 
     const isLoading = isInitializing || isIpDetailsLoading || (isProtectedRoute(pathname) && !user && !error);
 
@@ -55,7 +58,8 @@ function getRedirectPath({
                              isGuest,
                              isVerified,
                              pathname,
-                             userRole
+                             userRole,
+                             redirectAfterAuth
                          }: {
     isAuthenticated: boolean;
     hasFlaggedIp: boolean;
@@ -63,6 +67,7 @@ function getRedirectPath({
     isVerified: boolean;
     pathname: string;
     userRole?: Role;
+    redirectAfterAuth?: string | null;
 }): string | null {
     // Unauthenticated users
     if (!isAuthenticated) {
@@ -87,7 +92,9 @@ function getRedirectPath({
     }
 
     if (isAuthFlowRoute(pathname) && !isGuest) {
-        return ROUTES.HOME;
+        // Honor a sanitized ?redirect= param (e.g. back to the ads portal
+        // campaign the visitor picked before registering).
+        return redirectAfterAuth ?? ROUTES.HOME;
     }
 
     if (isStaffRoute(pathname) && userRole && !isStaff(userRole)) {

@@ -50,7 +50,12 @@ const AuthPage: React.FC = () => {
             [AuthView.FORGOT_PASSWORD]: "forgot-password",
         };
 
-        router.push(`?view=${viewMap[newView]}`);
+        // Keep the post-auth redirect target when hopping between views
+        // (e.g. register -> login), so the visitor still lands where they
+        // originally intended after authenticating.
+        const redirect = searchParams.get("redirect");
+        const redirectSuffix = redirect ? `&redirect=${encodeURIComponent(redirect)}` : "";
+        router.push(`?view=${viewMap[newView]}${redirectSuffix}`);
     };
 
     return (

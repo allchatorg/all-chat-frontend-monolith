@@ -1,7 +1,7 @@
 "use client";
 
 import React, {useEffect} from "react";
-import {usePathname, useRouter} from "next/navigation";
+import {usePathname, useRouter, useSearchParams} from "next/navigation";
 import {SidebarInset, SidebarProvider} from "@ads/components/ui/sidebar";
 import {AppSidebar} from "@ads/components/app-sidebar";
 import {DialogProvider} from "@ads/components/providers/DialogProvider";
@@ -23,19 +23,20 @@ import {ClaimAccountGate} from "@/app/portal/components/ClaimAccountGate";
  *     user with >=1 ad      -> /portal/dashboard
  *     user with no ads      -> /portal/campaign
  *   inner routes:
- *     guest / not-logged-in                            -> /portal
+ *     guest / not-logged-in                            -> register (returning here after auth)
  *     unclaimed (throwaway) account                    -> null (layout renders ClaimAccountGate)
  *     non-staff, no ads, not campaign/payment-methods  -> /portal/campaign
  *     otherwise                                        -> null
  */
 function resolvePortalRedirect(
     pathname: string,
-    {isGuestOrAnon, isUnclaimed, isStaff, isSuperAdmin, hasAd}: {
+    {isGuestOrAnon, isUnclaimed, isStaff, isSuperAdmin, hasAd, returnTo}: {
         isGuestOrAnon: boolean;
         isUnclaimed: boolean;
         isStaff: boolean;
         isSuperAdmin: boolean;
         hasAd: boolean;
+        returnTo: string;
     }
 ): string | null {
     if (pathname.startsWith("/portal/admin")) return null;
@@ -44,7 +45,9 @@ function resolvePortalRedirect(
         if (isStaff) return isSuperAdmin ? "/portal/admin/dashboard" : "/portal/admin/ads";
         return hasAd ? "/portal/dashboard" : "/portal/campaign";
     }
-    if (isGuestOrAnon) return "/portal";
+    // Send visitors through registration and back to where they were headed
+    // (e.g. /portal/campaign?formatId=X from a landing-page CTA or deep link).
+    if (isGuestOrAnon) return `/auth?view=register&redirect=${encodeURIComponent(returnTo)}`;
     // Throwaway accounts stay put and get a "claim your account" notice instead
     // of a confusing bounce to the campaign page.
     if (isUnclaimed) return null;
@@ -73,15 +76,18 @@ export default function PortalLayout({children}: { children: React.ReactNode }) 
     const {isStaffMember, currentRole} = useRoleAccess();
     const router = useRouter();
     const pathname = usePathname();
+    const searchParams = useSearchParams();
 
     const isLanding = pathname === "/portal";
     const isUnclaimed = user?.role === Role.UNCLAIMED_USER;
+    const search = searchParams.toString();
     const redirectTarget = resolvePortalRedirect(pathname, {
         isGuestOrAnon: !user || user.role === Role.GUEST,
         isUnclaimed,
         isStaff: isStaffMember(),
         isSuperAdmin: currentRole === Role.SUPER_ADMIN,
         hasAd: (user?.purchasedAdsCount ?? 0) > 0,
+        returnTo: search ? `${pathname}?${search}` : pathname,
     });
 
     // Throwaway accounts see the claim notice instead of inner-page content.

@@ -8,12 +8,13 @@ import {Label} from "@/components/ui/label";
 import {AuthView} from "@/models/AuthView";
 import {LoginRequest} from "@/models/LoginRequest";
 import {useState} from "react";
-import {useRouter} from "next/navigation";
+import {useRouter, useSearchParams} from "next/navigation";
 import {fetchMe} from "@/redux/user/usersThunk";
 import {loginThunk} from "@/redux/auth/authThunk";
 import {trackUserLoggedIn} from "@/lib/analytics";
 import {useThunk} from "@/lib/hooks/useThunk";
 import {emailValidationRules} from "@/features/auth/lib/validation";
+import {sanitizeRedirectParam} from "@/routes";
 
 export function LoginForm({
                               className,
@@ -26,6 +27,7 @@ export function LoginForm({
 }) {
     const [error, setError] = useState("");
     const router = useRouter();
+    const searchParams = useSearchParams();
 
     const [runLogin, loginLoading, loginError] = useThunk(loginThunk);
     const [runFetchMe] = useThunk(fetchMe);
@@ -50,7 +52,7 @@ export function LoginForm({
         } catch {
         }
         await runFetchMe();
-        router.push("/");
+        router.push(sanitizeRedirectParam(searchParams.get("redirect")) ?? "/");
     };
 
     const handleForgotPassword = (e: React.MouseEvent) => {

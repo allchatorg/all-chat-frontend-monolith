@@ -22,6 +22,9 @@ import {AdFormatType} from "@ads/data/adFormats";
 import {AdPreviewButton} from "@ads/components/ad-preview/ad-preview-button";
 import {PreviewAdData} from "@ads/components/ad-preview/preview-utils";
 
+// Manually uploaded demo assets on the public R2 bucket — keep these URLs
+// stable. Ad media uploads moved to Wasabi, but these are served directly
+// by Cloudflare and don't depend on any backend storage config.
 const PHOTO_PREVIEW_URL = "https://pub-0041c325ef4f49388686f7b78d23aa40.r2.dev/dev/73bed392-0adc-43cd-8a68-c763be2a45fe_allchat-logo.png"
 const VIDEO_PREVIEW_URL = "https://pub-0041c325ef4f49388686f7b78d23aa40.r2.dev/dev/7415fc9a-2e6a-4ca8-8ce7-32f41cb2a28d_Generated%20Video%20March%2027,%202026%20-%201_43AM.mp4"
 
@@ -111,7 +114,8 @@ export default function Home() {
                     </div>
 
                     <div className="mt-10 flex w-full flex-col items-center justify-center gap-4 sm:flex-row sm:gap-6">
-                        <Link href="/auth?view=register" className="w-full sm:w-auto">
+                        <Link href={`/auth?view=register&redirect=${encodeURIComponent("/portal")}`}
+                              className="w-full sm:w-auto">
                             <button
                                 className="w-full inline-flex items-center justify-center rounded-xl bg-blue-600 px-8 py-4 text-base font-bold text-white shadow-md transition-all duration-200 hover:bg-blue-700 active:scale-95">
                                 Create Account
@@ -119,7 +123,8 @@ export default function Home() {
                             </button>
                         </Link>
 
-                        <Link href="/auth?view=login" className="w-full sm:w-auto">
+                        <Link href={`/auth?view=login&redirect=${encodeURIComponent("/portal")}`}
+                              className="w-full sm:w-auto">
                             <button
                                 className="w-full inline-flex items-center justify-center rounded-xl border border-border bg-card/50 backdrop-blur-sm px-8 py-4 text-base font-bold text-foreground shadow-sm transition-all duration-200 hover:bg-card/80 active:scale-95">
                                 Log in
@@ -164,8 +169,10 @@ export default function Home() {
                                         </p>
 
                                         <div className="mt-auto flex w-full flex-col gap-3 pt-6">
+                                            {/* Landing only renders for guests/anon, so send them through
+                                                registration and return to the chosen campaign format after. */}
                                             <Link
-                                                href={`/portal/campaign?formatId=${format.id}`}
+                                                href={`/auth?view=register&redirect=${encodeURIComponent(`/portal/campaign?formatId=${format.id}`)}`}
                                                 className="inline-flex w-full items-center justify-center rounded-xl bg-blue-600 px-4 py-3 text-sm font-bold text-white shadow-sm transition-all duration-200 hover:bg-blue-700"
                                             >
                                                 Create Campaign
