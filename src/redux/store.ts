@@ -11,6 +11,7 @@ import storage from "redux-persist/lib/storage";
 import {persistReducer, persistStore} from "redux-persist";
 import {logoutThunk} from "@/redux/auth/authThunk";
 import {reportCasesReducer} from "@/redux/report-cases/reportCasesSlice";
+import {appealsReducer} from "@/redux/appeals/appealsSlice";
 import {auditLogsReducer} from "@/redux/audit-logs/auditLogsSlice";
 import adsReducer from "@/redux/ads/adsSlice";
 import messagingAvailabilityReducer from "@/redux/messagingAvailability/messagingAvailabilitySlice";
@@ -83,6 +84,7 @@ const appReducer = combineReducers({
     modPanel: modPanelReducer,
     admin: adminReducer,
     reportCases: reportCasesReducer,
+    appeals: appealsReducer,
     auditLogs: auditLogsReducer,
     ads: persistedAdsReducer,
     messagingAvailability: messagingAvailabilityReducer,

@@ -2,10 +2,18 @@
 
 import React, {Suspense, useEffect, useState} from "react";
 import {useRouter, useSearchParams} from "next/navigation";
-import {AlertTriangle, Clock, Shield} from "lucide-react";
+import {AlertTriangle, Clock, FileText, LogOut, Shield} from "lucide-react";
+import {useSelector} from "react-redux";
 import {Ban} from "@/models/Ban";
 import {BanTypeEnum} from "@/models/BanTypeEnum";
 import {getReportTypeLabel} from "@/lib/reportUtils";
+import {Button} from "@/components/ui/button";
+import {getSessionToken, removeSessionToken} from "@/lib/tokenManager";
+import {useThunk} from "@/lib/hooks/useThunk";
+import {getMyBanThunk} from "@/redux/appeals/appealsThunk";
+import {logoutThunk} from "@/redux/auth/authThunk";
+import {selectMyBanContext} from "@/redux/appeals/appealsSelector";
+import {ROUTES} from "@/routes";
 
 function BannedPageContent() {
     const searchParams = useSearchParams();
@@ -15,6 +23,11 @@ function BannedPageContent() {
     const [banInfo, setBanInfo] = useState<Ban | null>(null);
     const [timeRemaining, setTimeRemaining] = useState<string>("");
     const [loading, setLoading] = useState(false);
+    const [hasSession, setHasSession] = useState(false);
+
+    const banContext = useSelector(selectMyBanContext);
+    const [runGetMyBan] = useThunk(getMyBanThunk);
+    const [runLogout] = useThunk(logoutThunk);
 
     useEffect(() => {
         if (banParam) {
@@ -29,6 +42,33 @@ function BannedPageContent() {
             }
         }
     }, [banParam]);
+
+    // With a live session (the interceptor no longer drops the token on ban), the
+    // server is the source of truth and also tells us whether an appeal is possible.
+    // The ?ban= param stays as fallback for users without a session.
+    useEffect(() => {
+        if (!getSessionToken()) return;
+        setHasSession(true);
+        runGetMyBan().catch(() => {
+            // 404 = no active ban (e.g. it just expired); send the user back to login.
+            router.push(ROUTES.AUTH);
+        });
+    }, []);
+
+    useEffect(() => {
+        if (banContext?.ban) {
+            setBanInfo(banContext.ban);
+        }
+    }, [banContext]);
+
+    const handleLogout = async () => {
+        try {
+            await runLogout();
+        } finally {
+            removeSessionToken();
+            router.push(ROUTES.AUTH);
+        }
+    };
 
     useEffect(() => {
         if (!banInfo || banInfo.type !== BanTypeEnum.TEMPORARY || !banInfo.expiresAt) {
@@ -163,6 +203,39 @@ function BannedPageContent() {
                                     Your access to this service has been restricted due to a violation of our terms of
                                     service.
                                 </p>
+                            </div>
+                        )}
+
+                        {hasSession && banContext && (
+                            <div className="space-y-2 sm:space-y-3">
+                                {banContext.appealable && (
+                                    <Button
+                                        className="w-full"
+                                        onClick={() => router.push(ROUTES.BANNED_APPEAL)}
+                                    >
+                                        <FileText className="mr-2 h-4 w-4"/>
+                                        Appeal this ban
+                                    </Button>
+                                )}
+                                {banContext.appeal && (
+                                    <Button
+                                        className="w-full"
+                                        variant="outline"
+                                        onClick={() => router.push(ROUTES.BANNED_APPEAL)}
+                                    >
+                                        <FileText className="mr-2 h-4 w-4"/>
+                                        View appeal status
+                                    </Button>
+                                )}
+                                {!banContext.appealable && !banContext.appeal && (
+                                    <p className="text-center text-xs sm:text-sm text-gray-500">
+                                        This ban cannot be appealed.
+                                    </p>
+                                )}
+                                <Button className="w-full" variant="ghost" onClick={handleLogout}>
+                                    <LogOut className="mr-2 h-4 w-4"/>
+                                    Log out
+                                </Button>
                             </div>
                         )}
                     </div>

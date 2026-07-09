@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import {Ban, FileText, Flag, Megaphone, MessageCircle, MessageSquare, UsersIcon} from "lucide-react";
+import {Ban, FileText, Flag, Megaphone, MessageCircle, MessageSquare, Scale, UsersIcon} from "lucide-react";
 import Image from "next/image";
 import {useRoleAccess} from "@/lib/hooks/useRoleAccess";
 import {usePathname, useRouter} from "next/navigation";
@@ -48,6 +48,13 @@ export const Sidebar: React.FC<SidebarProps> = ({className = "", onClose}) => {
             label: "Ban List",
             href: ROUTES.BANS,
         },
+        ...(isAdmin()
+            ? [{
+                icon: <Scale className="h-5 w-5"/>,
+                label: "Appeals",
+                href: ROUTES.APPEALS,
+            }]
+            : []),
         {
             icon: <UsersIcon className="h-5 w-5"/>,
             label: "Users",

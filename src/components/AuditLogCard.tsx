@@ -12,6 +12,7 @@ import {
     CheckCircle,
     Clock,
     MessageSquareX,
+    Scale,
     ShieldBan,
     User,
     UserCheck
@@ -57,6 +58,8 @@ const getActionIcon = (type: AuditLogType) => {
             return <Archive {...iconProps} className="h-5 w-5 text-slate-600 dark:text-slate-300"/>;
         case AuditLogType.UNARCHIVE_CHATROOM:
             return <ArchiveRestore {...iconProps} className="h-5 w-5 text-cyan-600 dark:text-cyan-400"/>;
+        case AuditLogType.BAN_APPEAL_RESOLVE:
+            return <Scale {...iconProps} className="h-5 w-5 text-indigo-600 dark:text-indigo-400"/>;
         default:
             return null;
     }
@@ -86,6 +89,8 @@ const getActionColor = (type: AuditLogType) => {
             return 'bg-slate-100 text-slate-800 border-slate-200 dark:bg-slate-800 dark:text-slate-200 dark:border-slate-700';
         case AuditLogType.UNARCHIVE_CHATROOM:
             return 'bg-cyan-100 text-cyan-800 border-cyan-200 dark:bg-cyan-900/30 dark:text-cyan-300 dark:border-cyan-800';
+        case AuditLogType.BAN_APPEAL_RESOLVE:
+            return 'bg-indigo-100 text-indigo-800 border-indigo-200 dark:bg-indigo-900/30 dark:text-indigo-300 dark:border-indigo-800';
         default:
             return 'bg-gray-100 text-gray-800 border-gray-200 dark:bg-gray-800 dark:text-gray-300 dark:border-gray-700';
     }
@@ -322,6 +327,40 @@ const renderLogDetails = (log: AuditLogUnion) => {
                             </span>
                         </div>
                     )}
+                </div>
+            );
+
+        case AuditLogType.BAN_APPEAL_RESOLVE:
+            return (
+                <div className="space-y-2">
+                    <div className="flex items-center gap-2">
+                        <span className="text-sm font-medium">Target User:</span>
+                        <span
+                            className="rounded bg-gray-100 px-2 py-1 font-mono text-sm dark:bg-gray-800 dark:text-gray-100">
+                            {log.targetUser.username}
+                        </span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                        <span className="text-sm font-medium">Appeal ID:</span>
+                        <span
+                            className="rounded bg-gray-100 px-2 py-1 font-mono text-sm dark:bg-gray-800 dark:text-gray-100">
+                            {log.appealId}
+                        </span>
+                        <span className="text-sm font-medium">Ban ID:</span>
+                        <span
+                            className="rounded bg-gray-100 px-2 py-1 font-mono text-sm dark:bg-gray-800 dark:text-gray-100">
+                            {log.banId}
+                        </span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                        <span className="text-sm font-medium">Decision:</span>
+                        <Badge
+                            variant={log.decision === 'APPROVED' ? "secondary" : "destructive"}
+                            className="text-xs"
+                        >
+                            {log.decision}
+                        </Badge>
+                    </div>
                 </div>
             );
 

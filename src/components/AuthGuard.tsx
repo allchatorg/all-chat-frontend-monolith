@@ -26,6 +26,7 @@ export default function AuthGuard({children}: { children: React.ReactNode }) {
 
         const redirectConfig = getRedirectPath({
             isAuthenticated,
+            isBanned: user?.banned === true,
             hasFlaggedIp,
             isGuest,
             isVerified,
@@ -54,6 +55,7 @@ export default function AuthGuard({children}: { children: React.ReactNode }) {
 
 function getRedirectPath({
                              isAuthenticated,
+                             isBanned,
                              hasFlaggedIp,
                              isGuest,
                              isVerified,
@@ -62,6 +64,7 @@ function getRedirectPath({
                              redirectAfterAuth
                          }: {
     isAuthenticated: boolean;
+    isBanned: boolean;
     hasFlaggedIp: boolean;
     isGuest: boolean;
     isVerified: boolean;
@@ -78,6 +81,12 @@ function getRedirectPath({
             return ROUTES.REGISTER;
         }
         return null;
+    }
+
+    // Banned users are corralled to the ban info / appeal pages; the backend
+    // enforces the same boundary via the AccessRestrictionFilter whitelist.
+    if (isBanned) {
+        return pathname.startsWith(ROUTES.BANNED) ? null : ROUTES.BANNED;
     }
 
     // Authenticated users

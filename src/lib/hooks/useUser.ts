@@ -20,7 +20,7 @@ export const useUser = (): UseUserReturn => {
     const userIsLoading = useSelector(selectIsUserLoading);
     const [isInitializing, setIsInitializing] = useState(true);
 
-    const {ipDetails, isLoading: ipDetailsLoading} = useIpDetails();
+    const {ipDetails, isLoading: ipDetailsLoading, error: ipDetailsError} = useIpDetails();
 
     const flaggedIp = ipDetails && (ipDetails.requiredVerification !== 'NONE');
 
@@ -31,7 +31,9 @@ export const useUser = (): UseUserReturn => {
         const initUser = async () => {
             const hasToken = getSessionToken();
             const hasAccount = getHasAccount();
-            if (userIsLoading || registerGuestIsLoading || ipDetailsLoading || (ipDetails === null)) return;
+            // Don't wait on ipDetails forever if the ping call failed (e.g. it was
+            // rejected with a ban 403) — proceed so the session can still hydrate.
+            if (userIsLoading || registerGuestIsLoading || ipDetailsLoading || (ipDetails === null && !ipDetailsError)) return;
 
             if (!hasToken) {
                 if (!hasAccount && !flaggedIp) {
@@ -47,7 +49,7 @@ export const useUser = (): UseUserReturn => {
         };
 
         initUser();
-    }, [user, userIsLoading, registerGuestIsLoading, runFetchMe, registerGuest, ipDetails, ipDetailsLoading]);
+    }, [user, userIsLoading, registerGuestIsLoading, runFetchMe, registerGuest, ipDetails, ipDetailsLoading, ipDetailsError]);
 
     useEffect(() => {
         if (user || error) {

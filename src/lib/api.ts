@@ -24,9 +24,13 @@ api.interceptors.response.use(
     (response) => response,
     (error: AxiosError<any>) => {
         if (error.response && isBanResponse(error.response)) {
-            removeSessionToken();
+            // Keep the session token: banned users stay authenticated so they can reach
+            // the whitelisted ban-appeal endpoints. Skip the redirect when already on a
+            // /banned page, otherwise its own API calls would loop the navigation.
             const banData: Ban = error.response.data;
-            window.location.href = `/banned?ban=${encodeURIComponent(JSON.stringify(banData))}`;
+            if (!window.location.pathname.startsWith('/banned')) {
+                window.location.href = `/banned?ban=${encodeURIComponent(JSON.stringify(banData))}`;
+            }
         }
         // Handle HTTP 429 Too Many Requests globally
         if (error.response && error.response.status === 429) {

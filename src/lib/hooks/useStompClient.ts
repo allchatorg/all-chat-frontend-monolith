@@ -334,7 +334,7 @@ export function useStompWithRedux(
     const backgroundedAtRef = useRef<number | null>(null);
 
     useEffect(() => {
-        if (!user?.id) {
+        if (!user?.id || user?.banned) {
             return;
         }
 
@@ -477,7 +477,7 @@ export function useStompWithRedux(
             setIsConnected(false);
             client.deactivate();
         };
-    }, [user?.id]);
+    }, [user?.id, user?.banned]);
 
     // Manage subscriptions when rooms change or connection is established
     useEffect(() => {

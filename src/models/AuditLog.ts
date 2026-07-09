@@ -20,6 +20,7 @@ export enum AuditLogType {
     NCMEC_REPORT = "NCMEC_REPORT",
     ARCHIVE_CHATROOM = "ARCHIVE_CHATROOM",
     UNARCHIVE_CHATROOM = "UNARCHIVE_CHATROOM",
+    BAN_APPEAL_RESOLVE = "BAN_APPEAL_RESOLVE",
 }
 
 export interface AuditLog {
@@ -93,9 +94,18 @@ export interface ChatRoomAuditLog extends AuditLog {
     targetUser: null;
 }
 
+export interface BanAppealResolveAuditLog extends AuditLog {
+    auditLogType: AuditLogType.BAN_APPEAL_RESOLVE;
+    targetUser: User;
+    appealId: number;
+    banId: number;
+    decision: string;
+}
+
 export type AuditLogUnion =
     | BanAuditLog
     | RevokeBanAuditLog
+    | BanAppealResolveAuditLog
     | MessageDeleteAuditLog
     | ChangeUsernameAuditLog
     | WarningAuditLog

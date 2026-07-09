@@ -3,8 +3,10 @@ export const ROUTES = {
     AUTH: '/auth',
     RESET_PASSWORD: '/reset-password',
     BANNED: '/banned',
+    BANNED_APPEAL: '/banned/appeal',
     AD_PREVIEW: '/ad-preview',
     BANS: '/bans',
+    APPEALS: '/appeals',
     USERS: '/users',
     REPORTS: '/report-cases',
     AUDIT_LOGS: '/audit-logs',
@@ -29,6 +31,7 @@ export const PROTECTED_ROUTES = [
 
 export const STAFF_ROUTES = [
     ROUTES.BANS,
+    ROUTES.APPEALS,
     ROUTES.USERS,
     ROUTES.REPORTS,
     ROUTES.AUDIT_LOGS,
