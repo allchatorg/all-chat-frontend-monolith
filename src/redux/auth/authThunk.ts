@@ -119,7 +119,7 @@ export const logoutThunk = createAsyncThunk<void>(
 );
 
 export const pingServerThunk = createAsyncThunk<IpDetails, void, {
-    state: { auth: { pingLoading: boolean; ipDetails: IpDetails | null } }
+    state: { auth: { pingLoading: boolean; pingError: string | null; ipDetails: IpDetails | null } }
 }>(
     "auth/pingServer",
     async (_, {rejectWithValue}) => {
@@ -132,8 +132,11 @@ export const pingServerThunk = createAsyncThunk<IpDetails, void, {
     {
         condition: (_, {getState}) => {
             const {auth} = getState();
-            // Skip if already loading or if ipDetails already exists
-            if (auth.pingLoading || auth.ipDetails) {
+            // Skip if already loading, if ipDetails already exists, or if a
+            // previous attempt failed this page load (retry only on reload) —
+            // otherwise every mounted useIpDetails instance re-fires the ping
+            // when the server is unreachable.
+            if (auth.pingLoading || auth.ipDetails || auth.pingError) {
                 return false;
             }
         }

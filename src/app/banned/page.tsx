@@ -10,6 +10,7 @@ import {getReportTypeLabel} from "@/lib/reportUtils";
 import {Button} from "@/components/ui/button";
 import {getSessionToken, removeSessionToken} from "@/lib/tokenManager";
 import {useThunk} from "@/lib/hooks/useThunk";
+import {ApiError} from "@/models/ApiError";
 import {getMyBanThunk} from "@/redux/appeals/appealsThunk";
 import {logoutThunk} from "@/redux/auth/authThunk";
 import {selectMyBanContext} from "@/redux/appeals/appealsSelector";
@@ -49,9 +50,13 @@ function BannedPageContent() {
     useEffect(() => {
         if (!getSessionToken()) return;
         setHasSession(true);
-        runGetMyBan().catch(() => {
+        runGetMyBan().catch((e: ApiError) => {
             // 404 = no active ban (e.g. it just expired); send the user back to login.
-            router.push(ROUTES.AUTH);
+            // Anything else (429 rate limit, transient failure) must NOT redirect:
+            // AuthGuard bounces banned users straight back here, creating a loop.
+            if (e?.status === 404) {
+                router.push(ROUTES.AUTH);
+            }
         });
     }, []);
 

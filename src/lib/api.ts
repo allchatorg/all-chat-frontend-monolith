@@ -10,10 +10,25 @@ const api: AxiosInstance = axios.create({
     }
 });
 
+// Credential-establishing endpoints authenticate by payload, never by session.
+// A stored token must not ride along: a stale banned session on POST /auth/login
+// makes the AccessRestrictionFilter answer with the previous user's ban 403,
+// hijacking a different user's login. Exact match — /auth/register must not
+// shadow /auth/register-guest. /auth/claim-account and /auth/logout stay
+// tokenized because they act on the current session.
+const CREDENTIAL_ENDPOINTS = new Set([
+    "/auth/login",
+    "/auth/register",
+    "/auth/register-unclaimed",
+    "/auth/forgot-password",
+    "/auth/forgot-password/verify-phone-code",
+    "/auth/reset-password",
+]);
+
 api.interceptors.request.use(
     (config: InternalAxiosRequestConfig): InternalAxiosRequestConfig => {
         const sessionToken = getSessionToken();
-        if (sessionToken && config.headers) {
+        if (sessionToken && config.headers && !CREDENTIAL_ENDPOINTS.has(config.url ?? "")) {
             config.headers['X-Auth-Token'] = sessionToken.token;
         }
         return config;

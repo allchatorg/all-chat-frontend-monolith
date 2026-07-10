@@ -3,6 +3,7 @@
 import React from 'react';
 import {motion} from 'framer-motion';
 import Image from 'next/image';
+import {usePathname} from 'next/navigation';
 import {Dialog, DialogContent} from '@/components/ui/dialog';
 import VerifyMail from '@/features/auth/components/VerifyMail';
 import VerifyPhone from '@/features/auth/components/VerifyPhone';
@@ -23,6 +24,7 @@ export const VerificationBlockingOverlay: React.FC<VerificationBlockingOverlayPr
     const {ipDetails} = useIpDetails();
     const {user} = useUser();
     const logoSrc = useThemedLogo();
+    const pathname = usePathname();
 
     let show: 'NONE' | 'CLAIM' | 'EMAIL' | 'PHONE' = 'NONE';
 
@@ -46,6 +48,8 @@ export const VerificationBlockingOverlay: React.FC<VerificationBlockingOverlayPr
         const isClaimed = !!user?.claimed;
 
         if (user.role === 'GUEST') return 'NONE';
+        // Never block the ban/appeal pages with the verification dialog.
+        if (pathname.startsWith('/banned')) return 'NONE';
         if (!isClaimed && required !== 'NONE') return 'CLAIM';
         if (required === 'EMAIL' && !emailVerified) return 'EMAIL';
         if (required === 'PHONE') {

@@ -7,3 +7,4 @@ export const selectIsAuthLoading = (state: RootState) => state.auth.loading;
 export const selectAuthError = (state: RootState) => state.auth.error;
 export const selectIpDetails = (state: RootState) => state.auth.ipDetails;
 export const selectPingLoading = (state: RootState) => state.auth.pingLoading;
+export const selectPingError = (state: RootState) => state.auth.pingError;

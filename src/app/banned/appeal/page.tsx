@@ -15,6 +15,7 @@ import {useThunk} from "@/lib/hooks/useThunk";
 import {getMyBanThunk, submitAppealThunk} from "@/redux/appeals/appealsThunk";
 import {selectMyAppeal, selectMyBanContext} from "@/redux/appeals/appealsSelector";
 import {BanAppealRequest, BanAppealUserStatus, BanAppealUserView} from "@/models/BanAppeal";
+import {ApiError} from "@/models/ApiError";
 import {ROUTES} from "@/routes";
 import {Spinner} from "@/components/Spinner";
 
@@ -276,9 +277,16 @@ function BannedAppealPageContent() {
         }
 
         runGetMyBan()
-            .catch(() => {
-                // No active ban -> nothing to appeal.
-                router.push(ROUTES.AUTH);
+            .catch((e: ApiError) => {
+                if (e?.status === 404) {
+                    // No active ban -> nothing to appeal.
+                    router.push(ROUTES.AUTH);
+                } else if (!banContext) {
+                    // Transient failure (e.g. 429) with nothing to render — show the
+                    // ban page instead of an endless spinner; it has its own fallbacks
+                    // and only leaves for /auth on a genuine 404.
+                    router.push(ROUTES.BANNED);
+                }
             })
             .finally(() => setIsLoading(false));
     }, []);

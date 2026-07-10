@@ -15,6 +15,7 @@ interface AuthState {
     isAuthenticated: boolean | null;
     loading: boolean;
     pingLoading: boolean;
+    pingError: string | null;
     ipDetails: IpDetails | null;
     error: string | null;
     sessionToken: SessionToken | null;
@@ -25,6 +26,7 @@ const initialState: AuthState = {
     ipDetails: null,
     loading: false,
     pingLoading: false,
+    pingError: null,
     error: null,
     sessionToken: null,
 };
@@ -138,13 +140,18 @@ const authSlice = createSlice({
             })
             .addCase(pingServerThunk.pending, (state) => {
                 state.pingLoading = true;
+                state.pingError = null;
             })
             .addCase(pingServerThunk.fulfilled, (state, action) => {
                 state.pingLoading = false;
+                state.pingError = null;
                 state.ipDetails = action.payload;
             })
-            .addCase(pingServerThunk.rejected, (state) => {
+            .addCase(pingServerThunk.rejected, (state, action) => {
                 state.pingLoading = false;
+                state.pingError = typeof action.payload === "string"
+                    ? action.payload
+                    : (action.payload as { message?: string } | undefined)?.message ?? "Failed to reach server";
             })
     }
 

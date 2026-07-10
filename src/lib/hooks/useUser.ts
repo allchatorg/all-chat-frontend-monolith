@@ -6,6 +6,7 @@ import {fetchMe} from "@/redux/user/usersThunk";
 import {useEffect, useState} from "react";
 import {getHasAccount, getSessionToken, removeSessionToken} from "@/lib/tokenManager";
 import {registerGuestThunk} from "@/redux/auth/authThunk";
+import {selectIsAuthLoading} from "@/redux/auth/authSelectors";
 import {useIpDetails} from "@/lib/hooks/useIpDetails";
 
 interface UseUserReturn {
@@ -18,6 +19,10 @@ interface UseUserReturn {
 export const useUser = (): UseUserReturn => {
     const user = useSelector(selectUser);
     const userIsLoading = useSelector(selectIsUserLoading);
+    // registerGuestThunk sets auth.loading, so waiting on it serializes the
+    // useUser mounts (AuthGuard + AppInitializer) — without it both can fire
+    // their own register-guest before either sees the other's result.
+    const authIsLoading = useSelector(selectIsAuthLoading);
     const [isInitializing, setIsInitializing] = useState(true);
 
     const {ipDetails, isLoading: ipDetailsLoading, error: ipDetailsError} = useIpDetails();
@@ -33,23 +38,36 @@ export const useUser = (): UseUserReturn => {
             const hasAccount = getHasAccount();
             // Don't wait on ipDetails forever if the ping call failed (e.g. it was
             // rejected with a ban 403) — proceed so the session can still hydrate.
-            if (userIsLoading || registerGuestIsLoading || ipDetailsLoading || (ipDetails === null && !ipDetailsError)) return;
+            if (userIsLoading || authIsLoading || registerGuestIsLoading || ipDetailsLoading || (ipDetails === null && !ipDetailsError)) return;
 
             if (!hasToken) {
-                if (!hasAccount && !flaggedIp) {
-                    await registerGuest();
+                // Attempt guest registration at most once: without the error
+                // guard, a failed attempt (server down) re-runs this effect via
+                // the registerGuestIsLoading toggle and loops forever.
+                if (!hasAccount && !flaggedIp && !registerGuestError) {
+                    try {
+                        await registerGuest();
+                    } catch {
+                        // Recorded by useThunk as registerGuestError.
+                    }
                 }
                 setIsInitializing(false);
                 return;
             }
 
-            if (!user) {
-                await runFetchMe();
+            // The !error guard stops a second fetchMe from firing in the render
+            // before the error-effect below has removed the stale token.
+            if (!user && !error) {
+                try {
+                    await runFetchMe();
+                } catch {
+                    // Recorded by useThunk as error.
+                }
             }
         };
 
-        initUser();
-    }, [user, userIsLoading, registerGuestIsLoading, runFetchMe, registerGuest, ipDetails, ipDetailsLoading, ipDetailsError]);
+        void initUser();
+    }, [user, userIsLoading, authIsLoading, registerGuestIsLoading, runFetchMe, registerGuest, ipDetails, ipDetailsLoading, ipDetailsError, error, registerGuestError, flaggedIp]);
 
     useEffect(() => {
         if (user || error) {
@@ -60,6 +78,8 @@ export const useUser = (): UseUserReturn => {
     useEffect(() => {
         if (error) {
             removeSessionToken();
+        }
+        if (error || registerGuestError) {
             setIsInitializing(false);
         }
     }, [error, registerGuestError]);

@@ -7,7 +7,6 @@ import {RegisterForm} from "@/features/auth/components/RegisterForm";
 import {AnimatePresence, motion} from "framer-motion";
 import {RegisterAnonymousForm} from "@/features/auth/components/RegisterAnonymousForm";
 import {ForgotPasswordForm} from "@/features/auth/components/ForgotPasswordForm";
-import {pingServer} from "@/api/auth/authAPI";
 import {useRouter, useSearchParams} from "next/navigation";
 import Image from "next/image";
 import {Card} from "@/components/ui/card";
@@ -17,7 +16,7 @@ import {useThemedLogo} from "@/lib/hooks/useThemedLogo";
 const AuthPage: React.FC = () => {
     const searchParams = useSearchParams();
     const router = useRouter()
-    const {ipDetails} = useIpDetails()
+    const {ipDetails, error: ipDetailsError} = useIpDetails()
     const logoSrc = useThemedLogo();
     const flaggedIp = ipDetails?.requiredVerification !== 'NONE';
     const defaultView = flaggedIp ? AuthView.REGISTER : AuthView.LOGIN;
@@ -38,9 +37,14 @@ const AuthPage: React.FC = () => {
         }
     }, [searchParams]);
 
+    // flaggedIp fails closed while ipDetails is null, which is right while the
+    // ping is pending but wrong once it has definitively failed (server down):
+    // the visitor would be stuck on the register view. Fall back to login.
     useEffect(() => {
-        pingServer().then();
-    }, []);
+        if (ipDetailsError && !searchParams.get("view")) {
+            setView(AuthView.LOGIN);
+        }
+    }, [ipDetailsError, searchParams]);
 
     const handleAuthViewChange = (newView: AuthView) => {
         const viewMap = {

@@ -13,6 +13,7 @@ import {
     CheckCircle,
     Clock,
     MessageSquareX,
+    Scale,
     ShieldBan,
     User,
     UserCheck,
@@ -55,6 +56,8 @@ const getActionIcon = (type: AuditLogType) => {
             return <Archive {...iconProps} className="text-slate-600 dark:text-slate-300"/>;
         case AuditLogType.UNARCHIVE_CHATROOM:
             return <ArchiveRestore {...iconProps} className="text-cyan-600 dark:text-cyan-400"/>;
+        case AuditLogType.BAN_APPEAL_RESOLVE:
+            return <Scale {...iconProps} className="text-indigo-600 dark:text-indigo-400"/>;
         default:
             return null;
     }
@@ -84,6 +87,8 @@ const getActionColor = (type: AuditLogType) => {
             return "bg-slate-100 text-slate-800 border-slate-200 dark:bg-slate-800 dark:text-slate-200 dark:border-slate-700";
         case AuditLogType.UNARCHIVE_CHATROOM:
             return "bg-cyan-100 text-cyan-800 border-cyan-200 dark:bg-cyan-900/30 dark:text-cyan-300 dark:border-cyan-800";
+        case AuditLogType.BAN_APPEAL_RESOLVE:
+            return "bg-indigo-100 text-indigo-800 border-indigo-200 dark:bg-indigo-900/30 dark:text-indigo-300 dark:border-indigo-800";
         default:
             return "bg-gray-100 text-gray-800 border-gray-200 dark:bg-gray-800 dark:text-gray-300 dark:border-gray-700";
     }
@@ -244,6 +249,32 @@ const renderLogDetails = (log: AuditLogUnion) => {
                     {log.description && (
                         <div
                             className="rounded border-l-4 border-slate-300 bg-slate-50 p-3 text-sm text-slate-800 dark:border-slate-700 dark:bg-slate-900/10 dark:text-slate-300">
+                            {log.description}
+                        </div>
+                    )}
+                </div>
+            );
+
+        case AuditLogType.BAN_APPEAL_RESOLVE:
+            return (
+                <div className="space-y-2">
+                    <Row label="Target User" value={log.targetUser.username}/>
+                    <div className="flex items-center gap-2">
+                        <Row label="Appeal ID" value={log.appealId}/>
+                        <Row label="Ban ID" value={log.banId}/>
+                    </div>
+                    <div className="flex items-center gap-2">
+                        <span className="text-sm font-medium">Decision:</span>
+                        <Badge
+                            variant={log.decision === "APPROVED" ? "secondary" : "destructive"}
+                            className="text-xs"
+                        >
+                            {log.decision}
+                        </Badge>
+                    </div>
+                    {log.description && (
+                        <div
+                            className="rounded border-l-4 border-indigo-300 bg-indigo-50 p-3 text-sm text-indigo-800 dark:border-indigo-700 dark:bg-indigo-900/10 dark:text-indigo-300">
                             {log.description}
                         </div>
                     )}
