@@ -10,15 +10,23 @@ import {Skeleton} from "@ads/components/ui/skeleton"
 
 const monthlyChartConfig = {
     revenue: {
-        label: "Revenue",
+        label: "Ad Revenue",
         color: "blue",
+    },
+    promotedRevenue: {
+        label: "Promoted Messages",
+        color: "orange",
     },
 }
 
 const weeklyChartConfig = {
     revenue: {
-        label: "Revenue",
+        label: "Ad Revenue",
         color: "blue",
+    },
+    promotedRevenue: {
+        label: "Promoted Messages",
+        color: "orange",
     },
 }
 
@@ -77,6 +85,11 @@ export function ChartBarRevenue() {
                                     fill="var(--color-revenue)"
                                     radius={[4, 4, 0, 0]}
                                 />
+                                <Bar
+                                    dataKey="promotedRevenue"
+                                    fill="var(--color-promotedRevenue)"
+                                    radius={[4, 4, 0, 0]}
+                                />
                             </BarChart>
                         </ChartContainer>
                     )}
@@ -129,6 +142,11 @@ export function ChartBarRevenue() {
                                 <Bar
                                     dataKey="revenue"
                                     fill="var(--color-revenue)"
+                                    radius={[4, 4, 0, 0]}
+                                />
+                                <Bar
+                                    dataKey="promotedRevenue"
+                                    fill="var(--color-promotedRevenue)"
                                     radius={[4, 4, 0, 0]}
                                 />
                             </BarChart>

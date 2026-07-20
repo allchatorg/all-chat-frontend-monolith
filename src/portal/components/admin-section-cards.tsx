@@ -4,6 +4,7 @@ import {StatCard} from "@ads/components/stat-card";
 import {NotifyCard} from "@ads/components/NotifyCard";
 import Link from "next/link";
 import {useGetAdStatusCountsQuery, useGetDailyRevenueQuery} from "@ads/store/services/adminAdsApi";
+import {useGetPromotedRevenueSummaryQuery} from "@ads/store/services/adminPromotedMessagesApi";
 import {AdStatus} from "@ads/models/ad";
 import {Skeleton} from "@ads/components/ui/skeleton";
 
@@ -49,9 +50,27 @@ const statusConfig: Record<AdStatus, {
 // Define the order in which to display the status cards
 const statusDisplayOrder: AdStatus[] = [AdStatus.SUBMITTED, AdStatus.ACTIVE, AdStatus.COMPLETED, AdStatus.REJECTED];
 
+const formatUsd = (value: number) =>
+    new Intl.NumberFormat('en-US', {style: 'currency', currency: 'USD'}).format(value);
+
+function computeTrend(today: number, yesterday: number): { trend: "up" | "down"; trendValue: string } {
+    if (yesterday > 0) {
+        const percentage = ((today - yesterday) / yesterday) * 100;
+        return {
+            trend: percentage >= 0 ? "up" : "down",
+            trendValue: `${percentage > 0 ? '+' : ''}${percentage.toFixed(1)}%`,
+        };
+    }
+    if (today > 0) {
+        return {trend: "up", trendValue: "+100%"};
+    }
+    return {trend: "up", trendValue: "0%"};
+}
+
 export function AdminSectionCards() {
     const {data: statusCounts, isLoading: isStatusLoading, isError: isStatusError} = useGetAdStatusCountsQuery();
     const {data: revenueData, isLoading: isRevenueLoading} = useGetDailyRevenueQuery();
+    const {data: promotedData, isLoading: isPromotedLoading} = useGetPromotedRevenueSummaryQuery();
 
     // Get count for a specific status
     const getCountForStatus = (status: AdStatus): number => {
@@ -60,56 +79,70 @@ export function AdminSectionCards() {
         return found?.count ?? 0;
     };
 
-    // Calculate revenue stats
-    const todayRevenue = revenueData?.todayRevenue || 0;
-    const yesterdayRevenue = revenueData?.yesterdayRevenue || 0;
-
-    let trend: "up" | "down" = "up";
-    let trendValue = "0%";
-
-    if (yesterdayRevenue > 0) {
-        const diff = todayRevenue - yesterdayRevenue;
-        const percentage = (diff / yesterdayRevenue) * 100;
-        trend = percentage >= 0 ? "up" : "down";
-        trendValue = `${percentage > 0 ? '+' : ''}${percentage.toFixed(1)}%`;
-    } else if (todayRevenue > 0) {
-        trend = "up";
-        trendValue = "+100%";
-    }
-
-    const revenueStat = {
-        id: 1,
-        title: "Today's Revenue",
-        value: new Intl.NumberFormat('en-US', {style: 'currency', currency: 'USD'}).format(todayRevenue),
-        trend: trend,
-        trendValue: trendValue,
-        footerText: "Compared to yesterday",
-        description: "Total revenue from ad purchases",
-    };
+    const revenueTrend = computeTrend(revenueData?.todayRevenue ?? 0, revenueData?.yesterdayRevenue ?? 0);
+    const promotedTrend = computeTrend(promotedData?.todayRevenue ?? 0, promotedData?.yesterdayRevenue ?? 0);
 
     return (
         <div
-            className="grid grid-cols-1 gap-4 px-4 *:data-[slot=card]:shadow-sm lg:px-6 @xl/main:grid-cols-2 @5xl/main:grid-cols-3">
+            className="grid grid-cols-1 gap-4 px-4 *:data-[slot=card]:shadow-sm lg:px-6 @xl/main:grid-cols-2 @5xl/main:grid-cols-4">
 
             {isRevenueLoading ? (
-                <Skeleton className="h-32 w-full rounded-xl"/>
+                <Skeleton className="h-28 w-full rounded-xl"/>
             ) : (
                 <StatCard
-                    key={revenueStat.id}
-                    title={revenueStat.title}
-                    value={revenueStat.value}
-                    trend={revenueStat.trend}
-                    trendValue={revenueStat.trendValue}
-                    footerText={revenueStat.footerText}
-                    description={revenueStat.description}
+                    title="Today's Revenue"
+                    value={formatUsd(revenueData?.todayRevenue ?? 0)}
+                    trend={revenueTrend.trend}
+                    trendValue={revenueTrend.trendValue}
+                    footerText="Compared to yesterday"
+                    description="Total revenue from ad purchases"
+                    compact
                 />
+            )}
+
+            {isPromotedLoading ? (
+                <>
+                    <Skeleton className="h-28 w-full rounded-xl"/>
+                    <Skeleton className="h-28 w-full rounded-xl"/>
+                    <Skeleton className="h-28 w-full rounded-xl"/>
+                </>
+            ) : (
+                <>
+                    <StatCard
+                        title="Promoted Revenue Today"
+                        value={formatUsd(promotedData?.todayRevenue ?? 0)}
+                        trend={promotedTrend.trend}
+                        trendValue={promotedTrend.trendValue}
+                        footerText="Compared to yesterday"
+                        description="Captured from promoted messages"
+                        compact
+                    />
+                    <StatCard
+                        title="Pending Promotions"
+                        value={formatUsd(promotedData?.pendingHoldTotal ?? 0)}
+                        trend="up"
+                        trendValue=""
+                        footerText=""
+                        description={`${promotedData?.pendingCount ?? 0} authorized holds awaiting review`}
+                        compact
+                    />
+                    <StatCard
+                        title="Total Promoted Revenue"
+                        value={formatUsd(promotedData?.totalRevenue ?? 0)}
+                        trend="up"
+                        trendValue=""
+                        footerText=""
+                        description={`All-time · ${promotedData?.approvedCount ?? 0} approved promotions`}
+                        compact
+                    />
+                </>
             )}
 
             {isStatusLoading ? (
                 // Loading skeleton for status cards
                 <>
-                    <Skeleton className="h-32 w-full rounded-xl"/>
-                    <Skeleton className="h-32 w-full rounded-xl"/>
+                    <Skeleton className="h-28 w-full rounded-xl"/>
+                    <Skeleton className="h-28 w-full rounded-xl"/>
                 </>
             ) : isStatusError ? (
                 // Error state
@@ -129,6 +162,7 @@ export function AdminSectionCards() {
                                 label={config.buttonLabel}
                                 description={config.description}
                                 variant={config.variant}
+                                compact
                             />
                         </Link>
                     );

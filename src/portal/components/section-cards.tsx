@@ -1,12 +1,17 @@
+"use client"
+
 import {StatCard} from "@ads/components/stat-card";
 import {NotifyCard} from "@ads/components/NotifyCard";
 import {CompletionCard} from "@ads/components/CompletionCard";
 import Link from "next/link";
 import {AdStatus, AdStatusCount} from "@ads/models/ad";
+import {useGetMyPromotionSpendSummaryQuery} from "@ads/store/services/promotedMessagesApi";
 
 interface SectionCardsProps {
     statusCounts?: AdStatusCount[];
     isLoading?: boolean;
+    // When false (promotion-only user with no ads), only the Promotion Spend card renders
+    showAdStats?: boolean;
 }
 
 // Helper to get count for a specific status
@@ -16,16 +21,42 @@ function getStatusCount(statusCounts: AdStatusCount[] | undefined, status: AdSta
     return found?.count ?? 0;
 }
 
-export function SectionCards({statusCounts, isLoading}: SectionCardsProps) {
+const formatUsd = (value: number) =>
+    new Intl.NumberFormat('en-US', {style: 'currency', currency: 'USD'}).format(value);
+
+export function SectionCards({statusCounts, isLoading, showAdStats = true}: SectionCardsProps) {
     const submittedCount = getStatusCount(statusCounts, AdStatus.SUBMITTED);
     const activeCount = getStatusCount(statusCounts, AdStatus.ACTIVE);
     const completedCount = getStatusCount(statusCounts, AdStatus.COMPLETED);
     const rejectedCount = getStatusCount(statusCounts, AdStatus.REJECTED);
     const totalAds = submittedCount + activeCount + completedCount + rejectedCount;
 
+    const {data: spendData, isLoading: isSpendLoading} = useGetMyPromotionSpendSummaryQuery();
+    const pendingCount = spendData?.pendingCount ?? 0;
+
+    const promotionSpendCard = (
+        <StatCard
+            title="Promotion Spend"
+            value={isSpendLoading ? "..." : formatUsd(spendData?.totalSpent ?? 0)}
+            trend="up"
+            trendValue=""
+            footerText={`${pendingCount} pending promotion${pendingCount === 1 ? "" : "s"}`}
+            description={`${formatUsd(spendData?.pendingHoldTotal ?? 0)} on hold awaiting review`}
+        />
+    );
+
+    if (!showAdStats) {
+        return (
+            <div
+                className="grid grid-cols-1 gap-4 px-4 *:data-[slot=card]:shadow-sm lg:px-6 @xl/main:grid-cols-2 @5xl/main:grid-cols-3">
+                {promotionSpendCard}
+            </div>
+        );
+    }
+
     return (
         <div
-            className="grid grid-cols-1 gap-4 px-4 *:data-[slot=card]:shadow-sm lg:px-6 @xl/main:grid-cols-2 @5xl/main:grid-cols-4">
+            className="grid grid-cols-1 gap-4 px-4 *:data-[slot=card]:shadow-sm lg:px-6 @xl/main:grid-cols-2 @5xl/main:grid-cols-5">
             <StatCard
                 title="Total Ads"
                 value={isLoading ? "..." : totalAds.toLocaleString()}
@@ -61,6 +92,8 @@ export function SectionCards({statusCounts, isLoading}: SectionCardsProps) {
                 total={totalAds || 0}
                 description={`${completedCount} ads have completed`}
             />
+
+            {promotionSpendCard}
         </div>
     );
 }

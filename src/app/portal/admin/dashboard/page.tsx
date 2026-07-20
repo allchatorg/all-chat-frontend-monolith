@@ -4,6 +4,7 @@ import {SiteHeader} from "@ads/components/site-header"
 import {AdminSectionCards} from "@ads/components/admin-section-cards"
 import {ChartAreaPurchasedAds} from "@ads/components/chart-area-purchased-ads"
 import {ChartBarRevenue} from "@ads/components/chart-bar-revenue"
+import {ChartPromotedRevenue} from "@ads/components/chart-promoted-revenue"
 import {AdsTable} from "@ads/components/ads-table"
 import {useSearchAdsQuery} from "@ads/store/services/adminAdsApi"
 import {AdStatus} from "@ads/models/ad"
@@ -31,6 +32,9 @@ export default function AdminDashboardPage() {
                         </div>
                         <div className="px-4 lg:px-6">
                             <ChartBarRevenue/>
+                        </div>
+                        <div className="px-4 lg:px-6">
+                            <ChartPromotedRevenue/>
                         </div>
                         <div className="px-4 lg:px-6">
                             <h2 className="text-lg font-semibold mb-4">Submitted Ads</h2>
