@@ -95,7 +95,7 @@ export function AdminSectionCards() {
                     trend={revenueTrend.trend}
                     trendValue={revenueTrend.trendValue}
                     footerText="Compared to yesterday"
-                    description="Total revenue from ad purchases"
+                    description="Revenue from ad purchases only"
                     compact
                 />
             )}
