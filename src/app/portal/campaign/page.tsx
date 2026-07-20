@@ -8,8 +8,7 @@ import StripePayment from "@/app/portal/campaign/components/stripe-payment";
 import {Suspense} from "react";
 import {useUser} from "@/lib/hooks/useUser";
 import {useDialog} from "@/components/providers/DialogProvider";
-import {SettingsComponent} from "@/features/auth/components/SettingsComponent";
-import {Button} from "@/components/ui/button";
+import {ClaimAccountPrompt} from "@/features/auth/components/ClaimAccountPrompt";
 import {Role} from "@/models/Role";
 
 function CampaignContent() {
@@ -31,30 +30,13 @@ function CampaignContent() {
 
     const STEPS = ['Select Type', 'Configure', 'Payment'];
 
-    // Reuse the account-settings claim form (same flow as ClaimAccountBanner).
-    const openAccountSettings = () =>
-        openChatDialog(
-            <div
-                className="w-[80vw] md:min-w-[800px] md:max-w-[800px] h-[500px] overflow-hidden">
-                <SettingsComponent defaultTab="account"/>
-            </div>
-        );
-
     // Unclaimed users may browse ad formats, but must claim their account before
     // moving on to configuration. Backend enforces this on ad creation too.
     const handleSelectNext = () => {
         if (user?.role === Role.UNCLAIMED_USER) {
             openChatDialog(
-                <div className="w-[90vw] max-w-md space-y-4 p-2">
-                    <h2 className="text-lg font-semibold text-foreground">Claim your account to continue</h2>
-                    <p className="text-sm text-muted-foreground">
-                        You&apos;re using a throwaway account. To configure and pay for a campaign you need to
-                        claim your account by adding an email and password.
-                    </p>
-                    <Button className="w-full" onClick={openAccountSettings}>
-                        Claim account
-                    </Button>
-                </div>
+                <ClaimAccountPrompt
+                    description="You're using a throwaway account. To configure and pay for a campaign you need to claim your account by adding an email and password."/>
             );
             return;
         }

@@ -11,6 +11,7 @@ import {useRoleAccess} from "@/lib/hooks/useRoleAccess";
 import {useDialog} from "@/components/providers/DialogProvider";
 import ReportForm from "@/features/chatroom/components/ReportForm";
 import PromoteMessageModal from "@/features/chatroom/components/PromoteMessageModal";
+import {ClaimAccountPrompt} from "@/features/auth/components/ClaimAccountPrompt";
 import RemovePromotedMessageDialog from "@/features/chatroom/components/RemovePromotedMessageDialog";
 import {GuestModalWrapper} from "@/components/GuestModalWrapper";
 import {canActOn, Role} from "@/models/Role";
@@ -233,7 +234,18 @@ export const MessageMenu: React.FC<MessageMenuProps> = ({
                             {canPromote && (
                                 <DropdownMenuItem
                                     className="justify-between"
-                                    onClick={() => open(<PromoteMessageModal message={message}/>, {className: 'w-[95vw] max-w-lg'})}
+                                    onClick={() => {
+                                        // Promoting requires a claimed account (backend rejects
+                                        // unclaimed with 403), so prompt the claim flow instead.
+                                        if (currentRole === Role.UNCLAIMED_USER) {
+                                            open(
+                                                <ClaimAccountPrompt
+                                                    description="You're using a throwaway account. To promote a message you need to claim your account by adding an email and password."/>
+                                            );
+                                            return;
+                                        }
+                                        open(<PromoteMessageModal message={message}/>, {className: 'w-[95vw] max-w-lg'});
+                                    }}
                                 >
                                     Promote Message
                                     <Megaphone className="h-4 w-4"/>
