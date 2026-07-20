@@ -76,14 +76,6 @@ export const promotedMessagesApi = createApi({
                 'PromotedMessages',
             ],
         }),
-        // Delete own promotion (only DENIED/CANCELED)
-        deletePromotedMessage: builder.mutation<void, number>({
-            query: (id) => ({
-                url: `/promoted-messages/${id}`,
-                method: 'DELETE',
-            }),
-            invalidatesTags: ['PromotedMessages'],
-        }),
     }),
 });
 
@@ -94,5 +86,4 @@ export const {
     useGetPromotedMessageByIdQuery,
     useCancelPromotedMessageMutation,
     useRequestCancelPromotedMessageMutation,
-    useDeletePromotedMessageMutation,
 } = promotedMessagesApi;

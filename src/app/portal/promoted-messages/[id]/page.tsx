@@ -5,12 +5,11 @@ import PromotedMessageDetails from "@ads/components/promoted-message-details";
 import {Card, CardContent} from "@ads/components/ui/card";
 import {ActionButton} from "@ads/components/ui/action-button";
 import {ConfirmationDialog} from "@ads/components/ui/confirmation-dialog";
-import {ExternalLink, Loader2, Trash2, XCircle} from "lucide-react";
+import {ExternalLink, Loader2, XCircle} from "lucide-react";
 import {PromotionReasonModal} from "@ads/components/promotion-reason-modal";
 import {useParams, useRouter} from "next/navigation";
 import {
     useCancelPromotedMessageMutation,
-    useDeletePromotedMessageMutation,
     useGetPromotedMessageByIdQuery,
     useRequestCancelPromotedMessageMutation,
 } from "@ads/store/services/promotedMessagesApi";
@@ -25,17 +24,13 @@ export default function UserPromotedMessageDetailsPage() {
     const {data, isLoading, error} = useGetPromotedMessageByIdQuery(promotionId);
     const [cancelPromotion, {isLoading: isCanceling}] = useCancelPromotedMessageMutation();
     const [requestCancel, {isLoading: isRequestingCancel}] = useRequestCancelPromotedMessageMutation();
-    const [deletePromotion, {isLoading: isDeleting}] = useDeletePromotedMessageMutation();
 
     const [isCancelDialogOpen, setIsCancelDialogOpen] = useState(false);
-    const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
 
     const isPending = data?.status === PromotedMessageStatus.PENDING;
     const isApproved = data?.status === PromotedMessageStatus.APPROVED;
     // PENDING promotions are canceled via an admin-reviewed request instead
     const canRequestCancel = isPending && !data?.cancelRequested;
-    const canDelete = data?.status === PromotedMessageStatus.DENIED
-        || data?.status === PromotedMessageStatus.CANCELED;
 
     const handleGoToMessage = () => {
         if (!data) return;
@@ -59,17 +54,6 @@ export default function UserPromotedMessageDetailsPage() {
             toast.success("Cancellation request submitted.");
         } catch {
             toast.error("Failed to submit the cancellation request. Please try again.");
-        }
-    };
-
-    const handleDelete = async () => {
-        if (!data) return;
-        try {
-            await deletePromotion(data.id).unwrap();
-            toast.success("Promotion deleted.");
-            router.push("/portal/promoted-messages");
-        } catch {
-            toast.error("Failed to delete the promotion. Please try again.");
         }
     };
 
@@ -145,16 +129,6 @@ export default function UserPromotedMessageDetailsPage() {
                                     {isCanceling ? 'Canceling...' : 'Cancel Promotion'}
                                 </ActionButton>
                             )}
-                            {canDelete && (
-                                <ActionButton
-                                    variant="negative"
-                                    onClick={() => setIsDeleteDialogOpen(true)}
-                                    disabled={isDeleting}
-                                >
-                                    <Trash2 className="mr-2 h-4 w-4"/>
-                                    {isDeleting ? 'Deleting...' : 'Delete'}
-                                </ActionButton>
-                            )}
                         </div>
 
                         <PromotedMessageDetails className="m-4 mt-0" data={data} isAdmin={false}/>
@@ -170,16 +144,6 @@ export default function UserPromotedMessageDetailsPage() {
                 description="The promotion stops immediately and the message loses its PROMOTED badge. The payment will NOT be refunded."
                 confirmText="Cancel Promotion"
                 cancelText="Keep Promotion"
-                variant="destructive"
-            />
-
-            <ConfirmationDialog
-                isOpen={isDeleteDialogOpen}
-                onClose={() => setIsDeleteDialogOpen(false)}
-                onConfirm={handleDelete}
-                title="Delete this promotion?"
-                description="This removes the promotion record from your list. This action cannot be undone."
-                confirmText="Delete"
                 variant="destructive"
             />
         </div>
