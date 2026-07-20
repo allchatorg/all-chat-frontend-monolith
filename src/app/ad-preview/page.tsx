@@ -3,8 +3,24 @@
 import React from "react";
 import {useSearchParams} from "next/navigation";
 import {PreviewChatSection} from "@/features/chatroom/components/PreviewChatSection";
+import {
+    buildAttachmentType,
+    createConversation,
+    DEFAULT_CHAT_ROOM_ID,
+    DEFAULT_CHAT_ROOM_NAME,
+    DEFAULT_COUNTRY_CODE,
+    DEFAULT_MESSAGE_ID,
+    DEFAULT_SENDER_ID,
+    DEFAULT_SENDER_USERNAME,
+    deriveAttachmentName,
+    inferAttachmentTypeFromMime,
+    inferMimeTypeFromUrl,
+    MIME_BY_EXTENSION,
+    PREVIEW_CURRENT_USER_ID,
+    PREVIEW_CURRENT_USERNAME,
+    previewTotalMessages,
+} from "@/features/chatroom/utils/adPreview";
 import {Attachment} from "@/models/Attachment";
-import {AttachmentType} from "@/models/AttachmentType";
 import {AttachmentTypeEnum} from "@/models/AttachmentTypeEnum";
 import {Message} from "@/models/message";
 import {MimeType} from "@/models/MimeType";
@@ -23,37 +39,9 @@ interface PreviewBuildResult {
 
 type JsonRecord = Record<string, unknown>;
 
-const DEFAULT_MESSAGE_ID = 9001;
-const DEFAULT_CHAT_ROOM_ID = 77;
-const DEFAULT_CHAT_ROOM_NAME = "launch-lounge";
-const DEFAULT_SENDER_USERNAME = "Pepsi";
-const DEFAULT_SENDER_ID = 7001;
 const DEFAULT_COLOR = "#005CB9";
-const DEFAULT_COUNTRY_CODE = "US";
 const DEFAULT_CONTENT = "Cool down with a crisp Pepsi and see how your sponsored message lands right inside the conversation.";
 const DEFAULT_ATTACHMENT_URL = "https://upload.wikimedia.org/wikipedia/commons/thumb/6/68/Pepsi_2023.svg/1280px-Pepsi_2023.svg.png";
-const PREVIEW_CURRENT_USER_ID = 4242;
-const PREVIEW_CURRENT_USERNAME = "Preview User";
-
-const IMAGE_MIME_TYPES: MimeType[] = [
-    MimeType.PNG,
-    MimeType.JPEG,
-    MimeType.JPG,
-    MimeType.GIF,
-    MimeType.BMP,
-    MimeType.SVG,
-    MimeType.WEBP,
-];
-
-const VIDEO_MIME_TYPES: MimeType[] = [
-    MimeType.MP4,
-    MimeType.AVI,
-    MimeType.MOV,
-    MimeType.WEBM,
-    MimeType.MPEG,
-];
-
-const AUDIO_MIME_TYPES: MimeType[] = [MimeType.MP3, MimeType.OGG];
 
 const FLAT_PREVIEW_KEYS = [
     "id",
@@ -83,25 +71,6 @@ const FLAT_PREVIEW_KEYS = [
     "deleted",
     "bannedUser",
 ];
-
-const MIME_BY_EXTENSION: Record<string, MimeType> = {
-    png: MimeType.PNG,
-    jpeg: MimeType.JPEG,
-    jpg: MimeType.JPG,
-    gif: MimeType.GIF,
-    bmp: MimeType.BMP,
-    svg: MimeType.SVG,
-    webp: MimeType.WEBP,
-    mp4: MimeType.MP4,
-    avi: MimeType.AVI,
-    mov: MimeType.MOV,
-    webm: MimeType.WEBM,
-    mpeg: MimeType.MPEG,
-    mpg: MimeType.MPEG,
-    ogg: MimeType.OGG,
-    mp3: MimeType.MP3,
-    swf: MimeType.SWF,
-};
 
 function isJsonRecord(value: unknown): value is JsonRecord {
     return typeof value === "object" && value !== null && !Array.isArray(value);
@@ -250,16 +219,6 @@ function isAbsoluteUrl(value: string): boolean {
     }
 }
 
-function inferMimeTypeFromUrl(url: string): MimeType | undefined {
-    try {
-        const pathname = new URL(url).pathname;
-        const extension = pathname.split(".").pop()?.toLowerCase();
-        return extension ? MIME_BY_EXTENSION[extension] : undefined;
-    } catch {
-        return undefined;
-    }
-}
-
 function normalizeMimeType(value: unknown, url?: string): MimeType {
     if (typeof value === "string") {
         const normalized = value.trim();
@@ -283,26 +242,6 @@ function normalizeMimeType(value: unknown, url?: string): MimeType {
     return (url && inferMimeTypeFromUrl(url)) || MimeType.PNG;
 }
 
-function inferAttachmentTypeFromMime(mime: MimeType): AttachmentTypeEnum {
-    if (IMAGE_MIME_TYPES.includes(mime)) {
-        return AttachmentTypeEnum.IMAGE;
-    }
-
-    if (VIDEO_MIME_TYPES.includes(mime)) {
-        return AttachmentTypeEnum.VIDEO;
-    }
-
-    if (AUDIO_MIME_TYPES.includes(mime)) {
-        return AttachmentTypeEnum.AUDIO;
-    }
-
-    if (mime === MimeType.SWF) {
-        return AttachmentTypeEnum.FLASH;
-    }
-
-    return AttachmentTypeEnum.UNKNOWN;
-}
-
 function normalizeAttachmentType(value: unknown, mime: MimeType): AttachmentTypeEnum {
     if (typeof value === "string") {
         const normalized = value.trim().toUpperCase() as keyof typeof AttachmentTypeEnum;
@@ -322,23 +261,6 @@ function normalizeAttachmentType(value: unknown, mime: MimeType): AttachmentType
     }
 
     return inferAttachmentTypeFromMime(mime);
-}
-
-function buildAttachmentType(fileType: AttachmentTypeEnum): AttachmentType {
-    const acceptedMimeTypes =
-        fileType === AttachmentTypeEnum.IMAGE ? IMAGE_MIME_TYPES :
-            fileType === AttachmentTypeEnum.VIDEO ? VIDEO_MIME_TYPES :
-                fileType === AttachmentTypeEnum.AUDIO ? AUDIO_MIME_TYPES :
-                    fileType === AttachmentTypeEnum.FLASH ? [MimeType.SWF] :
-                        [];
-
-    return {
-        id: fileType.length,
-        fileType,
-        acceptedMimeTypes,
-        maxFileSizeBytes: 25 * 1024 * 1024,
-        availableTags: [],
-    };
 }
 
 function normalizeTags(value: unknown): Tag[] {
@@ -387,22 +309,6 @@ function normalizeTags(value: unknown): Tag[] {
             restrictedToAdults: tag.restrictedToAdults === true,
         }];
     });
-}
-
-function deriveAttachmentName(url: string, mime: MimeType, index: number): string {
-    try {
-        const pathname = new URL(url).pathname;
-        const filename = pathname.split("/").pop();
-        if (filename) {
-            return decodeURIComponent(filename);
-        }
-    } catch {
-    }
-
-    const extension = Object.entries(MIME_BY_EXTENSION)
-        .find(([, value]) => value === mime)?.[0] || "file";
-
-    return `preview-asset-${index + 1}.${extension}`;
 }
 
 function normalizeAttachment(raw: unknown, index: number, messageId: number): Attachment | null {
@@ -622,82 +528,6 @@ function buildPreviewData(params: SearchParamsLike): PreviewBuildResult {
     };
 }
 
-function createPreviewMessage({
-                                  id,
-                                  content,
-                                  createdAt,
-                                  senderId,
-                                  senderUsername,
-                                  senderRole,
-                                  senderCountryCode,
-                                  color,
-                                  chatRoomId,
-                                  chatRoomName,
-                                  editedAt,
-                              }: {
-    id: number;
-    content: string;
-    createdAt: Date;
-    senderId: number;
-    senderUsername: string;
-    senderRole: Role;
-    senderCountryCode: string;
-    color: string;
-    chatRoomId: number;
-    chatRoomName: string;
-    editedAt?: Date;
-}): Message {
-    return {
-        id,
-        content,
-        createdAt,
-        senderId,
-        senderUsername,
-        senderRole,
-        senderCountryCode,
-        chatRoomId,
-        chatRoomName,
-        bannedUser: false,
-        editedAt,
-        color,
-        deleted: false,
-        attachments: [],
-        reactions: [],
-    };
-}
-
-function createConversation(advertMessage: Message): Message[] {
-    const adTimestamp = advertMessage.createdAt.getTime();
-
-    return [
-        createPreviewMessage({
-            id: advertMessage.id - 2,
-            senderId: 184,
-            senderUsername: "Nina",
-            senderRole: Role.USER,
-            senderCountryCode: "NL",
-            chatRoomId: advertMessage.chatRoomId,
-            chatRoomName: advertMessage.chatRoomName,
-            createdAt: new Date(adTimestamp - 6 * 60 * 1000),
-            content: "heyy have you heard that you can also advertise on allchat?",
-            color: "#F8FAFC",
-        }),
-        createPreviewMessage({
-            id: advertMessage.id - 1,
-            senderId: 185,
-            senderUsername: "Rico",
-            senderRole: Role.USER,
-            senderCountryCode: "ES",
-            chatRoomId: advertMessage.chatRoomId,
-            chatRoomName: advertMessage.chatRoomName,
-            createdAt: new Date(adTimestamp - 3 * 60 * 1000),
-            content: "yeah! i saw some ads earlier today, looks super cool!",
-            color: "#EEF2FF",
-        }),
-        advertMessage,
-    ];
-}
-
 export default function AdPreviewPage() {
     const searchParams = useSearchParams();
 
@@ -716,7 +546,7 @@ export default function AdPreviewPage() {
 
     const preview = buildPreviewData(searchParams);
     const previewMessages = createConversation(preview.advertMessage);
-    const totalMessages = 125000 + preview.advertMessage.chatRoomId;
+    const totalMessages = previewTotalMessages(preview.advertMessage.chatRoomId);
 
     return (
         <main className="h-screen w-full bg-primary-blue-bg">

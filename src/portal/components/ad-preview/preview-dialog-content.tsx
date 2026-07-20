@@ -1,11 +1,23 @@
 "use client";
 
+import React from "react";
+import {PreviewChatSection} from "@/features/chatroom/components/PreviewChatSection";
+import {
+    PREVIEW_CURRENT_USER_ID,
+    PREVIEW_CURRENT_USERNAME,
+    previewTotalMessages,
+} from "@/features/chatroom/utils/adPreview";
+import {buildPreviewMessages, PreviewAdData} from "@ads/components/ad-preview/preview-utils";
+
 interface PreviewDialogContentProps {
-    previewUrl: string;
+    ad: PreviewAdData;
     title: string;
 }
 
-export function PreviewDialogContent({previewUrl, title}: PreviewDialogContentProps) {
+export function PreviewDialogContent({ad, title}: PreviewDialogContentProps) {
+    const messages = React.useMemo(() => buildPreviewMessages(ad), [ad]);
+    const advertMessage = messages[messages.length - 1];
+
     return (
         <div className="flex flex-col bg-card h-full">
             <div className="border-b border-border px-5 py-2 sm:px-6">
@@ -18,12 +30,15 @@ export function PreviewDialogContent({previewUrl, title}: PreviewDialogContentPr
                 </p>
             </div>
 
-            <iframe
-                src={previewUrl}
-                title={`${title} iframe preview`}
-                loading="lazy"
-                className="h-full min-h-[520px] w-full bg-background"
-            />
+            <div className="min-h-0 flex-1 bg-background">
+                <PreviewChatSection
+                    chatRoomName={advertMessage.chatRoomName}
+                    totalMessages={previewTotalMessages(advertMessage.chatRoomId)}
+                    messages={messages}
+                    currentUserId={PREVIEW_CURRENT_USER_ID}
+                    currentUsername={PREVIEW_CURRENT_USERNAME}
+                />
+            </div>
         </div>
     );
 }
