@@ -290,7 +290,8 @@ export default function AppealDetailPage() {
             <AuditLogCardList
                 logs={auditLogs}
                 title={`Moderation history for ${summary.username}`}
-                maxHeight="600px"
+                height="clamp(600px, 75vh, 800px)"
+                maxHeight="clamp(600px, 75vh, 800px)"
             />
         </div>
     );

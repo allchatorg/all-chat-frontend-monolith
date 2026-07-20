@@ -22,7 +22,7 @@ const AuditLogCardList: React.FC<AuditLogCardListProps> = ({logs, title, height 
             )}
 
             {logs.length > 0 ? (
-                <ScrollArea className="flex-1">
+                <ScrollArea className="min-h-0 flex-1">
                     <div className="flex flex-col gap-4 p-4">
                         {logs.map((log) => (
                             <AuditLogCard key={log.id} log={log}/>
