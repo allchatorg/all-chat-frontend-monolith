@@ -79,9 +79,16 @@ export const MessageMenu: React.FC<MessageMenuProps> = ({
     const [internalEmojiPopoverOpen, setInternalEmojiPopoverOpen] = useState(false);
     const [isRemovePromotedDialogOpen, setIsRemovePromotedDialogOpen] = useState(false);
     const {resolvedTheme} = useTheme();
+    // An active promotion locks the message against edits: the promoted content
+    // must stay what was reviewed/paid for. Removal of a PENDING one is handled
+    // in handleRemoveMessage below.
+    const activePromotionStatus = message.promotion?.status === "PENDING"
+        || message.promotion?.status === "APPROVED"
+        ? message.promotion.status
+        : null;
     const canViewReactions = Boolean(message.reactions && message.reactions.length > 0 && !deleted);
     const canReply = Boolean(onReply && !deleted && !archivedRoom);
-    const canEditMessage = Boolean(isPrincipal(userId) && !deleted && !archivedRoom);
+    const canEditMessage = Boolean(isPrincipal(userId) && !deleted && !archivedRoom && !activePromotionStatus);
     const canRemoveMessage = Boolean((isPrincipal(userId) || canActOn(currentRole, role)) && !deleted && !archivedRoom);
     const canOpenModView = Boolean(allowModView && isStaffMember() && !isPrincipal(userId));
     const canReport = Boolean(!isPrincipal(userId) && allowReport);
@@ -99,12 +106,11 @@ export const MessageMenu: React.FC<MessageMenuProps> = ({
         onEmojiPopoverOpenChange?.(open);
     };
 
-    // Removing a message with an active promotion cascades into canceling the
-    // promotion on the backend, so confirm before removing.
-    const activePromotionStatus = message.promotion?.status === "PENDING"
-        || message.promotion?.status === "APPROVED"
-        ? message.promotion.status
-        : null;
+    // Removing a message with an active promotion either cascades into canceling
+    // the promotion on the backend (staff, or owner of an APPROVED one — confirm
+    // first), or is blocked for the owner while the promotion is PENDING: they
+    // must request a cancellation in the ads portal before removing the message.
+    const ownerPendingPromotion = activePromotionStatus === "PENDING" && isPrincipal(userId);
 
     const handleRemoveMessage = () => {
         if (activePromotionStatus) {
@@ -119,6 +125,8 @@ export const MessageMenu: React.FC<MessageMenuProps> = ({
             open={isRemovePromotedDialogOpen}
             onOpenChange={setIsRemovePromotedDialogOpen}
             promotionStatus={activePromotionStatus}
+            ownerPendingBlock={ownerPendingPromotion}
+            promotionId={message.promotion?.id}
             onConfirm={() => {
                 setIsRemovePromotedDialogOpen(false);
                 removeMessage?.(messageId);

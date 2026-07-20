@@ -274,7 +274,7 @@ const ChatMessage: React.FC<ChatMessageProps> = ({
                             showSenderName={false}
                             handleMessageClick={() => {
                             }}
-                            onRemoveAttachment={interactionsDisabled ? undefined : handleRemoveAttachment}
+                            onRemoveAttachment={interactionsDisabled || message.promotion ? undefined : handleRemoveAttachment}
                             showEditButton={!interactionsDisabled}
                             interactionsDisabled={interactionsDisabled}
                         />
@@ -342,7 +342,6 @@ const ChatMessage: React.FC<ChatMessageProps> = ({
                         showSenderName={false}
                         handleMessageClick={() => {
                         }}
-                        onRemoveAttachment={interactionsDisabled ? undefined : handleRemoveAttachment}
                         showEditButton={!interactionsDisabled}
                         interactionsDisabled={interactionsDisabled}
                     />
