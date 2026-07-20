@@ -58,7 +58,7 @@ export const ClickableStepper = ({
                             {/* Optional: Step Label below the circle */}
                             <div className="absolute top-12 min-w-[80px] text-center">
                                 <span className={cn(
-                                    "text-xs font-medium transition-colors duration-300",
+                                    "whitespace-nowrap text-xs font-medium transition-colors duration-300",
                                     isActive ? "text-slate-900 dark:text-slate-50" : "text-slate-500"
                                 )}>
                                     {step}

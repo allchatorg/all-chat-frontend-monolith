@@ -16,7 +16,7 @@ export const description = "Promoted messages revenue chart"
 // Orange matches the promoted series in chart-bar-revenue.tsx
 const chartConfig = {
     promotedRevenue: {
-        label: "Promoted Revenue",
+        label: "Message Promotions",
         color: "orange",
     },
 }
@@ -69,7 +69,7 @@ export function ChartPromotedRevenue() {
         return (
             <Card className="@container/card">
                 <CardHeader>
-                    <CardTitle>Promoted Messages Revenue</CardTitle>
+                    <CardTitle>Message Promotions Revenue</CardTitle>
                     <CardDescription>Loading chart data...</CardDescription>
                 </CardHeader>
                 <CardContent className="px-2 pt-4 sm:px-6 sm:pt-6">
@@ -83,7 +83,7 @@ export function ChartPromotedRevenue() {
         return (
             <Card className="@container/card">
                 <CardHeader>
-                    <CardTitle>Promoted Messages Revenue</CardTitle>
+                    <CardTitle>Message Promotions Revenue</CardTitle>
                     <CardDescription className="text-destructive">Error loading chart data</CardDescription>
                 </CardHeader>
                 <CardContent className="px-2 pt-4 sm:px-6 sm:pt-6">
@@ -98,7 +98,7 @@ export function ChartPromotedRevenue() {
     return (
         <Card className="@container/card">
             <CardHeader>
-                <CardTitle>Promoted Messages Revenue</CardTitle>
+                <CardTitle>Message Promotions Revenue</CardTitle>
                 <CardDescription>
                     <span className="hidden @[540px]/card:block">
                         {getDateRangeDescription(daysToSubtract)} — Total: {formatUsd(data?.totalRevenue ?? 0)}

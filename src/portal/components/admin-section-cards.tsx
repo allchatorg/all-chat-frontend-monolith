@@ -84,13 +84,13 @@ export function AdminSectionCards() {
 
     return (
         <div
-            className="grid grid-cols-1 gap-4 px-4 *:data-[slot=card]:shadow-sm lg:px-6 @xl/main:grid-cols-2 @5xl/main:grid-cols-4">
+            className="grid grid-cols-2 gap-3 px-4 *:data-[slot=card]:shadow-sm lg:px-6 @xl/main:gap-4 @5xl/main:grid-cols-4">
 
             {isRevenueLoading ? (
-                <Skeleton className="h-28 w-full rounded-xl"/>
+                <Skeleton className="h-24 w-full rounded-xl"/>
             ) : (
                 <StatCard
-                    title="Today's Revenue"
+                    title="Ad Revenue Today"
                     value={formatUsd(revenueData?.todayRevenue ?? 0)}
                     trend={revenueTrend.trend}
                     trendValue={revenueTrend.trendValue}
@@ -102,23 +102,23 @@ export function AdminSectionCards() {
 
             {isPromotedLoading ? (
                 <>
-                    <Skeleton className="h-28 w-full rounded-xl"/>
-                    <Skeleton className="h-28 w-full rounded-xl"/>
-                    <Skeleton className="h-28 w-full rounded-xl"/>
+                    <Skeleton className="h-24 w-full rounded-xl"/>
+                    <Skeleton className="h-24 w-full rounded-xl"/>
+                    <Skeleton className="h-24 w-full rounded-xl"/>
                 </>
             ) : (
                 <>
                     <StatCard
-                        title="Promoted Revenue Today"
+                        title="Message Promotions Revenue Today"
                         value={formatUsd(promotedData?.todayRevenue ?? 0)}
                         trend={promotedTrend.trend}
                         trendValue={promotedTrend.trendValue}
                         footerText="Compared to yesterday"
-                        description="Captured from promoted messages"
+                        description="Captured from message promotions"
                         compact
                     />
                     <StatCard
-                        title="Pending Promotions"
+                        title="Pending Message Promotions"
                         value={formatUsd(promotedData?.pendingHoldTotal ?? 0)}
                         trend="up"
                         trendValue=""
@@ -127,7 +127,7 @@ export function AdminSectionCards() {
                         compact
                     />
                     <StatCard
-                        title="Total Promoted Revenue"
+                        title="Total Message Promotions Revenue"
                         value={formatUsd(promotedData?.totalRevenue ?? 0)}
                         trend="up"
                         trendValue=""
@@ -141,8 +141,8 @@ export function AdminSectionCards() {
             {isStatusLoading ? (
                 // Loading skeleton for status cards
                 <>
-                    <Skeleton className="h-28 w-full rounded-xl"/>
-                    <Skeleton className="h-28 w-full rounded-xl"/>
+                    <Skeleton className="h-24 w-full rounded-xl"/>
+                    <Skeleton className="h-24 w-full rounded-xl"/>
                 </>
             ) : isStatusError ? (
                 // Error state

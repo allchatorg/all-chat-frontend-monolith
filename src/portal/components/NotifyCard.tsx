@@ -20,27 +20,36 @@ export function NotifyCard({title, value, label, description, variant = "default
     };
 
     return (
-        <Card className={cn("@container/card", compact && "gap-3 py-4")}>
-            <CardHeader>
-                <CardDescription>{title}</CardDescription>
+        <Card className={cn("@container/card", compact && "gap-2 py-3")}>
+            <CardHeader
+                className={cn(compact && "@max-[250px]/card:flex @max-[250px]/card:flex-row @max-[250px]/card:items-center @max-[250px]/card:justify-between @max-[250px]/card:gap-x-2")}>
+                <CardDescription className={cn(compact && "@max-[250px]/card:flex-1")}>{title}</CardDescription>
                 <CardTitle
                     className={cn(
                         "font-bold tabular-nums",
-                        compact ? "text-3xl @[250px]/card:text-4xl" : "text-5xl @[250px]/card:text-6xl",
+                        compact
+                            ? "text-xl @[250px]/card:text-4xl @max-[250px]/card:shrink-0"
+                            : "text-5xl @[250px]/card:text-6xl",
                         variantColors[variant]
                     )}>
                     {value}
                 </CardTitle>
                 {label && (
-                    <CardAction>
+                    <CardAction className={cn(compact && "@max-[250px]/card:hidden")}>
                         <Badge variant="outline">
                             {label}
                         </Badge>
                     </CardAction>
                 )}
             </CardHeader>
-            <CardFooter className={cn("flex-col items-start text-sm", compact ? "gap-0.5" : "gap-1.5")}>
-                <div className="text-muted-foreground">{description}</div>
+            <CardFooter
+                className={cn(
+                    "flex-col items-start text-sm",
+                    compact ? "gap-0.5 @max-[250px]/card:hidden" : "gap-1.5"
+                )}>
+                <div className={cn("text-muted-foreground", compact && "hidden @[250px]/card:block")}>
+                    {description}
+                </div>
             </CardFooter>
         </Card>
     );

@@ -21,6 +21,7 @@ import AdvertiserTerms from "@ads/components/AdvertiserPolicy"
 import {AdFormatType} from "@ads/data/adFormats";
 import {AdPreviewButton} from "@ads/components/ad-preview/ad-preview-button";
 import {PreviewAdData} from "@ads/components/ad-preview/preview-utils";
+import {useThemedLogo} from "@/lib/hooks/useThemedLogo";
 
 // Manually uploaded demo assets on the public R2 bucket — keep these URLs
 // stable. Ad media uploads moved to Wasabi, but these are served directly
@@ -38,6 +39,7 @@ type HomeAdFormat = {
 
 export default function Home() {
     const {open} = useDialog();
+    const logoSrc = useThemedLogo("/allchat_ads_portal_light_logo.png", "/allchat_ads_portal_dark_logo.png");
     const adFormats: HomeAdFormat[] = [
         {
             id: 1,
@@ -93,7 +95,7 @@ export default function Home() {
                 <div className="flex flex-col items-center">
                     <div className="mb-8 sm:mb-12">
                         <Image
-                            src="/allchat-logo.png"
+                            src={logoSrc}
                             alt="AllChat Ads Portal"
                             width={640}
                             height={220}

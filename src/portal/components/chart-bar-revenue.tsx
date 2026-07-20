@@ -4,7 +4,13 @@ import * as React from "react"
 import {Bar, BarChart, CartesianGrid, XAxis, YAxis} from "recharts"
 
 import {Card, CardContent, CardDescription, CardHeader, CardTitle,} from "@ads/components/ui/card"
-import {ChartContainer, ChartTooltip, ChartTooltipContent,} from "@ads/components/ui/chart"
+import {
+    ChartContainer,
+    ChartLegend,
+    ChartLegendContent,
+    ChartTooltip,
+    ChartTooltipContent,
+} from "@ads/components/ui/chart"
 import {useGetMonthlyRevenueQuery, useGetWeeklyRevenueQuery} from "@ads/store/services/adminAdsApi"
 import {Skeleton} from "@ads/components/ui/skeleton"
 
@@ -14,7 +20,7 @@ const monthlyChartConfig = {
         color: "blue",
     },
     promotedRevenue: {
-        label: "Promoted Messages",
+        label: "Message Promotions",
         color: "orange",
     },
 }
@@ -25,7 +31,7 @@ const weeklyChartConfig = {
         color: "blue",
     },
     promotedRevenue: {
-        label: "Promoted Messages",
+        label: "Message Promotions",
         color: "orange",
     },
 }
@@ -59,6 +65,7 @@ export function ChartBarRevenue() {
                         >
                             <BarChart data={monthlyData?.data || []}>
                                 <CartesianGrid vertical={false}/>
+                                <ChartLegend content={<ChartLegendContent/>}/>
                                 <XAxis
                                     dataKey="month"
                                     tickLine={false}
@@ -118,6 +125,7 @@ export function ChartBarRevenue() {
                         >
                             <BarChart data={weeklyData?.data || []}>
                                 <CartesianGrid vertical={false}/>
+                                <ChartLegend content={<ChartLegendContent/>}/>
                                 <XAxis
                                     dataKey="day"
                                     tickLine={false}

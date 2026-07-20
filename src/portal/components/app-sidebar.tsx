@@ -35,6 +35,7 @@ import TermsOfService from "@ads/components/TermsOfService"
 import PrivacyPolicy from "@ads/components/PrivacyPolicy"
 import AdvertiserTerms from "@ads/components/AdvertiserPolicy"
 import {NavLegal} from "@ads/components/nav-legal"
+import {useThemedLogo} from "@/lib/hooks/useThemedLogo"
 
 const regularUserNavMain = [
     {
@@ -124,6 +125,7 @@ export function AppSidebar({...props}: React.ComponentProps<typeof Sidebar>) {
     const router = useRouter()
     const {open} = useDialog()
     const {open: openChatDialog} = useChatDialog()
+    const logoSrc = useThemedLogo("/allchat_ads_portal_light_logo.png", "/allchat_ads_portal_dark_logo.png")
 
     // Reuse the chat app's Settings modal (superset of the old portal account page).
     // Opened via the chat DialogProvider so its nested flows (e.g. account deletion,
@@ -197,9 +199,9 @@ export function AppSidebar({...props}: React.ComponentProps<typeof Sidebar>) {
                     title="Back to chat"
                 >
                     <img
-                        src="/allchat-logo.png"
+                        src={logoSrc}
                         alt="AllChat Logo"
-                        className="w-32 h-auto mb-4"
+                        className="w-44 h-auto mb-4"
                     />
                 </div>
             </SidebarHeader>

@@ -7,12 +7,13 @@ import {useTheme} from "next-themes";
  * resolves on the client so server and first client render agree (no hydration
  * mismatch / flicker).
  */
-export function useThemedLogo(): string {
+export function useThemedLogo(
+    lightSrc = "/allchat_light_logo.png",
+    darkSrc = "/allchat_dark_logo.png",
+): string {
     const {resolvedTheme} = useTheme();
     const [mounted, setMounted] = useState(false);
     useEffect(() => setMounted(true), []);
 
-    return mounted && resolvedTheme === "light"
-        ? "/allchat_light_logo.png"
-        : "/allchat_dark_logo.png";
+    return mounted && resolvedTheme === "light" ? lightSrc : darkSrc;
 }
