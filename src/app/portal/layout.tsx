@@ -11,6 +11,7 @@ import {useRoleAccess} from "@/lib/hooks/useRoleAccess";
 import {Role} from "@/models/Role";
 import {Spinner} from "@/components/Spinner";
 import {ClaimAccountGate} from "@/app/portal/components/ClaimAccountGate";
+import {useGetMyPromotedMessagesQuery} from "@ads/store/services/promotedMessagesApi";
 
 /**
  * Where the current visitor belongs, or null to stay on `pathname`.
@@ -18,24 +19,26 @@ import {ClaimAccountGate} from "@/app/portal/components/ClaimAccountGate";
  * Redirect matrix:
  *   /portal/admin/*: null (admin pages keep their own guards).
  *   /portal (landing):
- *     guest / not-logged-in -> null (public landing)
- *     staff                 -> super admin ? /portal/admin/dashboard : /portal/admin/ads
- *     user with >=1 ad      -> /portal/dashboard
- *     user with no ads      -> /portal/campaign
+ *     guest / not-logged-in       -> null (public landing)
+ *     staff                       -> super admin ? /portal/admin/dashboard : /portal/admin/ads
+ *     user with >=1 ad/promotion  -> /portal/dashboard
+ *     user with neither           -> /portal/campaign
  *   inner routes:
  *     guest / not-logged-in                            -> register (returning here after auth)
  *     unclaimed (throwaway) account                    -> null (layout renders ClaimAccountGate)
  *     non-staff, no ads, not campaign/payment-methods  -> /portal/campaign
+ *     (dashboard is additionally exempt for promotion owners)
  *     otherwise                                        -> null
  */
 function resolvePortalRedirect(
     pathname: string,
-    {isGuestOrAnon, isUnclaimed, isStaff, isSuperAdmin, hasAd, returnTo}: {
+    {isGuestOrAnon, isUnclaimed, isStaff, isSuperAdmin, hasAd, hasPromotion, returnTo}: {
         isGuestOrAnon: boolean;
         isUnclaimed: boolean;
         isStaff: boolean;
         isSuperAdmin: boolean;
         hasAd: boolean;
+        hasPromotion: boolean;
         returnTo: string;
     }
 ): string | null {
@@ -43,7 +46,7 @@ function resolvePortalRedirect(
     if (pathname === "/portal") {
         if (isGuestOrAnon) return null;
         if (isStaff) return isSuperAdmin ? "/portal/admin/dashboard" : "/portal/admin/ads";
-        return hasAd ? "/portal/dashboard" : "/portal/campaign";
+        return hasAd || hasPromotion ? "/portal/dashboard" : "/portal/campaign";
     }
     // Send visitors through registration and back to where they were headed
     // (e.g. /portal/campaign?formatId=X from a landing-page CTA or deep link).
@@ -53,10 +56,15 @@ function resolvePortalRedirect(
     if (isUnclaimed) return null;
     // Payment methods is exempt from the no-ads funnel: cards can be managed
     // before the first campaign is purchased (and right after claiming).
+    // Promoted messages are exempt too: message promotions are bought from the
+    // chat app, so a user can own promotions without ever purchasing an ad —
+    // and owning one also unlocks the dashboard (it shows promotion spend).
     if (
         !isStaff && !hasAd &&
+        !(hasPromotion && pathname === "/portal/dashboard") &&
         pathname !== "/portal/campaign" &&
-        pathname !== "/portal/payment-methods"
+        pathname !== "/portal/payment-methods" &&
+        !pathname.startsWith("/portal/promoted-messages")
     ) return "/portal/campaign";
     return null;
 }
@@ -79,14 +87,29 @@ export default function PortalLayout({children}: { children: React.ReactNode }) 
     const searchParams = useSearchParams();
 
     const isLanding = pathname === "/portal";
+    const isGuestOrAnon = !user || user.role === Role.GUEST;
     const isUnclaimed = user?.role === Role.UNCLAIMED_USER;
+    const isStaff = isStaffMember();
+    const hasAd = (user?.purchasedAdsCount ?? 0) > 0;
+
+    // Owning a promoted message also unlocks the dashboard. Only fetched when
+    // the answer can change the redirect: a claimed, non-staff user with no ads
+    // (promotions require a claimed account, so everyone else is settled).
+    const needsPromotionCheck = !isInitializing && !isGuestOrAnon && !isUnclaimed && !isStaff && !hasAd;
+    const {data: promotionsPage, isLoading: isPromotionsLoading} = useGetMyPromotedMessagesQuery(
+        {page: 0, size: 1},
+        {skip: !needsPromotionCheck}
+    );
+    const isResolvingPromotions = needsPromotionCheck && isPromotionsLoading;
+
     const search = searchParams.toString();
     const redirectTarget = resolvePortalRedirect(pathname, {
-        isGuestOrAnon: !user || user.role === Role.GUEST,
+        isGuestOrAnon,
         isUnclaimed,
-        isStaff: isStaffMember(),
+        isStaff,
         isSuperAdmin: currentRole === Role.SUPER_ADMIN,
-        hasAd: (user?.purchasedAdsCount ?? 0) > 0,
+        hasAd,
+        hasPromotion: (promotionsPage?.totalElements ?? 0) > 0,
         returnTo: search ? `${pathname}?${search}` : pathname,
     });
 
@@ -100,11 +123,11 @@ export default function PortalLayout({children}: { children: React.ReactNode }) 
         !pathname.startsWith("/portal/admin");
 
     useEffect(() => {
-        if (isInitializing || !redirectTarget) return;
+        if (isInitializing || isResolvingPromotions || !redirectTarget) return;
         router.replace(redirectTarget);
-    }, [isInitializing, redirectTarget, router]);
+    }, [isInitializing, isResolvingPromotions, redirectTarget, router]);
 
-    if (isInitializing) {
+    if (isInitializing || isResolvingPromotions) {
         return (
             <div className="flex min-h-screen w-full items-center justify-center">
                 <Spinner/>

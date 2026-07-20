@@ -11,6 +11,7 @@ import {
     IconMessageCircle,
     IconSettings,
     IconShield,
+    IconSpeakerphone,
     IconUsers
 } from "@tabler/icons-react"
 import {NavMain} from "@ads/components/nav-main"
@@ -29,6 +30,7 @@ import {useRouter} from "next/navigation"
 import {useDialog} from "@ads/components/providers/DialogProvider"
 import {useDialog as useChatDialog} from "@/components/providers/DialogProvider"
 import {SettingsComponent} from "@/features/auth/components/SettingsComponent"
+import {useGetMyPromotedMessagesQuery} from "@ads/store/services/promotedMessagesApi"
 import TermsOfService from "@ads/components/TermsOfService"
 import PrivacyPolicy from "@ads/components/PrivacyPolicy"
 import AdvertiserTerms from "@ads/components/AdvertiserPolicy"
@@ -49,6 +51,11 @@ const regularUserNavMain = [
         title: "Start a Campaign",
         url: "/portal/campaign",
         icon: IconChartBar,
+    },
+    {
+        title: "My Promoted Messages",
+        url: "/portal/promoted-messages",
+        icon: IconSpeakerphone,
     },
 ]
 
@@ -75,6 +82,11 @@ const adminNavMain = [
         icon: IconListDetails,
     },
     {
+        title: "Promoted Messages",
+        url: "/portal/admin/promoted-messages",
+        icon: IconSpeakerphone,
+    },
+    {
         title: "Users",
         url: "/portal/admin/users",
         icon: IconUsers,
@@ -87,15 +99,26 @@ export function AppSidebar({...props}: React.ComponentProps<typeof Sidebar>) {
     const {user, isSuperAdmin} = useUser()
     const isAdmin = user.role === UserRole.ADMIN
 
-    // Non-staff users who have never created an ad only get "Start a Campaign";
-    // Dashboard + My Campaigns are hidden until they have at least one ad.
+    // Non-staff users who have never created an ad only get "Start a Campaign"
+    // and "My Promoted Messages" (promotions are bought from the chat app, so
+    // they exist independently of ads). My Campaigns stays hidden until they
+    // have at least one ad; the Dashboard also unlocks by owning a promoted
+    // message (it shows promotion spend).
     const {user: chatUser} = useChatUser()
     const {isStaffMember} = useRoleAccess()
     const hasAd = (chatUser?.purchasedAdsCount ?? 0) > 0
-    const showFullNav = isStaffMember() || hasAd
-    const regularNav = showFullNav
-        ? regularUserNavMain
-        : regularUserNavMain.filter((item) => item.url === "/portal/campaign")
+    const isStaff = isStaffMember()
+    // Promotions require a claimed account, so only ordinary no-ad users need the lookup
+    const {data: promotionsPage} = useGetMyPromotedMessagesQuery(
+        {page: 0, size: 1},
+        {skip: isStaff || hasAd || !chatUser || chatUser.role === Role.GUEST || chatUser.role === Role.UNCLAIMED_USER}
+    )
+    const hasPromotion = (promotionsPage?.totalElements ?? 0) > 0
+    const regularNav = regularUserNavMain.filter((item) => {
+        if (item.url === "/portal/dashboard") return isStaff || hasAd || hasPromotion
+        if (item.url === "/portal/ads") return isStaff || hasAd
+        return true
+    })
 
     const dispatch = useDispatch<AppDispatch>()
     const router = useRouter()
