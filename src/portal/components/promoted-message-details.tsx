@@ -5,6 +5,9 @@ import {AlertCircle, Calendar, CreditCard, DollarSign, Info, MessageSquare} from
 import * as React from "react";
 import {PromotedMessageDetail, PromotedMessageStatus, PromotionCanceledBy} from "@ads/models/promoted-message";
 import {getPromotionStatusBadgeClass} from "@ads/components/promoted-messages-table";
+import MessageItem from "@/features/chatroom/components/MessageItem";
+import {Message} from "@/models/message";
+import {Role} from "@/models/Role";
 
 interface PromotedMessageDetailsProps {
     data: PromotedMessageDetail;
@@ -64,6 +67,25 @@ export default function PromotedMessageDetails({data, className, isAdmin = false
     const isDenied = data.status === PromotedMessageStatus.DENIED;
     const isCanceled = data.status === PromotedMessageStatus.CANCELED;
 
+    // Message-shaped view of the promotion detail so the preview reuses the
+    // same MessageItem as the purchase flow's confirm step (renders attachments).
+    // senderRole/color are unused in search view, so defaults are fine.
+    const previewMessage: Message = {
+        id: data.messageId,
+        content: data.messageContent,
+        createdAt: new Date(data.messageCreatedAt),
+        senderId: data.userId ?? 0,
+        senderUsername: data.messageSenderUsername,
+        senderRole: Role.USER,
+        chatRoomId: data.chatRoomId,
+        chatRoomName: data.chatRoomName,
+        bannedUser: false,
+        color: "",
+        deleted: data.messageDeleted,
+        attachments: data.messageAttachments ?? [],
+        reactions: [],
+    };
+
     return (
         <Card className={clsx("border shadow-sm", statusConfig.bg, className)}>
             <CardHeader className="border-b">
@@ -86,25 +108,15 @@ export default function PromotedMessageDetails({data, className, isAdmin = false
                         <h3 className="text-lg font-semibold">Message Preview</h3>
                     </div>
 
-                    <div className="rounded-lg border bg-card p-4">
-                        <div className="mb-2 flex flex-wrap items-center gap-2 text-sm">
-                            <span className="font-medium">{data.messageSenderUsername}</span>
-                            <span className="rounded bg-blue-100 px-1.5 py-0.5 text-[10px] font-medium text-blue-700 dark:bg-blue-950 dark:text-blue-300">
-                                {data.chatRoomName}
-                            </span>
-                            <span className="text-xs text-muted-foreground">
-                                {formatDate(data.messageCreatedAt)}
-                            </span>
-                            {data.messageDeleted && (
-                                <span className="rounded px-1 py-0.5 text-[10px] font-medium bg-destructive text-destructive-foreground">
-                                    DELETED
-                                </span>
-                            )}
-                        </div>
-                        <p className="text-sm leading-relaxed whitespace-pre-wrap break-words">
-                            {data.messageContent}
-                        </p>
-                    </div>
+                    <MessageItem
+                        message={previewMessage}
+                        viewMode="search"
+                        handleMessageClick={() => {}}
+                        showChatRoomName={true}
+                        showSenderName={true}
+                        showEditButton={false}
+                        interactionsDisabled={true}
+                    />
                 </div>
 
                 {/* Promotion Details Section */}
@@ -132,7 +144,7 @@ export default function PromotedMessageDetails({data, className, isAdmin = false
                                 <CreditCard className="h-5 w-5 text-muted-foreground"/>
                             </div>
                             <div>
-                                <p className="text-sm font-medium text-muted-foreground">Payment Method</p>
+                                <p className="text-sm font-medium text-muted-foreground">Payment</p>
                                 <p className="text-base font-semibold capitalize">
                                     {data.cardBrand && data.cardLast4
                                         ? `${data.cardBrand} •••• ${data.cardLast4}`

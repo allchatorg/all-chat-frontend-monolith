@@ -182,7 +182,7 @@ const MessageItem: React.FC<{
 
     const PromotedBadge = () => (
         <span
-            className="rounded px-1 py-0.5 font-medium text-[10px] bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-300">
+            className="rounded px-1 py-0.5 font-medium text-[10px] bg-violet-100 text-violet-700 dark:bg-violet-900/40 dark:text-violet-300">
                 PROMOTED
             </span>
     );
@@ -196,13 +196,15 @@ const MessageItem: React.FC<{
     if (viewMode === "search") {
         return (
             <div
-                onClick={handleSearchItemClick}
+                onClick={interactionsDisabled ? undefined : handleSearchItemClick}
                 className={clsx(
-                    "glass-surface relative mb-3 cursor-pointer rounded-lg p-4 transition-colors duration-200 group min-w-0 max-w-full"
+                    "glass-surface relative mb-3 rounded-lg p-4 transition-colors duration-200 group min-w-0 max-w-full",
+                    !interactionsDisabled && "cursor-pointer"
                 )}
             >
-                <div
-                    className="absolute top-2 right-2 opacity-0 transition-opacity duration-200 group-hover:opacity-100">
+                {!interactionsDisabled && (
+                    <div
+                        className="absolute top-2 right-2 opacity-0 transition-opacity duration-200 group-hover:opacity-100">
                         <span
                             onClick={(e) => {
                                 e.stopPropagation();
@@ -212,7 +214,8 @@ const MessageItem: React.FC<{
                         >
                             Jump
                         </span>
-                </div>
+                    </div>
+                )}
 
                 <div className="flex items-start gap-3">
                     <div className="min-w-0 flex-1">
@@ -328,8 +331,8 @@ const MessageItem: React.FC<{
                             "shadow-sm rounded-lg px-3 py-2 wrap-break-word max-w-full min-w-0",
                             className,
                             message.deleted && "italic",
-                            // Subtle amber ring marks approved promoted messages for all viewers.
-                            showPromotedBadge && "ring-1 ring-amber-400/70 dark:ring-amber-500/60"
+                            // Subtle violet ring marks approved promoted messages for all viewers.
+                            showPromotedBadge && "ring-1 ring-violet-400/50 dark:ring-violet-500/40"
                         )}
                         style={{
                             backgroundColor: message.color,

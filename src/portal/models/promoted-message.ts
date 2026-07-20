@@ -1,3 +1,5 @@
+import {Attachment} from "@/models/Attachment";
+
 export enum PromotedMessageStatus {
     PENDING = "PENDING",
     APPROVED = "APPROVED",
@@ -41,6 +43,7 @@ export interface PromotedMessageDetail extends PromotedMessage {
     messageSenderUsername: string;
     messageCreatedAt: string;
     messageDeleted: boolean;
+    messageAttachments: Attachment[];
     // Payment info
     cardBrand?: string | null;
     cardLast4?: string | null;

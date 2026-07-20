@@ -7,10 +7,11 @@ import {Message} from "@/models/message";
 import {useDialog} from "@/components/providers/DialogProvider";
 import {ClickableStepper} from "@ads/components/clickable-stepper";
 import {PaymentMethodSelector} from "@/app/portal/campaign/components/payment-method-selector";
+import MessageItem from "@/features/chatroom/components/MessageItem";
 import {usePromoteMessageMutation} from "@ads/store/services/promotedMessagesApi";
-import {AlertCircle, CheckCircle2, Loader2, Lock, Megaphone} from "lucide-react";
+import {AlertCircle, ArrowDownWideNarrow, CheckCircle2, Info, Loader2, Lock, Megaphone, PanelLeft} from "lucide-react";
 
-const STEPS = ["Payment Method", "Confirm"];
+const STEPS = ["Payment", "Confirm"];
 
 const getApiErrorMessage = (error: unknown): string => {
     if (error && typeof error === "object" && "data" in error) {
@@ -37,6 +38,7 @@ export const PromoteMessageModal: React.FC<PromoteMessageModalProps> = ({message
     const [selectedPaymentMethodId, setSelectedPaymentMethodId] = useState<string | undefined>();
     const [errorMessage, setErrorMessage] = useState<string | null>(null);
     const [isSuccess, setIsSuccess] = useState(false);
+    const [showInfo, setShowInfo] = useState(false);
     const [promoteMessage, {isLoading}] = usePromoteMessageMutation();
 
     const handlePurchase = async () => {
@@ -82,8 +84,75 @@ export const PromoteMessageModal: React.FC<PromoteMessageModalProps> = ({message
         );
     }
 
+    // Info view swaps the dialog content in place — stepper and payment state
+    // stay untouched, so Back returns to exactly the screen the user left.
+    if (showInfo) {
+        return (
+            <div className="flex max-h-[75vh] w-full flex-col gap-4 pt-2">
+                <div className="flex items-center gap-2">
+                    <Megaphone className="h-5 w-5 text-amber-600 dark:text-amber-400"/>
+                    <h2 className="text-lg font-semibold text-foreground">How promotions work</h2>
+                </div>
+
+                <div className="min-h-0 flex-1 space-y-3 overflow-y-auto pr-1">
+                    <div className="flex items-start gap-3 bg-muted p-4 rounded-lg border border-border">
+                        <PanelLeft className="mt-0.5 h-5 w-5 shrink-0 text-blue-600 dark:text-blue-400"/>
+                        <div className="space-y-1 text-sm">
+                            <p className="font-semibold text-foreground">Shown in this room&apos;s sidebar</p>
+                            <p className="text-muted-foreground">
+                                Your message is listed in the Promoted Messages sidebar of{" "}
+                                <span className="font-medium text-foreground">{message.chatRoomName}</span> only,
+                                with a PROMOTED badge once approved.
+                            </p>
+                        </div>
+                    </div>
+
+                    <div className="flex items-start gap-3 bg-muted p-4 rounded-lg border border-border">
+                        <Lock className="mt-0.5 h-5 w-5 shrink-0 text-blue-600 dark:text-blue-400"/>
+                        <div className="space-y-1 text-sm">
+                            <p className="font-semibold text-foreground">One-time $0.50</p>
+                            <p className="text-muted-foreground">
+                                $0.50 is held on your card until an admin reviews the promotion. The hold is
+                                released in full if the promotion is denied or if you cancel it while it is
+                                still pending.
+                            </p>
+                        </div>
+                    </div>
+
+                    <div className="flex items-start gap-3 bg-muted p-4 rounded-lg border border-border">
+                        <ArrowDownWideNarrow className="mt-0.5 h-5 w-5 shrink-0 text-blue-600 dark:text-blue-400"/>
+                        <div className="space-y-1 text-sm">
+                            <p className="font-semibold text-foreground">Newest on top</p>
+                            <p className="text-muted-foreground">
+                                Your promotion starts at the top of the sidebar and is pushed down as newer
+                                approved promotions arrive.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <div className="flex justify-end">
+                    <Button variant="outline" onClick={() => setShowInfo(false)}>
+                        Back
+                    </Button>
+                </div>
+            </div>
+        );
+    }
+
     return (
         <div className="flex max-h-[75vh] w-full flex-col gap-4 pt-2">
+            {/* Positioned against the fixed DialogContent (no overflow clipping
+                there), so the badge straddles the dialog's top border. */}
+            <button
+                type="button"
+                onClick={() => setShowInfo(true)}
+                className="absolute -top-3.5 left-1/2 z-10 flex -translate-x-1/2 items-center gap-1.5 whitespace-nowrap rounded-full border border-amber-300 bg-amber-100 px-3 py-1 text-xs font-semibold text-amber-800 shadow-sm transition-colors hover:bg-amber-200 dark:border-amber-700 dark:bg-amber-900 dark:text-amber-200 dark:hover:bg-amber-800"
+            >
+                <Info className="h-3.5 w-3.5"/>
+                How promotions work
+            </button>
+
             <div className="flex items-center gap-2">
                 <Megaphone className="h-5 w-5 text-amber-600 dark:text-amber-400"/>
                 <h2 className="text-lg font-semibold text-foreground">Promote Message</h2>
@@ -141,14 +210,15 @@ export const PromoteMessageModal: React.FC<PromoteMessageModalProps> = ({message
 
                 {currentStep === 1 && (
                     <>
-                        <div className="rounded-lg border bg-muted/40 p-3 dark:bg-muted/20">
-                            <p className="mb-1 text-xs font-medium text-muted-foreground">
-                                Your message in {message.chatRoomName}
-                            </p>
-                            <p className="line-clamp-3 whitespace-pre-wrap text-sm text-foreground [word-break:break-word]">
-                                {message.content}
-                            </p>
-                        </div>
+                        <MessageItem
+                            message={message}
+                            viewMode="search"
+                            handleMessageClick={() => {}}
+                            showChatRoomName={true}
+                            showSenderName={true}
+                            showEditButton={false}
+                            interactionsDisabled={true}
+                        />
 
                         <div
                             className="rounded-lg border border-amber-200 bg-amber-50 p-3 text-sm text-amber-800 dark:border-amber-900 dark:bg-amber-950/30 dark:text-amber-200">
