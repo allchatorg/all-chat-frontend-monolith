@@ -231,6 +231,7 @@ const PrivateChatSection: React.FC<PrivateChatSectionProps> = ({
                 isGuest={user.role === Role.GUEST}
                 allowReport={false}
                 allowModView={false}
+                allowPromote={false}
                 interactionsDisabled={false}
                 archivedRoom={false}
                 isConnected={!!chatRoom}

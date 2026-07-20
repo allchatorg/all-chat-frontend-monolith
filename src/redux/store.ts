@@ -28,8 +28,10 @@ import {fileApi} from "@ads/store/services/fileApi";
 import {adsApi as adsPortalApi} from "@ads/store/services/adsApi";
 import {adminAdsApi} from "@ads/store/services/adminAdsApi";
 import {adminUsersApi} from "@ads/store/services/adminUsersApi";
+import {promotedMessagesApi} from "@ads/store/services/promotedMessagesApi";
+import {adminPromotedMessagesApi} from "@ads/store/services/adminPromotedMessagesApi";
 
-const adsPortalApis = [userApi, paymentApi, adFormatsApi, fileApi, adsPortalApi, adminAdsApi, adminUsersApi];
+const adsPortalApis = [userApi, paymentApi, adFormatsApi, fileApi, adsPortalApi, adminAdsApi, adminUsersApi, promotedMessagesApi, adminPromotedMessagesApi];
 
 
 const settingsPersistConfig = {
@@ -102,6 +104,8 @@ const appReducer = combineReducers({
     [adsPortalApi.reducerPath]: adsPortalApi.reducer,
     [adminAdsApi.reducerPath]: adminAdsApi.reducer,
     [adminUsersApi.reducerPath]: adminUsersApi.reducer,
+    [promotedMessagesApi.reducerPath]: promotedMessagesApi.reducer,
+    [adminPromotedMessagesApi.reducerPath]: adminPromotedMessagesApi.reducer,
 });
 
 export const resetApp = createAction('app/reset');

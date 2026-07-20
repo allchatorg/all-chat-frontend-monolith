@@ -66,6 +66,7 @@ export interface ConversationViewProps {
     pullThreshold?: number;
     allowReport?: boolean;
     allowModView?: boolean;
+    allowPromote?: boolean;
     // Observer (admin review) mode: interactions disabled but a Remove action is exposed per message.
     deleteOnly?: boolean;
     // Observer mode: also label own (right-aligned) messages with the sender's username, since the
@@ -113,6 +114,7 @@ const ConversationView: React.FC<ConversationViewProps> = ({
                                                                pullThreshold = DEFAULT_PULL_THRESHOLD,
                                                                allowReport = true,
                                                                allowModView = true,
+                                                               allowPromote = true,
                                                                deleteOnly = false,
                                                                showOwnSenderName = false,
                                                            }) => {
@@ -208,6 +210,7 @@ const ConversationView: React.FC<ConversationViewProps> = ({
                                                              archivedRoom={archivedRoom}
                                                              allowReport={allowReport}
                                                              allowModView={allowModView}
+                                                             allowPromote={allowPromote}
                                                              deleteOnly={deleteOnly}
                                                 />}
                                         </div>

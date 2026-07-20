@@ -1,7 +1,7 @@
 import React, {useState} from "react";
 import {Button} from "@/components/ui/button";
 import {DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger,} from "@/components/ui/dropdown-menu";
-import {Flag, MoreHorizontal, Pencil, Reply, Shield, Smile, Trash2} from "lucide-react";
+import {Flag, Megaphone, MoreHorizontal, Pencil, Reply, Shield, Smile, Trash2} from "lucide-react";
 import {Popover, PopoverContent, PopoverTrigger} from "@/components/ui/popover";
 import {useDispatch} from "react-redux";
 import {AppDispatch} from "@/redux/store";
@@ -10,6 +10,8 @@ import {setSelectedUserInfo} from "@/redux/modPanel/modPanelSlice";
 import {useRoleAccess} from "@/lib/hooks/useRoleAccess";
 import {useDialog} from "@/components/providers/DialogProvider";
 import ReportForm from "@/features/chatroom/components/ReportForm";
+import PromoteMessageModal from "@/features/chatroom/components/PromoteMessageModal";
+import RemovePromotedMessageDialog from "@/features/chatroom/components/RemovePromotedMessageDialog";
 import {GuestModalWrapper} from "@/components/GuestModalWrapper";
 import {canActOn, Role} from "@/models/Role";
 import data from "@emoji-mart/data";
@@ -39,6 +41,8 @@ interface MessageMenuProps {
     allowReport?: boolean;
     // Private chat is staff-only, so the Mod View action is suppressed there.
     allowModView?: boolean;
+    // Promotions only exist for public chat-room messages, so private chat suppresses the action.
+    allowPromote?: boolean;
     // Observer (admin review) mode: hide every action except Remove, which stays gated by
     // canRemoveMessage (canActOn the sender). Reactions/edit/report/mod-view are suppressed.
     deleteOnly?: boolean;
@@ -63,6 +67,7 @@ export const MessageMenu: React.FC<MessageMenuProps> = ({
                                                             archivedRoom = false,
                                                             allowReport = true,
                                                             allowModView = true,
+                                                            allowPromote = true,
                                                             deleteOnly = false,
                                                             emojiPopoverOpen,
                                                             onEmojiPopoverOpenChange,
@@ -71,6 +76,7 @@ export const MessageMenu: React.FC<MessageMenuProps> = ({
     const {open} = useDialog();
     const {isPrincipal, isStaffMember, currentRole} = useRoleAccess();
     const [internalEmojiPopoverOpen, setInternalEmojiPopoverOpen] = useState(false);
+    const [isRemovePromotedDialogOpen, setIsRemovePromotedDialogOpen] = useState(false);
     const {resolvedTheme} = useTheme();
     const canViewReactions = Boolean(message.reactions && message.reactions.length > 0 && !deleted);
     const canReply = Boolean(onReply && !deleted && !archivedRoom);
@@ -78,7 +84,8 @@ export const MessageMenu: React.FC<MessageMenuProps> = ({
     const canRemoveMessage = Boolean((isPrincipal(userId) || canActOn(currentRole, role)) && !deleted && !archivedRoom);
     const canOpenModView = Boolean(allowModView && isStaffMember() && !isPrincipal(userId));
     const canReport = Boolean(!isPrincipal(userId) && allowReport);
-    const canOpenActionsMenu = canViewReactions || canReply || canEditMessage || canRemoveMessage || canOpenModView || canReport;
+    const canPromote = Boolean(allowPromote && isPrincipal(userId) && !deleted && !archivedRoom && !message.promotion);
+    const canOpenActionsMenu = canViewReactions || canReply || canEditMessage || canRemoveMessage || canOpenModView || canReport || canPromote;
     const canAddReaction = Boolean(!deleted && !archivedRoom);
     const isEmojiPopoverControlled = emojiPopoverOpen !== undefined;
     const isOpenEmojiPopover = isEmojiPopoverControlled ? emojiPopoverOpen : internalEmojiPopoverOpen;
@@ -90,6 +97,33 @@ export const MessageMenu: React.FC<MessageMenuProps> = ({
 
         onEmojiPopoverOpenChange?.(open);
     };
+
+    // Removing a message with an active promotion cascades into canceling the
+    // promotion on the backend, so confirm before removing.
+    const activePromotionStatus = message.promotion?.status === "PENDING"
+        || message.promotion?.status === "APPROVED"
+        ? message.promotion.status
+        : null;
+
+    const handleRemoveMessage = () => {
+        if (activePromotionStatus) {
+            setIsRemovePromotedDialogOpen(true);
+        } else {
+            removeMessage?.(messageId);
+        }
+    };
+
+    const removePromotedDialog = activePromotionStatus ? (
+        <RemovePromotedMessageDialog
+            open={isRemovePromotedDialogOpen}
+            onOpenChange={setIsRemovePromotedDialogOpen}
+            promotionStatus={activePromotionStatus}
+            onConfirm={() => {
+                setIsRemovePromotedDialogOpen(false);
+                removeMessage?.(messageId);
+            }}
+        />
+    ) : null;
 
     const buttonGroup = (
         <div className={cn("flex items-center gap-1", className)}>
@@ -125,13 +159,14 @@ export const MessageMenu: React.FC<MessageMenuProps> = ({
                     <DropdownMenuContent align="start" className="glass-popover w-48">
                         <DropdownMenuItem
                             className="justify-between"
-                            onClick={() => removeMessage?.(messageId)}
+                            onClick={handleRemoveMessage}
                         >
                             Remove Message
                             <Trash2 className="h-4 w-4"/>
                         </DropdownMenuItem>
                     </DropdownMenuContent>
                 </DropdownMenu>
+                {removePromotedDialog}
             </div>
         );
     }
@@ -189,10 +224,19 @@ export const MessageMenu: React.FC<MessageMenuProps> = ({
                             {canRemoveMessage && (
                                 <DropdownMenuItem
                                     className="justify-between"
-                                    onClick={() => removeMessage?.(messageId)}
+                                    onClick={handleRemoveMessage}
                                 >
                                     Remove Message
                                     <Trash2 className="h-4 w-4"/>
+                                </DropdownMenuItem>
+                            )}
+                            {canPromote && (
+                                <DropdownMenuItem
+                                    className="justify-between"
+                                    onClick={() => open(<PromoteMessageModal message={message}/>, {className: 'w-[95vw] max-w-lg'})}
+                                >
+                                    Promote Message
+                                    <Megaphone className="h-4 w-4"/>
                                 </DropdownMenuItem>
                             )}
                             {canOpenModView && (
@@ -248,6 +292,7 @@ export const MessageMenu: React.FC<MessageMenuProps> = ({
                         </PopoverContent>
                     </Popover>
                 )}
+                {removePromotedDialog}
             </div>
         </GuestModalWrapper>
     );

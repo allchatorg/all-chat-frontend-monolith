@@ -15,6 +15,14 @@ export interface ReplyInfo {
     attachmentName?: string | null;
 }
 
+export type PromotionStatus = "PENDING" | "APPROVED" | "DENIED" | "CANCELED";
+
+/** Active promotion attached to a message (only PENDING/APPROVED are ever sent). */
+export interface PromotionInfo {
+    id: number;
+    status: PromotionStatus;
+}
+
 export interface Message {
     id: number;
     content: string;
@@ -33,4 +41,5 @@ export interface Message {
     reactions: Reaction[];
     advert?: boolean;
     replyTo?: ReplyInfo | null;
+    promotion?: PromotionInfo | null;
 }
