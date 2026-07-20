@@ -1,4 +1,4 @@
-import React, {useEffect} from "react";
+import React, {useEffect, useState} from "react";
 import {Card, CardContent, CardFooter, CardHeader, CardTitle} from "@/components/ui/card";
 import {X} from "lucide-react";
 import {Button} from "@/components/ui/button";
@@ -29,7 +29,16 @@ export const PromotedMessagesSection: React.FC = () => {
     const promotedMessagesState = useSelector(selectPromotedMessagesState);
     // Bumped by PROMOTED_MESSAGE_UPDATE broadcasts so the open sidebar refetches live.
     const promotionUpdateCounter = useSelector(selectPromotionUpdateCounter);
-    const {content = [], totalPages = 0, number: pageIndex = 0} = promotedMessagesState || {};
+    const {content = [], totalPages = 0} = promotedMessagesState || {};
+
+    // The requested page is local state (not the server response's `number`) so
+    // the effect below is the only fetch path — page changes just set state.
+    const [pageIndex, setPageIndex] = useState(0);
+    const [pageRoomId, setPageRoomId] = useState(activeRoom?.id);
+    if (pageRoomId !== activeRoom?.id) {
+        setPageRoomId(activeRoom?.id);
+        setPageIndex(0);
+    }
 
     const currentPage = pageIndex + 1;
 
@@ -42,7 +51,7 @@ export const PromotedMessagesSection: React.FC = () => {
 
     const handlePageChange = (page: number) => {
         if (!activeRoom || page < 1 || page > totalPages) return;
-        fetchPromotedMessages({roomId: activeRoom.id, page: page - 1, size: PAGE_SIZE});
+        setPageIndex(page - 1);
     };
 
     const handleMessageClick = (message: Message) => {
