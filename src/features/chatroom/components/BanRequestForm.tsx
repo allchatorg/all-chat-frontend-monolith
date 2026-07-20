@@ -152,7 +152,8 @@ export default function BanRequestForm({
             <Form {...form}>
                 <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
 
-                    <BanAdsPurchaseInfo userId={userId} banType={watchBanType}/>
+                    <BanAdsPurchaseInfo userId={userId} banType={watchBanType}
+                                        deleteMessagesEnabled={watchDeleteMessages}/>
 
                     <FormField
                         control={form.control}

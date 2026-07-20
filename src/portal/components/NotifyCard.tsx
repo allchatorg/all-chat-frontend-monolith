@@ -1,5 +1,6 @@
 import {Card, CardAction, CardDescription, CardFooter, CardHeader, CardTitle} from "@ads/components/ui/card";
 import {Badge} from "@ads/components/ui/badge";
+import {cn} from "@ads/lib/utils";
 
 interface NotifyCardProps {
     title: string;
@@ -7,9 +8,10 @@ interface NotifyCardProps {
     label?: string;
     description: string;
     variant?: "default" | "success" | "warning" | "destructive";
+    compact?: boolean;
 }
 
-export function NotifyCard({title, value, label, description, variant = "default"}: NotifyCardProps) {
+export function NotifyCard({title, value, label, description, variant = "default", compact}: NotifyCardProps) {
     const variantColors = {
         default: "text-foreground",
         success: "text-green-600 dark:text-green-400",
@@ -18,11 +20,15 @@ export function NotifyCard({title, value, label, description, variant = "default
     };
 
     return (
-        <Card className="@container/card">
+        <Card className={cn("@container/card", compact && "gap-3 py-4")}>
             <CardHeader>
                 <CardDescription>{title}</CardDescription>
                 <CardTitle
-                    className={`text-5xl font-bold tabular-nums @[250px]/card:text-6xl ${variantColors[variant]}`}>
+                    className={cn(
+                        "font-bold tabular-nums",
+                        compact ? "text-3xl @[250px]/card:text-4xl" : "text-5xl @[250px]/card:text-6xl",
+                        variantColors[variant]
+                    )}>
                     {value}
                 </CardTitle>
                 {label && (
@@ -33,7 +39,7 @@ export function NotifyCard({title, value, label, description, variant = "default
                     </CardAction>
                 )}
             </CardHeader>
-            <CardFooter className="flex-col items-start gap-1.5 text-sm">
+            <CardFooter className={cn("flex-col items-start text-sm", compact ? "gap-0.5" : "gap-1.5")}>
                 <div className="text-muted-foreground">{description}</div>
             </CardFooter>
         </Card>
