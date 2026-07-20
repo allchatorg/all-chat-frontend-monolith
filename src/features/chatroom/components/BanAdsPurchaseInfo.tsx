@@ -55,13 +55,13 @@ function buildPromotionsRefundWarning(summary: BanPromotionsSummary): string {
     const parts: string[] = [];
     if (summary.pendingCount > 0) {
         const holdsWord = summary.pendingCount === 1 ? "pending hold" : "pending holds";
-        parts.push(`${summary.pendingCount} ${holdsWord} totaling ${formatCurrency(summary.pendingReleaseTotal)} will be released`);
+        parts.push(`${summary.pendingCount} ${holdsWord} totaling ${formatCurrency(summary.pendingReleaseTotal)} will be released when this permanent ban is applied`);
     }
     if (summary.approvedCount > 0) {
         const promotionsWord = summary.approvedCount === 1 ? "approved promotion" : "approved promotions";
-        parts.push(`${summary.approvedCount} ${promotionsWord} totaling ${formatCurrency(summary.approvedRefundTotal)} will be refunded`);
+        parts.push(`${summary.approvedCount} ${promotionsWord} will NOT be refunded and will keep running unless their messages are deleted`);
     }
-    return `${parts.join(" and ")} when this permanent ban is applied. All of this user's promotions will be canceled.`;
+    return `${parts.join("; ")}.`;
 }
 
 function buildDeletedMessagesPromotionsWarning(summary: BanPromotionsSummary): string {
@@ -114,11 +114,10 @@ export default function BanAdsPurchaseInfo({userId, banType, deleteMessagesEnabl
         && banType === BanTypeEnum.PERMANENT
         && (promotionsData.pendingCount > 0 || promotionsData.approvedCount > 0);
 
-    // Non-permanent ban with "delete messages": promotions on the deleted
-    // messages are canceled too (the permanent-ban warning above covers the rest).
+    // Any ban with "delete messages" (permanent included): promotions on the
+    // deleted messages are canceled — pending holds released, approved kept.
     const showDeletedMessagesPromotionsWarning = showPromotions
         && deleteMessagesEnabled
-        && banType !== BanTypeEnum.PERMANENT
         && (promotionsData.pendingCount > 0 || promotionsData.approvedCount > 0);
 
     return (
@@ -152,7 +151,7 @@ export default function BanAdsPurchaseInfo({userId, banType, deleteMessagesEnabl
             {showPromotionsRefundWarning && (
                 <Alert variant="warning">
                     <AlertTriangle className="h-4 w-4"/>
-                    <AlertTitle>Promotions will be released/refunded</AlertTitle>
+                    <AlertTitle>Pending promotion holds will be released</AlertTitle>
                     <AlertDescription>{buildPromotionsRefundWarning(promotionsData)}</AlertDescription>
                 </Alert>
             )}
