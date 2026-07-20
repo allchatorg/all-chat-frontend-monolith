@@ -28,6 +28,7 @@ import {hideAd} from '@/redux/ads/adsSlice';
 import {selectHiddenAdIds} from '@/redux/ads/adsSelectors';
 import {usePageVisibility} from "@/lib/hooks/usePageVisibility";
 import {selectMessagingAvailability} from "@/redux/messagingAvailability/messagingAvailabilitySelectors";
+import {toast} from "sonner";
 
 
 interface ChatSectionProps {
@@ -231,6 +232,13 @@ const ChatSection: React.FC<ChatSectionProps> = ({
     const handleRemoveMessage = async (messageId: number) => {
         try {
             await removeMessage(messageId);
+        } catch (error: any) {
+            // Surface the backend message (e.g. a failed promotion cancellation).
+            toast.error(error?.message || "Failed to remove the message.");
+            return;
+        }
+
+        try {
             trackMessageDeleted({
                 room_id: String(chatRoom.id),
                 message_id: String(messageId),

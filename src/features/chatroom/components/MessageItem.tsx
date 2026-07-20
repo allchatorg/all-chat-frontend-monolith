@@ -14,6 +14,7 @@ import {useFormatMessageDate} from "@/lib/hooks/useTimeFormatSetting";
 import {EditHistoryButton} from "@/features/chatroom/components/EditHistoryButton";
 import {useIsMobile} from "@/lib/hooks/useIsMobile";
 import {ReactionButton} from "@/features/chatroom/components/ReactionButton";
+import {useRoleAccess} from "@/lib/hooks/useRoleAccess";
 
 const MessageItem: React.FC<{
     message: Message,
@@ -42,6 +43,13 @@ const MessageItem: React.FC<{
       }) => {
     const dispatch = useDispatch();
     const isMobile = useIsMobile();
+    const {isPrincipal, isStaffMember} = useRoleAccess();
+
+    // APPROVED promotions are badged for everyone; the PENDING indicator is
+    // only shown to the message owner and staff members.
+    const showPromotedBadge = message.promotion?.status === "APPROVED";
+    const showPromotionPendingBadge = message.promotion?.status === "PENDING"
+        && (isPrincipal(message.senderId) || isStaffMember());
     const {openMediaOverlay, openExternalVideoOverlay} = useMediaOverlay();
     const {
         unblurredAttachments,
@@ -172,6 +180,19 @@ const MessageItem: React.FC<{
             </span>
     );
 
+    const PromotedBadge = () => (
+        <span
+            className="rounded px-1 py-0.5 font-medium text-[10px] bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-300">
+                PROMOTED
+            </span>
+    );
+
+    const PromotionPendingBadge = () => (
+        <span className="glass-pill rounded px-1 py-0.5 font-medium text-[10px] text-muted-foreground">
+                PROMOTION PENDING
+            </span>
+    );
+
     if (viewMode === "search") {
         return (
             <div
@@ -201,6 +222,8 @@ const MessageItem: React.FC<{
                                 </span>
                             {message.bannedUser && <BannedUserBadge/>}
                             {message.deleted && <DeletedBadge/>}
+                            {showPromotedBadge && <PromotedBadge/>}
+                            {showPromotionPendingBadge && <PromotionPendingBadge/>}
                             {showChatRoomName && <ChatRoomBadge/>}
                             <span className="text-xs text-muted-foreground">
                                     {formatMessageDate(message.createdAt)}
@@ -258,20 +281,24 @@ const MessageItem: React.FC<{
             isOwn ? "items-end" : "items-start pl-4"
         )}>
             {/* Header with sender name and badges */}
-            {!isOwn && (showSenderName || message.bannedUser || message.deleted || showChatRoomName) && (
+            {!isOwn && (showSenderName || message.bannedUser || message.deleted || showChatRoomName || showPromotedBadge || showPromotionPendingBadge) && (
                 <div
                     className="text-xs font-medium transition-colors text-muted-foreground flex items-center gap-1 mb-1">
                     {showSenderName && <span>{message.senderUsername}</span>}
                     {message.bannedUser && <BannedUserBadge/>}
                     {message.deleted && <DeletedBadge/>}
+                    {showPromotedBadge && <PromotedBadge/>}
+                    {showPromotionPendingBadge && <PromotionPendingBadge/>}
                     {showChatRoomName && <ChatRoomBadge/>}
                 </div>
             )}
 
             {/* Header for own messages */}
-            {isOwn && (message.deleted || showChatRoomName) && (
+            {isOwn && (message.deleted || showChatRoomName || showPromotedBadge || showPromotionPendingBadge) && (
                 <div className="flex items-center gap-1 mb-1">
                     {message.deleted && <DeletedBadge/>}
+                    {showPromotedBadge && <PromotedBadge/>}
+                    {showPromotionPendingBadge && <PromotionPendingBadge/>}
                     {showChatRoomName && <ChatRoomBadge/>}
                 </div>
             )}
@@ -300,7 +327,9 @@ const MessageItem: React.FC<{
                         className={clsx(
                             "shadow-sm rounded-lg px-3 py-2 wrap-break-word max-w-full min-w-0",
                             className,
-                            message.deleted && "italic"
+                            message.deleted && "italic",
+                            // Subtle amber ring marks approved promoted messages for all viewers.
+                            showPromotedBadge && "ring-1 ring-amber-400/70 dark:ring-amber-500/60"
                         )}
                         style={{
                             backgroundColor: message.color,

@@ -8,6 +8,7 @@ import {AppDispatch, resetApp, RootState} from "@/redux/store";
 import {getSessionToken, removeSessionToken} from "@/lib/tokenManager";
 import {
     addMessageReaction,
+    applyPromotionUpdate,
     handleChatRoomArchivedRegularUser,
     handleChatRoomArchivedStaffUser,
     handleChatRoomBanUserNotificationRegularUser,
@@ -45,6 +46,9 @@ import {resolveSelectedRoomThunk} from "@/redux/chatRoom/chatRoomThunk";
 import {MessagingAvailability} from "@/models/MessagingAvailability";
 import {setMessagingAvailability} from "@/redux/messagingAvailability/messagingAvailabilitySlice";
 import {fetchMessagingAvailabilityThunk} from "@/redux/messagingAvailability/messagingAvailabilityThunk";
+import {PromotedMessageEvent} from "@/models/PromotedMessageEvent";
+import {promotedMessagesApi} from "@ads/store/services/promotedMessagesApi";
+import {adminPromotedMessagesApi} from "@ads/store/services/adminPromotedMessagesApi";
 
 const WS_URL = process.env.NEXT_PUBLIC_WS_URL || "http://localhost:8080/ws";
 const PUBLIC_TOPIC = ["/topic/public-chat"];
@@ -264,6 +268,15 @@ export function useStompWithRedux(
 
                     case WebSocketMessageType.MESSAGE_SENDING_AVAILABILITY_UPDATE:
                         dispatch(setMessagingAvailability(data as MessagingAvailability));
+                        break;
+
+                    case WebSocketMessageType.PROMOTED_MESSAGE_UPDATE:
+                        dispatch(applyPromotionUpdate(data as PromotedMessageEvent));
+                        // Keep the portal RTK Query caches in sync — RTK Query only
+                        // refetches queries with active subscribers, so this is cheap
+                        // when no portal page is open.
+                        dispatch(promotedMessagesApi.util.invalidateTags(['PromotedMessages']));
+                        dispatch(adminPromotedMessagesApi.util.invalidateTags(['AdminPromotedMessages']));
                         break;
 
                     default:

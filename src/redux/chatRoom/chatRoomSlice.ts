@@ -7,6 +7,7 @@ import {
     fetchChatRoomDetailsThunk,
     fetchChatRoomMessagesThunk,
     fetchJoinedUserChatRoomsThunk,
+    fetchPromotedMessagesThunk,
     fetchTopOnlineRoomsPaginatedThunk,
     fetchTopReactedMessagesThunk,
     joinChatRoomThunk,
@@ -26,6 +27,7 @@ import {revokeBanThunk} from "@/redux/modPanel/modPanelThunk";
 import {ReactionUpdateResponse} from "@/models/ReactionUpdateResponse";
 import {createEmptyPaginatedResponse} from "@/lib/utils";
 import {AdPlacement} from "@/models/AdPlacement";
+import {PromotedMessageEvent} from "@/models/PromotedMessageEvent";
 import {
     addChatRoomReaction,
     getLastNonAdvertMessage,
@@ -49,6 +51,10 @@ interface ChatRoomState {
     searchedMessages: PaginatedResponse<Message> | null;
     searchMessagesParams: SearchMessageRequest | null;
     topReactedMessages: PaginatedResponse<Message> | null;
+    promotedMessages: PaginatedResponse<Message> | null;
+    // Bumped on every PROMOTED_MESSAGE_UPDATE for the selected room so an open
+    // Promoted Messages sidebar refetches its page.
+    promotionUpdateCounter: number;
 
     selectedUserChatRoom?: UserChatRoom | null;
 
@@ -75,6 +81,8 @@ const chatRoomInitialState: ChatRoomState = {
     searchedMessages: null,
     searchMessagesParams: null,
     topReactedMessages: null,
+    promotedMessages: null,
+    promotionUpdateCounter: 0,
 
     joinChatRoomLoading: false,
     leaveChatRoomLoading: false,
@@ -204,6 +212,7 @@ function removeArchivedRoomFromState(state: ChatRoomState, roomId: number) {
         state.selectedChatRoom = null;
         state.searchedMessages = null;
         state.topReactedMessages = null;
+        state.promotedMessages = null;
     }
 }
 
@@ -717,6 +726,63 @@ const chatSlice = createSlice({
                 removeChatRoomReaction(room, action.payload)
             );
         },
+        // Applies a PROMOTED_MESSAGE_UPDATE broadcast: sets (PENDING/APPROVED)
+        // or clears (DENIED/CANCELED) the message's promotion everywhere it is
+        // cached, and bumps the counter so an open sidebar refetches its list.
+        applyPromotionUpdate(
+            state,
+            action: PayloadAction<PromotedMessageEvent>
+        ) {
+            const event = action.payload;
+            const promotion = event.status === "PENDING" || event.status === "APPROVED"
+                ? {id: event.promotionId, status: event.status}
+                : null;
+
+            const patchMessages = (messages: Message[]) =>
+                messages.map(message =>
+                    !message.advert && message.id === event.messageId
+                        ? {...message, promotion}
+                        : message
+                );
+
+            if (state.selectedChatRoom?.id === event.chatRoomId) {
+                state.selectedChatRoom = {
+                    ...state.selectedChatRoom,
+                    messages: patchMessages(state.selectedChatRoom.messages),
+                };
+            }
+
+            state.loadedChatRooms = state.loadedChatRooms.map(room =>
+                room.id === event.chatRoomId
+                    ? {...room, messages: patchMessages(room.messages)}
+                    : room
+            );
+
+            if (state.topReactedMessages) {
+                state.topReactedMessages = {
+                    ...state.topReactedMessages,
+                    content: patchMessages(state.topReactedMessages.content),
+                };
+            }
+
+            if (state.promotedMessages) {
+                state.promotedMessages = {
+                    ...state.promotedMessages,
+                    content: patchMessages(state.promotedMessages.content),
+                };
+            }
+
+            if (state.searchedMessages) {
+                state.searchedMessages = {
+                    ...state.searchedMessages,
+                    content: patchMessages(state.searchedMessages.content),
+                };
+            }
+
+            if (state.selectedChatRoom?.id === event.chatRoomId) {
+                state.promotionUpdateCounter += 1;
+            }
+        },
         handleChatRoomArchivedRegularUser(
             state,
             action: PayloadAction<ChatRoom>
@@ -933,6 +999,16 @@ const chatSlice = createSlice({
                     state.topReactedMessages = null;
                 }
             });
+            builder.addCase(fetchPromotedMessagesThunk.fulfilled, (state, action) => {
+                const {roomId} = action.meta.arg;
+                const promotedMessages = action.payload;
+
+                if (state.selectedChatRoom?.id === roomId) {
+                    state.promotedMessages = promotedMessages;
+                } else {
+                    state.promotedMessages = null;
+                }
+            });
             builder.addCase(updateLastReadMessageThunk.fulfilled, (state, action) => {
                 const updatedMessage = action.payload;
 
@@ -1004,6 +1080,7 @@ export const {
     addMessageReaction,
     removeMessageReaction,
     handleEditMessage,
+    applyPromotionUpdate,
     handleChatRoomArchivedRegularUser,
     handleChatRoomArchivedStaffUser,
     handleChatRoomUnarchivedStaffUser,

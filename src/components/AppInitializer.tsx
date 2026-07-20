@@ -3,7 +3,6 @@
 import {ReactNode, useEffect} from 'react';
 import {useAttachmentHook} from "@/lib/hooks/useAttachmentHook";
 import {useUser} from "@/lib/hooks/useUser";
-import {useStompWithRedux} from "@/lib/hooks/useStompClient";
 import {useHeartbeat} from "@/lib/hooks/useHeartbeat";
 import {useIpDetails} from "@/lib/hooks/useIpDetails";
 import {useIsMobile} from "@/lib/hooks/useIsMobile";
@@ -23,7 +22,7 @@ export default function AppInitializer({children}: { children: ReactNode }) {
     useIpDetails();
     const {user} = useUser();
     useAttachmentHook();
-    useStompWithRedux();
+    // STOMP lives in <StompBridge/> (AppShell) so /portal routes stay connected.
     useHeartbeat();
 
     useEffect(() => {

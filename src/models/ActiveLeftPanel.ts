@@ -1,1 +1,1 @@
-export type ActiveLeftPanel = "top-reacted-messages";
+export type ActiveLeftPanel = "top-reacted-messages" | "promoted-messages";

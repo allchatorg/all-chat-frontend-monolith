@@ -3,6 +3,7 @@ import React from "react";
 import {useDispatch, useSelector} from "react-redux";
 import {selectActiveLeftPanel} from "@/redux/settings/settingsSelector";
 import TopReactedMessagesSection from "./TopReactedMessagesSection";
+import PromotedMessagesSection from "./PromotedMessagesSection";
 import {AnimatePresence, motion} from "framer-motion";
 import {setActiveLeftSidebar} from "@/redux/settings/settingsSlice";
 import {
@@ -19,6 +20,9 @@ const LeftPanel = () => {
     switch (activePanel) {
         case "top-reacted-messages":
             content = <TopReactedMessagesSection/>;
+            break;
+        case "promoted-messages":
+            content = <PromotedMessagesSection/>;
             break;
         default:
             content = null;

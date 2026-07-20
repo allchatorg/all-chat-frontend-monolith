@@ -57,6 +57,12 @@ export const selectSearchMessagesParams = (state: RootState) =>
 export const selectTopReactedMessagesState = (state: RootState) =>
     state.chatRoom.topReactedMessages;
 
+export const selectPromotedMessagesState = (state: RootState) =>
+    state.chatRoom.promotedMessages;
+
+export const selectPromotionUpdateCounter = (state: RootState) =>
+    state.chatRoom.promotionUpdateCounter;
+
 export const selectJumpToMessageId = (state: RootState) =>
     state.chatRoomUi.jumpToMessageId;
 

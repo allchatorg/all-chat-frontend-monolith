@@ -26,6 +26,7 @@ interface ChatMessageProps {
     archivedRoom?: boolean;
     allowReport?: boolean;
     allowModView?: boolean;
+    allowPromote?: boolean;
     // Switches the message into edit mode. Supplied by the parent section so the correct
     // editing state (public vs. private chat slice) is updated.
     onStartEditMessage?: (message: Message) => void;
@@ -71,6 +72,7 @@ const ChatMessage: React.FC<ChatMessageProps> = ({
                                                      archivedRoom = false,
                                                      allowReport = true,
                                                      allowModView = true,
+                                                     allowPromote = true,
                                                      onStartEditMessage,
                                                      onStartReply,
                                                      onJumpToMessage,
@@ -255,6 +257,7 @@ const ChatMessage: React.FC<ChatMessageProps> = ({
                                 archivedRoom={archivedRoom}
                                 allowReport={allowReport}
                                 allowModView={allowModView}
+                                allowPromote={allowPromote}
                                 deleteOnly={deleteOnly}
                                 emojiPopoverOpen={isReactionPopoverOpen}
                                 onEmojiPopoverOpenChange={handleReactionPopoverOpenChange}
@@ -366,6 +369,7 @@ const ChatMessage: React.FC<ChatMessageProps> = ({
                             archivedRoom={archivedRoom}
                             allowReport={allowReport}
                             allowModView={allowModView}
+                            allowPromote={allowPromote}
                             deleteOnly={deleteOnly}
                             emojiPopoverOpen={isReactionPopoverOpen}
                             onEmojiPopoverOpenChange={handleReactionPopoverOpenChange}/>

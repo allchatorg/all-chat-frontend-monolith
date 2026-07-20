@@ -113,5 +113,17 @@ export const getTopReactedMessages = (
         }
     }).then(res => res.data);
 
+export const getPromotedMessages = (
+    roomId: number,
+    page: number = 0,
+    pageSize: number = 10
+): Promise<PaginatedResponse<Message>> =>
+    api.get<PaginatedResponse<Message>>(`${CHAT_ROOMS_PATH}/${roomId}/messages/promoted`, {
+        params: {
+            page,
+            pageSize,
+        }
+    }).then(res => res.data);
+
 export const sendHeartbeat = (activeRoomId: number | null): Promise<void> =>
     api.post(`${CHAT_ROOMS_PATH}/heartbeat`, {activeRoomId}).then(res => res.data);

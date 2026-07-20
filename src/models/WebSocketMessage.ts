@@ -7,6 +7,7 @@ import {ReactionUpdateResponse} from "@/models/ReactionUpdateResponse";
 import {ReportNotification} from "@/models/ReportNotification";
 import {ChatRoom} from "@/models/ChatRoom";
 import {MessagingAvailability} from "@/models/MessagingAvailability";
+import {PromotedMessageEvent} from "@/models/PromotedMessageEvent";
 
 type WarnUserResponse = {
     description: string;
@@ -58,6 +59,10 @@ export type WebSocketMessage =
 } | {
     type: WebSocketMessageType.MESSAGE_SENDING_AVAILABILITY_UPDATE;
     data: MessagingAvailability;
+} | {
+    type: WebSocketMessageType.PROMOTED_MESSAGE_UPDATE;
+    chatRoomName: string;
+    data: PromotedMessageEvent;
 } | {
     type: WebSocketMessageType.PRIVATE_NEW_MESSAGE;
     chatRoomName: null;

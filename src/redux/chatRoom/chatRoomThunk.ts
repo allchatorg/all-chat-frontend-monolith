@@ -9,6 +9,7 @@ import {
     getAllUserChatRooms,
     getChatRoomDetails,
     getChatRoomMessages,
+    getPromotedMessages,
     getReactionsByEmoji,
     getTopOnlineRoomsPaginated,
     getTopReactedMessages,
@@ -220,7 +221,7 @@ export const deleteMessageThunk = createAsyncThunk<void, number>(
     "chat/deleteMessage",
     async (messageId, {rejectWithValue}) => {
         try {
-            deleteMessage(messageId);
+            await deleteMessage(messageId);
         } catch (err: any) {
             return rejectWithValue(err.response?.data || err.message);
         }
@@ -308,6 +309,19 @@ export const fetchTopReactedMessagesThunk = createAsyncThunk<
     async ({roomId, page = 0, size = 10}, {rejectWithValue}) => {
         try {
             return await getTopReactedMessages(roomId, page, size);
+        } catch (err: any) {
+            return rejectWithValue(err.response?.data || err.message);
+        }
+    }
+);
+
+export const fetchPromotedMessagesThunk = createAsyncThunk<
+    PaginatedResponse<Message>,
+    { roomId: number; page?: number; size?: number }>(
+    "chat/fetchPromotedMessages",
+    async ({roomId, page = 0, size = 10}, {rejectWithValue}) => {
+        try {
+            return await getPromotedMessages(roomId, page, size);
         } catch (err: any) {
             return rejectWithValue(err.response?.data || err.message);
         }
@@ -460,8 +474,11 @@ export const resolveSelectedRoomThunk = createAsyncThunk<
 
         // Priority 2: Keep current selection if still valid
         if (currentSelected && rooms.some(r => r.id === currentSelected.id)) {
-            // If the chat room details haven't been loaded yet, load them
-            if (!currentChatRoom || currentChatRoom.id !== currentSelected.chatRoomId) {
+            // Reload when the details aren't loaded yet OR the room went stale
+            // (e.g. a disconnect window) — loadOrFetchChatRoom handles the
+            // stale refetch itself.
+            const isSelectedStale = selectStaleChatRoomIds(state).includes(currentSelected.chatRoomId);
+            if (!currentChatRoom || currentChatRoom.id !== currentSelected.chatRoomId || isSelectedStale) {
                 await loadOrFetchChatRoom(currentSelected.chatRoomId, dispatch, getState as () => RootState);
                 dispatch(setActiveChatRoomThunk({
                     currentRoomId: currentSelected.chatRoomId,

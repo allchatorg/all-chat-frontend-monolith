@@ -3,9 +3,21 @@
 import React, {useState} from "react";
 import {Button} from "@/components/ui/button";
 import {CardTitle} from "@/components/ui/card";
-import {Archive, ArchiveRestore, Flame, Loader2, MessageSquare, MoreVertical, Search, Users, X} from "lucide-react";
+import {
+    Archive,
+    ArchiveRestore,
+    Flame,
+    Loader2,
+    Megaphone,
+    MessageSquare,
+    MoreVertical,
+    Search,
+    Users,
+    X
+} from "lucide-react";
 import ChatSearchBar from "@/features/chatroom/components/ChatSearchBar";
 import {useTopReactedSidebar} from "@/lib/hooks/useTopReactedSidebar";
+import {usePromotedMessagesSidebar} from "@/lib/hooks/usePromotedMessagesSidebar";
 import {ChatRoomNoiseLevelEnum} from "@/models/ChatRoomNoiseLevelEnum";
 import {useIsMobile} from "@/lib/hooks/useIsMobile";
 import {DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger} from "@/components/ui/dropdown-menu";
@@ -63,6 +75,11 @@ const ChatSectionHeader: React.FC<ChatSectionHeaderProps> = ({
         toggleSidebar: onToggleTopReactedSidebar,
     } = useTopReactedSidebar();
 
+    const {
+        isActive: promotedSidebarActive,
+        toggleSidebar: onTogglePromotedSidebar,
+    } = usePromotedMessagesSidebar();
+
     const toggleExpanded = () => {
         setIsExpanded(!isExpanded);
     };
@@ -73,6 +90,7 @@ const ChatSectionHeader: React.FC<ChatSectionHeaderProps> = ({
         && typeof chatRoomId === "number"
         && !ARCHIVE_HIDDEN_ROOM_NAMES.has(normalizedChatRoomName);
     const topReactedButtonLabel = `${topReactedSidebarActive ? "Hide" : "Show"} Top Reacted`;
+    const promotedButtonLabel = `${promotedSidebarActive ? "Hide" : "Show"} Promoted Messages`;
     const popularityButtonLabel = `${popularitySidebarActive ? "Hide" : "Show"} Active Rooms`;
 
     const handleArchiveConfirm = () => {
@@ -186,6 +204,16 @@ const ChatSectionHeader: React.FC<ChatSectionHeaderProps> = ({
                         <Flame className="h-5 w-5"/>
                     </Button>
                     <Button
+                        onClick={onTogglePromotedSidebar}
+                        variant={promotedSidebarActive ? "secondary" : "outline"}
+                        size="sm"
+                        className={`glass-control z-10 h-10 w-10 p-2 ${promotedSidebarActive ? "text-primary" : ""}`}
+                        aria-label={promotedButtonLabel}
+                        title={promotedButtonLabel}
+                    >
+                        <Megaphone className="h-5 w-5"/>
+                    </Button>
+                    <Button
                         onClick={onTogglePopularitySidebar}
                         variant={popularitySidebarActive ? "secondary" : "outline"}
                         size="sm"
@@ -225,6 +253,16 @@ const ChatSectionHeader: React.FC<ChatSectionHeaderProps> = ({
                             title={topReactedButtonLabel}
                         >
                             <Flame className="h-4 w-4"/>
+                        </Button>
+                        <Button
+                            onClick={onTogglePromotedSidebar}
+                            variant={promotedSidebarActive ? "secondary" : "ghost"}
+                            size="sm"
+                            className="glass-control h-8 w-8 p-0"
+                            aria-label={promotedButtonLabel}
+                            title={promotedButtonLabel}
+                        >
+                            <Megaphone className="h-4 w-4"/>
                         </Button>
                         <Button
                             onClick={onTogglePopularitySidebar}

@@ -6,6 +6,7 @@ import {Navbar} from "@/components/Navbar";
 import AuthGuard from "@/components/AuthGuard";
 import {Toaster} from "@/components/ui/sonner";
 import AppInitializer from "@/components/AppInitializer";
+import StompBridge from "@/components/StompBridge";
 import RateLimitDialog from "@/components/RateLimitDialog";
 import GoogleAnalytics from "@/components/GoogleAnalytics";
 import {Footer} from "@/components/Footer";
@@ -41,6 +42,7 @@ export function AppShell({children}: { children: React.ReactNode }) {
     if (isPortalRoute) {
         return (
             <AuthGuard>
+                <StompBridge/>
                 {children}
                 <RateLimitDialog/>
                 <GoogleAnalytics/>
@@ -63,6 +65,7 @@ export function AppShell({children}: { children: React.ReactNode }) {
 
     return (
         <AuthGuard>
+            <StompBridge/>
             <AppInitializer>
                 <Navbar/>
                 <div className="flex flex-1 overflow-auto">
