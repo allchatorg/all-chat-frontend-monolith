@@ -17,12 +17,12 @@ const statusConfig: Record<AdStatus, {
     variant: "default" | "success" | "warning" | "destructive";
     href: string
 }> = {
-    [AdStatus.SUBMITTED]: {
-        label: "Submitted Ads",
+    [AdStatus.PENDING]: {
+        label: "Pending Ads",
         buttonLabel: "Review",
         description: "Ads waiting for approval",
         variant: "warning",
-        href: "/portal/admin/ads?status=SUBMITTED",
+        href: "/portal/admin/ads?status=PENDING",
     },
     [AdStatus.ACTIVE]: {
         label: "Active Ads",
@@ -48,7 +48,7 @@ const statusConfig: Record<AdStatus, {
 };
 
 // Define the order in which to display the status cards
-const statusDisplayOrder: AdStatus[] = [AdStatus.SUBMITTED, AdStatus.ACTIVE, AdStatus.COMPLETED, AdStatus.REJECTED];
+const statusDisplayOrder: AdStatus[] = [AdStatus.PENDING, AdStatus.ACTIVE, AdStatus.COMPLETED, AdStatus.REJECTED];
 
 const formatUsd = (value: number) =>
     new Intl.NumberFormat('en-US', {style: 'currency', currency: 'USD'}).format(value);

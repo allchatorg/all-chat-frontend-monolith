@@ -61,7 +61,7 @@ export default function UserAdsPage() {
             return {
                 all: 0,
                 active: 0,
-                submitted: 0,
+                pending: 0,
                 completed: 0,
                 rejected: 0,
             };
@@ -77,7 +77,7 @@ export default function UserAdsPage() {
         return {
             all: total,
             active: countMap['active'] || 0,
-            submitted: countMap['submitted'] || 0,
+            pending: countMap['pending'] || 0,
             completed: countMap['completed'] || 0,
             rejected: countMap['rejected'] || 0,
         };
@@ -140,9 +140,9 @@ export default function UserAdsPage() {
                         </div>
                         <div className="flex flex-col items-center justify-center p-4 border border-border rounded-lg bg-muted/30">
                             <p className="text-2xl font-bold text-orange-600 dark:text-orange-400">
-                                {counts.submitted}
+                                {counts.pending}
                             </p>
-                            <p className="text-sm text-muted-foreground">Submitted Ads</p>
+                            <p className="text-sm text-muted-foreground">Pending Ads</p>
                         </div>
                     </div>
                 </CardContent>

@@ -11,7 +11,7 @@ import {AdStatus} from "@ads/models/ad"
 
 export default function AdminDashboardPage() {
     const {data} = useSearchAdsQuery({
-        status: AdStatus.SUBMITTED,
+        status: AdStatus.PENDING,
         size: 100,
         page: 0,
         sort: "submittedDate,desc"
@@ -37,7 +37,7 @@ export default function AdminDashboardPage() {
                             <ChartPromotedRevenue/>
                         </div>
                         <div className="px-4 lg:px-6">
-                            <h2 className="text-lg font-semibold mb-4">Submitted Ads</h2>
+                            <h2 className="text-lg font-semibold mb-4">Pending Ads</h2>
                             <AdsTable
                                 ads={data?.content || []}
                                 isAdmin={true}

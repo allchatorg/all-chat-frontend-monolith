@@ -57,7 +57,7 @@ function AdsPageContent() {
     const counts = {
         all: data?.totalElements || 0,
         active: statusCountsData?.find(sc => sc.status === AdStatus.ACTIVE)?.count || 0,
-        submitted: statusCountsData?.find(sc => sc.status === AdStatus.SUBMITTED)?.count || 0,
+        pending: statusCountsData?.find(sc => sc.status === AdStatus.PENDING)?.count || 0,
         completed: statusCountsData?.find(sc => sc.status === AdStatus.COMPLETED)?.count || 0,
         rejected: statusCountsData?.find(sc => sc.status === AdStatus.REJECTED)?.count || 0,
     };

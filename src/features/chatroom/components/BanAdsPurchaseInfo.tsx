@@ -20,8 +20,7 @@ function buildPurchaseSummary(summary: BanAdsSummary): string {
     const segments = [
         {count: summary.activeCount, label: "active"},
         {count: summary.completedCount, label: "completed"},
-        // Staff-facing copy calls SUBMITTED ads "pending" (awaiting approval).
-        {count: summary.submittedCount, label: "pending"},
+        {count: summary.pendingCount, label: "pending"},
         {count: summary.rejectedCount, label: "rejected"},
     ].filter((segment) => segment.count > 0);
 

@@ -24,7 +24,7 @@ export const MOCK_ADS: AdItem[] = [
         totalPricePaid: 500.00,
         purchaseDate: "2024-05-20T14:30:00Z",
         startDate: "2024-06-05T00:00:00Z",
-        approvalState: "submitted",
+        approvalState: "pending",
         username: "jane.smith@example.com",
         userId: "u_2"
     },
@@ -76,7 +76,7 @@ export const MOCK_ADS: AdItem[] = [
         totalPricePaid: 600.00,
         purchaseDate: "2024-05-25T13:20:00Z",
         startDate: "2024-06-08T00:00:00Z",
-        approvalState: "submitted",
+        approvalState: "pending",
         username: "charlie.brown@example.com",
         userId: "u_5"
     }

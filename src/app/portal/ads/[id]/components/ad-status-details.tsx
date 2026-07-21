@@ -36,7 +36,7 @@ export default function AdStatusDetails({data, className, isAdmin = false}: AdSt
                     bg: "bg-blue-50 dark:bg-blue-950/20 border-blue-200 dark:border-blue-900",
                     badgeClass: "bg-blue-500 hover:bg-blue-600 text-white",
                 };
-            case "SUBMITTED":
+            case "PENDING":
                 return {
                     bg: "bg-amber-50 dark:bg-amber-950/20 border-amber-200 dark:border-amber-900",
                     badgeClass: "bg-amber-500 hover:bg-amber-600 text-white",
@@ -262,7 +262,7 @@ export default function AdStatusDetails({data, className, isAdmin = false}: AdSt
                 )}
 
                 {/* Pending Review Section */}
-                {data.status === "SUBMITTED" && !isAdmin && (
+                {data.status === "PENDING" && !isAdmin && (
                     <div
                         className="rounded-lg bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-900 p-4">
                         <div className="flex items-start gap-3">

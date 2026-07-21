@@ -1,5 +1,5 @@
 export enum AdStatus {
-    SUBMITTED = "SUBMITTED",
+    PENDING = "PENDING",
     ACTIVE = "ACTIVE",
     COMPLETED = "COMPLETED",
     REJECTED = "REJECTED"
@@ -73,10 +73,10 @@ export interface AdStatusCount {
 }
 
 // Per-user summary shown in the staff ban form: counts by status plus the
-// pending (SUBMITTED + payment authorized) purchases a permanent ban refunds.
+// pending (PENDING + payment authorized) purchases a permanent ban refunds.
 export interface BanAdsSummary {
     totalAds: number;
-    submittedCount: number;
+    pendingCount: number;
     activeCount: number;
     completedCount: number;
     rejectedCount: number;

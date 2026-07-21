@@ -24,7 +24,7 @@ interface AdsTableProps {
     counts?: {
         all: number
         active: number
-        submitted: number
+        pending: number
         completed: number
         rejected: number
     }
@@ -40,9 +40,9 @@ interface AdsTableProps {
     onSearchQueryChange?: (value: string) => void
 }
 
-function getAllCount(counts?: { active: number; submitted: number; completed: number; rejected: number }) {
+function getAllCount(counts?: { active: number; pending: number; completed: number; rejected: number }) {
     if (!counts) return 0
-    return (counts.active || 0) + (counts.submitted || 0) + (counts.completed || 0) + (counts.rejected || 0)
+    return (counts.active || 0) + (counts.pending || 0) + (counts.completed || 0) + (counts.rejected || 0)
 }
 
 export function AdsTable({
@@ -71,7 +71,7 @@ export function AdsTable({
         switch (status) {
             case AdStatus.ACTIVE:
                 return "default"
-            case AdStatus.SUBMITTED:
+            case AdStatus.PENDING:
                 return "secondary"
             default:
                 return "outline"
@@ -143,7 +143,7 @@ export function AdsTable({
                             <SelectContent>
                                 <SelectItem value="all">All Statuses ({allCount})</SelectItem>
                                 <SelectItem value="active">Active ({counts?.active || 0})</SelectItem>
-                                <SelectItem value="submitted">Submitted ({counts?.submitted || 0})</SelectItem>
+                                <SelectItem value="pending">Pending ({counts?.pending || 0})</SelectItem>
                                 <SelectItem value="rejected">Rejected ({counts?.rejected || 0})</SelectItem>
                                 <SelectItem value="completed">Completed ({counts?.completed || 0})</SelectItem>
                             </SelectContent>
@@ -157,9 +157,9 @@ export function AdsTable({
                                 Active <Badge variant="secondary"
                                               className="ml-2 rounded-full px-1">{counts?.active || 0}</Badge>
                             </TabsTrigger>
-                            <TabsTrigger value="submitted">
-                                Submitted <Badge variant="secondary"
-                                                 className="ml-2 rounded-full px-1">{counts?.submitted || 0}</Badge>
+                            <TabsTrigger value="pending">
+                                Pending <Badge variant="secondary"
+                                               className="ml-2 rounded-full px-1">{counts?.pending || 0}</Badge>
                             </TabsTrigger>
                             <TabsTrigger value="completed">
                                 Completed <Badge variant="secondary"
