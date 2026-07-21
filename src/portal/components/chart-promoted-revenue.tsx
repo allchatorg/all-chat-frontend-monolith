@@ -146,7 +146,7 @@ export function ChartPromotedRevenue() {
                     config={chartConfig}
                     className="aspect-auto h-[250px] w-full"
                 >
-                    <AreaChart data={chartData}>
+                    <AreaChart data={chartData} margin={{top: 12}}>
                         <defs>
                             <linearGradient id="fillPromotedRevenue" x1="0" y1="0" x2="0" y2="1">
                                 <stop offset="5%" stopColor="var(--color-promotedRevenue)" stopOpacity={0.8}/>

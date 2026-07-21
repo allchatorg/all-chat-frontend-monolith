@@ -142,7 +142,7 @@ export function ChartAreaPurchasedAds() {
                     config={chartConfig}
                     className="aspect-auto h-[250px] w-full"
                 >
-                    <AreaChart data={chartData}>
+                    <AreaChart data={chartData} margin={{top: 12}}>
                         <defs>
                             <linearGradient id="fillPurchasedAds" x1="0" y1="0" x2="0" y2="1">
                                 <stop offset="5%" stopColor="var(--color-purchasedAds)" stopOpacity={0.8}/>
