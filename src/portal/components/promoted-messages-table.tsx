@@ -45,6 +45,10 @@ interface PromotedMessagesTableProps {
     totalPages: number
     onPageChange: (page: number) => void
     isAdmin?: boolean
+    // Overrides the isAdmin-based detail route, e.g. an admin page that hides the admin columns
+    viewDetailsPath?: string
+    // Per-status totals shown as badges on the filter tabs; badges are hidden when omitted
+    counts?: Partial<Record<PromotedMessageStatusFilter, number>>
     // Admin-only: debounced email/userId search + submittedAt sort toggle
     searchQuery?: string
     onSearchQueryChange?: (value: string) => void
@@ -60,6 +64,8 @@ export function PromotedMessagesTable({
                                           totalPages,
                                           onPageChange,
                                           isAdmin = false,
+                                          viewDetailsPath,
+                                          counts,
                                           searchQuery,
                                           onSearchQueryChange,
                                           sort,
@@ -74,7 +80,8 @@ export function PromotedMessagesTable({
     }
 
     const handleViewDetailsClick = (id: number) => {
-        router.push(isAdmin ? `/portal/admin/promoted-messages/${id}` : `/portal/promoted-messages/${id}`)
+        const base = viewDetailsPath ?? (isAdmin ? "/portal/admin/promoted-messages" : "/portal/promoted-messages")
+        router.push(`${base}/${id}`)
     }
 
     return (
@@ -96,6 +103,7 @@ export function PromotedMessagesTable({
                             {STATUS_TABS.map((tab) => (
                                 <SelectItem key={tab.value} value={tab.value}>
                                     {tab.value === "ALL" ? "All Statuses" : tab.label}
+                                    {counts && ` (${counts[tab.value] || 0})`}
                                 </SelectItem>
                             ))}
                         </SelectContent>
@@ -105,6 +113,11 @@ export function PromotedMessagesTable({
                         {STATUS_TABS.map((tab) => (
                             <TabsTrigger key={tab.value} value={tab.value}>
                                 {tab.label}
+                                {counts && (
+                                    <Badge variant="secondary" className="ml-2 rounded-full px-1">
+                                        {counts[tab.value] || 0}
+                                    </Badge>
+                                )}
                             </TabsTrigger>
                         ))}
                     </TabsList>
