@@ -5,6 +5,11 @@ import {RestrictedContentBox} from "@/features/chatroom/components/RestrictedCon
 import AttachmentBox from "@/features/chatroom/components/AttachmentBox";
 import {useMediaOverlay} from "@/components/providers/MediaOverlayProvider";
 import {Attachment} from "@/models/Attachment";
+import {useDispatch, useSelector} from "react-redux";
+import {AppDispatch} from "@/redux/store";
+import {markAdClicked} from "@/redux/ads/adsSlice";
+import {selectClickedAdIds} from "@/redux/ads/adsSelectors";
+import {registerAdClick} from "@/api/ads/adsAPI";
 
 const AdvertMessageItem: React.FC<{
     message: Message;
@@ -13,6 +18,8 @@ const AdvertMessageItem: React.FC<{
     allowAttachmentPreview?: boolean;
 }> = ({message, className, interactionsDisabled = false, allowAttachmentPreview = false}) => {
     const {openMediaOverlay} = useMediaOverlay();
+    const dispatch = useDispatch<AppDispatch>();
+    const clickedAdIds = useSelector(selectClickedAdIds);
     const {
         unblurredAttachments,
         isRestrictedForUser,
@@ -21,6 +28,12 @@ const AdvertMessageItem: React.FC<{
     } = useAttachmentHook();
 
     const handleAttachmentClick = (attachment: Attachment) => {
+        // Opening a photo/video ad counts as a click-through; track it once per
+        // served ad (fire-and-forget, never blocks the overlay).
+        if (message.advert && !interactionsDisabled && !clickedAdIds.includes(message.id)) {
+            dispatch(markAdClicked(message.id));
+            registerAdClick(message.id);
+        }
         openMediaOverlay(attachment, {
             showDownloadButton: false,
             showFileSize: false,

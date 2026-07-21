@@ -28,3 +28,13 @@ export const serveAd = async (): Promise<Message | null> => {
         throw error;
     }
 };
+
+/**
+ * Records a click-through on a photo/video ad (media overlay opened).
+ * Fire-and-forget: failures are swallowed so ad interaction is never blocked.
+ */
+export const registerAdClick = (adId: number): void => {
+    api.post(`/ads/${adId}/click`).catch(() => {
+        // Stats tracking must never surface errors to the user
+    });
+};

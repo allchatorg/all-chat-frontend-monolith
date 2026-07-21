@@ -101,6 +101,8 @@ export interface ServedAd {
 export interface AdDailyStat {
     date: string; // ISO date string YYYY-MM-DD
     viewsCount: number;
+    clicksCount: number;
+    ctr: number; // fraction 0.0-1.0
 }
 
 export interface AdDailyStatsResponse {
@@ -109,7 +111,19 @@ export interface AdDailyStatsResponse {
     servedViews: number;
     todaysViews: number;
     yesterdaysViews: number;
+    totalClicks: number;
+    todaysClicks: number;
+    overallCtr: number; // fraction 0.0-1.0
     dailyStats: AdDailyStat[];
+}
+
+export interface UserAdViewsSummary {
+    todaysViews: number;
+    yesterdaysViews: number;
+    totalViewsBought: number;
+    totalServedViews: number;
+    totalClicks: number;
+    overallCtr: number; // fraction 0.0-1.0
 }
 
 export interface DailyViewStats {

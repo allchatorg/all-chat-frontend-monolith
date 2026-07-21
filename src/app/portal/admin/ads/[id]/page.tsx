@@ -28,7 +28,7 @@ export default function AdminAdDetailsPage() {
         skip: !adData?.userId,
     });
 
-    const isSubmitted = adData?.status === AdStatus.SUBMITTED;
+    const isPending = adData?.status === AdStatus.PENDING;
 
     const handleApprove = async () => {
         if (!adData) return;
@@ -110,7 +110,7 @@ export default function AdminAdDetailsPage() {
         );
     }
 
-    const actions = isSubmitted ? (
+    const actions = isPending ? (
         <>
             <ActionButton onClick={handleApprove} disabled={isRejecting || isApproving}>
                 <CheckCircle className="mr-2 h-4 w-4"/>
@@ -143,7 +143,8 @@ export default function AdminAdDetailsPage() {
             <div className="flex flex-1 flex-col">
                 <div className="@container/main flex flex-1 flex-col gap-2">
                     <div className="flex flex-col gap-4">
-                        <AdDetailsStats status={adData.status} isAdmin={true} actions={actions} stats={statsData}/>
+                        <AdDetailsStats status={adData.status} formatType={adData.formatType} isAdmin={true}
+                                        actions={actions} stats={statsData}/>
 
                         {userData ? (
                             <Card

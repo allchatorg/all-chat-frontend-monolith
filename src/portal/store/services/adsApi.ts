@@ -10,7 +10,8 @@ import {
     PaginatedResponse,
     ServeAdRequest,
     ServedAd,
-    UserAdViewsDailyBreakdownDto
+    UserAdViewsDailyBreakdownDto,
+    UserAdViewsSummary
 } from '@ads/models/ad';
 import {AdStatusDetails} from '@ads/models/ad-status-details';
 
@@ -98,6 +99,14 @@ export const adsApi = createApi({
             }),
             providesTags: (result, error, {id}) => [{type: 'Ads', id}],
         }),
+        // Get User's Aggregated Views/Clicks Summary
+        getUserAdViewsSummary: builder.query<UserAdViewsSummary, void>({
+            query: () => ({
+                url: '/ads/my-stats/summary',
+                method: 'GET',
+            }),
+            providesTags: ['Ads'],
+        }),
         // Get User's Aggregated Daily Views
         getUserAdViewsDailyBreakdown: builder.query<UserAdViewsDailyBreakdownDto, { fromDate?: string } | void>({
             query: (params) => ({
@@ -118,5 +127,6 @@ export const {
     useGetAdByIdQuery,
     useServeAdMutation,
     useGetAdDailyStatsQuery,
+    useGetUserAdViewsSummaryQuery,
     useGetUserAdViewsDailyBreakdownQuery,
 } = adsApi;

@@ -6,6 +6,7 @@ import {CompletionCard} from "@ads/components/CompletionCard";
 import Link from "next/link";
 import {AdStatus, AdStatusCount} from "@ads/models/ad";
 import {useGetMyPromotionSpendSummaryQuery} from "@ads/store/services/promotedMessagesApi";
+import {useGetUserAdViewsSummaryQuery} from "@ads/store/services/adsApi";
 
 interface SectionCardsProps {
     statusCounts?: AdStatusCount[];
@@ -25,14 +26,20 @@ const formatUsd = (value: number) =>
     new Intl.NumberFormat('en-US', {style: 'currency', currency: 'USD'}).format(value);
 
 export function SectionCards({statusCounts, isLoading, showAdStats = true}: SectionCardsProps) {
-    const submittedCount = getStatusCount(statusCounts, AdStatus.SUBMITTED);
+    const pendingAdsCount = getStatusCount(statusCounts, AdStatus.PENDING);
     const activeCount = getStatusCount(statusCounts, AdStatus.ACTIVE);
     const completedCount = getStatusCount(statusCounts, AdStatus.COMPLETED);
     const rejectedCount = getStatusCount(statusCounts, AdStatus.REJECTED);
-    const totalAds = submittedCount + activeCount + completedCount + rejectedCount;
+    const totalAds = pendingAdsCount + activeCount + completedCount + rejectedCount;
 
     const {data: spendData, isLoading: isSpendLoading} = useGetMyPromotionSpendSummaryQuery();
     const pendingCount = spendData?.pendingCount ?? 0;
+
+    const {data: viewsSummary, isLoading: isClicksLoading} = useGetUserAdViewsSummaryQuery(undefined, {
+        skip: !showAdStats,
+    });
+    const totalClicks = viewsSummary?.totalClicks ?? 0;
+    const overallCtrPct = ((viewsSummary?.overallCtr ?? 0) * 100).toFixed(2);
 
     const promotionSpendCard = (
         <StatCard
@@ -56,7 +63,7 @@ export function SectionCards({statusCounts, isLoading, showAdStats = true}: Sect
 
     return (
         <div
-            className="grid grid-cols-1 gap-4 px-4 *:data-[slot=card]:shadow-sm lg:px-6 @xl/main:grid-cols-2 @5xl/main:grid-cols-5">
+            className="grid grid-cols-1 gap-4 px-4 *:data-[slot=card]:shadow-sm lg:px-6 @xl/main:grid-cols-2 @5xl/main:grid-cols-3">
             <StatCard
                 title="Total Ads"
                 value={isLoading ? "..." : totalAds.toLocaleString()}
@@ -66,10 +73,10 @@ export function SectionCards({statusCounts, isLoading, showAdStats = true}: Sect
                 description="Total ads across all statuses"
             />
 
-            <Link href="/portal/ads?status=SUBMITTED" className="contents">
+            <Link href="/portal/ads?status=PENDING" className="contents">
                 <NotifyCard
-                    title="Submitted Ads"
-                    value={isLoading ? 0 : submittedCount}
+                    title="Pending Ads"
+                    value={isLoading ? 0 : pendingAdsCount}
                     label="Review"
                     description="Ads waiting for approval"
                     variant="warning"
@@ -91,6 +98,17 @@ export function SectionCards({statusCounts, isLoading, showAdStats = true}: Sect
                 current={isLoading ? 0 : completedCount}
                 total={totalAds || 0}
                 description={`${completedCount} ads have completed`}
+            />
+
+            <StatCard
+                title="Total Clicks"
+                value={isClicksLoading ? "..." : totalClicks.toLocaleString()}
+                trend="up"
+                trendValue=""
+                footerText={`Overall CTR ${overallCtrPct}%`}
+                description={totalClicks === 0
+                    ? "No clicks recorded yet"
+                    : "Clicks across all your photo & video ads"}
             />
 
             {promotionSpendCard}

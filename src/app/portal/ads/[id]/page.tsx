@@ -75,6 +75,7 @@ export default function UserAdDetailsPage() {
                     <div className="flex flex-col gap-4">
                         <AdDetailsStats
                             status={adData.status}
+                            formatType={adData.formatType}
                             isAdmin={false}
                             stats={statsData}
                         />
