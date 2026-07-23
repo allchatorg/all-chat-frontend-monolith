@@ -7,9 +7,9 @@ import {useMediaOverlay} from "@/components/providers/MediaOverlayProvider";
 import {Attachment} from "@/models/Attachment";
 import {useDispatch, useSelector} from "react-redux";
 import {AppDispatch} from "@/redux/store";
-import {markAdClicked} from "@/redux/ads/adsSlice";
-import {selectClickedAdIds} from "@/redux/ads/adsSelectors";
-import {registerAdClick} from "@/api/ads/adsAPI";
+import {markAdClicked, markAdLinkClicked} from "@/redux/ads/adsSlice";
+import {selectClickedAdIds, selectClickedAdLinkKeys} from "@/redux/ads/adsSelectors";
+import {registerAdClick, registerAdLinkClick} from "@/api/ads/adsAPI";
 
 const AdvertMessageItem: React.FC<{
     message: Message;
@@ -20,6 +20,7 @@ const AdvertMessageItem: React.FC<{
     const {openMediaOverlay} = useMediaOverlay();
     const dispatch = useDispatch<AppDispatch>();
     const clickedAdIds = useSelector(selectClickedAdIds);
+    const clickedAdLinkKeys = useSelector(selectClickedAdLinkKeys);
     const {
         unblurredAttachments,
         isRestrictedForUser,
@@ -38,6 +39,16 @@ const AdvertMessageItem: React.FC<{
             showDownloadButton: false,
             showFileSize: false,
         });
+    };
+
+    const handleLinkClick = (url: string) => {
+        // Each hyperlink in the ad text is tracked separately from the media
+        // click-through, once per served ad per link (fire-and-forget).
+        const key = `${message.id}::${url}`;
+        if (message.advert && !interactionsDisabled && !clickedAdLinkKeys.includes(key)) {
+            dispatch(markAdLinkClicked(key));
+            registerAdLinkClick(message.id, url);
+        }
     };
 
     const getAttachmentComponent = (attachment: Attachment) => {
@@ -90,7 +101,10 @@ const AdvertMessageItem: React.FC<{
                         target="_blank"
                         rel="noopener noreferrer"
                         className="underline hover:opacity-80 wrap-anywhere"
-                        onClick={(e) => e.stopPropagation()}
+                        onClick={(e) => {
+                            e.stopPropagation();
+                            handleLinkClick(part);
+                        }}
                     >
                         {part}
                     </a>

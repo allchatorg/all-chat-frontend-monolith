@@ -11,6 +11,7 @@ interface AdsState {
     adPlacementsByChatroomId: Record<number, AdPlacement>;
     hiddenAdIds: number[]; // List of hidden ad message IDs
     clickedAdIds: number[]; // Ad IDs already click-tracked for the current served ad
+    clickedAdLinkKeys: string[]; // "adId::url" keys already link-click-tracked for the current served ad
     status: 'idle' | 'loading' | 'failed';
 }
 
@@ -22,6 +23,7 @@ const initialState: AdsState = {
     adPlacementsByChatroomId: {},
     hiddenAdIds: [],
     clickedAdIds: [],
+    clickedAdLinkKeys: [],
     status: 'idle',
 };
 
@@ -47,6 +49,11 @@ const adsSlice = createSlice({
                 state.clickedAdIds.push(action.payload);
             }
         },
+        markAdLinkClicked: (state, action: PayloadAction<string>) => {
+            if (!state.clickedAdLinkKeys.includes(action.payload)) {
+                state.clickedAdLinkKeys.push(action.payload);
+            }
+        },
     },
     extraReducers: (builder) => {
         builder
@@ -65,6 +72,7 @@ const adsSlice = createSlice({
                     state.adPlacementsByChatroomId = {};
                     state.hiddenAdIds = [];
                     state.clickedAdIds = [];
+                    state.clickedAdLinkKeys = [];
                 }
             })
             .addCase(fetchAd.rejected, (state) => {
@@ -73,5 +81,5 @@ const adsSlice = createSlice({
     },
 });
 
-export const {markChatroomAsServed, hideAd, setAdPlacement, markAdClicked} = adsSlice.actions;
+export const {markChatroomAsServed, hideAd, setAdPlacement, markAdClicked, markAdLinkClicked} = adsSlice.actions;
 export default adsSlice.reducer;

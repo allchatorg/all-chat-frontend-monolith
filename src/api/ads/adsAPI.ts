@@ -38,3 +38,13 @@ export const registerAdClick = (adId: number): void => {
         // Stats tracking must never surface errors to the user
     });
 };
+
+/**
+ * Records a click on a specific hyperlink inside an ad's text.
+ * Fire-and-forget: failures are swallowed so ad interaction is never blocked.
+ */
+export const registerAdLinkClick = (adId: number, url: string): void => {
+    api.post(`/ads/${adId}/link-click`, {url}).catch(() => {
+        // Stats tracking must never surface errors to the user
+    });
+};

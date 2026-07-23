@@ -7,4 +7,5 @@ export const selectServedChatroomIds = (state: RootState) => state.ads.servedCha
 export const selectAdPlacementsByChatroomId = (state: RootState) => state.ads.adPlacementsByChatroomId;
 export const selectHiddenAdIds = (state: RootState) => state.ads.hiddenAdIds;
 export const selectClickedAdIds = (state: RootState) => state.ads.clickedAdIds;
+export const selectClickedAdLinkKeys = (state: RootState) => state.ads.clickedAdLinkKeys;
 export const selectAdsStatus = (state: RootState) => state.ads.status;

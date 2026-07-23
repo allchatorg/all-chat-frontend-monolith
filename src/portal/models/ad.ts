@@ -105,6 +105,18 @@ export interface AdDailyStat {
     ctr: number; // fraction 0.0-1.0
 }
 
+export interface AdLinkDailyStat {
+    date: string; // ISO date string YYYY-MM-DD
+    clicksCount: number;
+}
+
+export interface AdLinkStat {
+    url: string;
+    totalClicks: number;
+    todaysClicks: number;
+    dailyStats: AdLinkDailyStat[];
+}
+
 export interface AdDailyStatsResponse {
     adId: number;
     viewsBought: number;
@@ -115,6 +127,9 @@ export interface AdDailyStatsResponse {
     todaysClicks: number;
     overallCtr: number; // fraction 0.0-1.0
     dailyStats: AdDailyStat[];
+    // One entry per hyperlink in the ad's text, tracked separately from
+    // photo/video clicks
+    linkStats?: AdLinkStat[];
 }
 
 export interface UserAdViewsSummary {

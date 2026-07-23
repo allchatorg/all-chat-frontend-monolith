@@ -108,6 +108,12 @@ export function ChartAreaInteractive({dailyViews}: ChartAreaInteractiveProps) {
                 </CardAction>
             </CardHeader>
             <CardContent className="px-2 pt-4 sm:px-6 sm:pt-6">
+                {filteredData.length === 0 ? (
+                    <div
+                        className="flex h-[250px] items-center justify-center rounded-lg border border-dashed px-4 text-center text-sm text-muted-foreground">
+                        No views yet — views appear here once your ads start being served.
+                    </div>
+                ) : (
                 <ChartContainer
                     config={chartConfig}
                     className="aspect-auto h-[250px] w-full"
@@ -153,6 +159,7 @@ export function ChartAreaInteractive({dailyViews}: ChartAreaInteractiveProps) {
                         />
                     </AreaChart>
                 </ChartContainer>
+                )}
             </CardContent>
         </Card>
     )

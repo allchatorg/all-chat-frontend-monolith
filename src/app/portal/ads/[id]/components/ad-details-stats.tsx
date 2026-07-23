@@ -5,23 +5,13 @@ import {CartesianGrid, Line, LineChart, XAxis, YAxis} from "recharts";
 import {VerticalBarCard} from "@/app/portal/ads/[id]/components/vertical-bar-card";
 import {TotalViewsCard} from "@/app/portal/ads/[id]/components/total-views-card";
 import {ClicksCtrCard} from "@/app/portal/ads/[id]/components/clicks-ctr-card";
+import {LinkStatsCard} from "@/app/portal/ads/[id]/components/link-stats-card";
 import {AdDailyStatsResponse, AdFormatType, AdStatus} from "@ads/models/ad";
 
 const chartConfig = {
     viewsCount: {
         label: "Page Views",
         color: "hsl(var(--chart-1))",
-    },
-} satisfies ChartConfig
-
-const clicksChartConfig = {
-    clicksCount: {
-        label: "Clicks",
-        color: "hsl(var(--chart-2))",
-    },
-    ctr: {
-        label: "CTR",
-        color: "hsl(var(--chart-3))",
     },
 } satisfies ChartConfig
 
@@ -52,6 +42,29 @@ export function AdDetailsStats({
     const showClickStats = showStats && formatType !== AdFormatType.TEXT;
 
     const hasClickData = (stats?.dailyStats?.some(day => day.clicksCount > 0)) ?? false;
+
+    const hasViewsData = (stats?.dailyStats?.some(day => day.viewsCount > 0)) ?? false;
+
+    // Media click-throughs are labeled by the ad's format so they can't be
+    // confused with the separately-tracked hyperlink clicks below.
+    const mediaClicksLabel = formatType === AdFormatType.PHOTO
+        ? "Photo Clicks"
+        : formatType === AdFormatType.VIDEO
+            ? "Video Clicks"
+            : "Photo & Video Clicks";
+
+    const clicksChartConfig = {
+        clicksCount: {
+            label: mediaClicksLabel,
+            color: "hsl(var(--chart-2))",
+        },
+        ctr: {
+            label: "CTR",
+            color: "hsl(var(--chart-3))",
+        },
+    } satisfies ChartConfig
+
+    const linkStats = stats?.linkStats ?? [];
 
     const getHeaderContent = () => {
         if (status === AdStatus.PENDING) {
@@ -107,7 +120,8 @@ export function AdDetailsStats({
                                          max={stats?.viewsBought || 0}
                                          className={"flex-1 sm:min-w-[180px] lg:min-w-48 lg:max-w-48"}/>
                         {showClickStats && (
-                            <ClicksCtrCard totalClicks={stats?.totalClicks || 0}
+                            <ClicksCtrCard title={`Total ${mediaClicksLabel}`}
+                                           totalClicks={stats?.totalClicks || 0}
                                            todaysClicks={stats?.todaysClicks || 0}
                                            ctr={stats?.overallCtr || 0}
                                            className={"flex-1 sm:min-w-[180px] lg:min-w-48 lg:max-w-48"}/>
@@ -123,66 +137,73 @@ export function AdDetailsStats({
                             Daily views of your ad
                         </p>
                     </div>
-                    <ChartContainer
-                        config={chartConfig}
-                        className="aspect-auto h-[250px] w-full"
-                    >
-                        <LineChart
-                            accessibilityLayer
-                            data={stats?.dailyStats?.slice().reverse() || []}
-                            margin={{
-                                top: 12,
-                                left: 12,
-                                right: 12,
-                            }}
+                    {hasViewsData ? (
+                        <ChartContainer
+                            config={chartConfig}
+                            className="aspect-auto h-[250px] w-full"
                         >
-                            <CartesianGrid vertical={false} strokeDasharray="3 3" className="stroke-muted"/>
-                            <XAxis
-                                dataKey="date"
-                                tickLine={false}
-                                axisLine={false}
-                                tickMargin={8}
-                                minTickGap={32}
-                                tickFormatter={(value) => {
-                                    const date = new Date(value)
-                                    return date.toLocaleDateString("en-US", {
-                                        month: "short",
-                                        day: "numeric",
-                                    })
+                            <LineChart
+                                accessibilityLayer
+                                data={stats?.dailyStats?.slice().reverse() || []}
+                                margin={{
+                                    top: 12,
+                                    left: 12,
+                                    right: 12,
                                 }}
-                            />
-                            <ChartTooltip
-                                content={
-                                    <ChartTooltipContent
-                                        className="w-[150px]"
-                                        nameKey="viewsCount"
-                                        labelFormatter={(value) => {
-                                            return new Date(value).toLocaleDateString("en-US", {
-                                                month: "short",
-                                                day: "numeric",
-                                                year: "numeric",
-                                            })
-                                        }}
-                                    />
-                                }
-                            />
-                            <Line
-                                dataKey="viewsCount"
-                                type="monotone"
-                                stroke="#3b82f6"
-                                strokeWidth={2}
-                                dot={false}
-                            />
-                        </LineChart>
-                    </ChartContainer>
+                            >
+                                <CartesianGrid vertical={false} strokeDasharray="3 3" className="stroke-muted"/>
+                                <XAxis
+                                    dataKey="date"
+                                    tickLine={false}
+                                    axisLine={false}
+                                    tickMargin={8}
+                                    minTickGap={32}
+                                    tickFormatter={(value) => {
+                                        const date = new Date(value)
+                                        return date.toLocaleDateString("en-US", {
+                                            month: "short",
+                                            day: "numeric",
+                                        })
+                                    }}
+                                />
+                                <ChartTooltip
+                                    content={
+                                        <ChartTooltipContent
+                                            className="w-[150px]"
+                                            nameKey="viewsCount"
+                                            labelFormatter={(value) => {
+                                                return new Date(value).toLocaleDateString("en-US", {
+                                                    month: "short",
+                                                    day: "numeric",
+                                                    year: "numeric",
+                                                })
+                                            }}
+                                        />
+                                    }
+                                />
+                                <Line
+                                    dataKey="viewsCount"
+                                    type="monotone"
+                                    stroke="#3b82f6"
+                                    strokeWidth={2}
+                                    dot={false}
+                                />
+                            </LineChart>
+                        </ChartContainer>
+                    ) : (
+                        <div
+                            className="flex h-[250px] items-center justify-center rounded-lg border border-dashed px-4 text-center text-sm text-muted-foreground">
+                            No views yet — views appear here once your ad starts being served.
+                        </div>
+                    )}
                 </CardContent>
             )}
             {showClickStats && (
                 <CardContent className="px-2 pb-6 sm:px-6 sm:pt-0">
                     <div className="mb-2 px-4 sm:px-0">
-                        <h3 className="text-sm font-medium">Clicks & CTR</h3>
+                        <h3 className="text-sm font-medium">{mediaClicksLabel} & CTR</h3>
                         <p className="text-xs text-muted-foreground">
-                            Daily click-throughs and click-through rate
+                            Daily {mediaClicksLabel.toLowerCase()} and click-through rate
                         </p>
                     </div>
                     {hasClickData ? (
@@ -274,6 +295,22 @@ export function AdDetailsStats({
                             No clicks yet — clicks appear here when users open your photo or video ad.
                         </div>
                     )}
+                </CardContent>
+            )}
+            {/* Hyperlink stats apply to all formats (TEXT included), unlike media clicks */}
+            {showStats && linkStats.length > 0 && (
+                <CardContent className="px-2 pb-6 sm:px-6 sm:pt-0">
+                    <div className="mb-2 px-4 sm:px-0">
+                        <h3 className="text-sm font-medium">Hyperlink Clicks</h3>
+                        <p className="text-xs text-muted-foreground">
+                            Daily clicks on each link in your ad text
+                        </p>
+                    </div>
+                    <div className="flex flex-col gap-4">
+                        {linkStats.map((link) => (
+                            <LinkStatsCard key={link.url} link={link}/>
+                        ))}
+                    </div>
                 </CardContent>
             )}
         </Card>

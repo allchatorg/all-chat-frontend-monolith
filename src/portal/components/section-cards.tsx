@@ -101,13 +101,13 @@ export function SectionCards({statusCounts, isLoading, showAdStats = true}: Sect
             />
 
             <StatCard
-                title="Total Clicks"
+                title="Total Photo & Video Clicks"
                 value={isClicksLoading ? "..." : totalClicks.toLocaleString()}
                 trend="up"
                 trendValue=""
                 footerText={`Overall CTR ${overallCtrPct}%`}
                 description={totalClicks === 0
-                    ? "No clicks recorded yet"
+                    ? "No photo or video clicks recorded yet"
                     : "Clicks across all your photo & video ads"}
             />
 
