@@ -32,6 +32,7 @@ import {ReportSearchRequest} from "@/models/ReportSearchRequest";
 import {usePathname, useRouter, useSearchParams} from "next/navigation";
 import {ROUTES} from "@/routes";
 import {useIsMobile} from "@/lib/hooks/useIsMobile";
+import {ReportType} from "@/models/ReportTypeEnum";
 
 interface Props {
     isLoading: boolean,
@@ -72,6 +73,7 @@ export function ReportCasesTable({
         if (isMobile) {
             setColumnVisibility({
                 "needsAttention": false,
+                "underage": false,
                 "reportCount": false,
                 "message.content": false,
                 "message.sender.username": true,
@@ -156,6 +158,45 @@ export function ReportCasesTable({
         return mappedSorting.length > 0 ? encodeURIComponent(JSON.stringify(mappedSorting)) : undefined;
     }
 
+    const underageFilterActive = filters.reportTypes?.includes(ReportType.UNDERAGE) ?? false;
+
+    const toggleUnderageFilter = () => {
+        const reportTypes = underageFilterActive ? undefined : [ReportType.UNDERAGE];
+
+        const updatedFilters = {
+            ...filters,
+            page: 1,
+            reportTypes,
+        };
+
+        setFilters(updatedFilters);
+
+        handleSearchParamsChange({
+            ...updatedFilters,
+            sort: sortParamsToQueryString(sorting),
+        });
+    };
+
+    const clearAllFilters = () => {
+        table.resetColumnFilters();
+        setLocalSearch("");
+        senderCol?.setFilterValue("");
+
+        const updatedFilters = {
+            ...filters,
+            page: 1,
+            reportTypes: undefined,
+            reportedUserUsernameOrId: undefined,
+        };
+
+        setFilters(updatedFilters);
+
+        handleSearchParamsChange({
+            ...updatedFilters,
+            sort: sortParamsToQueryString(sorting),
+        });
+    };
+
 
     return (
         <div className="flex h-full w-full flex-col">
@@ -212,18 +253,20 @@ export function ReportCasesTable({
                                             })}
                                     </div>
                                 </div>
+                                <div className="space-y-2">
+                                    <h4 className="font-medium leading-none">Report type</h4>
+                                    <Button
+                                        variant={underageFilterActive ? "default" : "outline"}
+                                        size="sm"
+                                        onClick={toggleUnderageFilter}
+                                    >
+                                        Underage
+                                    </Button>
+                                </div>
                                 <Button
                                     variant="ghost"
                                     className="w-full"
-                                    onClick={() => {
-                                        table.resetColumnFilters();
-                                        setLocalSearch("");
-                                        senderCol?.setFilterValue("");
-                                        setFilters({
-                                            ...filters,
-                                            page: 1
-                                        });
-                                    }}
+                                    onClick={clearAllFilters}
                                 >
                                     Clear all filters
                                 </Button>
@@ -233,17 +276,16 @@ export function ReportCasesTable({
                 ) : (
                     <div className="ml-auto flex gap-2">
                         <Button
+                            variant={underageFilterActive ? "default" : "outline"}
+                            onClick={toggleUnderageFilter}
+                        >
+                            Underage
+                        </Button>
+
+                        <Button
                             variant="ghost"
                             className="ml-auto"
-                            onClick={() => {
-                                table.resetColumnFilters();
-                                setLocalSearch("");
-                                senderCol?.setFilterValue("");
-                                setFilters({
-                                    ...filters,
-                                    page: 1
-                                });
-                            }}
+                            onClick={clearAllFilters}
                         >
                             Clear filters
                         </Button>

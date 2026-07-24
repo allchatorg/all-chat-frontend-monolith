@@ -6,6 +6,7 @@ interface ActionButtonProps {
     onClick?: () => void;
     className?: string;
     disabled?: boolean;
+    title?: string;
 }
 
 const ActionButton: React.FC<ActionButtonProps> = ({
@@ -14,11 +15,13 @@ const ActionButton: React.FC<ActionButtonProps> = ({
                                                        onClick,
                                                        className,
                                                        disabled = false,
+                                                       title,
                                                    }) => {
     return (
         <button
             onClick={onClick}
             disabled={disabled}
+            title={title}
             className={cn(
                 "flex flex-col items-center justify-center p-3 rounded-md border transition-colors w-full h-full",
                 disabled

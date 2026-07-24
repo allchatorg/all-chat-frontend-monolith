@@ -1,6 +1,7 @@
 import {Role} from "./Role";
 import {Tag} from "@/models/Tag";
 import {TimeFormat} from "@/models/TimeFormat";
+import {IdVerificationStatus} from "@/models/IdVerificationStatus";
 
 export interface User {
     id: number;
@@ -12,6 +13,7 @@ export interface User {
     claimed: boolean;
     banned: boolean;
     verified: boolean;
+    idVerificationStatus?: IdVerificationStatus;
     subscribedToMarketingEmails?: boolean;
     role: Role;
     purchasedAdsCount?: number;

@@ -7,6 +7,7 @@ import {usePathname} from 'next/navigation';
 import {Dialog, DialogContent} from '@/components/ui/dialog';
 import VerifyMail from '@/features/auth/components/VerifyMail';
 import VerifyPhone from '@/features/auth/components/VerifyPhone';
+import VerifyIdentity from '@/features/auth/components/VerifyIdentity';
 import {useIpDetails} from "@/lib/hooks/useIpDetails";
 import {useUser} from "@/lib/hooks/useUser";
 import {useThemedLogo} from "@/lib/hooks/useThemedLogo";
@@ -26,7 +27,7 @@ export const VerificationBlockingOverlay: React.FC<VerificationBlockingOverlayPr
     const logoSrc = useThemedLogo();
     const pathname = usePathname();
 
-    let show: 'NONE' | 'CLAIM' | 'EMAIL' | 'PHONE' = 'NONE';
+    let show: 'NONE' | 'CLAIM' | 'EMAIL' | 'PHONE' | 'ID' = 'NONE';
 
     if (!user) {
         return <>{children}</>;
@@ -55,6 +56,13 @@ export const VerificationBlockingOverlay: React.FC<VerificationBlockingOverlayPr
         if (required === 'PHONE') {
             if (!hasEmail || !emailVerified) return 'EMAIL';
             if (!hasPhone) return 'PHONE';
+        }
+
+        // Staff-mandated ID verification: only blocks once the earlier
+        // steps are satisfied (or not required at all).
+        const idStatus = user.idVerificationStatus;
+        if (idStatus === 'REQUIRED' || idStatus === 'PENDING' || idStatus === 'REJECTED') {
+            return 'ID';
         }
 
         return 'NONE';
@@ -96,6 +104,7 @@ export const VerificationBlockingOverlay: React.FC<VerificationBlockingOverlayPr
                     {show === 'CLAIM' && <ClaimUser claimed={user.claimed ?? false} onClaim={handleClaimUser}/>}
                     {show === 'EMAIL' && <VerifyMail/>}
                     {show === 'PHONE' && <VerifyPhone/>}
+                    {show === 'ID' && <VerifyIdentity/>}
                 </DialogContent>
             </Dialog>
         </>

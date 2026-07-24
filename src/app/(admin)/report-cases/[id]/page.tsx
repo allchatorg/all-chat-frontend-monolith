@@ -3,7 +3,7 @@ import * as React from 'react';
 import {useCallback, useEffect} from 'react';
 import {AdminPageHeader} from "@/components/AdminPageHeader";
 import {AdminBreadcrumb} from "@/components/AdminBreadcrumb";
-import {Ban, CheckCircle2, Flag, MessageSquare, Shield, ShieldAlert, ShieldBan, X} from "lucide-react";
+import {Ban, CheckCircle2, Flag, IdCard, MessageSquare, Shield, ShieldAlert, ShieldBan, X} from "lucide-react";
 import {Card} from "@/components/ui/card";
 import {useThunk} from "@/lib/hooks/useThunk";
 import {useSelector} from "react-redux";
@@ -27,6 +27,9 @@ import {
 } from "@/redux/report-cases/reportCasesThunk";
 import {selectSelectedReportCase, selectSelectedReportCaseMessages} from "@/redux/report-cases/reportCasesSelector";
 import {requestElevation} from "@/api/reportCases/reportCasesAPI";
+import {requireIdVerification} from "@/api/admin/adminAPI";
+import {ConfirmModal} from "@/components/ConfirmModal";
+import {IdVerificationStatusBadge} from "@/components/IdVerificationStatusBadge";
 import BanRequestForm from "@/features/chatroom/components/BanRequestForm";
 import NcmecReportForm from "@/app/(admin)/report-cases/[id]/components/NcmecReportForm";
 import {NcmecReportRequest} from "@/models/NcmecReportRequest";
@@ -67,6 +70,22 @@ export default function Page() {
         .some(log => log.auditLogType === AuditLogType.NCMEC_REPORT);
 
     const isCsamCase = Boolean(selectedReportCase?.reportCase?.csamCase) || isCsamReportCase(selectedReportCase?.reportCase?.reports ?? []);
+
+    // Underage cases can require the reported user to verify their age via Stripe Identity
+    const hasUnderageReport = (selectedReportCase?.reportCase?.reports ?? [])
+        .some(report => report.reportType === ReportType.UNDERAGE);
+    const reportedMessage = selectedReportCase?.reportCase?.message;
+    const reportedUserIdStatus = reportedMessage?.senderIdVerificationStatus ?? 'NONE';
+    const idVerificationDisabled = reportedUserIdStatus === 'REQUIRED'
+        || reportedUserIdStatus === 'PENDING'
+        || reportedUserIdStatus === 'VERIFIED';
+    const idVerificationDisabledReason = reportedUserIdStatus === 'VERIFIED'
+        ? "The user has already verified their age"
+        : reportedUserIdStatus === 'PENDING'
+            ? "The user's ID verification is already under review"
+            : reportedUserIdStatus === 'REQUIRED'
+                ? "ID verification has already been required for this user"
+                : undefined;
 
     // Redact messages for resolved CSAM cases, when CSAM flag is true, or when an NCMEC log exists
     const shouldRedactMessages = hasNcmecLog || selectedReportCase?.reportCase?.csamCase || (isResolved && isCsamCase);
@@ -205,6 +224,35 @@ export default function Page() {
         }
     }
 
+    const handleRequireIdVerification = () => {
+        const reportedUserId = reportedMessage?.senderId;
+        const caseId = selectedReportCase?.reportCase?.id;
+
+        if (!reportedUserId || !caseId) {
+            toast.error("Report case data not available");
+            return;
+        }
+
+        open(
+            <ConfirmModal
+                title="Require ID verification?"
+                description={`The reported user will be blocked from using the app until they verify their age with a government ID through Stripe Identity.`}
+                onClose={close}
+                onConfirm={async () => {
+                    try {
+                        await requireIdVerification(reportedUserId, caseId);
+                        close();
+                        toast.success("ID verification required for the reported user");
+                        await refetchData();
+                    } catch (error) {
+                        close();
+                        toast.error("Failed to require ID verification");
+                    }
+                }}
+            />
+        );
+    };
+
     const handleNcmecSubmit = async (request: NcmecReportRequest): Promise<void> => {
         try {
             await submitNcmecReport(request);
@@ -257,6 +305,14 @@ export default function Page() {
             <Card className="flex min-h-0 flex-1 flex-col p-4 space-y-6">
                 {/* Actions */}
                 <div className="flex flex-col gap-4">
+                    {hasUnderageReport && (
+                        <div className="flex flex-wrap items-center gap-2">
+                            <span className="text-sm font-medium">
+                                Reported user{reportedMessage?.senderUsername ? `: ${reportedMessage.senderUsername}` : ""}
+                            </span>
+                            <IdVerificationStatusBadge status={reportedUserIdStatus}/>
+                        </div>
+                    )}
                     {isResolved ? (
                         // Show resolved banner and navigation only
                         <div className="space-y-3">
@@ -383,6 +439,18 @@ export default function Page() {
                                             />
                                         );
                                     }}
+                                />
+                            )}
+
+                            {/* Require ID Verification - Only visible for underage cases */}
+                            {hasUnderageReport && (
+                                <ActionButton
+                                    icon={<IdCard className="h-5 w-5 text-amber-600"/>}
+                                    label="Require ID Verification"
+                                    className="p-2 text-[10px] sm:p-3 sm:text-xs"
+                                    disabled={idVerificationDisabled}
+                                    title={idVerificationDisabledReason}
+                                    onClick={() => handleRequireIdVerification()}
                                 />
                             )}
 
