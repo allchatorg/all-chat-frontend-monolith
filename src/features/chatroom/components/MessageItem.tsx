@@ -1,7 +1,9 @@
 import clsx from "clsx";
 import {useDispatch} from "react-redux";
 import {setActiveRightSidebar} from "@/redux/settings/settingsSlice";
-import {extractUrls, VideoLinkPreview} from "@/features/chatroom/components/VideoLinkPreview";
+import {VideoLinkPreview} from "@/features/chatroom/components/VideoLinkPreview";
+import {FormattedMessageText} from "@/features/chatroom/components/FormattedMessageText";
+import {extractFormattedUrls} from "@/features/chatroom/utils/messageMarkers";
 import {Message} from "@/models/message";
 import {useAttachmentHook} from "@/lib/hooks/useAttachmentHook";
 import {getVideoEmbed, isSupportedVideoPlatform} from "@/lib/utils/urlThumbnailExtractionUtils";
@@ -61,7 +63,7 @@ const MessageItem: React.FC<{
 
     const {formatMessageDate} = useFormatMessageDate();
 
-    const videoUrls = removeDuplicateStrings(message.content ? extractUrls(message.content).filter(isSupportedVideoPlatform) : []);
+    const videoUrls = removeDuplicateStrings(message.content ? extractFormattedUrls(message.content).filter(isSupportedVideoPlatform) : []);
 
     const handleAttachmentClick = (attachment: Attachment) => {
         openMediaOverlay(attachment);
@@ -133,33 +135,6 @@ const MessageItem: React.FC<{
         const brightness = (r * 299 + g * 587 + b * 114) / 1000;
 
         return brightness > 128 ? "black" : "white";
-    };
-
-    const linkifyText = (text: string) => {
-        const urlRegex = /(https?:\/\/[^\s]+)/g;
-        const parts = text.split(urlRegex);
-
-        return parts.map((part, index) => {
-            if (part.match(urlRegex)) {
-                if (interactionsDisabled) {
-                    return <span key={index}>{part}</span>;
-                }
-
-                return (
-                    <a
-                        key={index}
-                        href={part}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="underline hover:opacity-80"
-                        onClick={(e) => e.stopPropagation()}
-                    >
-                        {part}
-                    </a>
-                );
-            }
-            return part;
-        });
     };
 
     const BannedUserBadge = () => (
@@ -256,7 +231,7 @@ const MessageItem: React.FC<{
                         {message.content && (
                             <div
                                 className="text-sm text-foreground transition-colors whitespace-pre-wrap [word-break:break-word] min-w-0 max-w-full">
-                                {linkifyText(message.content)}
+                                <FormattedMessageText text={message.content} interactionsDisabled={interactionsDisabled}/>
                             </div>
                         )}
 
@@ -340,7 +315,7 @@ const MessageItem: React.FC<{
                         }}
                     >
                         <div className="text-sm font-normal whitespace-pre-wrap [word-break:break-word] min-w-0">
-                            {linkifyText(message.content)}
+                            <FormattedMessageText text={message.content} interactionsDisabled={interactionsDisabled}/>
                         </div>
                     </div>
 

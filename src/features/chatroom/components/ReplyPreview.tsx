@@ -2,6 +2,7 @@ import React from "react";
 import {ReplyInfo} from "@/models/message";
 import {Paperclip} from "lucide-react";
 import {cn} from "@/lib/utils";
+import {stripMarkers} from "@/features/chatroom/utils/messageMarkers";
 
 interface ReplyPreviewProps {
     replyTo: ReplyInfo;
@@ -81,7 +82,7 @@ const ReplyPreview: React.FC<ReplyPreviewProps> = ({replyTo, isOwn = false, onJu
                         )}
                         {hasContent && (
                             <span className={cn("truncate min-w-0", replyTo.deleted && "italic")}>
-                                {replyTo.content}
+                                {stripMarkers(replyTo.content ?? "")}
                             </span>
                         )}
                     </>

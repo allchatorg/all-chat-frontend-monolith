@@ -1,8 +1,13 @@
 import React, {useEffect, useRef, useState} from "react";
 import {Button} from "@/components/ui/button";
 import {Textarea} from "@/components/ui/textarea";
-import {Check, Lock, Paperclip, Plus, Reply, Send, Smile, X} from "lucide-react";
+import {Bold, Check, ChevronUp, Italic, Lock, Paperclip, Reply, Send, Smile, X} from "lucide-react";
 import {DictationButton} from "@/features/chatroom/components/DictationButton";
+import {ChatComposerEditor, DICTATION_META} from "@/features/chatroom/components/ChatComposerEditor";
+import {FormatToggles} from "@/features/chatroom/components/FormatToggles";
+import {MobileActionsPanel, MobileActionsToggle} from "@/features/chatroom/components/MobileComposerActions";
+import {docToMarkers, markersToDoc, stripMarkers} from "@/features/chatroom/utils/messageMarkers";
+import type {Editor} from "@tiptap/react";
 import {useSpeechRecognition} from "@/lib/hooks/useSpeechRecognition";
 import AttachmentPreview from "@/features/chatroom/components/AttachmentPreview";
 import {Attachment} from "@/models/Attachment";
@@ -99,6 +104,26 @@ export function ChatInputShowcase({
                     tabIndex={-1}
                     className="hidden h-10 w-10 shrink-0 md:inline-flex"
                 >
+                    <Bold className="h-4 w-4"/>
+                </Button>
+
+                <Button
+                    type="button"
+                    variant="outline"
+                    size="icon"
+                    tabIndex={-1}
+                    className="hidden h-10 w-10 shrink-0 md:inline-flex"
+                >
+                    <Italic className="h-4 w-4"/>
+                </Button>
+
+                <Button
+                    type="button"
+                    variant="outline"
+                    size="icon"
+                    tabIndex={-1}
+                    className="hidden h-10 w-10 shrink-0 md:inline-flex"
+                >
                     <Smile className="h-4 w-4"/>
                 </Button>
 
@@ -109,7 +134,7 @@ export function ChatInputShowcase({
                     tabIndex={-1}
                     className="h-10 w-10 shrink-0 md:hidden"
                 >
-                    <Plus className="h-4 w-4"/>
+                    <ChevronUp className="h-4 w-4"/>
                 </Button>
 
                 <div className="hidden items-center gap-2 md:flex">
@@ -168,7 +193,12 @@ const ChatInput: React.FC<ChatInputProps> = ({
     const [isOpenEmojiPopover, setIsOpenEmojiPopover] = useState(false);
     const {resolvedTheme} = useTheme();
 
+    // `inputText` holds the serialized **bold**/*italic* marker string mirrored
+    // from the rich editor on every update — it is what gets validated, counted
+    // against the length limit, and sent to the backend.
     const [inputText, setInputText] = useState("");
+    const [editor, setEditor] = useState<Editor | null>(null);
+    const [actionsExpanded, setActionsExpanded] = useState(false);
     const [selectedFile, setSelectedFile] = useState<File | null>(null);
     const [isNsfw, setIsNsfw] = useState(false);
     const [uploadedAttachment, setUploadedAttachment] = useState<Attachment | null>(null);
@@ -177,29 +207,31 @@ const ChatInput: React.FC<ChatInputProps> = ({
     const [isUploading, setIsUploading] = useState(false);
     const [isCooldown, setIsCooldown] = useState(false);
 
-    const textareaRef = useRef<HTMLTextAreaElement>(null);
-
     // Length of the live, not-yet-final dictation segment currently sitting at
-    // the tail of `inputText`. Each interim update replaces this tail so the
-    // words refine in place as the user speaks; a final result commits it.
+    // the end of the editor document. Each interim update replaces this tail so
+    // the words refine in place as the user speaks; a final result commits it.
     const interimLenRef = useRef(0);
 
-    const appendDictation = (text: string) =>
-        setInputText((prev) => {
-            const base = prev.slice(0, prev.length - interimLenRef.current);
-            const sep = base && !base.endsWith(" ") ? " " : "";
-            interimLenRef.current = 0;
-            return (base + sep + text).slice(0, maxMessageLength);
-        });
+    // Dictated text is appended at the end of the document, replacing the
+    // current interim tail. The replacement inherits the marks at the insert
+    // position (or the armed stored marks), so dictating with the Bold toggle
+    // on produces bold text.
+    const applyDictation = (text: string, commit: boolean) => {
+        if (!editor) return;
+        const {state} = editor.view;
+        const end = state.doc.content.size - 1;
+        const from = Math.max(0, end - interimLenRef.current);
+        const before = state.doc.textBetween(0, from, "\n");
+        const sep = before && text && !before.endsWith(" ") ? " " : "";
+        const insert = sep + text;
+        const tr = state.tr.insertText(insert, from, end);
+        tr.setMeta(DICTATION_META, true);
+        editor.view.dispatch(tr);
+        interimLenRef.current = commit ? 0 : insert.length;
+    };
 
-    const handleDictationInterim = (text: string) =>
-        setInputText((prev) => {
-            const base = prev.slice(0, prev.length - interimLenRef.current);
-            const sep = base && text && !base.endsWith(" ") ? " " : "";
-            const next = (base + sep + text).slice(0, maxMessageLength);
-            interimLenRef.current = next.length - base.length;
-            return next;
-        });
+    const appendDictation = (text: string) => applyDictation(text, true);
+    const handleDictationInterim = (text: string) => applyDictation(text, false);
 
     const handleDictationError = (code: string) => {
         if (code === "not-allowed" || code === "service-not-allowed") {
@@ -231,13 +263,19 @@ const ChatInput: React.FC<ChatInputProps> = ({
     }, [isListening]);
 
     useEffect(() => {
+        if (!editor) return;
         if (editingMessage) {
             stopDictation();
-            setInputText(editingMessage.content);
+            // Prefill the editor from the stored marker string — the user edits
+            // rich text, never raw markers.
+            editor.commands.setContent(markersToDoc(editingMessage.content ?? ""));
+            setInputText(docToMarkers(editor.getJSON()));
+            editor.commands.focus("end");
         } else {
+            editor.commands.clearContent();
             setInputText("");
         }
-    }, [editingMessage, stopDictation]);
+    }, [editingMessage, stopDictation, editor]);
 
     // Stop dictation if sending becomes blocked or the connection drops.
     useEffect(() => {
@@ -246,9 +284,9 @@ const ChatInput: React.FC<ChatInputProps> = ({
 
     useEffect(() => {
         if (replyingToMessage) {
-            textareaRef.current?.focus();
+            editor?.commands.focus();
         }
-    }, [replyingToMessage]);
+    }, [replyingToMessage, editor]);
 
     useEffect(() => {
         if (selectedFile) {
@@ -260,25 +298,6 @@ const ChatInput: React.FC<ChatInputProps> = ({
         if (!attachmentTypes) return;
         setSupportedFileTypes(extractAcceptedMimeTypes(attachmentTypes));
     }, [attachmentTypes]);
-
-    useEffect(() => {
-        const el = textareaRef.current;
-        if (!el) return;
-
-        const resize = () => {
-            el.style.height = "auto";
-
-            const scrollHeight = el.scrollHeight;
-            const maxHeight = 120;
-
-            el.style.height = Math.min(scrollHeight, maxHeight) + "px";
-            el.style.overflowY = scrollHeight > maxHeight ? "auto" : "hidden";
-        };
-
-        const frame = requestAnimationFrame(resize);
-
-        return () => cancelAnimationFrame(frame);
-    }, [inputText]);
 
     const fileAcceptString = supportedFileTypes
         ? supportedFileTypes
@@ -295,7 +314,8 @@ const ChatInput: React.FC<ChatInputProps> = ({
             return;
         }
 
-        if (inputText.includes(".onion")) {
+        // Check the plain text too so markers inside the domain don't hide it.
+        if (inputText.includes(".onion") || stripMarkers(inputText).includes(".onion")) {
             open(<OnionLinkWarning onClose={close}/>);
             return;
         }
@@ -320,6 +340,7 @@ const ChatInput: React.FC<ChatInputProps> = ({
         onSendMessage(inputText.trim(), attachmentToSend, editingMessage?.id);
 
         stopDictation();
+        editor?.commands.clearContent();
         setInputText("");
         setSelectedFile(null);
         setUploadedAttachment(null);
@@ -334,8 +355,16 @@ const ChatInput: React.FC<ChatInputProps> = ({
     };
 
     const handleEditMessage = () => {
-        if (inputText.includes(".onion")) {
+        if (inputText.includes(".onion") || stripMarkers(inputText).includes(".onion")) {
             open(<OnionLinkWarning onClose={close}/>);
+            return;
+        }
+
+        // The stored content of older messages may serialize differently than
+        // the canonical round-trip — compare both so an untouched edit never
+        // fires a no-op PATCH.
+        if (isUnchanged) {
+            toast.error("No changes detected");
             return;
         }
 
@@ -357,31 +386,27 @@ const ChatInput: React.FC<ChatInputProps> = ({
         onCancelEdit();
     };
 
-    const handleKeyPress = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
-        if (e.key === "Enter" && !e.shiftKey) {
-            e.preventDefault();
-            if (editingMessage) handleEditMessage();
-            else handleSendMessage();
-            return;
-        }
-        if (e.key === "Escape" && editingMessage) {
-            e.preventDefault();
-            onCancelEdit();
-            return;
-        }
-        if (e.key === "Escape" && replyingToMessage) {
-            e.preventDefault();
-            onCancelReply?.();
-        }
+    const handleComposerEnter = () => {
+        if (editingMessage) handleEditMessage();
+        else handleSendMessage();
     };
 
-    const handleInputChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-        const value = e.target.value;
-        if (value.length <= maxMessageLength) {
-            // Manual edits fold any live dictation tail into committed text.
-            interimLenRef.current = 0;
-            setInputText(value);
+    const handleComposerEscape = () => {
+        if (editingMessage) {
+            onCancelEdit();
+            return true;
         }
+        if (replyingToMessage) {
+            onCancelReply?.();
+            return true;
+        }
+        return false;
+    };
+
+    const handleSerializedChange = (serialized: string, isDictation: boolean) => {
+        // Manual edits fold any live dictation tail into committed text.
+        if (!isDictation) interimLenRef.current = 0;
+        setInputText(serialized);
     };
 
     const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>, nsfw: boolean) => {
@@ -528,9 +553,14 @@ const ChatInput: React.FC<ChatInputProps> = ({
         : disabledReason;
     const trimmedInput = inputText.trim();
     const originalContent = editingMessage?.content?.trim() ?? "";
+    // The editor state is canonical marker text; round-trip the stored original
+    // so legacy strings that serialize differently don't fake a change.
+    const canonicalOriginal = isEditing
+        ? docToMarkers(markersToDoc(editingMessage?.content ?? "")).trim()
+        : "";
     const hasAttachment = !!uploadedAttachment;
     const hasContent = trimmedInput.length > 0;
-    const isUnchanged = isEditing && trimmedInput === originalContent;
+    const isUnchanged = isEditing && (trimmedInput === originalContent || trimmedInput === canonicalOriginal);
     const disableConfirmEdit =
         (!hasContent && !hasAttachment) || !isConnected || isOverLimit || isUploading || isUnchanged;
 
@@ -559,7 +589,7 @@ const ChatInput: React.FC<ChatInputProps> = ({
                         </span>
                     )}
                     {replyingToMessage.content && (
-                        <span className="truncate min-w-0 flex-1">{replyingToMessage.content}</span>
+                        <span className="truncate min-w-0 flex-1">{stripMarkers(replyingToMessage.content)}</span>
                     )}
                     <Button
                         type="button"
@@ -583,12 +613,42 @@ const ChatInput: React.FC<ChatInputProps> = ({
                 />
             )}
 
+            {isMobile && actionsExpanded && (
+                <MobileActionsPanel>
+                    <FormatToggles editor={editor} disabled={!canUseTextInput}/>
+                    {!editingMessage && (
+                        <>
+                            <DictationButton
+                                isSupported={isDictationSupported}
+                                isListening={isListening}
+                                disabled={!canSendNewMessage}
+                                onToggle={toggleDictation}
+                            />
+                            <UploadDragAndDropButton
+                                onFileSelect={handleFileSelect}
+                                accept={fileAcceptString}
+                                disabled={!canSendNewMessage || isUploading}
+                                nsfw={false}
+                                title="Safe for Work"
+                                label={"SFW"}
+                                className="glass-control"
+                            />
+                            <UploadDragAndDropButton
+                                onFileSelect={handleFileSelect}
+                                accept={fileAcceptString}
+                                disabled={!canSendNewMessage || isUploading}
+                                nsfw={true}
+                                title="Not Safe for Work"
+                                label={"NSFW"}
+                                className="glass-control"
+                            />
+                        </>
+                    )}
+                </MobileActionsPanel>
+            )}
+
             <div className="flex gap-2 items-center">
-                <Textarea
-                    ref={textareaRef}
-                    value={inputText}
-                    onChange={handleInputChange}
-                    onKeyDown={handleKeyPress}
+                <ChatComposerEditor
                     placeholder={
                         canUseTextInput
                             ? editingMessage
@@ -596,116 +656,79 @@ const ChatInput: React.FC<ChatInputProps> = ({
                                 : "Type your message..."
                             : newMessageDisabledReason || "Connecting..."
                     }
-                    className="glass-input flex-1 min-h-10 max-h-[120px] resize-none focus-visible:ring-0 focus-visible:ring-offset-0 focus:border-primary"
-                    disabled={!canUseTextInput}
-                    rows={1}
+                    editable={canUseTextInput}
+                    onSerializedChange={handleSerializedChange}
+                    onEnter={handleComposerEnter}
+                    onEscape={handleComposerEscape}
+                    onReady={setEditor}
                 />
 
-                {!editingMessage && (
+                {!isMobile && <FormatToggles editor={editor} disabled={!canUseTextInput}/>}
+
+                {!editingMessage && !isMobile && (
                     <>
-                        {!isMobile && (
-                            <Popover open={isOpenEmojiPopover} onOpenChange={setIsOpenEmojiPopover}>
-                                <PopoverTrigger asChild>
-                                    <Button
-                                        type="button"
-                                        variant="outline"
-                                        size="icon"
-                                        className="glass-control shrink-0 h-10 w-10"
-                                        disabled={!canSendNewMessage}
-                                    >
-                                        <Smile className="h-4 w-4"/>
-                                    </Button>
-                                </PopoverTrigger>
-                                <PopoverContent
-                                    align="end"
-                                    sideOffset={4}
-                                    className="glass-popover p-0 border-none shadow-lg w-auto"
+                        <Popover open={isOpenEmojiPopover} onOpenChange={setIsOpenEmojiPopover}>
+                            <PopoverTrigger asChild>
+                                <Button
+                                    type="button"
+                                    variant="outline"
+                                    size="icon"
+                                    className="glass-control shrink-0 h-10 w-10"
+                                    disabled={!canSendNewMessage}
                                 >
-                                    <Picker
-                                        data={data}
-                                        theme={resolvedTheme}
-                                        onEmojiSelect={(emoji: any) => {
-                                            setInputText((prev) => prev + emoji.native);
-                                        }}
-                                    />
-                                </PopoverContent>
-                            </Popover>
-                        )}
-
-                        {!isMobile && (
-                            <DictationButton
-                                isSupported={isDictationSupported}
-                                isListening={isListening}
-                                disabled={!canSendNewMessage}
-                                onToggle={toggleDictation}
-                            />
-                        )}
-
-                        {isMobile ? (
-                            <Popover>
-                                <PopoverTrigger asChild>
-                                    <Button
-                                        variant="outline"
-                                        size="icon"
-                                        className="glass-control shrink-0 h-10 w-10"
-                                        disabled={!canSendNewMessage}
-                                    >
-                                        <Plus className="h-4 w-4"/>
-                                    </Button>
-                                </PopoverTrigger>
-                                <PopoverContent className="glass-popover w-auto p-2" side="top" align="start">
-                                    <div className="flex flex-row gap-2">
-                                        <DictationButton
-                                            isSupported={isDictationSupported}
-                                            isListening={isListening}
-                                            disabled={!canSendNewMessage}
-                                            onToggle={toggleDictation}
-                                        />
-                                        <UploadDragAndDropButton
-                                            onFileSelect={handleFileSelect}
-                                            accept={fileAcceptString}
-                                            disabled={!canSendNewMessage || isUploading}
-                                            nsfw={false}
-                                            title="Safe for Work"
-                                            label={"SFW"}
-                                            className="glass-control"
-                                        />
-                                        <UploadDragAndDropButton
-                                            onFileSelect={handleFileSelect}
-                                            accept={fileAcceptString}
-                                            disabled={!canSendNewMessage || isUploading}
-                                            nsfw={true}
-                                            title="Not Safe for Work"
-                                            label={"NSFW"}
-                                            className="glass-control"
-                                        />
-                                    </div>
-                                </PopoverContent>
-                            </Popover>
-                        ) : (
-                            <>
-                                <UploadDragAndDropButton
-                                    onFileSelect={handleFileSelect}
-                                    accept={fileAcceptString}
-                                    disabled={!canSendNewMessage || isUploading}
-                                    nsfw={false}
-                                    title="Safe for Work"
-                                    label={"SFW"}
-                                    className="glass-control"
+                                    <Smile className="h-4 w-4"/>
+                                </Button>
+                            </PopoverTrigger>
+                            <PopoverContent
+                                align="end"
+                                sideOffset={4}
+                                className="glass-popover p-0 border-none shadow-lg w-auto"
+                            >
+                                <Picker
+                                    data={data}
+                                    theme={resolvedTheme}
+                                    onEmojiSelect={(emoji: any) => {
+                                        editor?.chain().focus().insertContent(emoji.native).run();
+                                    }}
                                 />
+                            </PopoverContent>
+                        </Popover>
 
-                                <UploadDragAndDropButton
-                                    onFileSelect={handleFileSelect}
-                                    accept={fileAcceptString}
-                                    disabled={!canSendNewMessage || isUploading}
-                                    nsfw={true}
-                                    title="Not Safe for Work"
-                                    label={"NSFW"}
-                                    className="glass-control"
-                                />
-                            </>
-                        )}
+                        <DictationButton
+                            isSupported={isDictationSupported}
+                            isListening={isListening}
+                            disabled={!canSendNewMessage}
+                            onToggle={toggleDictation}
+                        />
+
+                        <UploadDragAndDropButton
+                            onFileSelect={handleFileSelect}
+                            accept={fileAcceptString}
+                            disabled={!canSendNewMessage || isUploading}
+                            nsfw={false}
+                            title="Safe for Work"
+                            label={"SFW"}
+                            className="glass-control"
+                        />
+
+                        <UploadDragAndDropButton
+                            onFileSelect={handleFileSelect}
+                            accept={fileAcceptString}
+                            disabled={!canSendNewMessage || isUploading}
+                            nsfw={true}
+                            title="Not Safe for Work"
+                            label={"NSFW"}
+                            className="glass-control"
+                        />
                     </>
+                )}
+
+                {isMobile && (
+                    <MobileActionsToggle
+                        expanded={actionsExpanded}
+                        onToggle={() => setActionsExpanded((prev) => !prev)}
+                        disabled={!canUseTextInput}
+                    />
                 )}
 
                 {isEditing ? (
