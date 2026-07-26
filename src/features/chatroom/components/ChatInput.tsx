@@ -48,6 +48,10 @@ interface ChatInputProps {
 }
 
 const MAX_FILE_SIZE = 11 * 1024 * 1024; // 11MB
+// Mirrors MessagesServiceImpl.MAX_RAW_LENGTH: the visible (stripped) length is
+// what counts against maxMessageLength; the raw marker string is hard-capped at
+// 4x that (worst-case marker overhead the editor can produce).
+const MAX_RAW_MESSAGE_LENGTH = 2000;
 
 const validateMessage = ({
                              inputText,
@@ -70,8 +74,10 @@ const validateMessage = ({
     if (isUploading) return {valid: false, reason: "Uploading attachment..."};
     if (trimmed === "" && !uploadedAttachment)
         return {valid: false, reason: "Cannot send an empty message"};
-    if (trimmed.length > maxMessageLength)
+    if (stripMarkers(trimmed).length > maxMessageLength)
         return {valid: false, reason: "Message exceeds maximum length"};
+    if (trimmed.length > MAX_RAW_MESSAGE_LENGTH)
+        return {valid: false, reason: "Message formatting is too large"};
     if (editingMessage && trimmed === (editingMessage.content ?? "").trim())
         return {valid: false, reason: "No changes detected"};
 
@@ -543,8 +549,9 @@ const ChatInput: React.FC<ChatInputProps> = ({
         );
     };
 
-    const remainingChars = maxMessageLength - inputText.length;
-    const isOverLimit = inputText.length > maxMessageLength;
+    const visibleLength = stripMarkers(inputText).length;
+    const remainingChars = maxMessageLength - visibleLength;
+    const isOverLimit = visibleLength > maxMessageLength || inputText.length > MAX_RAW_MESSAGE_LENGTH;
     const isEditing = !!editingMessage;
     const canSendNewMessage = isConnected && !messageSendingBlocked;
     const canUseTextInput = isEditing ? isConnected : canSendNewMessage;
@@ -789,7 +796,7 @@ const ChatInput: React.FC<ChatInputProps> = ({
                     } ${remainingChars <= 0 ? "text-red-600" : ""} tabular-nums`}
                 >
                     {isMobile
-                        ? `${inputText.length} / ${maxMessageLength}`
+                        ? `${visibleLength} / ${maxMessageLength}`
                         : `${remainingChars} characters remaining`}
                 </div>
             </div>
