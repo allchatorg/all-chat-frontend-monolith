@@ -16,6 +16,7 @@ import {
 } from "lucide-react";
 import * as React from "react";
 import {AdStatusDetails as AdStatusDetailsType} from "@ads/models/ad-status-details";
+import {FormattedMessageText} from "@/features/chatroom/components/FormattedMessageText";
 
 interface AdStatusDetailsProps {
     data: AdStatusDetailsType;
@@ -118,7 +119,7 @@ export default function AdStatusDetails({data, className, isAdmin = false}: AdSt
                                     <span className="text-sm font-medium text-muted-foreground">Text Content</span>
                                 </div>
                                 <p className="text-sm leading-relaxed whitespace-pre-wrap">
-                                    {data.textContent}
+                                    <FormattedMessageText text={data.textContent ?? ''}/>
                                 </p>
                             </div>
                         )}

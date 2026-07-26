@@ -10,6 +10,7 @@ import {AppDispatch} from "@/redux/store";
 import {markAdClicked, markAdLinkClicked} from "@/redux/ads/adsSlice";
 import {selectClickedAdIds, selectClickedAdLinkKeys} from "@/redux/ads/adsSelectors";
 import {registerAdClick, registerAdLinkClick} from "@/api/ads/adsAPI";
+import {FormattedMessageText} from "@/features/chatroom/components/FormattedMessageText";
 
 const AdvertMessageItem: React.FC<{
     message: Message;
@@ -84,36 +85,6 @@ const AdvertMessageItem: React.FC<{
         return brightness > 128 ? "black" : "white";
     };
 
-    const linkifyText = (text: string) => {
-        const urlRegex = /(https?:\/\/[^\s]+)/g;
-        const parts = text.split(urlRegex);
-
-        return parts.map((part, index) => {
-            if (part.match(urlRegex)) {
-                if (interactionsDisabled) {
-                    return <span key={index} className="wrap-anywhere">{part}</span>;
-                }
-
-                return (
-                    <a
-                        key={index}
-                        href={part}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="underline hover:opacity-80 wrap-anywhere"
-                        onClick={(e) => {
-                            e.stopPropagation();
-                            handleLinkClick(part);
-                        }}
-                    >
-                        {part}
-                    </a>
-                );
-            }
-            return part;
-        });
-    };
-
     return (
         <div className={clsx("flex flex-col justify-items-center items-start pl-4 max-w-full min-w-0")}>
             {message.attachments?.map((attachment: Attachment) => (
@@ -136,7 +107,11 @@ const AdvertMessageItem: React.FC<{
                     >
                         <div
                             className="text-sm font-normal whitespace-pre-wrap [word-break:break-word] wrap-anywhere min-w-0 max-w-full">
-                            {linkifyText(message.content)}
+                            <FormattedMessageText
+                                text={message.content}
+                                interactionsDisabled={interactionsDisabled}
+                                onLinkClick={handleLinkClick}
+                            />
                         </div>
                     </div>
                 </div>

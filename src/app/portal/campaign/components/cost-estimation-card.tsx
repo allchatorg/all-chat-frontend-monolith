@@ -5,6 +5,7 @@ import {AdFormatDto, AdFormatType} from "@ads/data/adFormats";
 import {CampaignDetails} from "@ads/hooks/use-campaign-creator";
 import {useMemo} from "react";
 import {calculateAdCost} from "@ads/utils/pricing-utils";
+import {stripMarkers} from "@/features/chatroom/utils/messageMarkers";
 import {Info} from "lucide-react";
 import {Tooltip, TooltipContent, TooltipTrigger} from "@ads/components/ui/tooltip";
 
@@ -22,9 +23,12 @@ export default function CostEstimationCard({
                                                adFormats
                                            }: CostEstimationCardProps) {
 
+    // Pricing counts the visible text, not the raw **bold**/*italic* markers.
+    const visibleTextLength = useMemo(() => stripMarkers(details.text).length, [details.text]);
+
     const pricingData = useMemo(() => {
-        return calculateAdCost(selectedFormat, details.text.length, details.views, adFormats);
-    }, [details.views, details.text.length, selectedFormat, adFormats]);
+        return calculateAdCost(selectedFormat, visibleTextLength, details.views, adFormats);
+    }, [details.views, visibleTextLength, selectedFormat, adFormats]);
 
     const {totalCost, baseCPM, textCPM, totalCPM} = pricingData;
 
@@ -87,7 +91,7 @@ export default function CostEstimationCard({
                             <div className="flex justify-between items-center">
                                 <div className="flex items-center gap-1">
                                     <span
-                                        className="text-muted-foreground">Text Component ({details.text.length} chars)</span>
+                                        className="text-muted-foreground">Text Component ({visibleTextLength} chars)</span>
                                     <Tooltip>
                                         <TooltipTrigger>
                                             <Info

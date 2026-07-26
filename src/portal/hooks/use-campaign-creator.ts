@@ -1,4 +1,5 @@
 import {useEffect, useMemo, useState} from "react";
+import {stripMarkers} from "@/features/chatroom/utils/messageMarkers";
 import {AdFormatDto, AdFormatType} from "@ads/data/adFormats";
 import {useSearchParams} from "next/navigation";
 import {useGetAdFormatsQuery} from "@ads/store/services/adFormatsApi";
@@ -80,8 +81,8 @@ export function useCampaignCreator() {
 
         if (!selectedAdFormat) return false;
 
-        // Only require text if it is a text ad
-        if (selectedAdFormat.type === AdFormatType.TEXT && !details.text.trim()) {
+        // Only require text if it is a text ad (markers alone don't count)
+        if (selectedAdFormat.type === AdFormatType.TEXT && !stripMarkers(details.text).trim()) {
             newErrors.text = 'Ad text content is required';
             isValid = false;
         }

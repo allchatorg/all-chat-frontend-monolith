@@ -5,7 +5,8 @@ import {tokenize} from "@/features/chatroom/utils/messageMarkers";
 export const FormattedMessageText: React.FC<{
     text: string,
     interactionsDisabled?: boolean,
-}> = ({text, interactionsDisabled = false}) => {
+    onLinkClick?: (url: string) => void,
+}> = ({text, interactionsDisabled = false, onLinkClick}) => {
     return (
         <>
             {tokenize(text).map((segment, index) => {
@@ -17,8 +18,11 @@ export const FormattedMessageText: React.FC<{
                             href={segment.text}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="underline hover:opacity-80"
-                            onClick={(e) => e.stopPropagation()}
+                            className="underline hover:opacity-80 wrap-anywhere"
+                            onClick={(e) => {
+                                e.stopPropagation();
+                                onLinkClick?.(segment.text);
+                            }}
                         >
                             {segment.text}
                         </a>
