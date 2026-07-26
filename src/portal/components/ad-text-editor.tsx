@@ -100,8 +100,8 @@ export default function AdTextEditor({value, onChange, placeholder}: AdTextEdito
                         variant="outline"
                         size="icon"
                         className={cn(
-                            "h-8 w-8 shrink-0",
-                            isActive && "bg-accent text-accent-foreground"
+                            "h-8 w-8 shrink-0 text-muted-foreground",
+                            isActive && "bg-indigo-600 border-indigo-600 text-white shadow-sm hover:bg-indigo-700 hover:text-white"
                         )}
                         disabled={!editor}
                         // Keep focus (and the current selection) in the editor.
