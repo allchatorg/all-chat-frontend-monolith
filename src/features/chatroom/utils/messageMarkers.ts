@@ -161,14 +161,42 @@ interface StyledRun {
     italic: boolean;
 }
 
-function wrapRun(run: StyledRun): string {
-    if (!run.bold && !run.italic) return run.text;
-    // Flanking rules forbid markers around whitespace — hoist it outside.
-    const m = run.text.match(/^(\s*)([\s\S]*?)(\s*)$/);
-    const [, lead, core, trail] = m as RegExpMatchArray;
-    if (!core) return run.text;
-    const marker = run.bold && run.italic ? "***" : run.bold ? "**" : "*";
-    return lead + marker + core + marker + trail;
+// Serializes one line of styled runs by emitting toggle markers — exactly the
+// grammar tokenize() reads back: a run of 2 asterisks toggles bold, 1 toggles
+// italic, 3 toggle both. Wrapping each run independently and concatenating is
+// NOT safe: adjacent differently-styled runs would fuse into runs of 4+
+// asterisks, which tokenize() reads as *** plus literal stars.
+function serializeLine(runs: StyledRun[]): string {
+    let out = "";
+    let bold = false;
+    let italic = false;
+    const toggleTo = (b: boolean, i: boolean) => {
+        out += "*".repeat((bold !== b ? 2 : 0) + (italic !== i ? 1 : 0));
+        bold = b;
+        italic = i;
+    };
+    for (const run of runs) {
+        const m = run.text.match(/^(\s*)([\s\S]*?)(\s*)$/);
+        const [, lead, core, trail] = m as RegExpMatchArray;
+        if (!core) {
+            // Whitespace-only: styling is invisible, and closers must not
+            // trail whitespace — close everything first.
+            toggleTo(false, false);
+            out += run.text;
+            continue;
+        }
+        // Flanking rules: closers must sit after text, openers before it.
+        // Drop open-but-unwanted formats before the gap, open the rest after.
+        // With no gap the two emissions fuse into one valid toggle run (≤3).
+        toggleTo(bold && run.bold, italic && run.italic);
+        out += lead;
+        toggleTo(run.bold, run.italic);
+        out += core;
+        if (trail) toggleTo(false, false);
+        out += trail;
+    }
+    toggleTo(false, false);
+    return out;
 }
 
 function serializeParagraph(nodes: PmNode[]): string {
@@ -176,21 +204,23 @@ function serializeParagraph(nodes: PmNode[]): string {
     for (const node of nodes) {
         const text = node.type === "hardBreak" ? "\n" : node.text ?? "";
         if (!text) continue;
-        const bold = node.type !== "hardBreak" && !!node.marks?.some((m) => m.type === "bold");
-        const italic = node.type !== "hardBreak" && !!node.marks?.some((m) => m.type === "italic");
+        // Whitespace-only nodes render identically unstyled — treat as plain.
+        const styled = node.type !== "hardBreak" && /\S/.test(text);
+        const bold = styled && !!node.marks?.some((m) => m.type === "bold");
+        const italic = styled && !!node.marks?.some((m) => m.type === "italic");
         const last = runs[runs.length - 1];
         if (last && last.bold === bold && last.italic === italic) last.text += text;
         else runs.push({ text, bold, italic });
     }
-    // Marker pairs must not span a hard break — split runs on newlines.
-    let out = "";
+    // Marker pairs must not span a hard break — serialize per line.
+    const lines: StyledRun[][] = [[]];
     for (const run of runs) {
         run.text.split("\n").forEach((part, idx) => {
-            if (idx > 0) out += "\n";
-            out += wrapRun({ ...run, text: part });
+            if (idx > 0) lines.push([]);
+            if (part) lines[lines.length - 1].push({ ...run, text: part });
         });
     }
-    return out;
+    return lines.map(serializeLine).join("\n");
 }
 
 export function docToMarkers(doc: PmNode): string {
