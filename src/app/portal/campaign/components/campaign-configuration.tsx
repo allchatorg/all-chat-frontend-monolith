@@ -7,8 +7,8 @@ import {CheckCircle2, ChevronLeft, FileText, Image as ImageIcon, Info, Loader2, 
 import {Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle} from "@ads/components/ui/card";
 import {Tooltip, TooltipContent, TooltipTrigger} from "@ads/components/ui/tooltip";
 import {Input} from "@ads/components/ui/input";
-import {Textarea} from "@ads/components/ui/textarea";
 import {Button} from "@ads/components/ui/button";
+import AdTextEditor from "@ads/components/ad-text-editor";
 import {ActionButton} from "@ads/components/ui/action-button";
 import CostEstimationCard from "./cost-estimation-card";
 import {useForm} from "react-hook-form";
@@ -16,7 +16,8 @@ import {zodResolver} from "@hookform/resolvers/zod";
 import * as z from "zod";
 import {Form, FormControl, FormField, FormItem, FormLabel, FormMessage,} from "@ads/components/ui/form";
 import {AdFormatDto, AdFormatType} from "@ads/data/adFormats";
-import {MAX_CHAR_COUNT} from "@ads/utils/pricing-utils";
+import {MAX_CHAR_COUNT, MAX_RAW_TEXT_LENGTH} from "@ads/utils/pricing-utils";
+import {stripMarkers} from "@/features/chatroom/utils/messageMarkers";
 import {useUploadFileMutation} from "@ads/store/services/fileApi";
 import {toast} from "sonner";
 import CampaignPreviewCta from "@/app/portal/campaign/components/campaign-preview-cta";
@@ -44,9 +45,17 @@ export default function CampaignConfiguration({
     // Dynamic schema based on selectedFormat.type
     const schema = z.object({
         name: z.string().min(1, "Campaign name is required"),
+        // Limits count the visible (stripped) text; the raw marker string has
+        // its own cap — mirroring the backend's ad text validation.
         text: selectedFormat.type === AdFormatType.TEXT
-            ? z.string().min(1, "Ad text content is required").max(MAX_CHAR_COUNT, `Max ${MAX_CHAR_COUNT} characters`)
-            : z.string().max(MAX_CHAR_COUNT, `Max ${MAX_CHAR_COUNT} characters`).optional(),
+            ? z.string()
+                .refine((v) => stripMarkers(v).trim().length > 0, "Ad text content is required")
+                .refine((v) => stripMarkers(v).length <= MAX_CHAR_COUNT, `Max ${MAX_CHAR_COUNT} characters`)
+                .refine((v) => v.length <= MAX_RAW_TEXT_LENGTH, `Formatted text exceeds ${MAX_RAW_TEXT_LENGTH} characters`)
+            : z.string()
+                .refine((v) => stripMarkers(v).length <= MAX_CHAR_COUNT, `Max ${MAX_CHAR_COUNT} characters`)
+                .refine((v) => v.length <= MAX_RAW_TEXT_LENGTH, `Formatted text exceeds ${MAX_RAW_TEXT_LENGTH} characters`)
+                .optional(),
         media: selectedFormat.type !== AdFormatType.TEXT
             ? z.custom<File>((val) => val instanceof File, "Media is required").or(z.null())
             : z.any().optional(),
@@ -269,17 +278,15 @@ export default function CampaignConfiguration({
                                                             className="text-muted-foreground font-normal">(Optional)</span>}
                                                     </FormLabel>
                                                     <span
-                                                        className={`text-xs ${field.value?.length && field.value.length >= MAX_CHAR_COUNT ? 'text-red-500 font-bold' : 'text-muted-foreground'}`}>
-                                                        {field.value?.length || 0}/{MAX_CHAR_COUNT}
+                                                        className={`text-xs ${stripMarkers(field.value ?? '').length >= MAX_CHAR_COUNT ? 'text-red-500 font-bold' : 'text-muted-foreground'}`}>
+                                                        {stripMarkers(field.value ?? '').length}/{MAX_CHAR_COUNT}
                                                     </span>
                                                 </div>
                                                 <FormControl>
-                                                    <Textarea
+                                                    <AdTextEditor
+                                                        value={field.value ?? ''}
+                                                        onChange={field.onChange}
                                                         placeholder="Enter the primary text for your advertisement..."
-                                                        rows={4}
-                                                        maxLength={MAX_CHAR_COUNT}
-                                                        className="resize-none border-border focus-visible:ring-indigo-200"
-                                                        {...field}
                                                     />
                                                 </FormControl>
                                                 <FormMessage/>

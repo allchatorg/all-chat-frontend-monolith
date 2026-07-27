@@ -7,6 +7,7 @@ import {Button} from '@ads/components/ui/button';
 import {Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle} from '@ads/components/ui/card';
 import {ChevronLeft, Lock} from 'lucide-react';
 import {calculateAdCost} from '@ads/utils/pricing-utils';
+import {stripMarkers} from '@/features/chatroom/utils/messageMarkers';
 import {ActionButton} from '@ads/components/ui/action-button';
 import {useCreateAdMutation} from '@ads/store/services/adsApi';
 import {toast} from 'sonner';
@@ -36,7 +37,9 @@ const PaymentCard = ({details, selectedFormat, adFormats, onBack}: StripePayment
     const router = useRouter();
     const dispatch = useDispatch<AppDispatch>();
 
-    const {totalCost} = calculateAdCost(selectedFormat, details.text.length, details.views, adFormats);
+    // Pricing counts the visible text, not the raw **bold**/*italic* markers
+    // (must match the server-side calculation or the ad is rejected).
+    const {totalCost} = calculateAdCost(selectedFormat, stripMarkers(details.text).length, details.views, adFormats);
 
     const handleSubmit = async () => {
         if (!selectedPaymentMethodId) {

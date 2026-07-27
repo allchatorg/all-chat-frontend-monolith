@@ -2,6 +2,11 @@ import {AdFormatDto, AdFormatType} from "@ads/data/adFormats";
 
 export const MAX_CHAR_COUNT = 500;
 
+// Ad text carries the same **bold**/*italic* markers as chat messages:
+// MAX_CHAR_COUNT limits the visible (stripped) text, this caps the raw
+// marker string — mirroring the chat message limits.
+export const MAX_RAW_TEXT_LENGTH = 4 * MAX_CHAR_COUNT;
+
 export function calculateAdCost(format: AdFormatDto, textLength: number, views: number, adFormats: AdFormatDto[]): {
     totalCost: number;
     baseCPM: number;
