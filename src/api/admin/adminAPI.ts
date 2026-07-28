@@ -73,6 +73,14 @@ export const getAuditLogs = async (request: SearchAuditLogsRequest
     return res.data;
 }
 
+export const requireIdVerification = async (userId: number, reportCaseId?: number): Promise<void> => {
+    await api.post(`${ADMIN_PATH}/users/${userId}/id-verification/require`, {reportCaseId});
+};
+
+export const clearIdVerification = async (userId: number): Promise<void> => {
+    await api.delete(`${ADMIN_PATH}/users/${userId}/id-verification/require`);
+};
+
 export const archiveChatRoom = async (roomId: number): Promise<void> => {
     await api.put(`${ADMIN_PATH}/chat-rooms/${roomId}/archive`);
 };

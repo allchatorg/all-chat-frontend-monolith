@@ -21,6 +21,10 @@ export enum AuditLogType {
     ARCHIVE_CHATROOM = "ARCHIVE_CHATROOM",
     UNARCHIVE_CHATROOM = "UNARCHIVE_CHATROOM",
     BAN_APPEAL_RESOLVE = "BAN_APPEAL_RESOLVE",
+    REQUIRE_ID_VERIFICATION = "REQUIRE_ID_VERIFICATION",
+    CLEAR_ID_VERIFICATION = "CLEAR_ID_VERIFICATION",
+    ID_VERIFICATION_PASSED = "ID_VERIFICATION_PASSED",
+    ID_VERIFICATION_FAILED = "ID_VERIFICATION_FAILED",
 }
 
 export interface AuditLog {
@@ -102,6 +106,15 @@ export interface BanAppealResolveAuditLog extends AuditLog {
     decision: string;
 }
 
+export interface IdVerificationAuditLog extends AuditLog {
+    auditLogType:
+        | AuditLogType.REQUIRE_ID_VERIFICATION
+        | AuditLogType.CLEAR_ID_VERIFICATION
+        | AuditLogType.ID_VERIFICATION_PASSED
+        | AuditLogType.ID_VERIFICATION_FAILED;
+    reportCaseId?: number | null;
+}
+
 export type AuditLogUnion =
     | BanAuditLog
     | RevokeBanAuditLog
@@ -112,7 +125,8 @@ export type AuditLogUnion =
     | ResolveCaseAuditLog
     | RoleChangeAuditLog
     | NcmecReportAuditLog
-    | ChatRoomAuditLog;
+    | ChatRoomAuditLog
+    | IdVerificationAuditLog;
 
 export const isBan = (log: AuditLog): log is BanAuditLog =>
     log.auditLogType === AuditLogType.BAN;

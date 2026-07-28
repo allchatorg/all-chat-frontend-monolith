@@ -2,6 +2,9 @@ import {useCallback, useEffect, useRef, useState} from "react";
 import {ReportNotification} from "@/models/ReportNotification";
 import {useDispatch, useSelector} from "react-redux";
 import {useReportNotification} from "@/lib/hooks/useReportNotification";
+import {useIdVerificationNotification} from "@/lib/hooks/useIdVerificationNotification";
+import {IdVerificationResultNotification} from "@/models/IdVerificationResultNotification";
+import {fetchMe} from "@/redux/user/usersThunk";
 import SockJS from "sockjs-client";
 import {Client, IMessage, StompSubscription} from "@stomp/stompjs";
 import {AppDispatch, resetApp, RootState} from "@/redux/store";
@@ -100,6 +103,7 @@ export function useStompWithRedux(
     }, [onMessage]);
 
     const {handleReportNotification} = useReportNotification();
+    const {handleIdVerificationResult} = useIdVerificationNotification();
 
     // Memoize the message handler to prevent unnecessary recreations
     const handleWebSocketMessage = useCallback(
@@ -245,6 +249,24 @@ export function useStompWithRedux(
                         handleReportNotification(reportNotification, userRef.current);
                         break;
 
+                    case WebSocketMessageType.ID_VERIFICATION_REQUIRED:
+                        // Refetch the current user so the blocking overlay appears live.
+                        dispatch(fetchMe());
+                        break;
+
+                    case WebSocketMessageType.ID_VERIFICATION_RESULT: {
+                        if (!user) return;
+                        const idVerificationResult = data as IdVerificationResultNotification;
+
+                        if (idVerificationResult.userId === user.id) {
+                            // Refetch the current user so the overlay clears/updates.
+                            dispatch(fetchMe());
+                        }
+
+                        handleIdVerificationResult(idVerificationResult, user);
+                        break;
+                    }
+
                     case WebSocketMessageType.CHATROOM_ARCHIVED:
                         if (!user) return;
                         const archivedChatRoom = data as ChatRoom;
@@ -290,7 +312,7 @@ export function useStompWithRedux(
                 onMessageRef.current(topic, message);
             }
         },
-        [dispatch, handleReportNotification]
+        [dispatch, handleReportNotification, handleIdVerificationResult]
     );
 
     const disconnect = useCallback(() => {

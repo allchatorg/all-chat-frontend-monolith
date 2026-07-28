@@ -2,7 +2,8 @@ import {useMemo} from "react";
 import {ColumnDef} from "@tanstack/table-core";
 import {ReportCaseSummary} from "@/models/ReportCaseSummary";
 import {Button} from "@/components/ui/button";
-import {ArrowUpDown, ShieldAlert} from "lucide-react";
+import {ArrowUpDown, IdCard, ShieldAlert} from "lucide-react";
+import {ReportType} from "@/models/ReportTypeEnum";
 
 type UseReportCasesTableColumnsProps = {
     onViewDetails?: (reportCaseId: string) => void;
@@ -53,6 +54,28 @@ export function useReportCasesTableColumns({
                     if (filterValue === undefined) return true;
                     const needsAttention = row.original.needsAttentionAt !== null;
                     return needsAttention === filterValue;
+                }
+            },
+            {
+                id: "underage",
+                header: "Underage",
+                accessorFn: (row) => row.reportTypes?.includes(ReportType.UNDERAGE) ?? false,
+                cell: ({row}) => {
+                    const isUnderageCase = row.original.reportTypes?.includes(ReportType.UNDERAGE) ?? false;
+                    return isUnderageCase ? (
+                        <div className="flex items-center">
+                            <div
+                                className="inline-flex items-center rounded-full bg-amber-100 px-2 py-1 text-amber-800">
+                                <IdCard className="mr-1 h-4 w-4 text-amber-600"/>
+                                <span className="text-xs font-medium">UNDERAGE</span>
+                            </div>
+                        </div>
+                    ) : null;
+                },
+                filterFn: (row, columnId, filterValue: any) => {
+                    if (filterValue === undefined) return true;
+                    const isUnderageCase = row.original.reportTypes?.includes(ReportType.UNDERAGE) ?? false;
+                    return isUnderageCase === filterValue;
                 }
             },
             {

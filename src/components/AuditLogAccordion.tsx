@@ -12,9 +12,12 @@ import {
     Ban,
     CheckCircle,
     Clock,
+    IdCard,
     MessageSquareX,
     Scale,
     ShieldBan,
+    ShieldCheck,
+    ShieldX,
     User,
     UserCheck,
 } from "lucide-react";
@@ -58,6 +61,14 @@ const getActionIcon = (type: AuditLogType) => {
             return <ArchiveRestore {...iconProps} className="text-cyan-600 dark:text-cyan-400"/>;
         case AuditLogType.BAN_APPEAL_RESOLVE:
             return <Scale {...iconProps} className="text-indigo-600 dark:text-indigo-400"/>;
+        case AuditLogType.REQUIRE_ID_VERIFICATION:
+            return <IdCard {...iconProps} className="text-amber-600 dark:text-amber-400"/>;
+        case AuditLogType.CLEAR_ID_VERIFICATION:
+            return <IdCard {...iconProps} className="text-slate-600 dark:text-slate-300"/>;
+        case AuditLogType.ID_VERIFICATION_PASSED:
+            return <ShieldCheck {...iconProps} className="text-green-600 dark:text-green-400"/>;
+        case AuditLogType.ID_VERIFICATION_FAILED:
+            return <ShieldX {...iconProps} className="text-red-600 dark:text-red-400"/>;
         default:
             return null;
     }
@@ -89,6 +100,14 @@ const getActionColor = (type: AuditLogType) => {
             return "bg-cyan-100 text-cyan-800 border-cyan-200 dark:bg-cyan-900/30 dark:text-cyan-300 dark:border-cyan-800";
         case AuditLogType.BAN_APPEAL_RESOLVE:
             return "bg-indigo-100 text-indigo-800 border-indigo-200 dark:bg-indigo-900/30 dark:text-indigo-300 dark:border-indigo-800";
+        case AuditLogType.REQUIRE_ID_VERIFICATION:
+            return "bg-amber-100 text-amber-800 border-amber-200 dark:bg-amber-900/30 dark:text-amber-300 dark:border-amber-800";
+        case AuditLogType.CLEAR_ID_VERIFICATION:
+            return "bg-slate-100 text-slate-800 border-slate-200 dark:bg-slate-800 dark:text-slate-200 dark:border-slate-700";
+        case AuditLogType.ID_VERIFICATION_PASSED:
+            return "bg-green-100 text-green-800 border-green-200 dark:bg-green-900/30 dark:text-green-300 dark:border-green-800";
+        case AuditLogType.ID_VERIFICATION_FAILED:
+            return "bg-red-100 text-red-800 border-red-200 dark:bg-red-900/30 dark:text-red-300 dark:border-red-800";
         default:
             return "bg-gray-100 text-gray-800 border-gray-200 dark:bg-gray-800 dark:text-gray-300 dark:border-gray-700";
     }
@@ -275,6 +294,38 @@ const renderLogDetails = (log: AuditLogUnion) => {
                     {log.description && (
                         <div
                             className="rounded border-l-4 border-indigo-300 bg-indigo-50 p-3 text-sm text-indigo-800 dark:border-indigo-700 dark:bg-indigo-900/10 dark:text-indigo-300">
+                            {log.description}
+                        </div>
+                    )}
+                </div>
+            );
+
+        case AuditLogType.REQUIRE_ID_VERIFICATION:
+        case AuditLogType.CLEAR_ID_VERIFICATION:
+        case AuditLogType.ID_VERIFICATION_PASSED:
+        case AuditLogType.ID_VERIFICATION_FAILED:
+            return (
+                <div className="space-y-2">
+                    {log.targetUser && <Row label="Target User" value={log.targetUser.username}/>}
+                    <div className="flex items-center gap-2">
+                        <span className="text-sm font-medium">Outcome:</span>
+                        <Badge
+                            variant={log.auditLogType === AuditLogType.ID_VERIFICATION_FAILED ? "destructive" : "secondary"}
+                            className="text-xs"
+                        >
+                            {log.auditLogType === AuditLogType.REQUIRE_ID_VERIFICATION
+                                ? "ID Verification Required"
+                                : log.auditLogType === AuditLogType.CLEAR_ID_VERIFICATION
+                                    ? "ID Verification Requirement Cleared"
+                                    : log.auditLogType === AuditLogType.ID_VERIFICATION_PASSED
+                                        ? "ID Verification Passed"
+                                        : "ID Verification Failed"}
+                        </Badge>
+                    </div>
+                    {log.reportCaseId != null && <Row label="Report Case ID" value={log.reportCaseId}/>}
+                    {log.description && (
+                        <div
+                            className="rounded border-l-4 border-amber-300 bg-amber-50 p-3 text-sm text-amber-800 dark:border-amber-700 dark:bg-amber-900/10 dark:text-amber-300">
                             {log.description}
                         </div>
                     )}

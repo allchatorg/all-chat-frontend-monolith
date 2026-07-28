@@ -58,8 +58,10 @@ export function useReportCaseFilters() {
         if (filters.resolved !== undefined) {
             params.set('resolved', filters.resolved.toString());
         }
-        if (filters.reportTypes) {
+        if (filters.reportTypes && filters.reportTypes.length > 0) {
             params.set('reportTypes', filters.reportTypes.join(','));
+        } else {
+            params.delete('reportTypes');
         }
         if (filters.reportedUserUsernameOrId) {
             params.set('reportedUserUsernameOrId', filters.reportedUserUsernameOrId);

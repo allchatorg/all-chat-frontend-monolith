@@ -13,6 +13,12 @@ import {useParams} from "next/navigation";
 import {UserAdminView} from "@/models/UserAdminView";
 import {getCountryName} from "@/lib/utils/countryUtils";
 import {CountryFlag} from "@/features/chatroom/components/CountryFlag";
+import {Button} from "@/components/ui/button";
+import {useDialog} from "@/components/providers/DialogProvider";
+import {ConfirmModal} from "@/components/ConfirmModal";
+import {IdVerificationStatusBadge} from "@/components/IdVerificationStatusBadge";
+import {clearIdVerification, requireIdVerification} from "@/api/admin/adminAPI";
+import {toast} from "sonner";
 
 interface UserAdminViewProps {
     user: UserAdminView;
@@ -54,12 +60,85 @@ export default function UserDetailsPage() {
     const userId = Number(params.id) || 0;
     const [getUserDetails, userDetailsIsLoading, userDetailsError] = useThunk(getUserAdminViewDetailsThunk);
     const user = useSelector(selectUserAdminView);
+    const {open, close} = useDialog();
 
     useEffect(() => {
         if (userId) {
             getUserDetails(userId);
         }
     }, [userId, getUserDetails]);
+
+    const idVerificationStatus = user?.idVerificationStatus ?? 'NONE';
+    const requireDisabled = idVerificationStatus === 'REQUIRED'
+        || idVerificationStatus === 'PENDING'
+        || idVerificationStatus === 'VERIFIED';
+    const requireDisabledReason = idVerificationStatus === 'VERIFIED'
+        ? "The user has already verified their age"
+        : idVerificationStatus === 'PENDING'
+            ? "The user's ID verification is already under review"
+            : idVerificationStatus === 'REQUIRED'
+                ? "ID verification has already been required for this user"
+                : undefined;
+    const clearDisabled = idVerificationStatus === 'NONE' || idVerificationStatus === 'VERIFIED';
+    const clearDisabledReason = idVerificationStatus === 'VERIFIED'
+        ? "The user has already passed verification; there is no requirement to clear"
+        : idVerificationStatus === 'NONE'
+            ? "No ID verification requirement to clear"
+            : undefined;
+
+    const refetchUserDetails = async () => {
+        try {
+            await getUserDetails(userId);
+        } catch (error) {
+            toast.error("Failed to refresh user details");
+        }
+    };
+
+    const handleRequireIdVerification = () => {
+        if (!user) return;
+
+        open(
+            <ConfirmModal
+                title="Require ID verification?"
+                description={`${user.username} will be blocked from using the app until they verify their age with a government ID through Stripe Identity.`}
+                onClose={close}
+                onConfirm={async () => {
+                    try {
+                        await requireIdVerification(user.id);
+                        close();
+                        toast.success("ID verification required");
+                    } catch (error) {
+                        close();
+                        toast.error("Failed to require ID verification");
+                    }
+                    await refetchUserDetails();
+                }}
+            />
+        );
+    };
+
+    const handleClearIdVerification = () => {
+        if (!user) return;
+
+        open(
+            <ConfirmModal
+                title="Clear ID verification requirement?"
+                description={`${user.username} will no longer be asked to verify their age and will regain access to the app.`}
+                onClose={close}
+                onConfirm={async () => {
+                    try {
+                        await clearIdVerification(user.id);
+                        close();
+                        toast.success("ID verification requirement cleared");
+                    } catch (error) {
+                        close();
+                        toast.error("Failed to clear ID verification requirement");
+                    }
+                    await refetchUserDetails();
+                }}
+            />
+        );
+    };
 
     if (user === null || userDetailsIsLoading) {
         return (
@@ -175,6 +254,28 @@ export default function UserDetailsPage() {
                             trueVariant="destructive"
                             falseVariant="default"
                         />
+                        <IdVerificationStatusBadge status={idVerificationStatus}/>
+                    </div>
+
+                    <div className="mt-4 flex flex-wrap gap-2">
+                        <Button
+                            variant="outline"
+                            size="sm"
+                            disabled={requireDisabled}
+                            title={requireDisabledReason}
+                            onClick={handleRequireIdVerification}
+                        >
+                            Require ID verification
+                        </Button>
+                        <Button
+                            variant="outline"
+                            size="sm"
+                            disabled={clearDisabled}
+                            title={clearDisabledReason}
+                            onClick={handleClearIdVerification}
+                        >
+                            Clear requirement
+                        </Button>
                     </div>
                 </CardContent>
             </Card>

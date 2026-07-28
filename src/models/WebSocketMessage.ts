@@ -8,6 +8,7 @@ import {ReportNotification} from "@/models/ReportNotification";
 import {ChatRoom} from "@/models/ChatRoom";
 import {MessagingAvailability} from "@/models/MessagingAvailability";
 import {PromotedMessageEvent} from "@/models/PromotedMessageEvent";
+import {IdVerificationResultNotification} from "@/models/IdVerificationResultNotification";
 
 type WarnUserResponse = {
     description: string;
@@ -75,4 +76,10 @@ export type WebSocketMessage =
     type: WebSocketMessageType.PRIVATE_MESSAGE_DELETE;
     chatRoomName: null;
     data: Message;
+} | {
+    type: WebSocketMessageType.ID_VERIFICATION_REQUIRED;
+    data: any;
+} | {
+    type: WebSocketMessageType.ID_VERIFICATION_RESULT;
+    data: IdVerificationResultNotification;
 }

@@ -1,6 +1,7 @@
 import {Attachment} from "@/models/Attachment";
 import {Reaction} from "@/models/Reaction";
 import {Role} from "@/models/Role";
+import {IdVerificationStatus} from "@/models/IdVerificationStatus";
 
 export interface ReplyInfo {
     id: number;
@@ -31,6 +32,7 @@ export interface Message {
     senderUsername: string;
     senderRole: Role;
     senderCountryCode?: string;
+    senderIdVerificationStatus?: IdVerificationStatus;
     chatRoomId: number;
     chatRoomName: string;
     bannedUser: boolean;
