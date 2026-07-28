@@ -1,6 +1,6 @@
 'use client';
 
-import React from 'react';
+import React, {useEffect} from 'react';
 import {motion} from 'framer-motion';
 import Image from 'next/image';
 import {usePathname} from 'next/navigation';
@@ -27,12 +27,6 @@ export const VerificationBlockingOverlay: React.FC<VerificationBlockingOverlayPr
     const logoSrc = useThemedLogo();
     const pathname = usePathname();
 
-    let show: 'NONE' | 'CLAIM' | 'EMAIL' | 'PHONE' | 'ID' = 'NONE';
-
-    if (!user) {
-        return <>{children}</>;
-    }
-
     const handleClaimUser = async (email: string, password: string) => {
         try {
             const response = await runClaimAccount({email, password});
@@ -41,7 +35,9 @@ export const VerificationBlockingOverlay: React.FC<VerificationBlockingOverlayPr
         }
     };
 
-    const determineShow = () => {
+    const determineShow = (): 'NONE' | 'CLAIM' | 'EMAIL' | 'PHONE' | 'ID' => {
+        if (!user) return 'NONE';
+
         const required = ipDetails?.requiredVerification ?? 'NONE';
         const hasEmail = !!user?.email;
         const emailVerified = !!user?.verified;
@@ -68,14 +64,38 @@ export const VerificationBlockingOverlay: React.FC<VerificationBlockingOverlayPr
         return 'NONE';
     };
 
-    show = determineShow();
-
+    const show = determineShow();
     const showOverlay = show !== 'NONE';
+
+    // Stripe's verifyIdentity modal snapshots the body style while our dialog
+    // is open (pointer-events: none) and restores that snapshot when its
+    // iframe tears down — which happens asynchronously and can land AFTER the
+    // webhook->WS result has already closed this dialog, leaving the whole
+    // page unclickable. Clear the stale lock, and retry across the teardown
+    // window; skip whenever some other dialog is legitimately open.
+    useEffect(() => {
+        if (showOverlay) return;
+        const clearStaleLock = () => {
+            if (document.querySelector('[role="dialog"][data-state="open"]')) return;
+            if (document.body.style.pointerEvents === 'none') {
+                document.body.style.pointerEvents = '';
+            }
+        };
+        clearStaleLock();
+        const timers = [300, 1000, 2500].map(ms => window.setTimeout(clearStaleLock, ms));
+        return () => timers.forEach(t => window.clearTimeout(t));
+    }, [showOverlay]);
+
+    // Unmount the dialog entirely instead of flipping `open`, so closing never
+    // depends on Radix's exit-animation cleanup.
+    if (!showOverlay) {
+        return <>{children}</>;
+    }
 
     return (
         <>
             {children}
-            <Dialog open={showOverlay} modal>
+            <Dialog open modal>
                 <DialogContent
                     showCloseButton={false}
                     className="w-[90%] md:w-full rounded-xl md:max-w-[450px] shadow-2xl"
@@ -101,7 +121,7 @@ export const VerificationBlockingOverlay: React.FC<VerificationBlockingOverlayPr
                             For all conversations.
                         </p>
                     </motion.div>
-                    {show === 'CLAIM' && <ClaimUser claimed={user.claimed ?? false} onClaim={handleClaimUser}/>}
+                    {show === 'CLAIM' && <ClaimUser claimed={user?.claimed ?? false} onClaim={handleClaimUser}/>}
                     {show === 'EMAIL' && <VerifyMail/>}
                     {show === 'PHONE' && <VerifyPhone/>}
                     {show === 'ID' && <VerifyIdentity/>}

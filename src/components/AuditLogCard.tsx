@@ -65,6 +65,8 @@ const getActionIcon = (type: AuditLogType) => {
             return <Scale {...iconProps} className="h-5 w-5 text-indigo-600 dark:text-indigo-400"/>;
         case AuditLogType.REQUIRE_ID_VERIFICATION:
             return <IdCard {...iconProps} className="h-5 w-5 text-amber-600 dark:text-amber-400"/>;
+        case AuditLogType.CLEAR_ID_VERIFICATION:
+            return <IdCard {...iconProps} className="h-5 w-5 text-slate-600 dark:text-slate-300"/>;
         case AuditLogType.ID_VERIFICATION_PASSED:
             return <ShieldCheck {...iconProps} className="h-5 w-5 text-green-600 dark:text-green-400"/>;
         case AuditLogType.ID_VERIFICATION_FAILED:
@@ -102,6 +104,8 @@ const getActionColor = (type: AuditLogType) => {
             return 'bg-indigo-100 text-indigo-800 border-indigo-200 dark:bg-indigo-900/30 dark:text-indigo-300 dark:border-indigo-800';
         case AuditLogType.REQUIRE_ID_VERIFICATION:
             return 'bg-amber-100 text-amber-800 border-amber-200 dark:bg-amber-900/30 dark:text-amber-300 dark:border-amber-800';
+        case AuditLogType.CLEAR_ID_VERIFICATION:
+            return 'bg-slate-100 text-slate-800 border-slate-200 dark:bg-slate-800 dark:text-slate-200 dark:border-slate-700';
         case AuditLogType.ID_VERIFICATION_PASSED:
             return 'bg-green-100 text-green-800 border-green-200 dark:bg-green-900/30 dark:text-green-300 dark:border-green-800';
         case AuditLogType.ID_VERIFICATION_FAILED:
@@ -380,6 +384,7 @@ const renderLogDetails = (log: AuditLogUnion) => {
             );
 
         case AuditLogType.REQUIRE_ID_VERIFICATION:
+        case AuditLogType.CLEAR_ID_VERIFICATION:
         case AuditLogType.ID_VERIFICATION_PASSED:
         case AuditLogType.ID_VERIFICATION_FAILED:
             return (
@@ -401,9 +406,11 @@ const renderLogDetails = (log: AuditLogUnion) => {
                         >
                             {log.auditLogType === AuditLogType.REQUIRE_ID_VERIFICATION
                                 ? "ID Verification Required"
-                                : log.auditLogType === AuditLogType.ID_VERIFICATION_PASSED
-                                    ? "ID Verification Passed"
-                                    : "ID Verification Failed"}
+                                : log.auditLogType === AuditLogType.CLEAR_ID_VERIFICATION
+                                    ? "ID Verification Requirement Cleared"
+                                    : log.auditLogType === AuditLogType.ID_VERIFICATION_PASSED
+                                        ? "ID Verification Passed"
+                                        : "ID Verification Failed"}
                         </Badge>
                     </div>
                     {log.reportCaseId != null && (

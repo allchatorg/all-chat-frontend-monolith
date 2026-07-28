@@ -79,7 +79,12 @@ export default function UserDetailsPage() {
             : idVerificationStatus === 'REQUIRED'
                 ? "ID verification has already been required for this user"
                 : undefined;
-    const clearDisabled = idVerificationStatus === 'NONE';
+    const clearDisabled = idVerificationStatus === 'NONE' || idVerificationStatus === 'VERIFIED';
+    const clearDisabledReason = idVerificationStatus === 'VERIFIED'
+        ? "The user has already passed verification; there is no requirement to clear"
+        : idVerificationStatus === 'NONE'
+            ? "No ID verification requirement to clear"
+            : undefined;
 
     const refetchUserDetails = async () => {
         try {
@@ -266,7 +271,7 @@ export default function UserDetailsPage() {
                             variant="outline"
                             size="sm"
                             disabled={clearDisabled}
-                            title={clearDisabled ? "No ID verification requirement to clear" : undefined}
+                            title={clearDisabledReason}
                             onClick={handleClearIdVerification}
                         >
                             Clear requirement

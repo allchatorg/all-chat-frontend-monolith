@@ -110,6 +110,16 @@ export function ChatInputShowcase({
                     tabIndex={-1}
                     className="hidden h-10 w-10 shrink-0 md:inline-flex"
                 >
+                    <Smile className="h-4 w-4"/>
+                </Button>
+
+                <Button
+                    type="button"
+                    variant="outline"
+                    size="icon"
+                    tabIndex={-1}
+                    className="hidden h-10 w-10 shrink-0 md:inline-flex"
+                >
                     <Bold className="h-4 w-4"/>
                 </Button>
 
@@ -121,16 +131,6 @@ export function ChatInputShowcase({
                     className="hidden h-10 w-10 shrink-0 md:inline-flex"
                 >
                     <Italic className="h-4 w-4"/>
-                </Button>
-
-                <Button
-                    type="button"
-                    variant="outline"
-                    size="icon"
-                    tabIndex={-1}
-                    className="hidden h-10 w-10 shrink-0 md:inline-flex"
-                >
-                    <Smile className="h-4 w-4"/>
                 </Button>
 
                 <Button
@@ -572,7 +572,7 @@ const ChatInput: React.FC<ChatInputProps> = ({
         (!hasContent && !hasAttachment) || !isConnected || isOverLimit || isUploading || isUnchanged;
 
     return (
-        <div className="relative mt-1 bg-transparent px-2 py-3 shadow-none">
+        <div className="composer-floating relative mt-1 bg-transparent px-2 py-3 shadow-none">
             {!editingMessage && replyingToMessage && (
                 <div
                     className="glass-surface mb-2 flex items-center gap-2 rounded-md px-3 py-1.5 text-xs text-muted-foreground">
@@ -670,37 +670,39 @@ const ChatInput: React.FC<ChatInputProps> = ({
                     onReady={setEditor}
                 />
 
+                {!editingMessage && !isMobile && (
+                    <Popover open={isOpenEmojiPopover} onOpenChange={setIsOpenEmojiPopover}>
+                        <PopoverTrigger asChild>
+                            <Button
+                                type="button"
+                                variant="outline"
+                                size="icon"
+                                className="glass-control shrink-0 h-10 w-10"
+                                disabled={!canSendNewMessage}
+                            >
+                                <Smile className="h-4 w-4"/>
+                            </Button>
+                        </PopoverTrigger>
+                        <PopoverContent
+                            align="end"
+                            sideOffset={4}
+                            className="glass-popover p-0 border-none shadow-lg w-auto"
+                        >
+                            <Picker
+                                data={data}
+                                theme={resolvedTheme}
+                                onEmojiSelect={(emoji: any) => {
+                                    editor?.chain().focus().insertContent(emoji.native).run();
+                                }}
+                            />
+                        </PopoverContent>
+                    </Popover>
+                )}
+
                 {!isMobile && <FormatToggles editor={editor} disabled={!canUseTextInput}/>}
 
                 {!editingMessage && !isMobile && (
                     <>
-                        <Popover open={isOpenEmojiPopover} onOpenChange={setIsOpenEmojiPopover}>
-                            <PopoverTrigger asChild>
-                                <Button
-                                    type="button"
-                                    variant="outline"
-                                    size="icon"
-                                    className="glass-control shrink-0 h-10 w-10"
-                                    disabled={!canSendNewMessage}
-                                >
-                                    <Smile className="h-4 w-4"/>
-                                </Button>
-                            </PopoverTrigger>
-                            <PopoverContent
-                                align="end"
-                                sideOffset={4}
-                                className="glass-popover p-0 border-none shadow-lg w-auto"
-                            >
-                                <Picker
-                                    data={data}
-                                    theme={resolvedTheme}
-                                    onEmojiSelect={(emoji: any) => {
-                                        editor?.chain().focus().insertContent(emoji.native).run();
-                                    }}
-                                />
-                            </PopoverContent>
-                        </Popover>
-
                         <DictationButton
                             isSupported={isDictationSupported}
                             isListening={isListening}

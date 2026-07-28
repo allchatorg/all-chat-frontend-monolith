@@ -14,6 +14,7 @@ export interface User {
     banned: boolean;
     verified: boolean;
     idVerificationStatus?: IdVerificationStatus;
+    idVerificationUnderAge?: boolean;
     subscribedToMarketingEmails?: boolean;
     role: Role;
     purchasedAdsCount?: number;
