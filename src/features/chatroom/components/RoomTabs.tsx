@@ -89,7 +89,8 @@ export default function RoomTabs({
     const activeRoom = activeId ? rooms.find(r => r.chatRoomId === activeId) : null;
 
     return (
-        <ScrollArea className="w-[calc(100%+0.25rem)] rounded-t-xl pl-0 pr-1">
+        <ScrollArea
+            className="w-[calc(100%+0.25rem)] rounded-t-xl pl-0 pr-1 [&>[data-orientation=vertical]]:hidden [&>[data-radix-scroll-area-viewport]]:!overflow-y-hidden">
             <DndContext
                 sensors={sensors}
                 collisionDetection={closestCenter}
