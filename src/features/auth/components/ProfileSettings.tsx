@@ -1,5 +1,5 @@
 import {ChangeEvent, useEffect, useState} from "react";
-import {Check, Loader2, Pencil, X} from "lucide-react";
+import {Check, Focus, Loader2, Pencil, Volume2, VolumeX, X} from "lucide-react";
 import {Button} from "@/components/ui/button";
 import {Input} from "@/components/ui/input";
 import {Label} from "@/components/ui/label";
@@ -18,6 +18,20 @@ import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue} from "@/c
 import {useTheme} from "next-themes";
 import {Switch} from "@/components/ui/switch";
 import {setShowAppBackground} from "@/redux/settings/settingsSlice";
+import {RadioGroup, RadioGroupItem} from "@/components/ui/radio-group";
+import {useChatRoomSoundSettings} from "@/lib/hooks/useChatRoomSoundSettings";
+import {NotificationSoundMode} from "@/models/NotificationSoundMode";
+
+const NOTIFICATION_SOUND_MODE_OPTIONS: {
+    mode: NotificationSoundMode;
+    label: string;
+    description: string;
+    Icon: typeof Volume2;
+}[] = [
+    {mode: 'ALL', label: "All rooms", description: "Per-room speaker toggles decide which rooms play a sound.", Icon: Volume2},
+    {mode: 'FOCUSED', label: "Focused room only", description: "Only the room you're currently viewing plays a sound.", Icon: Focus},
+    {mode: 'MUTED', label: "Muted", description: "No message sounds at all.", Icon: VolumeX},
+];
 
 interface ProfileSettingsProps {
     isMobile?: boolean;
@@ -25,6 +39,7 @@ interface ProfileSettingsProps {
 
 export const ProfileSettings = ({isMobile = false}: ProfileSettingsProps) => {
     const {theme, setTheme} = useTheme();
+    const {soundMode, setSoundMode} = useChatRoomSoundSettings();
     const user: User | null = useSelector((state: RootState) => selectUser(state));
     const showAppBackground = useSelector((state: RootState) => state.settings.showAppBackground !== false);
     const dispatch: AppDispatch = useDispatch();
@@ -200,6 +215,35 @@ export const ProfileSettings = ({isMobile = false}: ProfileSettingsProps) => {
                         </Select>
                         <p className="text-[0.8rem] text-muted-foreground">
                             Select the theme for the dashboard.
+                        </p>
+                    </div>
+                    <div className="space-y-2">
+                        <Label>Notification sounds</Label>
+                        <RadioGroup
+                            value={soundMode}
+                            onValueChange={(value) => setSoundMode(value as NotificationSoundMode)}
+                            className="gap-2"
+                        >
+                            {NOTIFICATION_SOUND_MODE_OPTIONS.map(({mode, label, description, Icon}) => (
+                                <Label
+                                    key={mode}
+                                    className={`flex cursor-pointer items-center gap-3 rounded-md border p-4 transition-colors ${
+                                        soundMode === mode ? "border-primary" : "hover:bg-white/5"
+                                    }`}
+                                >
+                                    <RadioGroupItem value={mode}/>
+                                    <Icon className="h-4 w-4 shrink-0 text-muted-foreground"/>
+                                    <div className="space-y-1">
+                                        <span className="text-sm font-medium leading-none">{label}</span>
+                                        <p className="text-[0.8rem] font-normal text-muted-foreground">
+                                            {description}
+                                        </p>
+                                    </div>
+                                </Label>
+                            ))}
+                        </RadioGroup>
+                        <p className="text-[0.8rem] text-muted-foreground">
+                            Choose which chatrooms play a sound when new messages arrive.
                         </p>
                     </div>
                     <div className="flex items-center justify-between gap-4 rounded-md border p-4">

@@ -3,6 +3,7 @@ import {Archive, MessageSquare, UserCheck, Volume2, VolumeX, X} from "lucide-rea
 import {MouseEvent, useEffect, useRef} from "react";
 import {useUser} from "@/lib/hooks/useUser";
 import {useNotificationSounds} from "@/lib/hooks/useNotificationSounds";
+import {useChatRoomSoundSettings} from "@/lib/hooks/useChatRoomSoundSettings";
 import {getRoleLevel, Role} from "@/models/Role";
 import {ChatRoomNoiseLevelEnum} from "@/models/ChatRoomNoiseLevelEnum";
 import {useSortable} from "@dnd-kit/sortable";
@@ -40,6 +41,8 @@ export function RoomTabContent({
     const previousMessageRef = useRef<typeof room.lastMessage>(null);
     const {user} = useUser();
     const {playNotificationSound} = useNotificationSounds();
+    const {canPlaySound, soundMode} = useChatRoomSoundSettings();
+    const isToggleInert = soundMode !== 'ALL';
     const isStaffRoom = getRoleLevel(room.chatRoomRequiredAccessLevel) > getRoleLevel(Role.GUEST);
     const isBugReportsRoom = isBugReportsChatRoomName(room.chatRoomName);
     const isArchived = room.roomPopulation.archived;
@@ -91,7 +94,7 @@ export function RoomTabContent({
     })();
 
     useEffect(() => {
-        if (!isSoundOn || !user) return;
+        if (!user || !canPlaySound(room.chatRoomId, 'public')) return;
 
         const currentMessage = room.lastMessage;
         const previousMessage = previousMessageRef.current;
@@ -107,7 +110,7 @@ export function RoomTabContent({
         }
 
         previousMessageRef.current = currentMessage;
-    }, [room.lastMessage, isSoundOn, user]);
+    }, [room.lastMessage, user, canPlaySound, room.chatRoomId]);
 
     return (
         <div
@@ -203,9 +206,19 @@ export function RoomTabContent({
 
                     {!isArchived && (
                         <button
-                            onClick={onToggleSound}
-                            className="rounded-full shrink-0 p-1 transition-colors text-muted-foreground hover:bg-sky-100/35 hover:text-sky-700 dark:hover:bg-white/15 dark:hover:text-white"
-                            title={isSoundOn ? "Mute notifications" : "Unmute notifications"}
+                            onClick={(e) => {
+                                if (isToggleInert) return;
+                                onToggleSound(e);
+                            }}
+                            className={`rounded-full shrink-0 p-1 transition-colors text-muted-foreground ${isToggleInert
+                                ? "opacity-40 cursor-not-allowed"
+                                : "hover:bg-sky-100/35 hover:text-sky-700 dark:hover:bg-white/15 dark:hover:text-white"}`}
+                            title={soundMode === 'MUTED'
+                                ? "Sounds are muted globally"
+                                : soundMode === 'FOCUSED'
+                                    ? "Only the focused room plays sound"
+                                    : isSoundOn ? "Mute notifications" : "Unmute notifications"}
+                            aria-disabled={isToggleInert}
                             onPointerDown={(e) => e.stopPropagation()}
                         >
                             {isSoundOn ? <Volume2 className="h-3.5 w-3.5"/> : <VolumeX className="h-3.5 w-3.5"/>}

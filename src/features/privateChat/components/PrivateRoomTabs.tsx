@@ -63,6 +63,9 @@ function PrivateRoomTabContent({
     // which is always mounted on the page and covers every conversation —
     // tabs would double-fire for any conversation that's also open as a tab.
 
+    const {soundMode} = useChatRoomSoundSettings();
+    const isToggleInert = soundMode !== 'ALL';
+
     const tabStateClass = isSelected
         ? "glass-surface-strong room-tab-active text-blue-800 dark:text-emerald-100 font-semibold"
         : "glass-control room-tab-inactive text-slate-700 dark:text-muted-foreground hover:text-blue-800 dark:hover:text-emerald-100";
@@ -121,9 +124,19 @@ function PrivateRoomTabContent({
                         </span>
                     ) : null}
                     <button
-                        onClick={onToggleSound}
-                        className="rounded-full shrink-0 p-1 transition-colors text-muted-foreground hover:bg-sky-100/35 hover:text-sky-700 dark:hover:bg-white/15 dark:hover:text-white"
-                        title={isSoundOn ? "Mute notifications" : "Unmute notifications"}
+                        onClick={(e) => {
+                            if (isToggleInert) return;
+                            onToggleSound(e);
+                        }}
+                        className={`rounded-full shrink-0 p-1 transition-colors text-muted-foreground ${isToggleInert
+                            ? "opacity-40 cursor-not-allowed"
+                            : "hover:bg-sky-100/35 hover:text-sky-700 dark:hover:bg-white/15 dark:hover:text-white"}`}
+                        title={soundMode === 'MUTED'
+                            ? "Sounds are muted globally"
+                            : soundMode === 'FOCUSED'
+                                ? "Only the focused room plays sound"
+                                : isSoundOn ? "Mute notifications" : "Unmute notifications"}
+                        aria-disabled={isToggleInert}
                         onPointerDown={(e) => e.stopPropagation()}
                     >
                         {isSoundOn ? <Volume2 className="h-3.5 w-3.5"/> : <VolumeX className="h-3.5 w-3.5"/>}

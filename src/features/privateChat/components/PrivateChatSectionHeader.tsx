@@ -12,6 +12,7 @@ import {togglePrivateSidebar} from "@/redux/privateChat/privateChatUiSlice";
 import {DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger,} from "@/components/ui/dropdown-menu";
 import {PrivateChatDTO} from "@/models/PrivateChatDTO";
 import PrivateChatSearchBar from "@/features/privateChat/components/PrivateChatSearchBar";
+import NotificationSoundModeMenu from "@/components/NotificationSoundModeMenu";
 
 interface PrivateChatSectionHeaderProps {
     conversation: PrivateChatDTO;
@@ -92,6 +93,11 @@ const PrivateChatSectionHeader: React.FC<PrivateChatSectionHeaderProps> = ({
                 )}
                 <div className="ml-auto flex items-center gap-2">
                     <PrivateChatSearchBar/>
+                    <NotificationSoundModeMenu
+                        variant="outline"
+                        buttonClassName="glass-control h-9 w-9 p-0"
+                        iconClassName="h-5 w-5"
+                    />
                     {renderOptionsMenu("glass-control h-9 w-9 p-0", "h-5 w-5")}
                 </div>
             </CardTitle>
@@ -125,6 +131,11 @@ const PrivateChatSectionHeader: React.FC<PrivateChatSectionHeaderProps> = ({
                         </span>
                     )}
                     <div className="ml-auto flex items-center gap-1">
+                        <NotificationSoundModeMenu
+                            variant="ghost"
+                            buttonClassName="glass-control h-8 w-8 p-0"
+                            iconClassName="h-4 w-4"
+                        />
                         <Button
                             onClick={() => setIsSearchExpanded(true)}
                             variant="ghost"

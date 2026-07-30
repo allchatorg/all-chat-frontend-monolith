@@ -72,6 +72,13 @@ function ConversationRowContent({
     const unread = conversation.unreadMessagesCount;
     const counterpartName = conversation.counterpart?.username ?? "Deleted user";
     const lastMessagePreview = stripMarkers(conversation.lastMessage?.content?.trim() || "");
+    const {soundMode} = useChatRoomSoundSettings();
+    const isToggleInert = soundMode !== 'ALL';
+    const toggleTitle = soundMode === 'MUTED'
+        ? "Sounds are muted globally"
+        : soundMode === 'FOCUSED'
+            ? "Only the focused room plays sound"
+            : isMuted ? "Unmute notifications" : "Mute notifications";
 
     return (
         <div
@@ -130,12 +137,16 @@ function ConversationRowContent({
                     type="button"
                     onClick={(e) => {
                         e.stopPropagation();
+                        if (isToggleInert) return;
                         onToggleSound(e);
                     }}
                     onPointerDown={(e) => e.stopPropagation()}
-                    className="rounded-full p-1 transition-colors text-muted-foreground hover:bg-sky-100/35 hover:text-sky-700 dark:hover:bg-white/15 dark:hover:text-white"
-                    title={isMuted ? "Unmute notifications" : "Mute notifications"}
-                    aria-label={isMuted ? "Unmute notifications" : "Mute notifications"}
+                    className={`rounded-full p-1 transition-colors text-muted-foreground ${isToggleInert
+                        ? "opacity-40 cursor-not-allowed"
+                        : "hover:bg-sky-100/35 hover:text-sky-700 dark:hover:bg-white/15 dark:hover:text-white"}`}
+                    title={toggleTitle}
+                    aria-label={toggleTitle}
+                    aria-disabled={isToggleInert}
                 >
                     {isMuted
                         ? <VolumeX className="h-3.5 w-3.5"/>
@@ -207,7 +218,7 @@ const PrivateChatsSidebar: React.FC<PrivateChatsSidebarProps> = ({
                                                                      onCloseSidebar,
                                                                      showCloseButton,
                                                                  }) => {
-    const {getMuted, toggleSound} = useChatRoomSoundSettings();
+    const {getMuted, toggleSound, canPlaySound} = useChatRoomSoundSettings();
     const {playPrivateNotificationSound} = useNotificationSounds();
     const {user} = useUser();
     const [activeId, setActiveId] = useState<number | null>(null);
@@ -258,13 +269,13 @@ const PrivateChatsSidebar: React.FC<PrivateChatsSidebarProps> = ({
             const lastId = conv.lastMessage?.id ?? 0;
             next[conv.id] = lastId;
             const prevId = previousLastMessageIdsRef.current[conv.id];
-            if (prevId !== undefined && lastId > prevId && !getMuted(conv.id)) {
+            if (prevId !== undefined && lastId > prevId && canPlaySound(conv.id, 'private')) {
                 const isOwn = conv.lastMessage?.senderId === user.id;
                 playPrivateNotificationSound(isOwn);
             }
         }
         previousLastMessageIdsRef.current = next;
-    }, [conversations, user, getMuted, playPrivateNotificationSound]);
+    }, [conversations, user, canPlaySound, playPrivateNotificationSound]);
 
     const activeConversation = activeId
         ? conversations.find(c => c.id === activeId) ?? null

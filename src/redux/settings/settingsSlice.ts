@@ -4,6 +4,7 @@ import {getAllAttachmentTypesThunk, getAllTagsThunk} from "@/redux/settings/sett
 import {AttachmentType} from "@/models/AttachmentType";
 import {ActiveRightPanel} from "@/models/ActiveRightPanel";
 import {ActiveLeftPanel} from "@/models/ActiveLeftPanel";
+import {NotificationSoundMode} from "@/models/NotificationSoundMode";
 
 interface AttachmentTypesState {
     attachmentTypes: AttachmentType[];
@@ -18,6 +19,7 @@ interface SettingsState {
     activeRightPanel: ActiveRightPanel | null;
     activeLeftPanel: ActiveLeftPanel | null;
     chatRoomSoundSetting: Record<number, Record<number, boolean>>;
+    notificationSoundMode: Record<number, NotificationSoundMode>;
     userDisplayColor: string;
     mediaPlayerMuted: boolean;
     showAppBackground: boolean;
@@ -34,6 +36,7 @@ const initialState: SettingsState = {
     activeRightPanel: 'top-online',
     activeLeftPanel: 'top-reacted-messages',
     chatRoomSoundSetting: {},
+    notificationSoundMode: {},
     userDisplayColor: "#000000",
     mediaPlayerMuted: true,
     showAppBackground: true
@@ -69,6 +72,16 @@ const settingsSlice = createSlice({
             }
             state.chatRoomSoundSetting[userId][id] = isEnabled;
         },
+        setNotificationSoundMode(state, action: PayloadAction<{
+            userId: number | null | undefined;
+            mode: NotificationSoundMode;
+        }>) {
+            const {userId, mode} = action.payload;
+            if (userId == null) {
+                return;
+            }
+            state.notificationSoundMode[userId] = mode;
+        },
         setMediaPlayerMuted(state, action: PayloadAction<boolean>) {
             state.mediaPlayerMuted = action.payload;
         },
@@ -101,6 +114,7 @@ export const {
     setActiveRightSidebar,
     setActiveLeftSidebar,
     setSoundSettings,
+    setNotificationSoundMode,
     setMediaPlayerMuted,
     setShowAppBackground
 } = settingsSlice.actions;

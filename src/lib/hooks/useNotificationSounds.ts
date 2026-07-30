@@ -7,7 +7,6 @@ export function useNotificationSounds() {
     const reportBufferRef = useRef<AudioBuffer | null>(null);
     const privateSendBufferRef = useRef<AudioBuffer | null>(null);
     const privateReceiveBufferRef = useRef<AudioBuffer | null>(null);
-    const unlockedRef = useRef(false);
 
     // Load audio files as ArrayBuffers (works without user gesture)
     useEffect(() => {
@@ -38,22 +37,20 @@ export function useNotificationSounds() {
         };
     }, []);
 
-    // Unlock AudioContext on the first user interaction (required for Safari/iOS)
+    // Unlock the AudioContext on user interaction (required for Safari/iOS).
+    // The listeners stay attached for the hook's lifetime: browsers can
+    // re-suspend an idle context, and a one-shot listener whose resume() was
+    // rejected would leave the context suspended forever.
     const unlockAudio = useCallback(() => {
         const ctx = audioContextRef.current;
-        if (!ctx || unlockedRef.current) return;
-        if (ctx.state === "suspended") {
-            ctx.resume().then(() => {
-                unlockedRef.current = true;
-            });
-        } else {
-            unlockedRef.current = true;
-        }
+        if (!ctx || ctx.state !== "suspended") return;
+        ctx.resume().catch(() => {
+        });
     }, []);
 
     useEffect(() => {
-        document.addEventListener("click", unlockAudio, {once: true});
-        document.addEventListener("touchstart", unlockAudio, {once: true});
+        document.addEventListener("click", unlockAudio);
+        document.addEventListener("touchstart", unlockAudio);
         return () => {
             document.removeEventListener("click", unlockAudio);
             document.removeEventListener("touchstart", unlockAudio);
@@ -63,15 +60,21 @@ export function useNotificationSounds() {
     const playBuffer = useCallback((buffer: AudioBuffer | null) => {
         const ctx = audioContextRef.current;
         if (!ctx || !buffer) return;
-        // Ensure context is running before playing
+        const start = () => {
+            const source = ctx.createBufferSource();
+            source.buffer = buffer;
+            source.connect(ctx.destination);
+            source.start(0);
+        };
         if (ctx.state === "suspended") {
-            ctx.resume().catch(() => {
+            // Starting a source on a suspended context swallows the sound when
+            // the resume is rejected by autoplay policy (a websocket handler is
+            // not a user gesture); start only once the context is running.
+            ctx.resume().then(start).catch(() => {
             });
+        } else {
+            start();
         }
-        const source = ctx.createBufferSource();
-        source.buffer = buffer;
-        source.connect(ctx.destination);
-        source.start(0);
     }, []);
 
     const playNotificationSound = useCallback((isOwn: boolean) => {

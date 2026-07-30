@@ -16,6 +16,7 @@ import {
     X
 } from "lucide-react";
 import ChatSearchBar from "@/features/chatroom/components/ChatSearchBar";
+import NotificationSoundModeMenu from "@/components/NotificationSoundModeMenu";
 import {useTopReactedSidebar} from "@/lib/hooks/useTopReactedSidebar";
 import {usePromotedMessagesSidebar} from "@/lib/hooks/usePromotedMessagesSidebar";
 import {ChatRoomNoiseLevelEnum} from "@/models/ChatRoomNoiseLevelEnum";
@@ -223,6 +224,11 @@ const ChatSectionHeader: React.FC<ChatSectionHeaderProps> = ({
                     >
                         <Users className="h-5 w-5"/>
                     </Button>
+                    <NotificationSoundModeMenu
+                        variant="outline"
+                        buttonClassName="glass-control z-10 h-10 w-10 p-2"
+                        iconClassName="h-5 w-5"
+                    />
                     {renderArchiveMenuButton("glass-control h-10 w-10 p-0", "h-5 w-5", "outline")}
                 </div>
             </CardTitle>
@@ -274,6 +280,11 @@ const ChatSectionHeader: React.FC<ChatSectionHeaderProps> = ({
                         >
                             <Users className="h-4 w-4"/>
                         </Button>
+                        <NotificationSoundModeMenu
+                            variant="ghost"
+                            buttonClassName="glass-control h-8 w-8 p-0"
+                            iconClassName="h-4 w-4"
+                        />
                         <Button
                             onClick={toggleExpanded}
                             variant="ghost"
