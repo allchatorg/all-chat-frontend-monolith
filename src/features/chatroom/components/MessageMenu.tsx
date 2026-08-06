@@ -279,7 +279,14 @@ export const MessageMenu: React.FC<MessageMenuProps> = ({
                             {canReport && (
                                 <DropdownMenuItem
                                     className="justify-between"
-                                    onClick={() => open(<ReportForm messageId={messageId}/>)}
+                                    onClick={() => open(<ReportForm messageId={messageId}/>, {
+                                        // Glass styling lives on the dialog itself so the form
+                                        // doesn't draw a second border inside DialogContent's.
+                                        className: "glass-popover glass-modal-mobile p-0 overflow-hidden",
+                                        // Light scrim: the default bg-black/80 overlay greys out
+                                        // the surface in light mode (same as notification dialog).
+                                        overlayClassName: "bg-slate-950/30 backdrop-blur-[2px] dark:bg-black/45",
+                                    })}
                                 >
                                     Report
                                     <Flag className="h-4 w-4"/>

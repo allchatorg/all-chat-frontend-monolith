@@ -23,6 +23,7 @@ import {useRoleAccess} from "@/lib/hooks/useRoleAccess";
 import {DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger,} from "@/components/ui/dropdown-menu";
 import TermsOfService from "@/components/TermsOfService";
 import PrivacyPolicy from "@/components/PrivacyPolicy";
+import {NotificationBell} from "@/features/notifications/components/NotificationBell";
 import {
     joinAndSelectChatRoomThunk,
     searchChatRoomsByNameThunk,
@@ -253,6 +254,7 @@ export function Navbar() {
                                     <span className="hidden xl:inline">Report bug</span>
                                 </Button>
                             </div>
+                            {!isGuest && <NotificationBell/>}
                             {!isGuest && (
                                 <Button
                                     variant="ghost"

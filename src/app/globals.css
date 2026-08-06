@@ -438,6 +438,18 @@ html, body {
         background: linear-gradient(135deg, rgba(15, 23, 42, 0.6), rgba(2, 6, 23, 0.55)) !important;
     }
 
+    /* Mobile centered modals (search rooms/users, notifications). Unlike the
+       desktop popovers, these sit over the dialog scrim, so the backdrop blur
+       has nothing meaningful to sample and translucency just muddies the
+       surface — use a fully solid background instead. */
+    .glass-popover.glass-modal-mobile {
+        background: #ffffff !important;
+    }
+
+    .dark .glass-popover.glass-modal-mobile {
+        background: rgb(15, 23, 42) !important;
+    }
+
     .navbar-floating {
         color: rgba(15, 23, 42, 0.92);
     }
@@ -591,6 +603,22 @@ html, body {
     .dark .glass-control:hover,
     .dark .glass-control[data-state="open"] {
         box-shadow: var(--glass-shadow-soft) !important;
+    }
+
+    /* Report dialog surfaces: they sit inside a solid modal surface, where the
+       floating blue glass shadow overlaps neighbouring elements and reads as a
+       smeared halo in light mode — keep them flat there. */
+    html:not(.dark) .report-form .glass-control,
+    html:not(.dark) .report-form .glass-control:hover,
+    html:not(.dark) .report-form .glass-control[data-state="open"],
+    html:not(.dark) .report-form .glass-surface {
+        box-shadow: none !important;
+    }
+
+    /* The near-white translucent surface gradient is invisible on the solid
+       white modal — use a light grey tint so the summary box reads as a box. */
+    html:not(.dark) .report-form .glass-surface {
+        background: rgba(241, 245, 249, 0.9) !important;
     }
 
     html:not(.dark) :is(.glass-control, .glass-surface, .glass-surface-strong, .glass-pill).text-white {

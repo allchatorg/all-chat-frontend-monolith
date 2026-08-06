@@ -35,6 +35,7 @@ import TermsOfService from "@ads/components/TermsOfService"
 import PrivacyPolicy from "@ads/components/PrivacyPolicy"
 import AdvertiserTerms from "@ads/components/AdvertiserPolicy"
 import {NavLegal} from "@ads/components/nav-legal"
+import {NotificationBell} from "@ads/components/notification-bell"
 import {useThemedLogo} from "@/lib/hooks/useThemedLogo"
 
 const regularUserNavMain = [
@@ -213,6 +214,7 @@ export function AppSidebar({...props}: React.ComponentProps<typeof Sidebar>) {
             </SidebarContent>
 
             <SidebarFooter>
+                <NotificationBell/>
                 <NavUser user={{
                     name: user.name,
                     email: user.email,

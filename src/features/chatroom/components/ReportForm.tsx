@@ -69,7 +69,7 @@ export default function ReportForm({messageId}: { messageId: number }) {
     const getLabel = (type: ReportType) => reportTypeLabels[type].toUpperCase();
 
     return (
-        <div className="glass-popover w-[80vw] md:min-w-[400px] md:max-w-[400px] flex flex-col flex-1 rounded-lg p-4">
+        <div className="report-form w-[80vw] md:min-w-[400px] md:max-w-[400px] flex flex-col flex-1 p-4">
             <div className="flex flex-1 flex-col w-full">
                 <CardHeader className="p-0 mdf:p-6  pb-4">
                     <CardTitle className="text-xl">Report</CardTitle>

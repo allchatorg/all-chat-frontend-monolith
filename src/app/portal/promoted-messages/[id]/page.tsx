@@ -108,10 +108,12 @@ export default function UserPromotedMessageDetailsPage() {
                 <div className="@container/main flex flex-1 flex-col gap-2">
                     <div className="flex flex-col gap-4">
                         <div className="mx-4 mt-4 flex flex-wrap gap-2">
-                            <ActionButton onClick={handleGoToMessage}>
-                                <ExternalLink className="mr-2 h-4 w-4"/>
-                                Go to Message
-                            </ActionButton>
+                            {!data.messageDeleted && (
+                                <ActionButton onClick={handleGoToMessage}>
+                                    <ExternalLink className="mr-2 h-4 w-4"/>
+                                    Go to Message
+                                </ActionButton>
+                            )}
                             {canRequestCancel && (
                                 <PromotionReasonModal
                                     mode="request-cancel"

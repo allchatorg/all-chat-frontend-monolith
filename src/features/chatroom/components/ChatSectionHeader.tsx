@@ -27,6 +27,7 @@ import {useDialog} from "@/components/providers/DialogProvider";
 import {ConfirmModal} from "@/components/ConfirmModal";
 import {useThunk} from "@/lib/hooks/useThunk";
 import {archiveChatRoomThunk, unarchiveChatRoomThunk} from "@/redux/chatRoom/chatRoomThunk";
+import {getRoomPromotionsSummary} from "@/api/admin/adminAPI";
 import {toast} from "sonner";
 
 interface ChatSectionHeaderProps {
@@ -94,9 +95,27 @@ const ChatSectionHeader: React.FC<ChatSectionHeaderProps> = ({
     const promotedButtonLabel = `${promotedSidebarActive ? "Hide" : "Show"} Promoted Messages`;
     const popularityButtonLabel = `${popularitySidebarActive ? "Hide" : "Show"} Active Rooms`;
 
-    const handleArchiveConfirm = () => {
+    const handleArchiveConfirm = async () => {
         if (!chatRoomId || actionLoading) {
             return;
+        }
+
+        // Warn the admin when archiving will cancel active promotions: pending
+        // payment holds are released and approved payments are refunded.
+        let promotionsWarning = "";
+        try {
+            const summary = await getRoomPromotionsSummary(chatRoomId);
+            const activeCount = summary.pendingCount + summary.approvedCount;
+            if (activeCount > 0) {
+                const totalReturned = (summary.pendingReleaseTotal + summary.approvedRefundTotal).toFixed(2);
+                promotionsWarning = ` This room has ${activeCount} active promoted message${activeCount === 1 ? "" : "s"}`
+                    + ` (${summary.pendingCount} pending, ${summary.approvedCount} approved).`
+                    + ` Archiving cancels them: pending payment holds are released and approved payments are refunded`
+                    + ` — ${totalReturned} ${summary.currency} returned to the owners in total.`;
+            }
+        } catch {
+            promotionsWarning = " Could not load this room's promoted messages —"
+                + " any active promotions will still be canceled (pending holds released, approved payments refunded).";
         }
 
         open(
@@ -113,7 +132,7 @@ const ChatSectionHeader: React.FC<ChatSectionHeaderProps> = ({
                         }
                     }}
                     title={`Archive "${chatRoomName}"?`}
-                    description="Archiving this room will disconnect all users from the chatroom, and it will no longer be available to regular users until it is unarchived."
+                    description={"Archiving this room will disconnect all users from the chatroom, and it will no longer be available to regular users until it is unarchived." + promotionsWarning}
                 />
             </div>
         );
@@ -121,7 +140,7 @@ const ChatSectionHeader: React.FC<ChatSectionHeaderProps> = ({
 
     const openArchiveConfirmAfterMenuClose = () => {
         window.setTimeout(() => {
-            handleArchiveConfirm();
+            void handleArchiveConfirm();
         }, 100);
     };
 

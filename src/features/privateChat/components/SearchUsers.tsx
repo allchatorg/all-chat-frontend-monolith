@@ -61,7 +61,7 @@ const SearchUsers: React.FC = () => {
             <div className="w-[80vw] md:min-w-[800px] md:max-w-[800px] max-h-[300px] overflow-auto">
                 <SearchUsersMobile onClose={close}/>
             </div>,
-            {className: "glass-popover"}
+            {className: "glass-popover glass-modal-mobile"}
         );
     };
 
