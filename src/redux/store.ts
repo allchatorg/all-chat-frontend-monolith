@@ -18,6 +18,7 @@ import messagingAvailabilityReducer from "@/redux/messagingAvailability/messagin
 import privateChatReducer from "@/redux/privateChat/privateChatSlice";
 import privateChatUiReducer from "@/redux/privateChat/privateChatUiSlice";
 import observerChatReducer from "@/redux/observerChat/observerChatSlice";
+import {notificationsReducer} from "@/redux/notifications/notificationsSlice";
 import observerChatUiReducer from "@/redux/observerChat/observerChatUiSlice";
 import {setupListeners} from "@reduxjs/toolkit/query";
 // Ads portal RTK Query APIs (merged monolith) — registered into the single store.
@@ -90,6 +91,7 @@ const appReducer = combineReducers({
     auditLogs: auditLogsReducer,
     ads: persistedAdsReducer,
     messagingAvailability: messagingAvailabilityReducer,
+    notifications: notificationsReducer,
     privateChat: persistedPrivateChatReducer,
     privateChatUi: persistedPrivateChatUiReducer,
     // Observer (admin review) chat is intentionally NOT persisted — sensitive admin-viewed

@@ -9,10 +9,7 @@ import {ChatRoom} from "@/models/ChatRoom";
 import {MessagingAvailability} from "@/models/MessagingAvailability";
 import {PromotedMessageEvent} from "@/models/PromotedMessageEvent";
 import {IdVerificationResultNotification} from "@/models/IdVerificationResultNotification";
-
-type WarnUserResponse = {
-    description: string;
-};
+import {AppNotification} from "@/models/AppNotification";
 
 export type WebSocketMessage =
     | {
@@ -31,8 +28,8 @@ export type WebSocketMessage =
     type: WebSocketMessageType.BAN_USER_CHAT_NOTIFICATION;
     data: BanUserNotification;
 } | {
-    type: WebSocketMessageType.WARN_USER
-    data: WarnUserResponse;
+    type: WebSocketMessageType.NOTIFICATION;
+    data: AppNotification;
 } | {
     type: WebSocketMessageType.ROLE_UPDATE_NOTIFICATION;
     data: RoleUpdateNotification;

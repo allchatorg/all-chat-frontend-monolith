@@ -52,15 +52,15 @@ import {fetchMessagingAvailabilityThunk} from "@/redux/messagingAvailability/mes
 import {PromotedMessageEvent} from "@/models/PromotedMessageEvent";
 import {promotedMessagesApi} from "@ads/store/services/promotedMessagesApi";
 import {adminPromotedMessagesApi} from "@ads/store/services/adminPromotedMessagesApi";
+import {AppNotification} from "@/models/AppNotification";
+import {NotificationType} from "@/models/NotificationType";
+import {notificationReceived} from "@/redux/notifications/notificationsSlice";
+import {fetchUnreadCountThunk} from "@/redux/notifications/notificationsThunk";
 
 const WS_URL = process.env.NEXT_PUBLIC_WS_URL || "http://localhost:8080/ws";
 const PUBLIC_TOPIC = ["/topic/public-chat"];
 const USER_TOPIC_DESTINATION = "/topic/user.";
 const PRIVATE_MESSAGES_QUEUE = "/user/queue/private-messages";
-
-interface WarnUserResponse {
-    description: string;
-}
 
 export function useStompWithRedux(
     onMessage?: (topic: string, message: IMessage) => void
@@ -160,22 +160,28 @@ export function useStompWithRedux(
                         }
                         break;
 
-                    case WebSocketMessageType.WARN_USER:
+                    case WebSocketMessageType.NOTIFICATION:
                         if (!user) return;
-                        const warnUserResponse = data as WarnUserResponse;
-                        toast.warning(`You have been warned! Reason: ${warnUserResponse.description}`, {
-                            duration: Infinity,
-                            style: {
-                                background: '#ff8c00',
-                                color: 'white',
-                                border: '1px solid #ff6600'
-                            },
-                            action: {
-                                label: 'Dismiss',
-                                onClick: () => {
-                                }
-                            },
-                        });
+                        const notification = data as AppNotification;
+                        dispatch(notificationReceived(notification));
+
+                        if (notification.type === NotificationType.WARNING) {
+                            toast.warning(`You have been warned!${notification.body ? ` Reason: ${notification.body}` : ""}`, {
+                                duration: 8000,
+                                style: {
+                                    background: '#ff8c00',
+                                    color: 'white',
+                                    border: '1px solid #ff6600'
+                                },
+                                action: {
+                                    label: 'Dismiss',
+                                    onClick: () => {
+                                    }
+                                },
+                            });
+                        } else {
+                            toast.info(notification.title, {duration: 8000});
+                        }
                         break;
 
                     case WebSocketMessageType.ROLE_UPDATE_NOTIFICATION:
@@ -392,6 +398,10 @@ export function useStompWithRedux(
                 if (!isInitialConnect.current) {
                     dispatch(setStompReconnected(true));
                     setTimeout(() => dispatch(setStompReconnected(false)), 500);
+                    // Notifications created while the socket was down were never pushed.
+                    if (userRef.current?.id) {
+                        dispatch(fetchUnreadCountThunk());
+                    }
                 }
                 isInitialConnect.current = false;
                 setIsConnected(true);

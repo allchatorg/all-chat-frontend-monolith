@@ -438,6 +438,18 @@ html, body {
         background: linear-gradient(135deg, rgba(15, 23, 42, 0.6), rgba(2, 6, 23, 0.55)) !important;
     }
 
+    /* Mobile centered modals (search rooms/users, notifications). Unlike the
+       desktop popovers, these sit over the dialog scrim, so the backdrop blur
+       has nothing meaningful to sample and translucency just muddies the
+       surface — use a fully solid background instead. */
+    .glass-popover.glass-modal-mobile {
+        background: #ffffff !important;
+    }
+
+    .dark .glass-popover.glass-modal-mobile {
+        background: rgb(15, 23, 42) !important;
+    }
+
     .navbar-floating {
         color: rgba(15, 23, 42, 0.92);
     }

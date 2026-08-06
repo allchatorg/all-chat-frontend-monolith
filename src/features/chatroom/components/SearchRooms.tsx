@@ -61,7 +61,7 @@ const SearchRooms: React.FC = () => {
     const handleMobileClick = () => {
         open(<div className="w-[80vw] md:min-w-[800px] md:max-w-[800px] max-h-[300px] overflow-auto">
             <SearchRoomsMobile onClose={close}/>
-        </div>, {className: "glass-popover"});
+        </div>, {className: "glass-popover glass-modal-mobile"});
     };
 
     if (isMobile) {
