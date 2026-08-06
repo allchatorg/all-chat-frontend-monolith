@@ -9,6 +9,7 @@ import {UserSearchRequest} from "@/models/UserSearchRequest";
 import {UserAdminView} from "@/models/UserAdminView";
 import {SearchAuditLogsRequest} from "@/models/SearchAuditLogsRequest";
 import {AuditLogUnion} from "@/models/AuditLog";
+import {RoomPromotionsSummary} from "@/models/RoomPromotionsSummary";
 
 const ADMIN_PATH = '/admin';
 
@@ -83,6 +84,11 @@ export const clearIdVerification = async (userId: number): Promise<void> => {
 
 export const archiveChatRoom = async (roomId: number): Promise<void> => {
     await api.put(`${ADMIN_PATH}/chat-rooms/${roomId}/archive`);
+};
+
+export const getRoomPromotionsSummary = async (roomId: number): Promise<RoomPromotionsSummary> => {
+    const res = await api.get<RoomPromotionsSummary>(`${ADMIN_PATH}/chat-rooms/${roomId}/promotions-summary`);
+    return res.data;
 };
 
 export const unarchiveChatRoom = async (roomId: number): Promise<void> => {
