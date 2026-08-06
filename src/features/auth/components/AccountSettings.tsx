@@ -25,6 +25,7 @@ import BlurredContentSettings from "@/features/chatroom/components/BlurredConten
 import {Tag} from "@/models/Tag";
 import {claimAccountThunk} from "@/redux/auth/authThunk";
 import {AccountDeleteComponent} from "@/features/auth/components/AccountDeleteComponent";
+import {isStaff} from "@/models/Role";
 import {PhoneSettings} from "@/features/auth/components/PhoneSettings";
 import TimeFormatSettingsCard from "@/features/auth/components/TimeFormatSettingsCard";
 import {useFormatMessageDate} from "@/lib/hooks/useTimeFormatSetting";
@@ -187,9 +188,14 @@ export const AccountSettings = ({isMobile = false}: AccountSettingsProps) => {
                 error={updateError?.message}
             />
 
-            <Separator/>
+            {/* Staff accounts cannot self-delete (backend rejects it too) */}
+            {user && !isStaff(user.role) && (
+                <>
+                    <Separator/>
 
-            <AccountDeleteComponent userId={user?.id}/>
+                    <AccountDeleteComponent userId={user.id} claimed={claimed}/>
+                </>
+            )}
         </div>
     );
 };

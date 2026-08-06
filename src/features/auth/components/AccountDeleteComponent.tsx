@@ -12,12 +12,15 @@ import {trackUserDeleted} from "@/lib/analytics";
 
 interface AccountDeleteComponentProps {
     userId: number | undefined;
+    /** Claimed accounts must additionally confirm with their password; guests have none. */
+    claimed: boolean;
 }
 
-export function AccountDeleteComponent({userId}: AccountDeleteComponentProps) {
+export function AccountDeleteComponent({userId, claimed}: AccountDeleteComponentProps) {
     const [showConfirmation, setShowConfirmation] = useState(false);
     const [deleteMessages, setDeleteMessages] = useState(false);
     const [confirmationInput, setConfirmationInput] = useState("");
+    const [password, setPassword] = useState("");
 
     const [deleteAccount, deleteAccountLoading, deleteAccountError] = useThunk(deleteAccountThunk);
 
@@ -31,19 +34,23 @@ export function AccountDeleteComponent({userId}: AccountDeleteComponentProps) {
         setShowConfirmation(false);
         setDeleteMessages(false);
         setConfirmationInput("");
+        setPassword("");
     };
 
+    const isConfirmValid = confirmationInput === "sudo delete account" && (!claimed || password.length > 0);
+
     const handleFinalDelete = () => {
-        if (confirmationInput === "sudo delete account") {
+        if (isConfirmValid) {
             if (userId) {
                 trackUserDeleted({user_id: userId?.toString()})
             }
-            deleteAccount({removeMessages: deleteMessages})
+            deleteAccount({removeMessages: deleteMessages, password: claimed ? password : null})
                 .then(close)
+                .catch(() => {
+                    // Wrong password etc. — surfaced via deleteAccountError below
+                })
         }
     };
-
-    const isConfirmValid = confirmationInput === "sudo delete account";
 
     return (
         <Card
@@ -89,11 +96,13 @@ export function AccountDeleteComponent({userId}: AccountDeleteComponentProps) {
                         </div>
 
                         <div className="space-y-2">
+                            {/* leading-normal overrides the Label default leading-none so the
+                                padded code chip doesn't overflow onto the input below */}
                             <Label htmlFor="confirm-delete"
-                                   className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                                   className="block text-sm font-medium leading-normal text-gray-700 dark:text-gray-300">
                                 Type{" "}
                                 <code
-                                    className="rounded border bg-gray-100 px-2 py-1 font-mono text-xs text-red-600 dark:bg-gray-800 dark:border-gray-700 dark:text-red-400">
+                                    className="rounded border bg-gray-100 px-1.5 py-0.5 font-mono text-xs text-red-600 dark:bg-gray-800 dark:border-gray-700 dark:text-red-400">
                                     sudo delete account
                                 </code>{" "}
                                 to confirm:
@@ -106,6 +115,30 @@ export function AccountDeleteComponent({userId}: AccountDeleteComponentProps) {
                                 className="border-red-200 font-mono text-base focus:border-red-400 focus:ring-red-400/20 dark:bg-gray-950 dark:border-red-900 dark:focus:border-red-500 dark:text-gray-100 dark:focus:ring-red-500/20 dark:placeholder:text-gray-500"
                             />
                         </div>
+
+                        {claimed && (
+                            <div className="space-y-2">
+                                <Label htmlFor="confirm-password"
+                                       className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                                    Enter your password to confirm:
+                                </Label>
+                                <Input
+                                    id="confirm-password"
+                                    type="password"
+                                    autoComplete="current-password"
+                                    placeholder="Your password"
+                                    value={password}
+                                    onChange={(e) => setPassword(e.target.value)}
+                                    className="border-red-200 text-base focus:border-red-400 focus:ring-red-400/20 dark:bg-gray-950 dark:border-red-900 dark:focus:border-red-500 dark:text-gray-100 dark:focus:ring-red-500/20 dark:placeholder:text-gray-500"
+                                />
+                            </div>
+                        )}
+
+                        {deleteAccountError && (
+                            <p className="text-sm font-medium text-red-600 dark:text-red-400">
+                                {deleteAccountError.message}
+                            </p>
+                        )}
 
                         <div className="flex flex-wrap justify-end gap-3 pt-2">
                             <Button
