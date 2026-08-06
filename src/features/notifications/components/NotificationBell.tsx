@@ -17,10 +17,17 @@ import {useIsMobile} from "@/lib/hooks/useIsMobile";
 export function NotificationBell() {
     const [popoverOpen, setPopoverOpen] = useState(false);
     const isMobile = useIsMobile();
-    const {open: openDialog} = useDialog();
+    const {open: openDialog, close: closeDialog} = useDialog();
     // Also fetches the unread count once on mount, so the badge is live
     // before the list is ever opened.
     const {unreadCount} = useNotifications();
+
+    // Deep-link navigation: close whichever surface hosts the list
+    // (desktop popover or mobile dialog) before routing away.
+    const closeSurfaces = () => {
+        setPopoverOpen(false);
+        closeDialog();
+    };
 
     const openDetails = (notification: AppNotification) => {
         setPopoverOpen(false);
@@ -51,10 +58,12 @@ export function NotificationBell() {
                 onClick={() =>
                     openDialog(
                         <div className="w-[80vw]">
-                            <NotificationList onOpenDetails={openDetails}/>
+                            <NotificationList onOpenDetails={openDetails} onNavigate={closeSurfaces}/>
                         </div>,
                         {
-                            className: "glass-popover glass-modal-mobile p-0",
+                            // overflow-hidden clips the square row-hover background
+                            // to the dialog's rounded corners.
+                            className: "glass-popover glass-modal-mobile p-0 overflow-hidden",
                             // Light scrim: the default bg-black/80 overlay shows
                             // through the translucent glass and greys it out in
                             // light mode (same fix as the edit-history dialog).
@@ -83,8 +92,10 @@ export function NotificationBell() {
                     {badge}
                 </Button>
             </PopoverTrigger>
-            <PopoverContent align="end" side="bottom" className="glass-popover w-96 p-0">
-                <NotificationList onOpenDetails={openDetails}/>
+            {/* overflow-hidden clips the square row-hover background to the
+                popover's rounded corners (else the last item covers the border) */}
+            <PopoverContent align="end" side="bottom" className="glass-popover w-96 overflow-hidden p-0">
+                <NotificationList onOpenDetails={openDetails} onNavigate={closeSurfaces}/>
             </PopoverContent>
         </Popover>
     );

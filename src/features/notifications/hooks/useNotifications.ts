@@ -1,5 +1,6 @@
 'use client';
 import {useCallback, useEffect} from "react";
+import {useRouter} from "next/navigation";
 import {useDispatch, useSelector} from "react-redux";
 import {AppDispatch} from "@/redux/store";
 import {selectUser} from "@/redux/user/userSelectors";
@@ -21,15 +22,18 @@ import {
     markUnreadThunk
 } from "@/redux/notifications/notificationsThunk";
 import {AppNotification} from "@/models/AppNotification";
+import {getNotificationRoute} from "@/features/notifications/notificationRoutes";
 
 const PAGE_SIZE = 10;
 
 /**
  * Shared notification-center logic. The details modal is opened by the caller
  * (chat and portal use different DialogProviders), so it is injected.
+ * onNavigate closes the hosting popover/dialog before a deep-link navigation.
  */
-export const useNotifications = (openDetails?: (notification: AppNotification) => void) => {
+export const useNotifications = (openDetails?: (notification: AppNotification) => void, onNavigate?: () => void) => {
     const dispatch = useDispatch<AppDispatch>();
+    const router = useRouter();
     const user = useSelector(selectUser);
     const notifications = useSelector(selectNotifications);
     const unreadCount = useSelector(selectUnreadCount);
@@ -72,8 +76,14 @@ export const useNotifications = (openDetails?: (notification: AppNotification) =
         if (notification.readAt === null) {
             markRead(notification);
         }
-        openDetails?.(notification);
-    }, [markRead, openDetails]);
+        const route = getNotificationRoute(notification);
+        if (route) {
+            onNavigate?.();
+            router.push(route);
+        } else {
+            openDetails?.(notification);
+        }
+    }, [markRead, openDetails, onNavigate, router]);
 
     const onToggleRead = useCallback((notification: AppNotification) => {
         if (notification.readAt === null) {

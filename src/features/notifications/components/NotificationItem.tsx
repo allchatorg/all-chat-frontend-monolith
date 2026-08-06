@@ -1,5 +1,6 @@
 'use client';
-import {MoreHorizontal, Trash2} from "lucide-react";
+import {useState} from "react";
+import {Check, Circle, MoreHorizontal, Trash2} from "lucide-react";
 import {AppNotification} from "@/models/AppNotification";
 import {getNotificationVisual} from "@/features/notifications/components/notificationVisuals";
 import {useFormatMessageDate} from "@/lib/hooks/useTimeFormatSetting";
@@ -24,6 +25,10 @@ export function NotificationItem({notification, onClick, onToggleRead, onDelete}
     const visual = getNotificationVisual(notification.type);
     const Icon = visual.icon;
     const unread = notification.readAt === null;
+    // Snapshot of `unread` taken when the actions menu opens: the optimistic
+    // toggle flips `unread` instantly, and rendering the menu from live state
+    // would swap the label/icon mid close-animation (visible flicker).
+    const [menuUnread, setMenuUnread] = useState(unread);
 
     return (
         <div
@@ -61,12 +66,14 @@ export function NotificationItem({notification, onClick, onToggleRead, onDelete}
             </div>
 
             <div className="flex shrink-0 items-center gap-1">
-                <DropdownMenu>
+                <DropdownMenu onOpenChange={(open) => open && setMenuUnread(unread)}>
                     <DropdownMenuTrigger asChild>
                         <Button
                             variant="ghost"
                             size="icon"
-                            className="h-7 w-7 opacity-0 transition-opacity group-hover:opacity-100 focus-visible:opacity-100 data-[state=open]:opacity-100"
+                            // Reveal-on-hover only where hovering exists (mouse);
+                            // touch devices keep the button always visible.
+                            className="h-7 w-7 transition-opacity pointer-fine:opacity-0 pointer-fine:group-hover:opacity-100 pointer-fine:focus-visible:opacity-100 pointer-fine:data-[state=open]:opacity-100"
                             aria-label="Notification actions"
                             onClick={(e) => e.stopPropagation()}
                         >
@@ -75,7 +82,15 @@ export function NotificationItem({notification, onClick, onToggleRead, onDelete}
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end" className="glass-popover" onClick={(e) => e.stopPropagation()}>
                         <DropdownMenuItem onSelect={() => onToggleRead(notification)}>
-                            {unread ? "Mark as read" : "Mark as unread"}
+                            {/* Facebook-style: check to mark read, unread-dot to mark unread */}
+                            {menuUnread
+                                ? <Check className="mr-2 h-4 w-4"/>
+                                : (
+                                    <span className="mr-2 flex h-4 w-4 items-center justify-center">
+                                        <Circle className="h-2.5 w-2.5 fill-blue-500 stroke-none"/>
+                                    </span>
+                                )}
+                            {menuUnread ? "Mark as read" : "Mark as unread"}
                         </DropdownMenuItem>
                         <DropdownMenuItem
                             onSelect={() => onDelete(notification)}

@@ -9,9 +9,11 @@ import {Button} from "@/components/ui/button";
 interface NotificationListProps {
     /** Opens the details modal — injected because chat and portal use different DialogProviders. */
     onOpenDetails: (notification: AppNotification) => void;
+    /** Closes the hosting popover/dialog before a deep-link navigation. */
+    onNavigate?: () => void;
 }
 
-export function NotificationList({onOpenDetails}: NotificationListProps) {
+export function NotificationList({onOpenDetails, onNavigate}: NotificationListProps) {
     const {
         notifications,
         unreadCount,
@@ -23,7 +25,7 @@ export function NotificationList({onOpenDetails}: NotificationListProps) {
         onToggleRead,
         onDelete,
         onMarkAllRead,
-    } = useNotifications(onOpenDetails);
+    } = useNotifications(onOpenDetails, onNavigate);
 
     // The list mounts when the popover/dialog opens — refresh page 0 each time.
     useEffect(() => {
@@ -44,9 +46,8 @@ export function NotificationList({onOpenDetails}: NotificationListProps) {
                 )}
             </div>
 
-            {/* min-h + stable scrollbar gutter keep the container from jumping
-                between loading/empty/loaded states */}
-            <div className="max-h-[60vh] min-h-[140px] overflow-y-auto [scrollbar-gutter:stable]">
+            {/* min-h keeps the container from jumping between loading/empty/loaded states */}
+            <div className="max-h-[60vh] min-h-[140px] overflow-y-auto">
                 {initialLoading ? (
                     <NotificationSkeletons/>
                 ) : notifications.length === 0 ? (

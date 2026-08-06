@@ -14,7 +14,7 @@ import {AppNotification} from "@/models/AppNotification"
  * (works in expanded and collapsed sidebar states).
  */
 export function NotificationBell() {
-    const {open} = useDialog()
+    const {open, close} = useDialog()
     // Also fetches the unread count once on mount, keeping the badge live.
     const {unreadCount} = useNotifications()
 
@@ -31,9 +31,11 @@ export function NotificationBell() {
     const openList = () => {
         open(
             <div className="w-[80vw] sm:w-[420px]">
-                <NotificationList onOpenDetails={openDetails}/>
+                <NotificationList onOpenDetails={openDetails} onNavigate={close}/>
             </div>,
-            {className: "p-0"}
+            // overflow-hidden clips the square row-hover background to the
+            // dialog's rounded corners.
+            {className: "p-0 overflow-hidden"}
         )
     }
 

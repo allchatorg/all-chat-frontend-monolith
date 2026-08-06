@@ -179,6 +179,12 @@ export function useStompWithRedux(
                                     }
                                 },
                             });
+                        } else if ([NotificationType.AD_APPROVED, NotificationType.AD_COMPLETED,
+                            NotificationType.PROMOTION_APPROVED, NotificationType.MODERATOR_ACCEPTED].includes(notification.type)) {
+                            toast.success(notification.title, {duration: 8000});
+                        } else if ([NotificationType.AD_REJECTED, NotificationType.PROMOTION_DENIED,
+                            NotificationType.PROMOTION_CANCELED].includes(notification.type)) {
+                            toast.error(notification.title, {duration: 8000});
                         } else {
                             toast.info(notification.title, {duration: 8000});
                         }
