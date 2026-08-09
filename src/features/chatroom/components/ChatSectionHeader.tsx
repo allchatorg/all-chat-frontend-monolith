@@ -202,22 +202,23 @@ const ChatSectionHeader: React.FC<ChatSectionHeaderProps> = ({
     // Desktop layout
     if (!isMobile) {
         return (
-            <CardTitle className="flex items-center gap-2">
-                <div className={`w-3 h-3 rounded-full ${noiseIndicator.color}`} title={noiseIndicator.title}></div>
-                {chatRoomName}
-                <div className="flex items-center gap-1.5 ml-2">
+            <CardTitle className="chat-header-floating flex items-center gap-2">
+                <div className={`w-3 h-3 shrink-0 rounded-full ${noiseIndicator.color}`}
+                     title={noiseIndicator.title}></div>
+                <span className="min-w-0 truncate" title={chatRoomName}>{chatRoomName}</span>
+                <div className="flex shrink-0 items-center gap-1.5 ml-2">
                     <MessageSquare className="h-4 w-4 text-muted-foreground"/>
                     <span className="text-sm font-normal text-muted-foreground">
                         {totalMessages}
                     </span>
                 </div>
-                <div className="ml-auto flex items-center gap-2">
+                <div className="ml-auto flex shrink-0 items-center gap-2">
                     <ChatSearchBar/>
                     <Button
                         onClick={onToggleTopReactedSidebar}
-                        variant={topReactedSidebarActive ? "secondary" : "outline"}
+                        variant="outline"
                         size="sm"
-                        className={`glass-control z-10 h-10 w-10 p-2 ${topReactedSidebarActive ? "text-primary" : ""}`}
+                        className="glass-control z-10 h-10 w-10 p-2"
                         aria-label={topReactedButtonLabel}
                         title={topReactedButtonLabel}
                     >
@@ -225,9 +226,9 @@ const ChatSectionHeader: React.FC<ChatSectionHeaderProps> = ({
                     </Button>
                     <Button
                         onClick={onTogglePromotedSidebar}
-                        variant={promotedSidebarActive ? "secondary" : "outline"}
+                        variant="outline"
                         size="sm"
-                        className={`glass-control z-10 h-10 w-10 p-2 ${promotedSidebarActive ? "text-primary" : ""}`}
+                        className="glass-control z-10 h-10 w-10 p-2"
                         aria-label={promotedButtonLabel}
                         title={promotedButtonLabel}
                     >
@@ -235,9 +236,9 @@ const ChatSectionHeader: React.FC<ChatSectionHeaderProps> = ({
                     </Button>
                     <Button
                         onClick={onTogglePopularitySidebar}
-                        variant={popularitySidebarActive ? "secondary" : "outline"}
+                        variant="outline"
                         size="sm"
-                        className={`glass-control z-10 h-10 w-10 p-2 ${popularitySidebarActive ? "text-primary" : ""}`}
+                        className="glass-control z-10 h-10 w-10 p-2"
                         aria-label={popularityButtonLabel}
                         title={popularityButtonLabel}
                     >
@@ -256,13 +257,14 @@ const ChatSectionHeader: React.FC<ChatSectionHeaderProps> = ({
 
     // Mobile layout
     return (
-        <CardTitle className="flex items-center gap-2">
+        <CardTitle className="chat-header-floating flex items-center gap-2">
             {!isExpanded ? (
                 <>
                     {/* Default view - chatroom name with message count, then buttons on right */}
-                    <div className={`w-3 h-3 rounded-full ${noiseIndicator.color}`} title={noiseIndicator.title}></div>
-                    <span className="truncate">{chatRoomName}</span>
-                    <div className="flex items-center gap-1">
+                    <div className={`w-3 h-3 shrink-0 rounded-full ${noiseIndicator.color}`}
+                         title={noiseIndicator.title}></div>
+                    <span className="truncate" title={chatRoomName}>{chatRoomName}</span>
+                    <div className="flex shrink-0 items-center gap-1">
                         <MessageSquare className="h-3.5 w-3.5 text-muted-foreground"/>
                         <span className="text-sm font-normal text-muted-foreground whitespace-nowrap">
                             {totalMessages}
@@ -271,7 +273,7 @@ const ChatSectionHeader: React.FC<ChatSectionHeaderProps> = ({
                     <div className="ml-auto flex items-center gap-1">
                         <Button
                             onClick={onToggleTopReactedSidebar}
-                            variant={topReactedSidebarActive ? "secondary" : "ghost"}
+                            variant="ghost"
                             size="sm"
                             className="glass-control h-8 w-8 p-0"
                             aria-label={topReactedButtonLabel}
@@ -281,7 +283,7 @@ const ChatSectionHeader: React.FC<ChatSectionHeaderProps> = ({
                         </Button>
                         <Button
                             onClick={onTogglePromotedSidebar}
-                            variant={promotedSidebarActive ? "secondary" : "ghost"}
+                            variant="ghost"
                             size="sm"
                             className="glass-control h-8 w-8 p-0"
                             aria-label={promotedButtonLabel}
@@ -291,7 +293,7 @@ const ChatSectionHeader: React.FC<ChatSectionHeaderProps> = ({
                         </Button>
                         <Button
                             onClick={onTogglePopularitySidebar}
-                            variant={popularitySidebarActive ? "secondary" : "ghost"}
+                            variant="ghost"
                             size="sm"
                             className="glass-control h-8 w-8 p-0"
                             aria-label={popularityButtonLabel}

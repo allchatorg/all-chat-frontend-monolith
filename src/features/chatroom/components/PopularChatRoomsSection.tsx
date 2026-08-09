@@ -18,7 +18,7 @@ import {RoomSortByEnum} from "@/models/RoomSortByEnum";
 import {ChatRoomNoiseLevelEnum} from "@/models/ChatRoomNoiseLevelEnum";
 import {useIsMobile} from "@/lib/hooks/useIsMobile";
 
-const PAGE_SIZE = 2;
+const PAGE_SIZE = 8;
 const POLL_INTERVAL = 10000;
 
 const PopularChatRoomsSection: React.FC = () => {
