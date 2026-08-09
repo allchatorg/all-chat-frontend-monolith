@@ -20,10 +20,11 @@ export const metadata: Metadata = {
     title: "allchat – For all conversations",
     description: "Join allchat and dive into conversations on any topic that interests you. It's your space to chat, connect, and explore ideas with others.",
     icons: {
-        // Default favicon for SSR / first paint. AppInitializer swaps this to
-        // /icon_light.png at runtime when light mode is selected.
+        // Default favicon for SSR / first paint — also what Safari and bookmark
+        // caches keep, since they ignore the runtime swap. AppInitializer swaps
+        // this to /icon_dark.png at runtime when dark mode is selected.
         icon: [
-            {url: "/icon_dark.png", type: "image/png"},
+            {url: "/icon_light.png", type: "image/png"},
         ]
     }
 };

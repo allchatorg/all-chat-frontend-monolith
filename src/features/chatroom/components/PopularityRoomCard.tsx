@@ -41,36 +41,32 @@ const PopularityRoomCard: React.FC<RoomCardProps> = ({
     return (
         <div
             onClick={onClick}
-            className={`grow flex flex-col min-w-0 cursor-pointer rounded-md px-4 py-2 transition-colors
+            className={`grow flex flex-wrap items-center gap-x-3 gap-y-1 min-w-0 cursor-pointer rounded-md px-4 py-2 transition-colors
                 ${isJoined
                 ? "glass-surface-strong border-green-400/70 text-foreground"
                 : room.archived
                     ? "glass-surface border-amber-300/70 dark:border-amber-500/40"
                     : "glass-surface"}`}
         >
-            <div className="flex items-start justify-between gap-3">
-                <div
-                    className="min-w-0 text-lg font-semibold truncate text-foreground"
-                    title={room.roomName}
-                >
-                    {room.roomName}
-                </div>
-
-                <div className="flex shrink-0 items-center gap-2">
-                    {room.archived && (
-                        <Badge
-                            variant="outline"
-                            className="border-amber-300 bg-amber-100/80 text-amber-800 dark:border-amber-700 dark:bg-amber-950/40 dark:text-amber-200"
-                        >
-                            <Archive className="mr-1 h-3 w-3"/>
-                            Archived
-                        </Badge>
-                    )}
-                </div>
+            <div
+                className="max-w-full shrink-0 text-lg font-semibold truncate text-foreground"
+                title={room.roomName}
+            >
+                {room.roomName}
             </div>
 
+            {room.archived && (
+                <Badge
+                    variant="outline"
+                    className="ml-auto shrink-0 border-amber-300 bg-amber-100/80 text-amber-800 dark:border-amber-700 dark:bg-amber-950/40 dark:text-amber-200"
+                >
+                    <Archive className="mr-1 h-3 w-3"/>
+                    Archived
+                </Badge>
+            )}
+
             {!room.archived && (
-                <div className="mt-1 flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-muted-foreground">
+                <div className="ml-auto flex shrink-0 items-center gap-x-3 text-sm text-muted-foreground">
                     <div
                         className="flex items-center gap-1 text-green-600 dark:text-green-400"
                         title="Users with this room open and selected"

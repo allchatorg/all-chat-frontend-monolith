@@ -69,7 +69,7 @@ const PaginationFooter: React.FC<PaginationFooterProps> = ({
     const paginationRange = getPaginationRange();
 
     return (
-        <div className={`glass-surface p-4 border-t mt-auto ${className}`}>
+        <div className={`glass-surface rounded-lg p-4 mt-auto ${className}`}>
             <Pagination>
                 <PaginationContent>
                     <PaginationItem>

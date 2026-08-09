@@ -95,7 +95,7 @@ export const getTopOnlineRoomsPaginated = (
     api.get<PaginatedResponse<RoomPopulation>>(`${CHAT_ROOMS_PATH}/chatroom-leaderboard`, {
         params: {
             page,
-            size,
+            pageSize: size,
             popularitySort,
             chatRoomNoiseLevel,
         }
