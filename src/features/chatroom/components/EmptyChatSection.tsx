@@ -25,18 +25,17 @@ const EmptyChatSection: React.FC<EmptyChatSectionProps> = ({className = "", onOp
         <Card
             className={`glass-panel chat-section-edge w-full h-full mx-auto flex flex-col rounded-b-xl border-t-0 ${className}`}>
             <CardHeader className="rounded-none bg-transparent pb-3 shadow-none">
-                <CardTitle className="flex items-center gap-2">
+                <CardTitle className="chat-header-floating flex items-center gap-2">
                     <div className="h-3 w-3 rounded-full bg-gray-400 dark:bg-gray-600"></div>
                     No Chat Selected
                     <div className="flex items-center ml-auto gap-2">
                         <Button
                             onClick={onToggleTopReactedSidebar}
-                            variant={topReactedSidebarActive ? "secondary" : "outline"}
+                            variant="outline"
                             size="sm"
                             className={`
                               glass-control z-20 relative flex flex-col items-center justify-center
-                              w-10 h-10 p-2 text-sm group 
-                              ${topReactedSidebarActive ? "text-primary" : ""}
+                              w-10 h-10 p-2 text-sm group
                             `}
                         >
                             <Flame className="h-5 w-5"/>
@@ -52,12 +51,11 @@ const EmptyChatSection: React.FC<EmptyChatSectionProps> = ({className = "", onOp
                         </Button>
                         <Button
                             onClick={onTogglePopularitySidebar}
-                            variant={popularitySidebarActive ? "secondary" : "outline"}
+                            variant="outline"
                             size="sm"
                             className={`
                               glass-control z-20 relative flex flex-col items-center justify-center
-                              w-10 h-10 p-2 text-sm group 
-                              ${popularitySidebarActive ? "text-primary" : ""}
+                              w-10 h-10 p-2 text-sm group
                             `}
                         >
                             <Users className="h-5 w-5"/>

@@ -45,12 +45,7 @@ export function FormatToggles({
                     type="button"
                     variant="outline"
                     size="icon"
-                    className={cn(
-                        "glass-control shrink-0 h-10 w-10",
-                        isActive
-                            ? "bg-primary border-primary text-primary-foreground shadow-sm hover:bg-primary/90 hover:text-primary-foreground"
-                            : "text-muted-foreground"
-                    )}
+                    className={cn("glass-control shrink-0 h-10 w-10 text-muted-foreground")}
                     disabled={disabled || !editor}
                     // Keep focus (and the current selection) in the editor.
                     onMouseDown={(e) => e.preventDefault()}

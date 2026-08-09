@@ -31,7 +31,7 @@ export function DictationButton({
             size="icon"
             className={cn(
                 "glass-control shrink-0 h-10 w-10",
-                isListening && "text-red-500 hover:text-red-500 animate-pulse",
+                isListening && "dictation-listening text-red-500 hover:text-red-500 animate-pulse",
                 className
             )}
             onClick={onToggle}

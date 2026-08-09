@@ -260,7 +260,7 @@ html, body {
         --sidebar-accent-foreground: 240 4.8% 95.9%;
         --sidebar-border: 240 3.7% 15.9%;
         --sidebar-ring: 217.2 91.2% 59.8%;
-        --app-bg-image: url("/dark-bg.png");
+        --app-bg-image: url("/dark-bg.jpg");
         --app-bg-overlay: linear-gradient(180deg, rgba(2, 6, 23, 0.24), rgba(2, 8, 23, 0.4));
         --glass-panel-bg: rgba(2, 6, 23, 0.22);
         --glass-surface-bg: rgba(8, 18, 38, 0.38);
@@ -454,12 +454,13 @@ html, body {
         color: rgba(15, 23, 42, 0.92);
     }
 
-    /* The chat composer (.composer-floating) shares the navbar's control
-       treatment so both toolbars read identically. Toggled controls
-       (aria-pressed="true": active bold/italic, listening mic) are excluded so
-       their pressed-state styling stays visible. */
+    /* The chat composer (.composer-floating) and chat section header
+       (.chat-header-floating) share the navbar's control treatment so all
+       three toolbars read identically. Bold/italic show no pressed-state
+       styling; only the listening mic (.dictation-listening) is excluded so
+       its red recording indicator stays visible. */
     .navbar-floating .glass-control,
-    .composer-floating .glass-control:not([aria-pressed="true"]) {
+    :is(.composer-floating, .chat-header-floating) .glass-control:not(.dictation-listening) {
         background: rgba(255, 255, 255, 0.34) !important;
         color: rgba(15, 23, 42, 0.9) !important;
         border: 1px solid rgba(96, 165, 250, 0.28) !important;
@@ -468,8 +469,8 @@ html, body {
 
     .navbar-floating .glass-control:hover,
     .navbar-floating .glass-control[data-state="open"],
-    .composer-floating .glass-control:not([aria-pressed="true"]):hover,
-    .composer-floating .glass-control:not([aria-pressed="true"])[data-state="open"] {
+    :is(.composer-floating, .chat-header-floating) .glass-control:not(.dictation-listening):hover,
+    :is(.composer-floating, .chat-header-floating) .glass-control:not(.dictation-listening)[data-state="open"] {
         background: rgba(255, 255, 255, 0.52) !important;
         color: rgba(29, 78, 216, 0.98) !important;
         border-color: rgba(59, 130, 246, 0.4) !important;
@@ -506,8 +507,8 @@ html, body {
 
     .navbar-floating .glass-control:hover :is(.text-white, .text-white\/80),
     .navbar-floating .glass-control:hover :is(svg, span),
-    .composer-floating .glass-control:not([aria-pressed="true"]):hover :is(.text-white, .text-white\/80),
-    .composer-floating .glass-control:not([aria-pressed="true"]):hover :is(svg, span) {
+    :is(.composer-floating, .chat-header-floating) .glass-control:not(.dictation-listening):hover :is(.text-white, .text-white\/80),
+    :is(.composer-floating, .chat-header-floating) .glass-control:not(.dictation-listening):hover :is(svg, span) {
         color: rgba(29, 78, 216, 0.98) !important;
     }
 
@@ -517,7 +518,7 @@ html, body {
     }
 
     .dark .navbar-floating .glass-control,
-    .dark .composer-floating .glass-control:not([aria-pressed="true"]) {
+    .dark :is(.composer-floating, .chat-header-floating) .glass-control:not(.dictation-listening) {
         background: rgba(255, 255, 255, 0.28) !important;
         color: white !important;
         border: 0 !important;
@@ -526,8 +527,8 @@ html, body {
 
     .dark .navbar-floating .glass-control:hover,
     .dark .navbar-floating .glass-control[data-state="open"],
-    .dark .composer-floating .glass-control:not([aria-pressed="true"]):hover,
-    .dark .composer-floating .glass-control:not([aria-pressed="true"])[data-state="open"] {
+    .dark :is(.composer-floating, .chat-header-floating) .glass-control:not(.dictation-listening):hover,
+    .dark :is(.composer-floating, .chat-header-floating) .glass-control:not(.dictation-listening)[data-state="open"] {
         background: rgba(255, 255, 255, 0.36) !important;
         color: white !important;
         box-shadow: 0 14px 30px rgba(15, 23, 42, 0.22), 0 1px 0 rgba(255, 255, 255, 0.28) inset !important;
@@ -559,8 +560,8 @@ html, body {
     .dark .navbar-floating :is(.text-white, .text-white\/80),
     .dark .navbar-floating .glass-control:hover :is(.text-white, .text-white\/80),
     .dark .navbar-floating .glass-control:hover :is(svg, span),
-    .dark .composer-floating .glass-control:not([aria-pressed="true"]):hover :is(.text-white, .text-white\/80),
-    .dark .composer-floating .glass-control:not([aria-pressed="true"]):hover :is(svg, span) {
+    .dark :is(.composer-floating, .chat-header-floating) .glass-control:not(.dictation-listening):hover :is(.text-white, .text-white\/80),
+    .dark :is(.composer-floating, .chat-header-floating) .glass-control:not(.dictation-listening):hover :is(svg, span) {
         color: white !important;
     }
 
@@ -630,7 +631,7 @@ html, body {
     }
 
     html:not(.dark) .navbar-floating .glass-control,
-    html:not(.dark) .composer-floating .glass-control:not([aria-pressed="true"]) {
+    html:not(.dark) :is(.composer-floating, .chat-header-floating) .glass-control:not(.dictation-listening) {
         background: rgba(255, 255, 255, 0.34) !important;
         color: rgba(15, 23, 42, 0.9) !important;
         box-shadow: 0 12px 28px rgba(37, 99, 235, 0.1), 0 8px 22px rgba(15, 23, 42, 0.08), 0 1px 0 rgba(255, 255, 255, 0.38) inset !important;
@@ -638,8 +639,8 @@ html, body {
 
     html:not(.dark) .navbar-floating .glass-control:hover,
     html:not(.dark) .navbar-floating .glass-control[data-state="open"],
-    html:not(.dark) .composer-floating .glass-control:not([aria-pressed="true"]):hover,
-    html:not(.dark) .composer-floating .glass-control:not([aria-pressed="true"])[data-state="open"] {
+    html:not(.dark) :is(.composer-floating, .chat-header-floating) .glass-control:not(.dictation-listening):hover,
+    html:not(.dark) :is(.composer-floating, .chat-header-floating) .glass-control:not(.dictation-listening)[data-state="open"] {
         background: rgba(255, 255, 255, 0.52) !important;
         color: rgba(29, 78, 216, 0.98) !important;
         box-shadow: 0 14px 30px rgba(37, 99, 235, 0.14), 0 8px 22px rgba(15, 23, 42, 0.1), 0 1px 0 rgba(255, 255, 255, 0.46) inset !important;
