@@ -10,6 +10,7 @@ import {AppDispatch} from "@/redux/store";
 import {markAdClicked, markAdLinkClicked} from "@/redux/ads/adsSlice";
 import {selectClickedAdIds, selectClickedAdLinkKeys} from "@/redux/ads/adsSelectors";
 import {registerAdClick, registerAdLinkClick} from "@/api/ads/adsAPI";
+import {isFillerAdId} from "@/features/chatroom/utils/fillerAds";
 import {FormattedMessageText} from "@/features/chatroom/components/FormattedMessageText";
 
 const AdvertMessageItem: React.FC<{
@@ -31,8 +32,9 @@ const AdvertMessageItem: React.FC<{
 
     const handleAttachmentClick = (attachment: Attachment) => {
         // Opening a photo/video ad counts as a click-through; track it once per
-        // served ad (fire-and-forget, never blocks the overlay).
-        if (message.advert && !interactionsDisabled && !clickedAdIds.includes(message.id)) {
+        // served ad (fire-and-forget, never blocks the overlay). Filler/house
+        // ads (negative ids) are never tracked — they have no backend Ad row.
+        if (message.advert && !isFillerAdId(message.id) && !interactionsDisabled && !clickedAdIds.includes(message.id)) {
             dispatch(markAdClicked(message.id));
             registerAdClick(message.id);
         }
@@ -46,7 +48,7 @@ const AdvertMessageItem: React.FC<{
         // Each hyperlink in the ad text is tracked separately from the media
         // click-through, once per served ad per link (fire-and-forget).
         const key = `${message.id}::${url}`;
-        if (message.advert && !interactionsDisabled && !clickedAdLinkKeys.includes(key)) {
+        if (message.advert && !isFillerAdId(message.id) && !interactionsDisabled && !clickedAdLinkKeys.includes(key)) {
             dispatch(markAdLinkClicked(key));
             registerAdLinkClick(message.id, url);
         }

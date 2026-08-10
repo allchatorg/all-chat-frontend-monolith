@@ -25,9 +25,10 @@ import {useThemedLogo} from "@/lib/hooks/useThemedLogo";
 
 // Manually uploaded demo assets on the public R2 bucket — keep these URLs
 // stable. Ad media uploads moved to Wasabi, but these are served directly
-// by Cloudflare and don't depend on any backend storage config.
-const PHOTO_PREVIEW_URL = "https://pub-0041c325ef4f49388686f7b78d23aa40.r2.dev/dev/73bed392-0adc-43cd-8a68-c763be2a45fe_allchat-logo.png"
-const VIDEO_PREVIEW_URL = "https://pub-0041c325ef4f49388686f7b78d23aa40.r2.dev/dev/7415fc9a-2e6a-4ca8-8ce7-32f41cb2a28d_Generated%20Video%20March%2027,%202026%20-%201_43AM.mp4"
+// by Cloudflare and don't depend on any backend storage config. The chat's
+// filler/house ads use the same assets (src/features/chatroom/utils/fillerAds.ts).
+const PHOTO_PREVIEW_URL = "https://pub-0041c325ef4f49388686f7b78d23aa40.r2.dev/allchat-advert-images/allchat_light_logo.png"
+const VIDEO_PREVIEW_URL = "https://pub-0041c325ef4f49388686f7b78d23aa40.r2.dev/allchat-advert-images/video_ads.mp4"
 
 type HomeAdFormat = {
     id: number
@@ -40,6 +41,7 @@ type HomeAdFormat = {
 export default function Home() {
     const {open} = useDialog();
     const logoSrc = useThemedLogo("/allchat_ads_portal_light_logo.png", "/allchat_ads_portal_dark_logo.png");
+    const brandLogoSrc = useThemedLogo();
     const adFormats: HomeAdFormat[] = [
         {
             id: 1,
@@ -47,7 +49,7 @@ export default function Home() {
             title: "Text Advertisement",
             description: "Simple text-based advertisement",
             previewAd: {
-                brandName: "Allchat Ads",
+                brandName: "allchat Ads",
                 content: "Promote your next campaign directly inside the conversation and meet customers where they already chat.",
                 color: "#2563EB",
                 chatRoomName: "General",
@@ -61,11 +63,11 @@ export default function Home() {
             title: "Photo Ad",
             description: "High-visibility visual format",
             previewAd: {
-                brandName: "Allchat Advert",
-                content: "Refresh your next campaign with a strong visual message that feels native in the thread.",
+                brandName: "allchat Ads",
+                content: "Refresh your next campaign with a strong visual message that feels native in the chat.",
                 color: "#004B93",
                 attachmentUrl: PHOTO_PREVIEW_URL,
-                attachmentName: "allchat-photo-preview.png",
+                attachmentName: "allchat_light_logo.png",
                 chatRoomName: "General",
                 senderCountryCode: "US",
                 senderRole: "USER",
@@ -77,11 +79,11 @@ export default function Home() {
             title: "Video Ad",
             description: "Engaging video content",
             previewAd: {
-                brandName: "Allchat Advert",
+                brandName: "allchat Ads",
                 content: "Show the product in action with a video ad preview embedded right into the chat experience.",
                 color: "#E11D48",
                 attachmentUrl: VIDEO_PREVIEW_URL,
-                attachmentName: "allchat-video-preview.mp4",
+                attachmentName: "video_ads.mp4",
                 chatRoomName: "General",
                 senderCountryCode: "US",
                 senderRole: "USER",
@@ -107,7 +109,13 @@ export default function Home() {
                     <div className="text-center max-w-4xl">
                         <h1 className="text-4xl font-extrabold tracking-tight text-foreground sm:text-5xl md:text-6xl">
                             Grow your business on <br className="hidden sm:block"/>
-                            <span className="text-blue-600">allchat</span>
+                            <Image
+                                src={brandLogoSrc}
+                                alt="allchat"
+                                width={1361}
+                                height={393}
+                                className="inline-block h-[1em] w-auto align-baseline"
+                            />
                         </h1>
                         <p className="mt-6 text-lg text-muted-foreground sm:text-xl leading-relaxed max-w-2xl mx-auto">
                             Launch high-conversion campaigns in minutes. Reach users directly in their conversations

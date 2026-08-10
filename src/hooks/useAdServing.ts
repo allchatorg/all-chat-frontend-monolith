@@ -10,7 +10,8 @@ import {
     selectServedChatroomIds,
 } from '@/redux/ads/adsSelectors';
 import {fetchAd} from '@/redux/ads/adsThunk';
-import {markChatroomAsServed as markServedAction, setAdPlacement} from '@/redux/ads/adsSlice';
+import {markChatroomAsServed as markServedAction, setAdPlacement, setFillerAd} from '@/redux/ads/adsSlice';
+import {buildFillerAdMessage} from '@/features/chatroom/utils/fillerAds';
 import {Message} from '@/models/message';
 import {ChatRoom} from '@/models/ChatRoom';
 import {selectLoadedChatRooms} from '@/redux/chatRoom/chatRoomSelectors';
@@ -137,6 +138,18 @@ export const useAdServing = () => {
                     dispatch(setAdPlacement(placement));
                     return ensureAdvertCached(newAd, chatRoom, placement);
                 }
+
+                // 204 — no paid campaigns running: fall back to a locally
+                // built filler/house ad (random text/photo/video creative).
+                // It becomes currentAd, so the branch above serves it
+                // per-chatroom until expiry, when a real fetch runs again
+                // and any new paid ad replaces it.
+                const filler = buildFillerAdMessage();
+                dispatch(setFillerAd(filler));
+                dispatch(markServedAction(chatroomId));
+                const placement = createPlacement(filler, chatRoom);
+                dispatch(setAdPlacement(placement));
+                return ensureAdvertCached(filler, chatRoom, placement);
             }
         } catch (error) {
             console.error("Failed to fetch ad", error);

@@ -54,6 +54,17 @@ const adsSlice = createSlice({
                 state.clickedAdLinkKeys.push(action.payload);
             }
         },
+        // Installs a locally built filler/house ad as the current ad, with the
+        // same tracking reset as a freshly fetched real ad.
+        setFillerAd: (state, action: PayloadAction<Message>) => {
+            state.currentAd = action.payload;
+            state.lastServedTimestamp = Date.now();
+            state.servedChatroomIds = [];
+            state.adPlacementsByChatroomId = {};
+            state.hiddenAdIds = [];
+            state.clickedAdIds = [];
+            state.clickedAdLinkKeys = [];
+        },
     },
     extraReducers: (builder) => {
         builder
@@ -81,5 +92,5 @@ const adsSlice = createSlice({
     },
 });
 
-export const {markChatroomAsServed, hideAd, setAdPlacement, markAdClicked, markAdLinkClicked} = adsSlice.actions;
+export const {markChatroomAsServed, hideAd, setAdPlacement, markAdClicked, markAdLinkClicked, setFillerAd} = adsSlice.actions;
 export default adsSlice.reducer;
