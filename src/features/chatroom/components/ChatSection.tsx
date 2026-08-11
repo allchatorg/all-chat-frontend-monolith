@@ -100,6 +100,14 @@ const ChatSection: React.FC<ChatSectionProps> = ({
             .join(":") ?? "";
     }, [chatRoom?.messages]);
 
+    // Refetches (reconnect/stale) replace messages and strip the advert without
+    // changing the non-advert signature — track its presence so the placement
+    // effect re-runs immediately instead of waiting for the next poll tick.
+    const isCurrentAdPlaced = React.useMemo(() => {
+        if (!currentAd) return false;
+        return chatRoom?.messages.some(message => message.advert && message.id === currentAd.id) ?? false;
+    }, [chatRoom?.messages, currentAd]);
+
     const unreadDividerMessageId = React.useMemo(() => {
         if (!selectedUserChatRoom || !chatRoom || !selectedUserChatRoom.unreadMessagesCount) return null;
 
@@ -170,7 +178,7 @@ const ChatSection: React.FC<ChatSectionProps> = ({
         if (!user || !chatRoom || !isVisible || !currentAd) return;
 
         void getAdRef.current(chatRoom, {fetchIfNeeded: false});
-    }, [user?.id, chatRoom?.id, isVisible, currentAd?.id, messagePlacementSignature]);
+    }, [user?.id, chatRoom?.id, isVisible, currentAd?.id, messagePlacementSignature, isCurrentAdPlaced]);
 
 
     if (!user) {

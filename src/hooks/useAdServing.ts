@@ -26,6 +26,22 @@ type GetAdOptions = {
     fetchIfNeeded?: boolean;
 };
 
+// Must mirror getAdvertInsertIndex in chatRoomSlice: a placement whose anchor
+// is missing from the loaded message window resolves to no insert index there.
+function isPlacementValid(placement: AdPlacement, messages: Message[]): boolean {
+    const hasNonAdvertMessages = messages.some(message => !message.advert);
+
+    if (placement.afterMessageId === null && placement.beforeMessageId === null) {
+        return !hasNonAdvertMessages;
+    }
+
+    if (placement.afterMessageId !== null) {
+        return messages.some(message => !message.advert && message.id === placement.afterMessageId);
+    }
+
+    return messages.some(message => !message.advert && message.id === placement.beforeMessageId);
+}
+
 export const useAdServing = () => {
     const dispatch = useDispatch<AppDispatch>();
     const currentAd = useSelector(selectCurrentAd);
@@ -59,7 +75,7 @@ export const useAdServing = () => {
     const getPlacement = useCallback((ad: Message, chatRoom: AdChatRoom): AdPlacement => {
         const existingPlacement = adPlacementsByChatroomId[chatRoom.id];
 
-        if (existingPlacement?.adId === ad.id) {
+        if (existingPlacement?.adId === ad.id && isPlacementValid(existingPlacement, chatRoom.messages)) {
             return existingPlacement;
         }
 
