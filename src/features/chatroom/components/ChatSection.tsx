@@ -25,7 +25,8 @@ import {setEditingMessage, setJumpToMessageId, setReplyingToMessage} from "@/red
 import {trackAttachmentUploaded, trackMessageDeleted, trackMessageSent} from "@/lib/analytics";
 import {useAdServing} from "@/hooks/useAdServing";
 import {hideAd} from '@/redux/ads/adsSlice';
-import {selectHiddenAdIds} from '@/redux/ads/adsSelectors';
+import {selectAdPlacementsByChatroomId, selectHiddenAdIds} from '@/redux/ads/adsSelectors';
+import {composeMessagesWithAd} from '@/features/chatroom/utils/adPlacement';
 import {usePageVisibility} from "@/lib/hooks/usePageVisibility";
 import {selectMessagingAvailability} from "@/redux/messagingAvailability/messagingAvailabilitySelectors";
 import {toast} from "sonner";
@@ -100,14 +101,6 @@ const ChatSection: React.FC<ChatSectionProps> = ({
             .join(":") ?? "";
     }, [chatRoom?.messages]);
 
-    // Refetches (reconnect/stale) replace messages and strip the advert without
-    // changing the non-advert signature — track its presence so the placement
-    // effect re-runs immediately instead of waiting for the next poll tick.
-    const isCurrentAdPlaced = React.useMemo(() => {
-        if (!currentAd) return false;
-        return chatRoom?.messages.some(message => message.advert && message.id === currentAd.id) ?? false;
-    }, [chatRoom?.messages, currentAd]);
-
     const unreadDividerMessageId = React.useMemo(() => {
         if (!selectedUserChatRoom || !chatRoom || !selectedUserChatRoom.unreadMessagesCount) return null;
 
@@ -178,7 +171,7 @@ const ChatSection: React.FC<ChatSectionProps> = ({
         if (!user || !chatRoom || !isVisible || !currentAd) return;
 
         void getAdRef.current(chatRoom, {fetchIfNeeded: false});
-    }, [user?.id, chatRoom?.id, isVisible, currentAd?.id, messagePlacementSignature, isCurrentAdPlaced]);
+    }, [user?.id, chatRoom?.id, isVisible, currentAd?.id, messagePlacementSignature]);
 
 
     if (!user) {
@@ -257,19 +250,19 @@ const ChatSection: React.FC<ChatSectionProps> = ({
     };
 
     const hiddenAdIds = useSelector(selectHiddenAdIds);
+    const adPlacementsByChatroomId = useSelector(selectAdPlacementsByChatroomId);
+    const adPlacement = chatRoom ? adPlacementsByChatroomId[chatRoom.id] : undefined;
 
     const handleHideAd = (adId: number) => {
         dispatch(hideAd(adId));
     };
 
-    const allMessages = () => {
+    // The advert is composed at render time so refetches that replace
+    // chatRoom.messages never drop and re-insert it (no layout shift).
+    const renderedMessages = React.useMemo(() => {
         if (!chatRoom) return [];
-
-        const messages = chatRoom.messages.filter(message =>
-            !message.advert || !hiddenAdIds.includes(message.id)
-        );
-        return messages;
-    }
+        return composeMessagesWithAd(chatRoom, currentAd, adPlacement, hiddenAdIds);
+    }, [chatRoom, currentAd, adPlacement, hiddenAdIds]);
 
     const blockedUserIds = React.useMemo(() => {
         return user?.blockedUsers?.map(u => u.id) || [];
@@ -300,7 +293,7 @@ const ChatSection: React.FC<ChatSectionProps> = ({
                 currentUserId={currentUserId}
                 currentUsername={user.username}
                 blockedUserIds={blockedUserIds}
-                messages={allMessages()}
+                messages={renderedMessages}
                 unreadDividerMessageId={unreadDividerMessageId}
                 composerDisabled={composerDisabled}
                 composerDisabledReason={composerDisabledReason}

@@ -221,6 +221,11 @@ export const useChatScrollAndPagination = (
     // --- 3. VISIBILITY & TOPMOST MESSAGE ---
     const visibleMessageIds = useRef<Set<number>>(new Set());
     const [topMostVisibleMessageId, setTopMostVisibleMessageId] = useState<number | null>(null);
+    // Viewport-relative top of the topmost visible message, so a wholesale
+    // message-window replacement (stale/reconnect `around` refetch) can pin the
+    // same message back where the user was reading.
+    const topMostAnchor = useRef<{ messageId: number; top: number } | null>(null);
+    const previousMessageWindow = useRef<{ roomId: number; firstId: number | null; lastId: number | null } | null>(null);
 
     useEffect(() => {
         if (!viewport || !chatRoom?.id) return;
@@ -230,6 +235,7 @@ export const useChatScrollAndPagination = (
 
             const querySelectorAll = viewport.querySelectorAll('[data-message-id]');
             let topMostId: number | null = null;
+            let topMostTop = 0;
             let minTop = Infinity;
 
             const viewportRectTop = viewport.getBoundingClientRect().top;
@@ -246,11 +252,13 @@ export const useChatScrollAndPagination = (
                     if (topOffset < minTop || (rect.top >= viewportRectTop && rect.top < minTop)) {
                         minTop = topOffset;
                         topMostId = messageId;
+                        topMostTop = rect.top - viewportRectTop;
                     }
                 }
             });
 
             if (topMostId !== null) {
+                topMostAnchor.current = {messageId: topMostId, top: topMostTop};
                 setTopMostVisibleMessageId(topMostId);
                 dispatch(config.setTopMostVisibleMessageId({
                     roomId: chatRoom.id,
@@ -331,7 +339,10 @@ export const useChatScrollAndPagination = (
             }
         });
 
-        mutationObserver.observe(viewport.querySelector('div') || viewport, {
+        // Observe the message list itself — the first descendant div is the
+        // pull-to-refresh indicator whenever hasPrevious, which left messages
+        // rendered after mount untracked and froze the topmost-visible id.
+        mutationObserver.observe(viewport.querySelector('[data-message-list]') ?? viewport, {
             childList: true,
             subtree: true
         });
@@ -341,10 +352,47 @@ export const useChatScrollAndPagination = (
             mutationObserver.disconnect();
             calculateTopMost.cancel();
             visibleMessageIds.current.clear();
+            topMostAnchor.current = null;
         };
     }, [viewport, chatRoom?.id, dispatch]);
 
+    // A stale/reconnect `around` refetch replaces the whole message window while the
+    // room id stays the same, so neither the per-room restore nor the prepend anchoring
+    // runs and the raw scrollTop lands on unrelated content. Detect the replacement
+    // (both ends of the window changed) and pin the previously topmost message back
+    // to the offset it had before the refetch.
+    useIsomorphicLayoutEffect(() => {
+        if (!viewport || !chatRoom?.id) return;
+
+        const chatMessages = chatRoom.messages.filter(message => !message.advert);
+        const firstId = chatMessages[0]?.id ?? null;
+        const lastId = chatMessages[chatMessages.length - 1]?.id ?? null;
+        const previous = previousMessageWindow.current;
+        previousMessageWindow.current = {roomId: chatRoom.id, firstId, lastId};
+
+        if (!previous || previous.roomId !== chatRoom.id) return;
+        if (previous.firstId === firstId || previous.lastId === lastId) return;
+        if (isRestoringScroll.current || previousFirstMessageId.current !== null) return;
+
+        const anchor = topMostAnchor.current;
+        if (!anchor) return;
+
+        const anchorEl = viewport.querySelector(`[data-message-id="${anchor.messageId}"]`);
+        if (!anchorEl) return;
+
+        void viewport.offsetHeight;
+        const delta = anchorEl.getBoundingClientRect().top - viewport.getBoundingClientRect().top - anchor.top;
+        if (delta === 0) return;
+
+        const originalOverflow = viewport.style.overflowY;
+        viewport.style.overflowY = 'hidden';
+        viewport.scrollTop = viewport.scrollTop + delta;
+        viewport.style.overflowY = originalOverflow;
+    }, [chatRoom?.messages, chatRoom?.id, viewport]);
+
     const isLastMessageVisible = useRef<boolean>(false);
+    // State twin of the ref so the pill re-derives when the bottom scrolls into view.
+    const [lastMessageVisible, setLastMessageVisible] = useState(false);
     const [showJumpToPresentPill, setShowJumpToPresentPill] = useState(false);
 
     // Track the id of the newest in-memory message (per room) so we can distinguish a
@@ -363,13 +411,16 @@ export const useChatScrollAndPagination = (
     const shouldShowJumpToPresent = useCallback((topMostId: number | null) => {
         if (!topMostId || !chatRoom) return false;
         if (chatRoom.hasNext) return true;
+        // The newest message is on screen — the message-count threshold below can
+        // still pass on tall viewports, so never show the pill while at the bottom.
+        if (lastMessageVisible) return false;
 
         const chatMessages = chatRoom.messages.filter(message => !message.advert);
         const index = chatMessages.findIndex(msg => msg.id === topMostId);
         if (index === -1) return false;
 
         return isLastMessageInMemory() && index <= chatMessages.length - SHOW_JUMP_TO_PRESENT_THRESHOLD;
-    }, [chatRoom, isLastMessageInMemory]);
+    }, [chatRoom, isLastMessageInMemory, lastMessageVisible]);
 
     useEffect(() => {
         setShowJumpToPresentPill(shouldShowJumpToPresent(topMostVisibleMessageId));
@@ -434,6 +485,7 @@ export const useChatScrollAndPagination = (
     const {elementRef: lastMessageVisibilityRef} = useIntersectionObserver(
         (entry) => {
             isLastMessageVisible.current = entry.isIntersecting;
+            setLastMessageVisible(entry.isIntersecting);
         },
         {
             threshold: 0.1,

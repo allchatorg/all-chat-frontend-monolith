@@ -165,7 +165,7 @@ const ConversationView: React.FC<ConversationViewProps> = ({
                         </div>
                     )}
 
-                    <div>
+                    <div data-message-list>
                         {messages.map((message, index) => {
                             const isBeingEdited = editingMessage?.id === message.id;
                             const shouldDim = editingMessage && !isBeingEdited;

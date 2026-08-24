@@ -6,7 +6,16 @@ export function useIntersectionObserver(
 ) {
     const observer = useRef<IntersectionObserver | null>(null);
     const timeoutId = useRef<NodeJS.Timeout | null>(null);
+    // Latest callback/options live in refs so `elementRef` keeps a stable identity.
+    // Otherwise React re-runs the ref callback every render, tearing down and
+    // re-arming the observer (with the delay below) and sentinels never fire
+    // during render bursts (reconnect refetch, pull-to-refresh, ad placement).
+    const callbackRef = useRef(callback);
+    const optionsRef = useRef(options);
     const DELAY_MS = 275;
+
+    callbackRef.current = callback;
+    optionsRef.current = options;
 
     const elementRef = useCallback((node: HTMLElement | null) => {
         if (observer.current) {
@@ -22,14 +31,14 @@ export function useIntersectionObserver(
             timeoutId.current = setTimeout(() => {
                 observer.current = new IntersectionObserver(
                     (entries) => {
-                        entries.forEach(callback);
+                        entries.forEach(entry => callbackRef.current(entry));
                     },
-                    options
+                    optionsRef.current
                 );
                 observer.current.observe(node);
             }, DELAY_MS);
         }
-    }, [callback, options]);
+    }, []);
 
     const cleanup = useCallback(() => {
         if (timeoutId.current) {

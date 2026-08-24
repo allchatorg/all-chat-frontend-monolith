@@ -26,7 +26,6 @@ import {BanUserNotification} from "@/models/BanUserNotification";
 import {revokeBanThunk} from "@/redux/modPanel/modPanelThunk";
 import {ReactionUpdateResponse} from "@/models/ReactionUpdateResponse";
 import {createEmptyPaginatedResponse} from "@/lib/utils";
-import {AdPlacement} from "@/models/AdPlacement";
 import {PromotedMessageEvent} from "@/models/PromotedMessageEvent";
 import {
     addChatRoomReaction,
@@ -129,60 +128,6 @@ function filterMessagesSentAfterMessage(messages: Message[], targetMessageId: nu
     return messages.filter(message => message.id > targetMessageId);
 }
 
-function findNonAdvertMessageIndex(messages: Message[], messageId: number): number {
-    return messages.findIndex(message => !message.advert && message.id === messageId);
-}
-
-function getAdvertInsertIndex(messages: Message[], placement: AdPlacement): number | null {
-    const hasNonAdvertMessages = messages.some(message => !message.advert);
-
-    if (placement.afterMessageId === null && placement.beforeMessageId === null) {
-        return hasNonAdvertMessages ? null : messages.length;
-    }
-
-    if (placement.afterMessageId !== null) {
-        const afterIndex = findNonAdvertMessageIndex(messages, placement.afterMessageId);
-        return afterIndex === -1 ? null : afterIndex + 1;
-    }
-
-    if (placement.beforeMessageId !== null) {
-        const beforeIndex = findNonAdvertMessageIndex(messages, placement.beforeMessageId);
-        return beforeIndex === -1 ? null : beforeIndex;
-    }
-
-    return null;
-}
-
-function addAdvertMessageToMessages(messages: Message[], advertMessage: Message, placement: AdPlacement): Message[] {
-    if (!advertMessage.advert) {
-        return messages;
-    }
-
-    if (placement.adId !== advertMessage.id || placement.chatRoomId !== advertMessage.chatRoomId) {
-        return messages;
-    }
-
-    const advertAlreadyCached = messages.some(message =>
-        message.advert && message.id === advertMessage.id
-    );
-
-    if (advertAlreadyCached) {
-        return messages;
-    }
-
-    const insertIndex = getAdvertInsertIndex(messages, placement);
-
-    if (insertIndex === null) {
-        return messages;
-    }
-
-    return [
-        ...messages.slice(0, insertIndex),
-        advertMessage,
-        ...messages.slice(insertIndex),
-    ];
-}
-
 function updateChatRoomArchivedStatus(chatRoom: ChatRoom, isArchived: boolean): ChatRoom {
     return {
         ...chatRoom,
@@ -231,29 +176,6 @@ const chatSlice = createSlice({
             action: PayloadAction<ChatRoom>
         ) {
             state.selectedChatRoom = action.payload;
-        },
-        cacheAdvertMessage(
-            state,
-            action: PayloadAction<{ advertMessage: Message; placement: AdPlacement }>
-        ) {
-            const {advertMessage, placement} = action.payload;
-            if (!advertMessage.advert) return;
-
-            state.loadedChatRooms = state.loadedChatRooms.map(room =>
-                room.id === advertMessage.chatRoomId
-                    ? {
-                        ...room,
-                        messages: addAdvertMessageToMessages(room.messages, advertMessage, placement),
-                    }
-                    : room
-            );
-
-            if (state.selectedChatRoom?.id === advertMessage.chatRoomId) {
-                state.selectedChatRoom = {
-                    ...state.selectedChatRoom,
-                    messages: addAdvertMessageToMessages(state.selectedChatRoom.messages, advertMessage, placement),
-                };
-            }
         },
         removeLoadedChatRoom(
             state,
@@ -1069,7 +991,6 @@ export const {
     handleNewMessage,
     handlePopularityUpdate,
     setSelectedChatRoom,
-    cacheAdvertMessage,
     setSearchMessagesParams,
     updateLastReadMessage,
     handleChatRoomBanUserNotificationRegularUser,

@@ -12,35 +12,15 @@ import {
 import {fetchAd} from '@/redux/ads/adsThunk';
 import {markChatroomAsServed as markServedAction, setAdPlacement, setFillerAd} from '@/redux/ads/adsSlice';
 import {buildFillerAdMessage} from '@/features/chatroom/utils/fillerAds';
+import {AdChatRoom, createPlacement, getAdvertInsertIndex, isAnchorDeleted} from '@/features/chatroom/utils/adPlacement';
 import {Message} from '@/models/message';
-import {ChatRoom} from '@/models/ChatRoom';
-import {selectLoadedChatRooms} from '@/redux/chatRoom/chatRoomSelectors';
-import {cacheAdvertMessage} from '@/redux/chatRoom/chatRoomSlice';
-import {AdPlacement} from '@/models/AdPlacement';
 
 const AD_EXPIRY_MS = 60 * 60 * 1000;
 const AD_FETCH_COOLDOWN_MS = AD_EXPIRY_MS;
 
-type AdChatRoom = Pick<ChatRoom, 'id' | 'name' | 'messages'>;
 type GetAdOptions = {
     fetchIfNeeded?: boolean;
 };
-
-// Must mirror getAdvertInsertIndex in chatRoomSlice: a placement whose anchor
-// is missing from the loaded message window resolves to no insert index there.
-function isPlacementValid(placement: AdPlacement, messages: Message[]): boolean {
-    const hasNonAdvertMessages = messages.some(message => !message.advert);
-
-    if (placement.afterMessageId === null && placement.beforeMessageId === null) {
-        return !hasNonAdvertMessages;
-    }
-
-    if (placement.afterMessageId !== null) {
-        return messages.some(message => !message.advert && message.id === placement.afterMessageId);
-    }
-
-    return messages.some(message => !message.advert && message.id === placement.beforeMessageId);
-}
 
 export const useAdServing = () => {
     const dispatch = useDispatch<AppDispatch>();
@@ -49,65 +29,33 @@ export const useAdServing = () => {
     const lastAdFetchTimestamp = useSelector(selectLastAdFetchTimestamp);
     const servedChatroomIds = useSelector(selectServedChatroomIds);
     const status = useSelector(selectAdsStatus);
-    const loadedChatRooms = useSelector(selectLoadedChatRooms);
     const adPlacementsByChatroomId = useSelector(selectAdPlacementsByChatroomId);
 
-    const isAdvertCached = useCallback((chatroomId: number, advertId: number) => {
-        return loadedChatRooms.some(room =>
-            room.id === chatroomId &&
-            room.messages.some(message => message.advert && message.id === advertId)
-        );
-    }, [loadedChatRooms]);
-
-    const createPlacement = useCallback((ad: Message, chatRoom: AdChatRoom): AdPlacement => {
-        const chatMessages = chatRoom.messages.filter(message => !message.advert);
-        const lastMessage = chatMessages[chatMessages.length - 1] ?? null;
-
-        return {
-            adId: ad.id,
-            chatRoomId: chatRoom.id,
-            afterMessageId: lastMessage?.id ?? null,
-            beforeMessageId: null,
-            placedAt: new Date().toISOString(),
-        };
-    }, []);
-
-    const getPlacement = useCallback((ad: Message, chatRoom: AdChatRoom): AdPlacement => {
+    // Creates the placement once per ad/room and re-anchors to the tail only when
+    // the anchor message was deleted (what composeMessagesWithAd already renders).
+    const ensurePlacement = useCallback((ad: Message, chatRoom: AdChatRoom) => {
         const existingPlacement = adPlacementsByChatroomId[chatRoom.id];
 
-        if (existingPlacement?.adId === ad.id && isPlacementValid(existingPlacement, chatRoom.messages)) {
-            return existingPlacement;
+        if (existingPlacement?.adId === ad.id) {
+            // Empty-room placement: once the first message exists, pin the advert
+            // before it so it keeps that top position instead of following the tail.
+            if (existingPlacement.afterMessageId === null && existingPlacement.beforeMessageId === null) {
+                const firstMessage = chatRoom.messages.find(message => !message.advert);
+                if (firstMessage) {
+                    dispatch(setAdPlacement({...existingPlacement, beforeMessageId: firstMessage.id}));
+                }
+                return;
+            }
+
+            // Keep the placement unless the anchor is provably deleted; an anchor that
+            // is simply outside the loaded window must not move the advert.
+            if (getAdvertInsertIndex(chatRoom.messages, existingPlacement) !== null || !isAnchorDeleted(chatRoom, existingPlacement)) {
+                return;
+            }
         }
 
-        const placement = createPlacement(ad, chatRoom);
-        dispatch(setAdPlacement(placement));
-        return placement;
-    }, [adPlacementsByChatroomId, createPlacement, dispatch]);
-
-    const buildAdvertMessage = useCallback((ad: Message, chatRoom: AdChatRoom, placement: AdPlacement): Message => {
-        return {
-            ...ad,
-            chatRoomId: chatRoom.id,
-            chatRoomName: chatRoom.name,
-            createdAt: new Date(placement.placedAt),
-            advert: true,
-        };
-    }, []);
-
-    const ensureAdvertCached = useCallback((
-        ad: Message,
-        chatRoom: AdChatRoom,
-        placementOverride?: AdPlacement
-    ): Message => {
-        const placement = placementOverride ?? getPlacement(ad, chatRoom);
-        const advertMessage = buildAdvertMessage(ad, chatRoom, placement);
-
-        if (!isAdvertCached(chatRoom.id, advertMessage.id)) {
-            dispatch(cacheAdvertMessage({advertMessage, placement}));
-        }
-
-        return advertMessage;
-    }, [buildAdvertMessage, dispatch, getPlacement, isAdvertCached]);
+        dispatch(setAdPlacement(createPlacement(ad, chatRoom)));
+    }, [adPlacementsByChatroomId, dispatch]);
 
     const getAd = useCallback(async (
         chatRoom: AdChatRoom,
@@ -117,22 +65,14 @@ export const useAdServing = () => {
         const now = Date.now();
 
         if (currentAd && lastServedTimestamp) {
-            const timeDiff = now - lastServedTimestamp;
-            const isExpired = timeDiff > AD_EXPIRY_MS;
-            const hasBeenServedInChatroom = servedChatroomIds.includes(chatroomId);
-            const isCachedInChatroom = isAdvertCached(chatroomId, currentAd.id);
+            const isExpired = now - lastServedTimestamp > AD_EXPIRY_MS;
 
             if (!isExpired) {
-                if (!hasBeenServedInChatroom) {
+                if (!servedChatroomIds.includes(chatroomId)) {
                     dispatch(markServedAction(chatroomId));
-                    return ensureAdvertCached(currentAd, chatRoom);
                 }
-
-                if (!isCachedInChatroom) {
-                    return ensureAdvertCached(currentAd, chatRoom);
-                }
-
-                return null;
+                ensurePlacement(currentAd, chatRoom);
+                return currentAd;
             }
         }
 
@@ -150,9 +90,8 @@ export const useAdServing = () => {
                 const newAd = resultAction.payload;
                 if (newAd) {
                     dispatch(markServedAction(chatroomId));
-                    const placement = createPlacement(newAd, chatRoom);
-                    dispatch(setAdPlacement(placement));
-                    return ensureAdvertCached(newAd, chatRoom, placement);
+                    dispatch(setAdPlacement(createPlacement(newAd, chatRoom)));
+                    return newAd;
                 }
 
                 // 204 — no paid campaigns running: fall back to a locally
@@ -163,9 +102,8 @@ export const useAdServing = () => {
                 const filler = buildFillerAdMessage();
                 dispatch(setFillerAd(filler));
                 dispatch(markServedAction(chatroomId));
-                const placement = createPlacement(filler, chatRoom);
-                dispatch(setAdPlacement(placement));
-                return ensureAdvertCached(filler, chatRoom, placement);
+                dispatch(setAdPlacement(createPlacement(filler, chatRoom)));
+                return filler;
             }
         } catch (error) {
             console.error("Failed to fetch ad", error);
@@ -173,7 +111,7 @@ export const useAdServing = () => {
 
         return null;
 
-    }, [createPlacement, currentAd, dispatch, ensureAdvertCached, isAdvertCached, lastAdFetchTimestamp, lastServedTimestamp, servedChatroomIds, status]);
+    }, [currentAd, dispatch, ensurePlacement, lastAdFetchTimestamp, lastServedTimestamp, servedChatroomIds, status]);
 
     return {getAd, currentAd, status};
 };
