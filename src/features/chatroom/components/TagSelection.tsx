@@ -44,7 +44,7 @@ const TagSelection: React.FC<TagSelectionProps> = ({
     const isTagSelected = (tag: Tag) => currentSelectedTags.some(t => t.id === tag.id);
 
     return (
-        <div className="glass-popover box-border flex flex-col rounded-lg text-foreground p-6 w-[300px] max-h-[80vh]">
+        <div className="flex flex-col text-foreground p-2 w-[300px] max-h-[80vh]">
             <div className="mb-4 flex shrink-0 items-center">
                 <TagIcon className="mr-2 h-5 w-5"/>
                 <h2 className="text-lg font-semibold">
@@ -65,12 +65,10 @@ const TagSelection: React.FC<TagSelectionProps> = ({
                         <div
                             key={tag.id}
                             className={`
-                flex items-center justify-between p-3 rounded-lg border transition-colors
+                flex min-h-12 items-center justify-between px-3 py-2 rounded-lg border transition-colors
                 ${isRestricted
-                                ? 'glass-surface text-muted-foreground opacity-50 cursor-not-allowed'
-                                : isSelected
-                                    ? 'glass-surface-strong text-white cursor-pointer'
-                                    : 'glass-surface cursor-pointer'}
+                                ? 'bg-muted text-muted-foreground opacity-50 cursor-not-allowed'
+                                : 'bg-background hover:bg-accent cursor-pointer'}
             `}
                             onClick={() => {
                                 if (!isRestricted) toggleTag(tag);
@@ -84,7 +82,7 @@ const TagSelection: React.FC<TagSelectionProps> = ({
                                 <span className="text-xs italic text-muted-foreground">18+</span>
                             ) : isSelected ? (
                                 <Badge variant="secondary"
-                                       className="bg-white/20 text-white dark:bg-white/15 dark:text-white">
+                                       className="bg-blue-600 text-white hover:bg-blue-600">
                                     Selected
                                 </Badge>
                             ) : null}
@@ -95,10 +93,10 @@ const TagSelection: React.FC<TagSelectionProps> = ({
             </div>
 
             <div className="flex shrink-0 justify-end gap-2">
-                <Button variant="outline" className="glass-control" onClick={onCancel}>
+                <Button variant="outline" onClick={onCancel}>
                     Cancel
                 </Button>
-                <Button className="glass-control text-foreground hover:text-foreground" onClick={handleConfirm}>
+                <Button onClick={handleConfirm}>
                     Update Tags
                 </Button>
             </div>
