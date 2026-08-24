@@ -222,7 +222,9 @@ const ConversationView: React.FC<ConversationViewProps> = ({
                             );
                         })}
 
-                        <div ref={nextMessageRef}/>
+                        {/* Real height pulled up over the list end: a zero-height sentinel can sit a
+                            sub-pixel below the scroll clip at max scroll and never intersect. */}
+                        <div ref={nextMessageRef} className="h-2 -mt-2"/>
                     </div>
                 </div>
 

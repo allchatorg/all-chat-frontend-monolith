@@ -6,6 +6,7 @@ export function useIntersectionObserver(
 ) {
     const observer = useRef<IntersectionObserver | null>(null);
     const timeoutId = useRef<NodeJS.Timeout | null>(null);
+    const nodeRef = useRef<HTMLElement | null>(null);
     // Latest callback/options live in refs so `elementRef` keeps a stable identity.
     // Otherwise React re-runs the ref callback every render, tearing down and
     // re-arming the observer (with the delay below) and sentinels never fire
@@ -27,6 +28,8 @@ export function useIntersectionObserver(
             clearTimeout(timeoutId.current);
         }
 
+        nodeRef.current = node;
+
         if (node) {
             timeoutId.current = setTimeout(() => {
                 observer.current = new IntersectionObserver(
@@ -40,6 +43,16 @@ export function useIntersectionObserver(
         }
     }, []);
 
+    // Re-observing delivers a fresh initial entry with the current intersection
+    // state. The observer otherwise only reports transitions, so a sentinel that
+    // is already on screen when its guard conditions become true would never fire.
+    const recheck = useCallback(() => {
+        const node = nodeRef.current;
+        if (!observer.current || !node) return;
+        observer.current.unobserve(node);
+        observer.current.observe(node);
+    }, []);
+
     const cleanup = useCallback(() => {
         if (timeoutId.current) {
             clearTimeout(timeoutId.current);
@@ -50,11 +63,12 @@ export function useIntersectionObserver(
             observer.current.disconnect();
             observer.current = null;
         }
+        nodeRef.current = null;
     }, []);
 
     useEffect(() => {
         return cleanup;
     }, [cleanup]);
 
-    return {elementRef, cleanup};
+    return {elementRef, recheck, cleanup};
 }

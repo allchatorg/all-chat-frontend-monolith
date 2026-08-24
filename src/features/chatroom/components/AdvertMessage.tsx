@@ -21,7 +21,7 @@ export const AdvertMessage: React.FC<AdvertMessageProps> = ({
     const formattedTime = formatMessageDate(message.createdAt);
 
     return (
-        <div className="flex w-full items-start mt-2 group min-w-0">
+        <div className="flex w-full items-start mt-2 group min-w-0" data-advert-id={message.id}>
             <div className="max-w-[75%] min-w-0 flex flex-col justify-start">
                 <div
                     className="pl-4 pb-1 px-1 text-xs font-medium transition-colors text-muted-foreground flex items-center gap-2">

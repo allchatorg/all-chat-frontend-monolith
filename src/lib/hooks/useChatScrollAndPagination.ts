@@ -163,7 +163,7 @@ export const useChatScrollAndPagination = (
         },
     });
 
-    const {elementRef: nextMessageRef} = useIntersectionObserver(
+    const {elementRef: nextMessageRef, recheck: recheckNextSentinel} = useIntersectionObserver(
         (entry) => {
             if (entry.isIntersecting && chatRoom?.hasNext && !fetchMessagesLoading) {
                 runFetchMessages({
@@ -173,10 +173,20 @@ export const useChatScrollAndPagination = (
             }
         },
         {
-            threshold: 1,
+            threshold: 0,
             rootMargin: '0px',
         }
     );
+
+    // The sentinel observer only reports intersection transitions. After a fetch
+    // completes (or hasNext flips on after an around-jump) the sentinel may still be
+    // on screen with no transition — e.g. the appended page was shorter than the
+    // viewport — so re-check it and let the callback above load the next page.
+    useEffect(() => {
+        if (!chatRoom?.hasNext || fetchMessagesLoading) return;
+        const frame = requestAnimationFrame(() => recheckNextSentinel());
+        return () => cancelAnimationFrame(frame);
+    }, [chatRoom?.id, chatRoom?.hasNext, chatRoom?.lastMessageId, fetchMessagesLoading, recheckNextSentinel]);
 
     useIsomorphicLayoutEffect(() => {
         if (

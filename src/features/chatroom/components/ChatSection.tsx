@@ -60,6 +60,7 @@ const ChatSection: React.FC<ChatSectionProps> = ({
     const {
         scrollRef,
         scrollToBottom,
+        viewport,
         fetchMessagesLoading,
         nextMessageRef,
         showJumpToPresentPill,
@@ -174,6 +175,47 @@ const ChatSection: React.FC<ChatSectionProps> = ({
     }, [user?.id, chatRoom?.id, isVisible, currentAd?.id, messagePlacementSignature]);
 
 
+    const hiddenAdIds = useSelector(selectHiddenAdIds);
+    const adPlacementsByChatroomId = useSelector(selectAdPlacementsByChatroomId);
+    const adPlacement = chatRoom ? adPlacementsByChatroomId[chatRoom.id] : undefined;
+
+    const handleHideAd = (adId: number) => {
+        dispatch(hideAd(adId));
+    };
+
+    // The advert is composed at render time so refetches that replace
+    // chatRoom.messages never drop and re-insert it (no layout shift).
+    const renderedMessages = React.useMemo(() => {
+        if (!chatRoom) return [];
+        return composeMessagesWithAd(chatRoom, currentAd, adPlacement, hiddenAdIds);
+    }, [chatRoom, currentAd, adPlacement, hiddenAdIds]);
+
+    // Track the advert at the tail of the rendered list; when it appears (ad arrives
+    // after the initial scroll-to-bottom) and the user is at the bottom, follow it.
+    const tailAdvertId = React.useMemo(() => {
+        const last = renderedMessages[renderedMessages.length - 1];
+        return last?.advert ? last.id : null;
+    }, [renderedMessages]);
+    const previousTailAdvertId = React.useRef<number | null>(null);
+
+    useEffect(() => {
+        const previous = previousTailAdvertId.current;
+        previousTailAdvertId.current = tailAdvertId;
+        if (tailAdvertId === null || tailAdvertId === previous) return;
+        if (!chatRoom || chatRoom.hasNext || !viewport) return;
+
+        // Decide "was at the bottom" from geometry rather than the intersection
+        // observer ref: locally the ad can land within a frame of the initial
+        // scroll-to-bottom, before the observer has reported the sentinel visible.
+        // If the only thing below the fold is the advert itself, follow it.
+        const advertElement = viewport.querySelector<HTMLElement>(`[data-advert-id="${tailAdvertId}"]`);
+        const advertHeight = advertElement?.offsetHeight ?? 0;
+        const distanceFromBottom = viewport.scrollHeight - viewport.scrollTop - viewport.clientHeight;
+        if (distanceFromBottom > advertHeight + 16) return;
+
+        scrollToBottom();
+    }, [tailAdvertId, chatRoom?.id, chatRoom?.hasNext, viewport, scrollToBottom]);
+
     if (!user) {
         return <div className="p-4 text-center">Loading user data...</div>;
     }
@@ -248,21 +290,6 @@ const ChatSection: React.FC<ChatSectionProps> = ({
         } catch {
         }
     };
-
-    const hiddenAdIds = useSelector(selectHiddenAdIds);
-    const adPlacementsByChatroomId = useSelector(selectAdPlacementsByChatroomId);
-    const adPlacement = chatRoom ? adPlacementsByChatroomId[chatRoom.id] : undefined;
-
-    const handleHideAd = (adId: number) => {
-        dispatch(hideAd(adId));
-    };
-
-    // The advert is composed at render time so refetches that replace
-    // chatRoom.messages never drop and re-insert it (no layout shift).
-    const renderedMessages = React.useMemo(() => {
-        if (!chatRoom) return [];
-        return composeMessagesWithAd(chatRoom, currentAd, adPlacement, hiddenAdIds);
-    }, [chatRoom, currentAd, adPlacement, hiddenAdIds]);
 
     const blockedUserIds = React.useMemo(() => {
         return user?.blockedUsers?.map(u => u.id) || [];
