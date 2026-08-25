@@ -1,3 +1,4 @@
+import {TopReactedPeriodEnum} from "@/models/TopReactedPeriodEnum";
 import {createAsyncThunk} from "@reduxjs/toolkit";
 
 import {ChatRoom} from "@/models/ChatRoom";
@@ -304,11 +305,11 @@ export const fetchTopOnlineRoomsPaginatedThunk = createAsyncThunk<
 
 export const fetchTopReactedMessagesThunk = createAsyncThunk<
     PaginatedResponse<Message>,
-    { roomId: number; page?: number; size?: number }>(
+    { roomId: number; page?: number; size?: number; period?: TopReactedPeriodEnum }>(
     "chat/fetchTopReactedMessages",
-    async ({roomId, page = 0, size = 10}, {rejectWithValue}) => {
+    async ({roomId, page = 0, size = 10, period = TopReactedPeriodEnum.ALL_TIME}, {rejectWithValue}) => {
         try {
-            return await getTopReactedMessages(roomId, page, size);
+            return await getTopReactedMessages(roomId, page, size, period);
         } catch (err: any) {
             return rejectWithValue(err.response?.data || err.message);
         }

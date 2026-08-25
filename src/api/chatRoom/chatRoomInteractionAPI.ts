@@ -1,3 +1,4 @@
+import {TopReactedPeriodEnum} from "@/models/TopReactedPeriodEnum";
 import {ChatRoom} from "@/models/ChatRoom";
 import {UserChatRoom} from "@/models/UserChatRoom";
 import {CreateChatRoomRequest} from "@/models/CreateChatRoomRequest";
@@ -104,12 +105,14 @@ export const getTopOnlineRoomsPaginated = (
 export const getTopReactedMessages = (
     roomId: number,
     page: number = 0,
-    size: number = 10
+    pageSize: number = 10,
+    period: TopReactedPeriodEnum = TopReactedPeriodEnum.ALL_TIME
 ): Promise<PaginatedResponse<Message>> =>
     api.get<PaginatedResponse<Message>>(`${CHAT_ROOMS_PATH}/${roomId}/messages/top-reacted`, {
         params: {
             page,
-            size,
+            pageSize,
+            period,
         }
     }).then(res => res.data);
 

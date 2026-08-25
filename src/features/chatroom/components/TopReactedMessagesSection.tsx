@@ -1,4 +1,4 @@
-import React, {useEffect} from "react";
+import React, {useEffect, useState} from "react";
 import {Card, CardContent, CardFooter, CardHeader, CardTitle} from "@/components/ui/card";
 import {X} from "lucide-react";
 import {Button} from "@/components/ui/button";
@@ -13,6 +13,8 @@ import MessageItem from "@/features/chatroom/components/MessageItem";
 import {setJumpToMessageId} from "@/redux/chatRoom/chatRoomUiSlice";
 import {Message} from "@/models/message";
 import {useIsMobile} from "@/lib/hooks/useIsMobile";
+import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue} from "@/components/ui/select";
+import {TopReactedPeriodEnum} from "@/models/TopReactedPeriodEnum";
 
 const PAGE_SIZE = 10;
 const POLL_INTERVAL = 10000;
@@ -21,6 +23,7 @@ export const TopReactedMessagesSection: React.FC = () => {
     const dispatch = useDispatch<AppDispatch>();
     const isMobile = useIsMobile();
     const [fetchTopReactedMessages] = useThunk(fetchTopReactedMessagesThunk);
+    const [period, setPeriod] = useState<TopReactedPeriodEnum>(TopReactedPeriodEnum.ALL_TIME);
 
     const activeRoom = useSelector(selectSelectedChatRoomState);
     const topReactedMessagesState = useSelector(selectTopReactedMessagesState);
@@ -30,22 +33,30 @@ export const TopReactedMessagesSection: React.FC = () => {
 
     useEffect(() => {
         if (!activeRoom) return;
-        fetchTopReactedMessages({roomId: activeRoom.id, page: pageIndex, size: PAGE_SIZE});
-    }, [activeRoom?.id, pageIndex, fetchTopReactedMessages]);
+        fetchTopReactedMessages({roomId: activeRoom.id, page: pageIndex, size: PAGE_SIZE, period});
+    }, [activeRoom?.id, pageIndex, period, fetchTopReactedMessages]);
 
     useEffect(() => {
         if (!activeRoom) return;
         const interval = setInterval(() => {
-            fetchTopReactedMessages({roomId: activeRoom.id, page: pageIndex, size: PAGE_SIZE});
+            fetchTopReactedMessages({roomId: activeRoom.id, page: pageIndex, size: PAGE_SIZE, period});
         }, POLL_INTERVAL);
         return () => clearInterval(interval);
-    }, [activeRoom?.id, pageIndex, fetchTopReactedMessages]);
+    }, [activeRoom?.id, pageIndex, period, fetchTopReactedMessages]);
 
     const handleClose = () => dispatch(setActiveLeftSidebar(null));
 
     const handlePageChange = (page: number) => {
         if (!activeRoom || page < 1 || page > totalPages) return;
-        fetchTopReactedMessages({roomId: activeRoom.id, page: page - 1, size: PAGE_SIZE});
+        fetchTopReactedMessages({roomId: activeRoom.id, page: page - 1, size: PAGE_SIZE, period});
+    };
+
+    const handlePeriodChange = (value: string) => {
+        const nextPeriod = value as TopReactedPeriodEnum;
+        setPeriod(nextPeriod);
+        if (activeRoom && pageIndex !== 0) {
+            fetchTopReactedMessages({roomId: activeRoom.id, page: 0, size: PAGE_SIZE, period: nextPeriod});
+        }
     };
 
     const handleMessageClick = (message: Message) => {
@@ -67,6 +78,26 @@ export const TopReactedMessagesSection: React.FC = () => {
                     </Button>
                 </div>
             </CardHeader>
+
+            <div className="flex flex-col space-y-2 px-4 pb-3">
+                <div className="glass-surface flex items-center rounded-lg p-2 transition">
+                    <span className="text-sm text-muted-foreground font-medium">Period</span>
+                    <div className="ml-auto">
+                        <Select value={period} onValueChange={handlePeriodChange}>
+                            <SelectTrigger className="glass-control h-8 w-[140px] text-sm">
+                                <SelectValue placeholder="Period"/>
+                            </SelectTrigger>
+                            <SelectContent className="glass-popover">
+                                <SelectItem value={TopReactedPeriodEnum.ALL_TIME}>All time</SelectItem>
+                                <SelectItem value={TopReactedPeriodEnum.THIS_YEAR}>This year</SelectItem>
+                                <SelectItem value={TopReactedPeriodEnum.THIS_MONTH}>This month</SelectItem>
+                                <SelectItem value={TopReactedPeriodEnum.THIS_WEEK}>This week</SelectItem>
+                                <SelectItem value={TopReactedPeriodEnum.TODAY}>Today</SelectItem>
+                            </SelectContent>
+                        </Select>
+                    </div>
+                </div>
+            </div>
 
             <CardContent className="flex flex-1 flex-col overflow-hidden px-4 pb-0">
                 <div aria-orientation={"vertical"} className="flex-1 overflow-y-auto">
