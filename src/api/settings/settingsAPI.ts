@@ -15,6 +15,10 @@ export const getAllAttachmentTypes = async () => {
     return res.data;
 }
 
+export const updateTimeZone = async (timeZone: string): Promise<void> => {
+    await api.patch(SETTINGS_PATH + "/time-zone", {timeZone});
+};
+
 export const updateTimeFormat = async (timeFormatRequest: UpdateTimeFormatRequest): Promise<void> => {
     await api.patch(SETTINGS_PATH + "/time-format", timeFormatRequest);
 };

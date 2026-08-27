@@ -1,4 +1,4 @@
-import {AlertTriangle, Ban, Bell, CheckCircle2, Flag, LucideIcon, Megaphone, ShieldCheck, XCircle} from "lucide-react";
+import {AlertTriangle, Ban, Bell, CalendarDays, CheckCircle2, Flag, LucideIcon, Megaphone, ShieldCheck, XCircle} from "lucide-react";
 import {NotificationType} from "@/models/NotificationType";
 
 interface NotificationVisual {
@@ -51,6 +51,11 @@ const NOTIFICATION_VISUALS: Record<NotificationType, NotificationVisual> = {
         icon: ShieldCheck,
         iconClass: "text-emerald-500",
         bgClass: "bg-emerald-500/15",
+    },
+    [NotificationType.COMMUNITY_NIGHT_REMINDER]: {
+        icon: CalendarDays,
+        iconClass: "text-purple-500",
+        bgClass: "bg-purple-500/15",
     },
 };
 

@@ -7,9 +7,11 @@ import {isAuthFlowRoute, isProtectedRoute, isStaffRoute, ROUTES, sanitizeRedirec
 import {isStaff, Role} from "@/models/Role";
 import {Spinner} from './Spinner';
 import {useIpDetails} from "@/lib/hooks/useIpDetails";
+import {useTimeZoneSync} from "@/lib/hooks/useTimeZoneSync";
 
 export default function AuthGuard({children}: { children: React.ReactNode }) {
     const {user, error, isInitializing} = useUser();
+    useTimeZoneSync(user);
     const {ipDetails, isLoading: isIpDetailsLoading} = useIpDetails();
     const pathname = usePathname();
     const searchParams = useSearchParams();

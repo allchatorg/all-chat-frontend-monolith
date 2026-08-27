@@ -21,6 +21,7 @@ export interface User {
     totalUploadUsage?: number;
     blurredContentTags: Tag[];
     timeFormatSetting: TimeFormat;
+    timeZone?: string | null;
     displayColor: string;
     blockedUsers: UserMinimal[] | [];
     appliedForModerator?: boolean;

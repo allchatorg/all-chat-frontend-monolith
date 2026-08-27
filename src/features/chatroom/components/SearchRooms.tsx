@@ -108,7 +108,7 @@ const SearchRooms: React.FC = () => {
                             onChange={(e) => setSearchTerm(e.target.value)}
                             onKeyDown={(e) => {
                                 if (e.key === "Enter" && searchTerm.trim()) {
-                                    if (rooms.length === 0 && showCreateOption) {
+                                    if (showCreateOption) {
                                         handleDesktopCreate();
                                     } else if (rooms.length > 0) {
                                         handleDesktopJoin(rooms[0].roomId);

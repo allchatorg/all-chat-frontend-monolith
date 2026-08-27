@@ -46,8 +46,8 @@ export function NotificationList({onOpenDetails, onNavigate}: NotificationListPr
                 )}
             </div>
 
-            {/* min-h keeps the container from jumping between loading/empty/loaded states */}
-            <div className="max-h-[60vh] min-h-[140px] overflow-y-auto">
+            {/* min-h only while loading/empty so a short list doesn't leave dead space below it */}
+            <div className={`max-h-[60vh] overflow-y-auto ${initialLoading || notifications.length === 0 ? "min-h-[140px]" : ""}`}>
                 {initialLoading ? (
                     <NotificationSkeletons/>
                 ) : notifications.length === 0 ? (
