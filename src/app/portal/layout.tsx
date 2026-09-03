@@ -12,6 +12,7 @@ import {Role} from "@/models/Role";
 import {Spinner} from "@/components/Spinner";
 import {ClaimAccountGate} from "@/app/portal/components/ClaimAccountGate";
 import {useGetMyPromotedMessagesQuery} from "@ads/store/services/promotedMessagesApi";
+import {useGetMyRoomPromotionsQuery} from "@ads/store/services/roomPromotionsApi";
 
 /**
  * Where the current visitor belongs, or null to stay on `pathname`.
@@ -56,15 +57,16 @@ function resolvePortalRedirect(
     if (isUnclaimed) return null;
     // Payment methods is exempt from the no-ads funnel: cards can be managed
     // before the first campaign is purchased (and right after claiming).
-    // Promoted messages are exempt too: message promotions are bought from the
-    // chat app, so a user can own promotions without ever purchasing an ad —
-    // and owning one also unlocks the dashboard (it shows promotion spend).
+    // Promoted messages and room promotions are exempt too: both are bought
+    // from the chat app, so a user can own promotions without ever purchasing
+    // an ad — and owning one also unlocks the dashboard (it shows promotion spend).
     if (
         !isStaff && !hasAd &&
         !(hasPromotion && pathname === "/portal/dashboard") &&
         pathname !== "/portal/campaign" &&
         pathname !== "/portal/payment-methods" &&
-        !pathname.startsWith("/portal/promoted-messages")
+        !pathname.startsWith("/portal/promoted-messages") &&
+        !pathname.startsWith("/portal/room-promotions")
     ) return "/portal/campaign";
     return null;
 }
@@ -92,15 +94,21 @@ export default function PortalLayout({children}: { children: React.ReactNode }) 
     const isStaff = isStaffMember();
     const hasAd = (user?.purchasedAdsCount ?? 0) > 0;
 
-    // Owning a promoted message also unlocks the dashboard. Only fetched when
-    // the answer can change the redirect: a claimed, non-staff user with no ads
-    // (promotions require a claimed account, so everyone else is settled).
+    // Owning a promoted message or a room promotion also unlocks the dashboard
+    // (room promotions are bought from chat, so a user can own one without ever
+    // purchasing an ad). Only fetched when the answer can change the redirect:
+    // a claimed, non-staff user with no ads (promotions require a claimed
+    // account, so everyone else is settled).
     const needsPromotionCheck = !isInitializing && !isGuestOrAnon && !isUnclaimed && !isStaff && !hasAd;
     const {data: promotionsPage, isLoading: isPromotionsLoading} = useGetMyPromotedMessagesQuery(
         {page: 0, size: 1},
         {skip: !needsPromotionCheck}
     );
-    const isResolvingPromotions = needsPromotionCheck && isPromotionsLoading;
+    const {data: roomPromotionsPage, isLoading: isRoomPromotionsLoading} = useGetMyRoomPromotionsQuery(
+        {page: 0, size: 1},
+        {skip: !needsPromotionCheck}
+    );
+    const isResolvingPromotions = needsPromotionCheck && (isPromotionsLoading || isRoomPromotionsLoading);
 
     const search = searchParams.toString();
     const redirectTarget = resolvePortalRedirect(pathname, {
@@ -109,7 +117,7 @@ export default function PortalLayout({children}: { children: React.ReactNode }) 
         isStaff,
         isSuperAdmin: currentRole === Role.SUPER_ADMIN,
         hasAd,
-        hasPromotion: (promotionsPage?.totalElements ?? 0) > 0,
+        hasPromotion: (promotionsPage?.totalElements ?? 0) > 0 || (roomPromotionsPage?.totalElements ?? 0) > 0,
         returnTo: search ? `${pathname}?${search}` : pathname,
     });
 

@@ -8,6 +8,7 @@ import {
     fetchChatRoomMessagesThunk,
     fetchJoinedUserChatRoomsThunk,
     fetchPromotedMessagesThunk,
+    fetchPromotedRoomsPaginatedThunk,
     fetchTopOnlineRoomsPaginatedThunk,
     fetchTopReactedMessagesThunk,
     joinChatRoomThunk,
@@ -27,6 +28,8 @@ import {revokeBanThunk} from "@/redux/modPanel/modPanelThunk";
 import {ReactionUpdateResponse} from "@/models/ReactionUpdateResponse";
 import {createEmptyPaginatedResponse} from "@/lib/utils";
 import {PromotedMessageEvent} from "@/models/PromotedMessageEvent";
+import {RoomPromotionEvent} from "@/models/RoomPromotionEvent";
+import {PromotedRoom} from "@/models/PromotedRoom";
 import {
     addChatRoomReaction,
     getLastNonAdvertMessage,
@@ -54,6 +57,9 @@ interface ChatRoomState {
     // Bumped on every PROMOTED_MESSAGE_UPDATE for the selected room so an open
     // Promoted Messages sidebar refetches its page.
     promotionUpdateCounter: number;
+    // Bumped on every ROOM_PROMOTION_UPDATE (the Promoted rooms list is global)
+    // so an open Promoted tab refetches its page.
+    roomPromotionUpdateCounter: number;
 
     selectedUserChatRoom?: UserChatRoom | null;
 
@@ -64,6 +70,7 @@ interface ChatRoomState {
     chatRoomsLeaderBoard: {
         topOnlineChatRooms: PaginatedResponse<RoomPopulation>,
         topActiveChatRooms: PaginatedResponse<RoomPopulation>,
+        promotedChatRooms: PaginatedResponse<PromotedRoom>,
     }
 }
 
@@ -82,6 +89,7 @@ const chatRoomInitialState: ChatRoomState = {
     topReactedMessages: null,
     promotedMessages: null,
     promotionUpdateCounter: 0,
+    roomPromotionUpdateCounter: 0,
 
     joinChatRoomLoading: false,
     leaveChatRoomLoading: false,
@@ -90,6 +98,7 @@ const chatRoomInitialState: ChatRoomState = {
     chatRoomsLeaderBoard: {
         topOnlineChatRooms: createEmptyPaginatedResponse(),
         topActiveChatRooms: createEmptyPaginatedResponse(),
+        promotedChatRooms: createEmptyPaginatedResponse(),
     },
 };
 
@@ -705,6 +714,15 @@ const chatSlice = createSlice({
                 state.promotionUpdateCounter += 1;
             }
         },
+        // Applies a ROOM_PROMOTION_UPDATE broadcast. The Promoted rooms list is
+        // global (not per selected room), so every transition just bumps the
+        // counter and lets the open tab refetch its page.
+        applyRoomPromotionUpdate(
+            state,
+            _action: PayloadAction<RoomPromotionEvent>
+        ) {
+            state.roomPromotionUpdateCounter += 1;
+        },
         handleChatRoomArchivedRegularUser(
             state,
             action: PayloadAction<ChatRoom>
@@ -982,6 +1000,9 @@ const chatSlice = createSlice({
             builder.addCase(fetchTopOnlineRoomsPaginatedThunk.fulfilled, (state, action) => {
                 state.chatRoomsLeaderBoard.topOnlineChatRooms = action.payload;
             });
+            builder.addCase(fetchPromotedRoomsPaginatedThunk.fulfilled, (state, action) => {
+                state.chatRoomsLeaderBoard.promotedChatRooms = action.payload;
+            });
         }
 })
 
@@ -1002,6 +1023,7 @@ export const {
     removeMessageReaction,
     handleEditMessage,
     applyPromotionUpdate,
+    applyRoomPromotionUpdate,
     handleChatRoomArchivedRegularUser,
     handleChatRoomArchivedStaffUser,
     handleChatRoomUnarchivedStaffUser,

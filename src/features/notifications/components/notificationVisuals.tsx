@@ -1,4 +1,16 @@
-import {AlertTriangle, Ban, Bell, CalendarDays, CheckCircle2, Flag, LucideIcon, Megaphone, ShieldCheck, XCircle} from "lucide-react";
+import {
+    AlertTriangle,
+    Ban,
+    Bell,
+    CalendarDays,
+    CheckCircle2,
+    Flag,
+    LucideIcon,
+    Megaphone,
+    Rocket,
+    ShieldCheck,
+    XCircle
+} from "lucide-react";
 import {NotificationType} from "@/models/NotificationType";
 
 interface NotificationVisual {
@@ -43,6 +55,21 @@ const NOTIFICATION_VISUALS: Record<NotificationType, NotificationVisual> = {
         bgClass: "bg-red-500/15",
     },
     [NotificationType.PROMOTION_CANCELED]: {
+        icon: Ban,
+        iconClass: "text-orange-500",
+        bgClass: "bg-orange-500/15",
+    },
+    [NotificationType.ROOM_PROMOTION_APPROVED]: {
+        icon: Rocket,
+        iconClass: "text-green-500",
+        bgClass: "bg-green-500/15",
+    },
+    [NotificationType.ROOM_PROMOTION_DENIED]: {
+        icon: XCircle,
+        iconClass: "text-red-500",
+        bgClass: "bg-red-500/15",
+    },
+    [NotificationType.ROOM_PROMOTION_CANCELED]: {
         icon: Ban,
         iconClass: "text-orange-500",
         bgClass: "bg-orange-500/15",

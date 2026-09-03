@@ -23,6 +23,10 @@ const monthlyChartConfig = {
         label: "Message Promotions",
         color: "orange",
     },
+    roomPromotedRevenue: {
+        label: "Room Promotions",
+        color: "violet",
+    },
 }
 
 const weeklyChartConfig = {
@@ -33,6 +37,10 @@ const weeklyChartConfig = {
     promotedRevenue: {
         label: "Message Promotions",
         color: "orange",
+    },
+    roomPromotedRevenue: {
+        label: "Room Promotions",
+        color: "violet",
     },
 }
 
@@ -97,6 +105,11 @@ export function ChartBarRevenue() {
                                     fill="var(--color-promotedRevenue)"
                                     radius={[4, 4, 0, 0]}
                                 />
+                                <Bar
+                                    dataKey="roomPromotedRevenue"
+                                    fill="var(--color-roomPromotedRevenue)"
+                                    radius={[4, 4, 0, 0]}
+                                />
                             </BarChart>
                         </ChartContainer>
                     )}
@@ -155,6 +168,11 @@ export function ChartBarRevenue() {
                                 <Bar
                                     dataKey="promotedRevenue"
                                     fill="var(--color-promotedRevenue)"
+                                    radius={[4, 4, 0, 0]}
+                                />
+                                <Bar
+                                    dataKey="roomPromotedRevenue"
+                                    fill="var(--color-roomPromotedRevenue)"
                                     radius={[4, 4, 0, 0]}
                                 />
                             </BarChart>

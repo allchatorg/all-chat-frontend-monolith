@@ -92,7 +92,8 @@ export const MessageMenu: React.FC<MessageMenuProps> = ({
     const canRemoveMessage = Boolean((isPrincipal(userId) || canActOn(currentRole, role)) && !deleted && !archivedRoom);
     const canOpenModView = Boolean(allowModView && isStaffMember() && !isPrincipal(userId));
     const canReport = Boolean(!isPrincipal(userId) && allowReport);
-    const canPromote = Boolean(allowPromote && isPrincipal(userId) && !deleted && !archivedRoom && !message.promotion);
+    // Staff are excluded from the paid funnel (backend returns 403 as well)
+    const canPromote = Boolean(allowPromote && isPrincipal(userId) && !isStaffMember() && !deleted && !archivedRoom && !message.promotion);
     const canOpenActionsMenu = canViewReactions || canReply || canEditMessage || canRemoveMessage || canOpenModView || canReport || canPromote;
     const canAddReaction = Boolean(!deleted && !archivedRoom);
     const isEmojiPopoverControlled = emojiPopoverOpen !== undefined;

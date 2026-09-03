@@ -11,6 +11,7 @@ import {
     getChatRoomDetails,
     getChatRoomMessages,
     getPromotedMessages,
+    getPromotedRoomsPaginated,
     getReactionsByEmoji,
     getTopOnlineRoomsPaginated,
     getTopReactedMessages,
@@ -26,6 +27,7 @@ import {
 } from "@/api/chatRoom/chatRoomInteractionAPI";
 import {RootState} from "@/redux/store";
 import {RoomPopulation} from "@/models/roomPopulation";
+import {PromotedRoom} from "@/models/PromotedRoom";
 import {MessagePage} from "@/models/MessagePage";
 import {FetchMessagesParams} from "@/models/fetchMessagesParams";
 import {PaginatedResponse} from "@/models/PaginatedResponse";
@@ -297,6 +299,19 @@ export const fetchTopOnlineRoomsPaginatedThunk = createAsyncThunk<
     async ({page = 0, pageSize = 2, popularitySort, chatRoomNoiseLevel} = {}, {rejectWithValue}) => {
         try {
             return await getTopOnlineRoomsPaginated(page, pageSize, popularitySort, chatRoomNoiseLevel);
+        } catch (err: any) {
+            return rejectWithValue(err.response?.data || err.message);
+        }
+    }
+);
+
+export const fetchPromotedRoomsPaginatedThunk = createAsyncThunk<
+    PaginatedResponse<PromotedRoom>,
+    { page?: number; pageSize?: number }>(
+    "chat/fetchPromotedRoomsPaginated",
+    async ({page = 0, pageSize = 8} = {}, {rejectWithValue}) => {
+        try {
+            return await getPromotedRoomsPaginated(page, pageSize);
         } catch (err: any) {
             return rejectWithValue(err.response?.data || err.message);
         }

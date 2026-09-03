@@ -9,6 +9,7 @@ import {
     IconDashboard,
     IconListDetails,
     IconMessageCircle,
+    IconRocket,
     IconSettings,
     IconShield,
     IconSpeakerphone,
@@ -31,6 +32,7 @@ import {useDialog} from "@ads/components/providers/DialogProvider"
 import {useDialog as useChatDialog} from "@/components/providers/DialogProvider"
 import {SettingsComponent} from "@/features/auth/components/SettingsComponent"
 import {useGetMyPromotedMessagesQuery} from "@ads/store/services/promotedMessagesApi"
+import {useGetMyRoomPromotionsQuery} from "@ads/store/services/roomPromotionsApi"
 import TermsOfService from "@ads/components/TermsOfService"
 import PrivacyPolicy from "@ads/components/PrivacyPolicy"
 import AdvertiserTerms from "@ads/components/AdvertiserPolicy"
@@ -58,6 +60,11 @@ const regularUserNavMain = [
         title: "My Promoted Messages",
         url: "/portal/promoted-messages",
         icon: IconSpeakerphone,
+    },
+    {
+        title: "My Room Promotions",
+        url: "/portal/room-promotions",
+        icon: IconRocket,
     },
 ]
 
@@ -89,6 +96,11 @@ const adminNavMain = [
         icon: IconSpeakerphone,
     },
     {
+        title: "Room Promotions",
+        url: "/portal/admin/room-promotions",
+        icon: IconRocket,
+    },
+    {
         title: "Users",
         url: "/portal/admin/users",
         icon: IconUsers,
@@ -101,21 +113,28 @@ export function AppSidebar({...props}: React.ComponentProps<typeof Sidebar>) {
     const {user, isSuperAdmin} = useUser()
     const isAdmin = user.role === UserRole.ADMIN
 
-    // Non-staff users who have never created an ad only get "Start a Campaign"
-    // and "My Promoted Messages" (promotions are bought from the chat app, so
-    // they exist independently of ads). My Campaigns stays hidden until they
-    // have at least one ad; the Dashboard also unlocks by owning a promoted
-    // message (it shows promotion spend).
+    // Non-staff users who have never created an ad only get "Start a Campaign",
+    // "My Promoted Messages" and "My Room Promotions" (both kinds of promotion
+    // are bought from the chat app, so a user can own one without ever
+    // purchasing an ad). My Campaigns stays hidden until they have at least one
+    // ad; the Dashboard also unlocks by owning any promotion.
     const {user: chatUser} = useChatUser()
     const {isStaffMember} = useRoleAccess()
     const hasAd = (chatUser?.purchasedAdsCount ?? 0) > 0
     const isStaff = isStaffMember()
     // Promotions require a claimed account, so only ordinary no-ad users need the lookup
+    const skipPromotionLookup =
+        isStaff || hasAd || !chatUser || chatUser.role === Role.GUEST || chatUser.role === Role.UNCLAIMED_USER
     const {data: promotionsPage} = useGetMyPromotedMessagesQuery(
         {page: 0, size: 1},
-        {skip: isStaff || hasAd || !chatUser || chatUser.role === Role.GUEST || chatUser.role === Role.UNCLAIMED_USER}
+        {skip: skipPromotionLookup}
     )
-    const hasPromotion = (promotionsPage?.totalElements ?? 0) > 0
+    const {data: roomPromotionsPage} = useGetMyRoomPromotionsQuery(
+        {page: 0, size: 1},
+        {skip: skipPromotionLookup}
+    )
+    const hasPromotion =
+        (promotionsPage?.totalElements ?? 0) > 0 || (roomPromotionsPage?.totalElements ?? 0) > 0
     const regularNav = regularUserNavMain.filter((item) => {
         if (item.url === "/portal/dashboard") return isStaff || hasAd || hasPromotion
         if (item.url === "/portal/ads") return isStaff || hasAd

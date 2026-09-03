@@ -11,6 +11,7 @@ import {SearchMessageRequest} from "@/models/SearchMessageRequest";
 import {ReportRequest} from "@/models/ReportRequest";
 import {Reaction} from "@/models/Reaction";
 import {ReactionRequest} from "@/models/ReactionRequest";
+import {PromotedRoom} from "@/models/PromotedRoom";
 
 const CHAT_ROOMS_PATH = "/chat-rooms";
 
@@ -122,6 +123,19 @@ export const getPromotedMessages = (
     pageSize: number = 10
 ): Promise<PaginatedResponse<Message>> =>
     api.get<PaginatedResponse<Message>>(`${CHAT_ROOMS_PATH}/${roomId}/messages/promoted`, {
+        params: {
+            page,
+            pageSize,
+        }
+    }).then(res => res.data);
+
+// Global list of rooms with at least one approved promotion, newest
+// approval first; the backend clamps the page index to 0..24.
+export const getPromotedRoomsPaginated = (
+    page: number = 0,
+    pageSize: number = 8
+): Promise<PaginatedResponse<PromotedRoom>> =>
+    api.get<PaginatedResponse<PromotedRoom>>(`${CHAT_ROOMS_PATH}/promoted`, {
         params: {
             page,
             pageSize,

@@ -1,0 +1,259 @@
+import {Card, CardContent, CardDescription, CardHeader, CardTitle} from "@ads/components/ui/card";
+import {Badge} from "@ads/components/ui/badge";
+import {clsx} from "clsx";
+import {AlertCircle, Archive, Calendar, CreditCard, DollarSign, ExternalLink, Hash, Info} from "lucide-react";
+import * as React from "react";
+import Link from "next/link";
+import {PromotionCanceledBy, RoomPromotionDetail, RoomPromotionStatus} from "@ads/models/room-promotion";
+import {getRoomPromotionStatusBadgeClass} from "@ads/components/room-promotions-table";
+
+interface RoomPromotionDetailsProps {
+    data: RoomPromotionDetail;
+    className?: string;
+    isAdmin?: boolean;
+}
+
+function getCanceledByLabel(canceledBy?: PromotionCanceledBy | null): string {
+    switch (canceledBy) {
+        case PromotionCanceledBy.USER:
+            return "Canceled by the owner";
+        case PromotionCanceledBy.ADMIN:
+            return "Canceled by an admin";
+        case PromotionCanceledBy.SYSTEM_BAN:
+            return "Canceled automatically (account ban)";
+        default:
+            return "Canceled";
+    }
+}
+
+// Detail card for a room promotion (user + admin views) — modeled on
+// promoted-message-details.tsx with a Chat Room section instead of the
+// inline message preview.
+export default function RoomPromotionDetails({data, className, isAdmin = false}: RoomPromotionDetailsProps) {
+    const getStatusConfig = () => {
+        switch (data.status) {
+            case RoomPromotionStatus.APPROVED:
+                return {bg: "bg-green-50 dark:bg-green-950/20 border-green-200 dark:border-green-900"};
+            case RoomPromotionStatus.PENDING:
+                return {bg: "bg-amber-50 dark:bg-amber-950/20 border-amber-200 dark:border-amber-900"};
+            case RoomPromotionStatus.DENIED:
+                return {bg: "bg-red-50 dark:bg-red-950/20 border-red-200 dark:border-red-900"};
+            case RoomPromotionStatus.CANCELED:
+                return {bg: "bg-muted/50"};
+            default:
+                return {bg: "bg-muted/50"};
+        }
+    };
+
+    const statusConfig = getStatusConfig();
+
+    const formatDate = (dateString?: string | null) => {
+        if (!dateString) return "-";
+        return new Date(dateString).toLocaleDateString("en-US", {
+            year: "numeric",
+            month: "long",
+            day: "numeric",
+        });
+    };
+
+    const formatCurrency = (amount: number) => {
+        return new Intl.NumberFormat("en-US", {
+            style: "currency",
+            currency: data.currency || "USD",
+        }).format(amount);
+    };
+
+    const isDenied = data.status === RoomPromotionStatus.DENIED;
+    const isCanceled = data.status === RoomPromotionStatus.CANCELED;
+
+    return (
+        <Card className={clsx("border shadow-sm", statusConfig.bg, className)}>
+            <CardHeader className="border-b">
+                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                    <div>
+                        <CardTitle className="text-xl">Room Promotion</CardTitle>
+                        <CardDescription className="mt-1">Promotion ID: #{data.id}</CardDescription>
+                    </div>
+                    <Badge className={clsx("w-fit", getRoomPromotionStatusBadgeClass(data.status))}>
+                        {data.status}
+                    </Badge>
+                </div>
+            </CardHeader>
+
+            <CardContent className="p-6 space-y-6">
+                {/* Chat Room Section */}
+                <div className="space-y-4">
+                    <div className="flex items-center gap-2 pb-2 border-b">
+                        <Hash className="h-5 w-5 text-primary"/>
+                        <h3 className="text-lg font-semibold">Chat Room</h3>
+                    </div>
+
+                    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                        <div className="flex flex-wrap items-center gap-2">
+                            <p className="text-base font-semibold break-words">{data.chatRoomName}</p>
+                            {data.chatRoomArchived && (
+                                <Badge
+                                    className="bg-gray-400 hover:bg-gray-500 text-white dark:bg-gray-600 dark:hover:bg-gray-700">
+                                    <Archive className="mr-1 h-3 w-3"/>
+                                    Archived
+                                </Badge>
+                            )}
+                        </div>
+                        {!data.chatRoomArchived && (
+                            <Link
+                                href={`/?chatRoomId=${data.chatRoomId}`}
+                                className="inline-flex items-center text-sm font-medium text-indigo-700 hover:underline dark:text-indigo-400"
+                            >
+                                <ExternalLink className="mr-1 h-4 w-4"/>
+                                Open Room
+                            </Link>
+                        )}
+                    </div>
+                </div>
+
+                {/* Promotion Details Section */}
+                <div>
+                    <div className="flex items-center gap-2 pb-2 mb-4 border-b">
+                        <Info className="h-5 w-5 text-primary"/>
+                        <h3 className="text-lg font-semibold">Promotion Details</h3>
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        {/* Amount */}
+                        <div className="flex items-start gap-3">
+                            <div className="p-2 rounded-lg bg-background">
+                                <DollarSign className="h-5 w-5 text-muted-foreground"/>
+                            </div>
+                            <div>
+                                <p className="text-sm font-medium text-muted-foreground">Amount</p>
+                                <p className="text-base font-semibold">{formatCurrency(data.amount)}</p>
+                            </div>
+                        </div>
+
+                        {/* Payment Method */}
+                        <div className="flex items-start gap-3">
+                            <div className="p-2 rounded-lg bg-background">
+                                <CreditCard className="h-5 w-5 text-muted-foreground"/>
+                            </div>
+                            <div>
+                                <p className="text-sm font-medium text-muted-foreground">Payment</p>
+                                <p className="text-base font-semibold capitalize">
+                                    {data.cardBrand && data.cardLast4
+                                        ? `${data.cardBrand} •••• ${data.cardLast4}`
+                                        : "-"}
+                                    {data.receiptStatus && (
+                                        <span className="ml-2 text-xs font-normal uppercase text-muted-foreground">
+                                            {data.receiptStatus}
+                                        </span>
+                                    )}
+                                </p>
+                            </div>
+                        </div>
+
+                        {/* Submitted Date */}
+                        <div className="flex items-start gap-3">
+                            <div className="p-2 rounded-lg bg-background">
+                                <Calendar className="h-5 w-5 text-muted-foreground"/>
+                            </div>
+                            <div>
+                                <p className="text-sm font-medium text-muted-foreground">Submitted Date</p>
+                                <p className="text-base font-semibold">{formatDate(data.submittedAt)}</p>
+                            </div>
+                        </div>
+
+                        {/* Approved Date */}
+                        {data.approvedAt && (
+                            <div className="flex items-start gap-3">
+                                <div className="p-2 rounded-lg bg-background">
+                                    <Calendar className="h-5 w-5 text-muted-foreground"/>
+                                </div>
+                                <div>
+                                    <p className="text-sm font-medium text-muted-foreground">Approved Date</p>
+                                    <p className="text-base font-semibold">{formatDate(data.approvedAt)}</p>
+                                </div>
+                            </div>
+                        )}
+
+                        {/* Resolved Date */}
+                        {data.resolvedAt && (
+                            <div className="flex items-start gap-3">
+                                <div className="p-2 rounded-lg bg-background">
+                                    <Calendar className="h-5 w-5 text-muted-foreground"/>
+                                </div>
+                                <div>
+                                    <p className="text-sm font-medium text-muted-foreground">Resolved Date</p>
+                                    <p className="text-base font-semibold">{formatDate(data.resolvedAt)}</p>
+                                </div>
+                            </div>
+                        )}
+                    </div>
+                </div>
+
+                {/* Deny / Cancel Reason Section — this is where the owner sees the admin's reason */}
+                {(isDenied || isCanceled) && data.reason && (
+                    <div
+                        className="rounded-lg bg-red-100 dark:bg-red-950/30 border border-red-200 dark:border-red-900 p-4">
+                        <div className="flex items-start gap-3">
+                            <AlertCircle className="h-5 w-5 text-red-600 dark:text-red-400 mt-0.5 flex-shrink-0"/>
+                            <div>
+                                <h3 className="text-sm font-semibold text-red-900 dark:text-red-100">
+                                    {isDenied ? "Denial Reason" : getCanceledByLabel(data.canceledBy)}
+                                </h3>
+                                <p className="text-sm text-red-800 dark:text-red-200 mt-1">
+                                    {data.reason}
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                )}
+
+                {/* Cancellation Request Section (PENDING only) */}
+                {data.status === RoomPromotionStatus.PENDING && data.cancelRequested && (
+                    <div
+                        className="rounded-lg bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-900 p-4">
+                        <div className="flex items-start gap-3">
+                            <AlertCircle className="h-5 w-5 text-amber-600 dark:text-amber-400 mt-0.5 flex-shrink-0"/>
+                            <div>
+                                <h3 className="text-sm font-semibold text-amber-900 dark:text-amber-100">
+                                    {isAdmin
+                                        ? "The user requested cancellation of this promotion"
+                                        : "Cancellation requested"}
+                                </h3>
+                                {data.cancelRequestReason && (
+                                    <p className="text-sm text-amber-800 dark:text-amber-200 mt-1">
+                                        {data.cancelRequestReason}
+                                    </p>
+                                )}
+                                <p className="text-xs text-amber-700 dark:text-amber-300 mt-1">
+                                    {isAdmin
+                                        ? `Requested on ${formatDate(data.cancelRequestedAt)}. Cancel the promotion to release the hold, or approve/deny it as usual.`
+                                        : `Submitted on ${formatDate(data.cancelRequestedAt)}. An admin will review your request — if it is accepted, the hold on your card is released in full.`}
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                )}
+
+                {/* Pending Review Section (user view) */}
+                {data.status === RoomPromotionStatus.PENDING && !isAdmin && (
+                    <div
+                        className="rounded-lg bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-900 p-4">
+                        <div className="flex items-start gap-3">
+                            <Info className="h-5 w-5 text-amber-600 dark:text-amber-400 mt-0.5 flex-shrink-0"/>
+                            <div>
+                                <h3 className="text-sm font-semibold text-amber-900 dark:text-amber-100">
+                                    Promotion Under Review
+                                </h3>
+                                <p className="text-sm text-amber-800 dark:text-amber-200 mt-1">
+                                    {formatCurrency(data.amount)} is on hold until an admin reviews this promotion.
+                                    Once approved the room is bumped to the top of the Promoted list and the
+                                    promotion never expires.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                )}
+            </CardContent>
+        </Card>
+    );
+}

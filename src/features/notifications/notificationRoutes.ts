@@ -7,6 +7,7 @@ import {AppNotification} from "@/models/AppNotification";
 const REFERENCE_ROUTES: Record<string, (id: number) => string> = {
     AD: (id) => `/portal/ads/${id}`,
     PROMOTED_MESSAGE: (id) => `/portal/promoted-messages/${id}`,
+    ROOM_PROMOTION: (id) => `/portal/room-promotions/${id}`,
 };
 
 export const getNotificationRoute = (notification: AppNotification): string | null => {

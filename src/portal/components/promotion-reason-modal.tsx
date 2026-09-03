@@ -19,11 +19,14 @@ interface PromotionReasonForm {
     reason: string;
 }
 
-export type PromotionReasonMode = "deny" | "cancel-pending" | "cancel-approved" | "request-cancel";
+export type PromotionReasonMode =
+    | "deny" | "cancel-pending" | "cancel-approved" | "request-cancel"
+    | "room-deny" | "room-cancel-pending" | "room-cancel-approved" | "room-request-cancel";
 
 interface PromotionReasonModalProps {
     // Admin: deny (PENDING), cancel-pending (hold released), cancel-approved
     // (promotion stopped, NO refund). User: request-cancel (PENDING only).
+    // The room-* variants are the same actions for room promotions ($2.50).
     mode: PromotionReasonMode;
     onSubmit: (reason: string) => void;
     disabled?: boolean;
@@ -65,6 +68,37 @@ const MODE_CONFIG: Record<PromotionReasonMode, {
         title: "Request Cancellation",
         description: "Your promotion is awaiting review. An admin will review your request — if it is accepted, " +
             "the $0.50 hold on your card is released in full.",
+        confirmLabel: "Submit Request",
+        placeholder: "Tell us why you want this promotion canceled...",
+    },
+    "room-deny": {
+        triggerLabel: "Deny",
+        title: "Deny Room Promotion",
+        description: "This will deny the room promotion and release the $2.50 payment hold in full.",
+        confirmLabel: "Confirm Denial",
+        placeholder: "Enter a detailed reason for denial...",
+    },
+    "room-cancel-pending": {
+        triggerLabel: "Cancel & Release Hold",
+        title: "Cancel Room Promotion",
+        description: "This cancels the pending room promotion and releases the $2.50 payment hold back to the " +
+            "user in full. A reason is required.",
+        confirmLabel: "Confirm Cancellation",
+        placeholder: "Enter a detailed reason for cancellation...",
+    },
+    "room-cancel-approved": {
+        triggerLabel: "Stop Promotion",
+        title: "Stop Room Promotion",
+        description: "This stops the promotion immediately. The room is removed from the Promoted list unless it " +
+            "has other approved promotions. The captured payment will NOT be refunded. A reason is required.",
+        confirmLabel: "Stop Promotion",
+        placeholder: "Enter a detailed reason for stopping this promotion...",
+    },
+    "room-request-cancel": {
+        triggerLabel: "Request Cancellation",
+        title: "Request Cancellation",
+        description: "Your room promotion is awaiting review. The $2.50 hold will be released in full if an admin " +
+            "accepts your request.",
         confirmLabel: "Submit Request",
         placeholder: "Tell us why you want this promotion canceled...",
     },

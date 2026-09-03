@@ -5,6 +5,7 @@ import {NotifyCard} from "@ads/components/NotifyCard";
 import Link from "next/link";
 import {useGetAdStatusCountsQuery, useGetDailyRevenueQuery} from "@ads/store/services/adminAdsApi";
 import {useGetPromotedRevenueSummaryQuery} from "@ads/store/services/adminPromotedMessagesApi";
+import {useGetRoomPromotedRevenueSummaryQuery} from "@ads/store/services/adminRoomPromotionsApi";
 import {AdStatus} from "@ads/models/ad";
 import {Skeleton} from "@ads/components/ui/skeleton";
 
@@ -71,6 +72,7 @@ export function AdminSectionCards() {
     const {data: statusCounts, isLoading: isStatusLoading, isError: isStatusError} = useGetAdStatusCountsQuery();
     const {data: revenueData, isLoading: isRevenueLoading} = useGetDailyRevenueQuery();
     const {data: promotedData, isLoading: isPromotedLoading} = useGetPromotedRevenueSummaryQuery();
+    const {data: roomPromotedData, isLoading: isRoomPromotedLoading} = useGetRoomPromotedRevenueSummaryQuery();
 
     // Get count for a specific status
     const getCountForStatus = (status: AdStatus): number => {
@@ -81,6 +83,7 @@ export function AdminSectionCards() {
 
     const revenueTrend = computeTrend(revenueData?.todayRevenue ?? 0, revenueData?.yesterdayRevenue ?? 0);
     const promotedTrend = computeTrend(promotedData?.todayRevenue ?? 0, promotedData?.yesterdayRevenue ?? 0);
+    const roomPromotedTrend = computeTrend(roomPromotedData?.todayRevenue ?? 0, roomPromotedData?.yesterdayRevenue ?? 0);
 
     return (
         <div
@@ -133,6 +136,44 @@ export function AdminSectionCards() {
                         trendValue=""
                         footerText=""
                         description={`All-time · ${promotedData?.approvedCount ?? 0} approved promotions`}
+                        compact
+                    />
+                </>
+            )}
+
+            {isRoomPromotedLoading ? (
+                <>
+                    <Skeleton className="h-24 w-full rounded-xl"/>
+                    <Skeleton className="h-24 w-full rounded-xl"/>
+                    <Skeleton className="h-24 w-full rounded-xl"/>
+                </>
+            ) : (
+                <>
+                    <StatCard
+                        title="Room Promotions Revenue Today"
+                        value={formatUsd(roomPromotedData?.todayRevenue ?? 0)}
+                        trend={roomPromotedTrend.trend}
+                        trendValue={roomPromotedTrend.trendValue}
+                        footerText="Compared to yesterday"
+                        description="Captured from room promotions"
+                        compact
+                    />
+                    <StatCard
+                        title="Pending Room Promotions"
+                        value={formatUsd(roomPromotedData?.pendingHoldTotal ?? 0)}
+                        trend="up"
+                        trendValue=""
+                        footerText=""
+                        description={`${roomPromotedData?.pendingCount ?? 0} authorized holds awaiting review`}
+                        compact
+                    />
+                    <StatCard
+                        title="Total Room Promotions Revenue"
+                        value={formatUsd(roomPromotedData?.totalRevenue ?? 0)}
+                        trend="up"
+                        trendValue=""
+                        footerText=""
+                        description={`All-time · ${roomPromotedData?.approvedCount ?? 0} approved promotions`}
                         compact
                     />
                 </>

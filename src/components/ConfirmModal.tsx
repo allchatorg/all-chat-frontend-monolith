@@ -7,13 +7,16 @@ interface ConfirmModalProps {
     onConfirm: () => void | Promise<void>;
     title: string;
     description: string;
+    // Optional rich content rendered under the description (kept outside the <p>)
+    children?: React.ReactNode;
 }
 
 export const ConfirmModal: React.FC<ConfirmModalProps> = ({
                                                               onClose,
                                                               onConfirm,
                                                               title,
-                                                              description
+                                                              description,
+                                                              children
                                                           }) => {
     const [isConfirming, setIsConfirming] = useState(false);
 
@@ -31,6 +34,7 @@ export const ConfirmModal: React.FC<ConfirmModalProps> = ({
             <div className="space-y-2">
                 <h2 className="text-lg font-semibold">{title}</h2>
                 <p className="text-sm text-muted-foreground accent-destructive">{description}</p>
+                {children}
             </div>
             <div className="flex justify-end gap-3">
                 <Button variant="outline" onClick={onClose} disabled={isConfirming}>

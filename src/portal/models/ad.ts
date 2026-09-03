@@ -170,7 +170,8 @@ export interface MonthlyRevenueDto {
     // Ad revenue only (historical receipts are all ads → backward compatible)
     revenue: number;
     // Promoted-messages revenue, reported as a separate series
-    promotedRevenue: number;
+    promotedRevenue: number; // message promotions only
+    roomPromotedRevenue: number;
 }
 
 export interface MonthlyRevenueResponseDto {
@@ -182,7 +183,8 @@ export interface WeeklyRevenueDto {
     // Ad revenue only
     revenue: number;
     // Promoted-messages revenue, reported as a separate series
-    promotedRevenue: number;
+    promotedRevenue: number; // message promotions only
+    roomPromotedRevenue: number;
 }
 
 export interface WeeklyRevenueResponseDto {

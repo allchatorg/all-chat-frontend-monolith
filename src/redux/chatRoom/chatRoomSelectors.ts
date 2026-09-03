@@ -48,6 +48,9 @@ export const selectTopOnlineChatRoomsState = (state: RootState) =>
 export const selectTopActiveChatRoomsState = (state: RootState) =>
     state.chatRoom.chatRoomsLeaderBoard.topActiveChatRooms;
 
+export const selectPromotedChatRoomsState = (state: RootState) =>
+    state.chatRoom.chatRoomsLeaderBoard.promotedChatRooms;
+
 export const selectSearchedMessagesState = (state: RootState) =>
     state.chatRoom.searchedMessages;
 
@@ -62,6 +65,9 @@ export const selectPromotedMessagesState = (state: RootState) =>
 
 export const selectPromotionUpdateCounter = (state: RootState) =>
     state.chatRoom.promotionUpdateCounter;
+
+export const selectRoomPromotionUpdateCounter = (state: RootState) =>
+    state.chatRoom.roomPromotionUpdateCounter;
 
 export const selectJumpToMessageId = (state: RootState) =>
     state.chatRoomUi.jumpToMessageId;

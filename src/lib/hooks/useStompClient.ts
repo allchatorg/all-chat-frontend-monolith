@@ -12,6 +12,7 @@ import {getSessionToken, removeSessionToken} from "@/lib/tokenManager";
 import {
     addMessageReaction,
     applyPromotionUpdate,
+    applyRoomPromotionUpdate,
     handleChatRoomArchivedRegularUser,
     handleChatRoomArchivedStaffUser,
     handleChatRoomBanUserNotificationRegularUser,
@@ -52,6 +53,9 @@ import {fetchMessagingAvailabilityThunk} from "@/redux/messagingAvailability/mes
 import {PromotedMessageEvent} from "@/models/PromotedMessageEvent";
 import {promotedMessagesApi} from "@ads/store/services/promotedMessagesApi";
 import {adminPromotedMessagesApi} from "@ads/store/services/adminPromotedMessagesApi";
+import {RoomPromotionEvent} from "@/models/RoomPromotionEvent";
+import {roomPromotionsApi} from "@ads/store/services/roomPromotionsApi";
+import {adminRoomPromotionsApi} from "@ads/store/services/adminRoomPromotionsApi";
 import {AppNotification} from "@/models/AppNotification";
 import {NotificationType} from "@/models/NotificationType";
 import {notificationReceived} from "@/redux/notifications/notificationsSlice";
@@ -180,10 +184,12 @@ export function useStompWithRedux(
                                 },
                             });
                         } else if ([NotificationType.AD_APPROVED, NotificationType.AD_COMPLETED,
-                            NotificationType.PROMOTION_APPROVED, NotificationType.MODERATOR_ACCEPTED].includes(notification.type)) {
+                            NotificationType.PROMOTION_APPROVED, NotificationType.ROOM_PROMOTION_APPROVED,
+                            NotificationType.MODERATOR_ACCEPTED].includes(notification.type)) {
                             toast.success(notification.title, {duration: 8000});
                         } else if ([NotificationType.AD_REJECTED, NotificationType.PROMOTION_DENIED,
-                            NotificationType.PROMOTION_CANCELED].includes(notification.type)) {
+                            NotificationType.PROMOTION_CANCELED, NotificationType.ROOM_PROMOTION_DENIED,
+                            NotificationType.ROOM_PROMOTION_CANCELED].includes(notification.type)) {
                             toast.error(notification.title, {duration: 8000});
                         } else {
                             toast.info(notification.title, {duration: 8000});
@@ -311,6 +317,14 @@ export function useStompWithRedux(
                         // when no portal page is open.
                         dispatch(promotedMessagesApi.util.invalidateTags(['PromotedMessages']));
                         dispatch(adminPromotedMessagesApi.util.invalidateTags(['AdminPromotedMessages']));
+                        break;
+
+                    case WebSocketMessageType.ROOM_PROMOTION_UPDATE:
+                        // The Promoted rooms list is global — bump the counter so an
+                        // open Promoted tab refetches, and sync the portal caches.
+                        dispatch(applyRoomPromotionUpdate(data as RoomPromotionEvent));
+                        dispatch(roomPromotionsApi.util.invalidateTags(['RoomPromotions']));
+                        dispatch(adminRoomPromotionsApi.util.invalidateTags(['AdminRoomPromotions']));
                         break;
 
                     default:

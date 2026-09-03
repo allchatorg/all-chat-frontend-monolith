@@ -31,8 +31,10 @@ import {adminAdsApi} from "@ads/store/services/adminAdsApi";
 import {adminUsersApi} from "@ads/store/services/adminUsersApi";
 import {promotedMessagesApi} from "@ads/store/services/promotedMessagesApi";
 import {adminPromotedMessagesApi} from "@ads/store/services/adminPromotedMessagesApi";
+import {roomPromotionsApi} from "@ads/store/services/roomPromotionsApi";
+import {adminRoomPromotionsApi} from "@ads/store/services/adminRoomPromotionsApi";
 
-const adsPortalApis = [userApi, paymentApi, adFormatsApi, fileApi, adsPortalApi, adminAdsApi, adminUsersApi, promotedMessagesApi, adminPromotedMessagesApi];
+const adsPortalApis = [userApi, paymentApi, adFormatsApi, fileApi, adsPortalApi, adminAdsApi, adminUsersApi, promotedMessagesApi, adminPromotedMessagesApi, roomPromotionsApi, adminRoomPromotionsApi];
 
 
 const settingsPersistConfig = {
@@ -108,6 +110,8 @@ const appReducer = combineReducers({
     [adminUsersApi.reducerPath]: adminUsersApi.reducer,
     [promotedMessagesApi.reducerPath]: promotedMessagesApi.reducer,
     [adminPromotedMessagesApi.reducerPath]: adminPromotedMessagesApi.reducer,
+    [roomPromotionsApi.reducerPath]: roomPromotionsApi.reducer,
+    [adminRoomPromotionsApi.reducerPath]: adminRoomPromotionsApi.reducer,
 });
 
 export const resetApp = createAction('app/reset');

@@ -11,6 +11,7 @@ import {
     Megaphone,
     MessageSquare,
     MoreVertical,
+    Rocket,
     Search,
     Users,
     X
@@ -28,7 +29,12 @@ import {ConfirmModal} from "@/components/ConfirmModal";
 import {useThunk} from "@/lib/hooks/useThunk";
 import {archiveChatRoomThunk, unarchiveChatRoomThunk} from "@/redux/chatRoom/chatRoomThunk";
 import {getRoomPromotionsSummary} from "@/api/admin/adminAPI";
+import {RoomPromotionsSummary} from "@/models/RoomPromotionsSummary";
+import ArchiveRoomPromotionsWarning from "@/features/chatroom/components/ArchiveRoomPromotionsWarning";
 import {toast} from "sonner";
+import {Role} from "@/models/Role";
+import PromoteRoomModal from "@/features/chatroom/components/PromoteRoomModal";
+import {ClaimAccountPrompt} from "@/features/auth/components/ClaimAccountPrompt";
 
 interface ChatSectionHeaderProps {
     chatRoomId?: number;
@@ -67,7 +73,7 @@ const ChatSectionHeader: React.FC<ChatSectionHeaderProps> = ({
     const isMobile = useIsMobile();
     const [isExpanded, setIsExpanded] = useState(false);
     const noiseIndicator = getNoiseIndicator(noiseLevel);
-    const {isAdmin} = useRoleAccess();
+    const {isAdmin, isStaffMember, currentRole} = useRoleAccess();
     const {open, close} = useDialog();
     const [archiveChatRoom, archiveChatRoomLoading] = useThunk(archiveChatRoomThunk);
     const [unarchiveChatRoom, unarchiveChatRoomLoading] = useThunk(unarchiveChatRoomThunk);
@@ -91,6 +97,15 @@ const ChatSectionHeader: React.FC<ChatSectionHeaderProps> = ({
     const canManageArchive = isAdmin()
         && typeof chatRoomId === "number"
         && !ARCHIVE_HIDDEN_ROOM_NAMES.has(normalizedChatRoomName);
+    // Any signed-in account may promote a public, non-archived, non-special
+    // room; the backend also rejects private/staff rooms and unclaimed users.
+    // Staff are excluded from the paid funnel (backend returns 403 as well)
+    const canPromoteRoom = !isStaffMember()
+        && !isArchived
+        && typeof chatRoomId === "number"
+        && !ARCHIVE_HIDDEN_ROOM_NAMES.has(normalizedChatRoomName)
+        && currentRole !== Role.GUEST;
+    const promoteRoomButtonLabel = "Promote Room";
     const topReactedButtonLabel = `${topReactedSidebarActive ? "Hide" : "Show"} Top Reacted`;
     const promotedButtonLabel = `${promotedSidebarActive ? "Hide" : "Show"} Promoted Messages`;
     const popularityButtonLabel = `${popularitySidebarActive ? "Hide" : "Show"} Active Rooms`;
@@ -100,22 +115,16 @@ const ChatSectionHeader: React.FC<ChatSectionHeaderProps> = ({
             return;
         }
 
-        // Warn the admin when archiving will cancel active promotions: pending
-        // payment holds are released and approved payments are refunded.
-        let promotionsWarning = "";
+        // Show the admin the money impact before archiving: promoted-message
+        // refunds/releases plus room promotions (refunded only inside the 24h
+        // window, older ones canceled without refund). Rendered as a breakdown
+        // block inside the confirm dialog.
+        let summary: RoomPromotionsSummary | null = null;
+        let summaryLoadError = false;
         try {
-            const summary = await getRoomPromotionsSummary(chatRoomId);
-            const activeCount = summary.pendingCount + summary.approvedCount;
-            if (activeCount > 0) {
-                const totalReturned = (summary.pendingReleaseTotal + summary.approvedRefundTotal).toFixed(2);
-                promotionsWarning = ` This room has ${activeCount} active promoted message${activeCount === 1 ? "" : "s"}`
-                    + ` (${summary.pendingCount} pending, ${summary.approvedCount} approved).`
-                    + ` Archiving cancels them: pending payment holds are released and approved payments are refunded`
-                    + ` — ${totalReturned} ${summary.currency} returned to the owners in total.`;
-            }
+            summary = await getRoomPromotionsSummary(chatRoomId);
         } catch {
-            promotionsWarning = " Could not load this room's promoted messages —"
-                + " any active promotions will still be canceled (pending holds released, approved payments refunded).";
+            summaryLoadError = true;
         }
 
         open(
@@ -132,9 +141,32 @@ const ChatSectionHeader: React.FC<ChatSectionHeaderProps> = ({
                         }
                     }}
                     title={`Archive "${chatRoomName}"?`}
-                    description={"Archiving this room will disconnect all users from the chatroom, and it will no longer be available to regular users until it is unarchived." + promotionsWarning}
-                />
+                    description="Archiving this room will disconnect all users from the chatroom, and it will no longer be available to regular users until it is unarchived."
+                >
+                    <ArchiveRoomPromotionsWarning summary={summary} loadError={summaryLoadError}/>
+                </ConfirmModal>
             </div>
+        );
+    };
+
+    const handlePromoteRoom = () => {
+        if (!canPromoteRoom || typeof chatRoomId !== "number") {
+            return;
+        }
+
+        // Promoting requires a claimed account (backend rejects unclaimed
+        // with 403), so prompt the claim flow instead.
+        if (currentRole === Role.UNCLAIMED_USER) {
+            open(
+                <ClaimAccountPrompt
+                    description="You're using a throwaway account. To promote a room you need to claim your account by adding an email and password."/>
+            );
+            return;
+        }
+
+        open(
+            <PromoteRoomModal chatRoomId={chatRoomId} chatRoomName={chatRoomName}/>,
+            {className: 'w-[95vw] max-w-lg'}
         );
     };
 
@@ -214,6 +246,18 @@ const ChatSectionHeader: React.FC<ChatSectionHeaderProps> = ({
                 </div>
                 <div className="ml-auto flex shrink-0 items-center gap-2">
                     <ChatSearchBar/>
+                    {canPromoteRoom && (
+                        <Button
+                            onClick={handlePromoteRoom}
+                            variant="outline"
+                            size="sm"
+                            className="glass-control z-10 h-10 w-10 p-2"
+                            aria-label={promoteRoomButtonLabel}
+                            title={promoteRoomButtonLabel}
+                        >
+                            <Rocket className="h-5 w-5"/>
+                        </Button>
+                    )}
                     <Button
                         onClick={onToggleTopReactedSidebar}
                         variant="outline"
@@ -271,6 +315,18 @@ const ChatSectionHeader: React.FC<ChatSectionHeaderProps> = ({
                         </span>
                     </div>
                     <div className="ml-auto flex items-center gap-1">
+                        {canPromoteRoom && (
+                            <Button
+                                onClick={handlePromoteRoom}
+                                variant="ghost"
+                                size="sm"
+                                className="glass-control h-8 w-8 p-0"
+                                aria-label={promoteRoomButtonLabel}
+                                title={promoteRoomButtonLabel}
+                            >
+                                <Rocket className="h-4 w-4"/>
+                            </Button>
+                        )}
                         <Button
                             onClick={onToggleTopReactedSidebar}
                             variant="ghost"

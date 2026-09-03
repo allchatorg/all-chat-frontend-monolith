@@ -8,6 +8,7 @@ import {ReportNotification} from "@/models/ReportNotification";
 import {ChatRoom} from "@/models/ChatRoom";
 import {MessagingAvailability} from "@/models/MessagingAvailability";
 import {PromotedMessageEvent} from "@/models/PromotedMessageEvent";
+import {RoomPromotionEvent} from "@/models/RoomPromotionEvent";
 import {IdVerificationResultNotification} from "@/models/IdVerificationResultNotification";
 import {AppNotification} from "@/models/AppNotification";
 
@@ -61,6 +62,10 @@ export type WebSocketMessage =
     type: WebSocketMessageType.PROMOTED_MESSAGE_UPDATE;
     chatRoomName: string;
     data: PromotedMessageEvent;
+} | {
+    type: WebSocketMessageType.ROOM_PROMOTION_UPDATE;
+    chatRoomName: string;
+    data: RoomPromotionEvent;
 } | {
     type: WebSocketMessageType.PRIVATE_NEW_MESSAGE;
     chatRoomName: null;
