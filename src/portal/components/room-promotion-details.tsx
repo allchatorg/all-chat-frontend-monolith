@@ -247,7 +247,8 @@ export default function RoomPromotionDetails({data, className, isAdmin = false}:
                                 <p className="text-sm text-amber-800 dark:text-amber-200 mt-1">
                                     {formatCurrency(data.amount)} is on hold until an admin reviews this promotion.
                                     Once approved the room is bumped to the top of the Promoted list and the
-                                    promotion never expires.
+                                    room can eventually be pushed beyond the first 25 Promoted pages by newer
+                                    approvals.
                                 </p>
                             </div>
                         </div>

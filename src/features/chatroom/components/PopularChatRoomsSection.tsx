@@ -233,7 +233,6 @@ const PopularChatRoomsSection: React.FC = () => {
                                     <PopularityRoomCard
                                         key={room.roomId}
                                         room={room}
-                                        promotedAt={room.promotedAt}
                                         onClick={() => handleRoomClick(room.roomId)}
                                         isJoined={joinedRoomNames.has(room.roomName)}
                                     />

@@ -66,7 +66,7 @@ export interface RoomPromotionSearchRequest {
 }
 
 // Per-user summary for the staff ban form: counts by status plus the
-// totals a permanent ban releases (pending holds) and refunds (approved).
+// totals a permanent ban releases (pending holds) and keeps (approved captures).
 export interface BanRoomPromotionsSummary {
     totalPromotions: number;
     pendingCount: number;
@@ -74,6 +74,6 @@ export interface BanRoomPromotionsSummary {
     deniedCount: number;
     canceledCount: number;
     pendingReleaseTotal: number;
-    approvedRefundTotal: number;
+    approvedCapturedTotal: number;
     currency: string;
 }

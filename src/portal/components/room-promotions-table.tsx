@@ -58,7 +58,7 @@ interface RoomPromotionsTableProps {
 }
 
 // Clone of promoted-messages-table.tsx for room promotions (no message column,
-// plus an Approved date column since approved room promotions never expire).
+// plus an Approved date column because each approval is the room's latest bump).
 export function RoomPromotionsTable({
                                         promotions,
                                         status,

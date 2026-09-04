@@ -6,8 +6,10 @@ import {Alert, AlertDescription, AlertTitle} from "@/components/ui/alert";
 import {BanTypeEnum} from "@/models/BanTypeEnum";
 import {useGetBanAdsSummaryQuery} from "@ads/store/services/adminAdsApi";
 import {useGetBanPromotionsSummaryQuery} from "@ads/store/services/adminPromotedMessagesApi";
+import {useGetBanRoomPromotionsSummaryQuery} from "@ads/store/services/adminRoomPromotionsApi";
 import {BanAdsSummary} from "@ads/models/ad";
 import {BanPromotionsSummary} from "@ads/models/promoted-message";
+import {BanRoomPromotionsSummary} from "@ads/models/room-promotion";
 
 interface BanAdsPurchaseInfoProps {
     userId: string;
@@ -44,6 +46,20 @@ function buildPromotionsSummary(summary: BanPromotionsSummary): string {
         .join(", ")}.`;
 }
 
+function buildRoomPromotionsSummary(summary: BanRoomPromotionsSummary): string {
+    const segments = [
+        {count: summary.pendingCount, label: "pending"},
+        {count: summary.approvedCount, label: "approved"},
+        {count: summary.deniedCount, label: "denied"},
+        {count: summary.canceledCount, label: "canceled"},
+    ].filter((segment) => segment.count > 0);
+
+    const promotionsWord = summary.totalPromotions === 1 ? "room promotion" : "room promotions";
+    return `This user has ${summary.totalPromotions} ${promotionsWord}: ${segments
+        .map((segment) => `${segment.count} ${segment.label}`)
+        .join(", ")}.`;
+}
+
 function buildPromotionsRefundWarning(summary: BanPromotionsSummary): string {
     const formatCurrency = (amount: number) =>
         new Intl.NumberFormat("en-US", {
@@ -59,6 +75,28 @@ function buildPromotionsRefundWarning(summary: BanPromotionsSummary): string {
     if (summary.approvedCount > 0) {
         const promotionsWord = summary.approvedCount === 1 ? "approved promotion" : "approved promotions";
         parts.push(`${summary.approvedCount} ${promotionsWord} will NOT be refunded and will keep running unless their messages are deleted`);
+    }
+    return `${parts.join("; ")}.`;
+}
+
+function buildRoomPromotionsBanWarning(summary: BanRoomPromotionsSummary): string {
+    const formatCurrency = (amount: number) =>
+        new Intl.NumberFormat("en-US", {
+            style: "currency",
+            currency: summary.currency || "USD",
+        }).format(amount);
+
+    const parts: string[] = [];
+    if (summary.pendingCount > 0) {
+        const holdsWord = summary.pendingCount === 1 ? "pending room promotion hold" : "pending room promotion holds";
+        parts.push(`${summary.pendingCount} ${holdsWord} totaling ${formatCurrency(summary.pendingReleaseTotal)} will be canceled and released when this permanent ban is applied`);
+    }
+    if (summary.approvedCount > 0) {
+        const promotionsWord = summary.approvedCount === 1 ? "approved room promotion" : "approved room promotions";
+        const listingText = summary.approvedCount === 1
+            ? "will keep the room listed unless staff cancels the promotion or archives the room"
+            : "will keep their rooms listed unless staff cancels the promotions or archives those rooms";
+        parts.push(`${summary.approvedCount} ${promotionsWord} totaling ${formatCurrency(summary.approvedCapturedTotal)} will NOT be refunded and ${listingText}`);
     }
     return `${parts.join("; ")}.`;
 }
@@ -91,14 +129,21 @@ export default function BanAdsPurchaseInfo({userId, banType, deleteMessagesEnabl
         isLoading: promotionsLoading,
         isError: promotionsError,
     } = useGetBanPromotionsSummaryQuery(numericUserId, {skip});
+    const {
+        data: roomPromotionsData,
+        isLoading: roomPromotionsLoading,
+        isError: roomPromotionsError,
+    } = useGetBanRoomPromotionsSummaryQuery(numericUserId, {skip});
 
     // Never block the ban flow: no banner while loading, on error (e.g. the
     // ads module being down) or when the user has no purchases/promotions.
     const showAds = !isLoading && !isError && !!data && data.totalAds > 0;
     const showPromotions = !promotionsLoading && !promotionsError && !!promotionsData
         && promotionsData.totalPromotions > 0;
+    const showRoomPromotions = !roomPromotionsLoading && !roomPromotionsError && !!roomPromotionsData
+        && roomPromotionsData.totalPromotions > 0;
 
-    if (!showAds && !showPromotions) {
+    if (!showAds && !showPromotions && !showRoomPromotions) {
         return null;
     }
 
@@ -112,6 +157,10 @@ export default function BanAdsPurchaseInfo({userId, banType, deleteMessagesEnabl
     const showPromotionsRefundWarning = showPromotions
         && banType === BanTypeEnum.PERMANENT
         && (promotionsData.pendingCount > 0 || promotionsData.approvedCount > 0);
+
+    const showRoomPromotionsBanWarning = showRoomPromotions
+        && banType === BanTypeEnum.PERMANENT
+        && (roomPromotionsData.pendingCount > 0 || roomPromotionsData.approvedCount > 0);
 
     // Any ban with "delete messages" (permanent included): promotions on the
     // deleted messages are canceled — pending holds released, approved kept.
@@ -152,6 +201,26 @@ export default function BanAdsPurchaseInfo({userId, banType, deleteMessagesEnabl
                     <AlertTriangle className="h-4 w-4"/>
                     <AlertTitle>Pending promotion holds will be released</AlertTitle>
                     <AlertDescription>{buildPromotionsRefundWarning(promotionsData)}</AlertDescription>
+                </Alert>
+            )}
+
+            {showRoomPromotions && (
+                <Alert>
+                    <Info className="h-4 w-4"/>
+                    <AlertTitle>Room promotions</AlertTitle>
+                    <AlertDescription>{buildRoomPromotionsSummary(roomPromotionsData)}</AlertDescription>
+                </Alert>
+            )}
+
+            {showRoomPromotionsBanWarning && (
+                <Alert variant="warning">
+                    <AlertTriangle className="h-4 w-4"/>
+                    <AlertTitle>
+                        {roomPromotionsData.pendingCount > 0
+                            ? "Pending room promotions will be canceled"
+                            : "Approved room promotions are not refunded"}
+                    </AlertTitle>
+                    <AlertDescription>{buildRoomPromotionsBanWarning(roomPromotionsData)}</AlertDescription>
                 </Alert>
             )}
 

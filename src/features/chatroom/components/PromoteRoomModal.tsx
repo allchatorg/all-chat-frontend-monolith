@@ -113,7 +113,7 @@ export const PromoteRoomModal: React.FC<PromoteRoomModalProps> = ({chatRoomId, c
                             <p className="text-muted-foreground">
                                 $2.50 is held on your card until an admin reviews the promotion. The hold is
                                 released in full if the promotion is denied or if a cancellation request is
-                                accepted while it is still pending. Approved promotions never expire.
+                                accepted while it is still pending.
                             </p>
                         </div>
                     </div>
@@ -124,7 +124,8 @@ export const PromoteRoomModal: React.FC<PromoteRoomModalProps> = ({chatRoomId, c
                             <p className="font-semibold text-foreground">Bumped to the top</p>
                             <p className="text-muted-foreground">
                                 Every newly approved promotion pushes the room to the top of the Promoted list.
-                                Promote the room again later to bump it back to the top.
+                                The Promoted tab shows the first 25 pages, so newer approvals can eventually push
+                                older rooms out of view. Promote the room again later to bump it back to the top.
                             </p>
                         </div>
                     </div>
@@ -223,7 +224,8 @@ export const PromoteRoomModal: React.FC<PromoteRoomModalProps> = ({chatRoomId, c
                             className="rounded-lg border border-amber-200 bg-amber-50 p-3 text-sm text-amber-800 dark:border-amber-900 dark:bg-amber-950/30 dark:text-amber-200">
                             <span className="font-semibold">$2.50</span> will be held on your card until an admin
                             reviews the promotion. The hold is released in full if the promotion is denied or a
-                            cancellation request is accepted while pending. Approved promotions never expire.
+                            cancellation request is accepted while pending. Once approved, newer room promotions can
+                            eventually push this room beyond the first 25 Promoted pages.
                         </div>
 
                         {errorMessage && (

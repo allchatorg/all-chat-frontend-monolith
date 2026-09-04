@@ -1,7 +1,6 @@
 import React from "react";
 import {RoomPopulation} from "@/models/roomPopulation";
-import {Archive, MessageSquare, Rocket, UserCheck} from "lucide-react";
-import {formatDistanceToNow} from "date-fns";
+import {Archive, MessageSquare, UserCheck} from "lucide-react";
 import {Badge} from "@/components/ui/badge";
 import {ChatRoomNoiseLevelEnum} from "@/models/ChatRoomNoiseLevelEnum";
 import {getMessageCategory} from "@/lib/utils";
@@ -10,8 +9,6 @@ interface RoomCardProps {
     room: RoomPopulation;
     onClick?: () => void;
     isJoined?: boolean;
-    // Set by the Promoted tab: timestamp of the latest approved promotion.
-    promotedAt?: string;
 }
 
 const getNoiseIndicator = (level: ChatRoomNoiseLevelEnum) => {
@@ -38,7 +35,6 @@ const PopularityRoomCard: React.FC<RoomCardProps> = ({
                                                          room,
                                                          onClick,
                                                          isJoined,
-                                                         promotedAt,
                                                      }) => {
     const noise = getNoiseIndicator(room.noiseLevel);
 
@@ -66,17 +62,6 @@ const PopularityRoomCard: React.FC<RoomCardProps> = ({
                 >
                     <Archive className="mr-1 h-3 w-3"/>
                     Archived
-                </Badge>
-            )}
-
-            {promotedAt && !room.archived && (
-                <Badge
-                    variant="outline"
-                    className="shrink-0 border-amber-300 bg-amber-100/80 text-amber-800 dark:border-amber-700 dark:bg-amber-950/40 dark:text-amber-200"
-                    title={`Promoted ${new Date(promotedAt).toLocaleString()}`}
-                >
-                    <Rocket className="mr-1 h-3 w-3"/>
-                    Promoted {formatDistanceToNow(new Date(promotedAt), {addSuffix: true})}
                 </Badge>
             )}
 
