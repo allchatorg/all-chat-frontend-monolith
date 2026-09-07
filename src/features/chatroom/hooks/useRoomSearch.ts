@@ -1,7 +1,6 @@
 import {useEffect, useMemo, useState} from "react";
 import {useThunk} from "@/lib/hooks/useThunk";
 import {
-    joinChatRoomThunk,
     joinRandomAndSelectChatRoomThunk,
     searchChatRoomsByNameThunk
 } from "@/redux/chatRoom/chatRoomThunk";
@@ -16,12 +15,11 @@ const DEBOUNCE_DELAY = 400;
 
 export const useRoomSearch = () => {
     const [runSearchRoomThunk, searchRoomIsLoading] = useThunk(searchChatRoomsByNameThunk);
-    const [runJoinChatRoom] = useThunk(joinChatRoomThunk);
     const [runJoinRandomChatRoom, joinRandomRoomIsLoading] = useThunk(joinRandomAndSelectChatRoomThunk);
     const userChatRooms = useSelector(selectJoinedUserChatRoomsState);
 
     const {user} = useUser();
-    const {handleCreateRoom: createAndJoinChatRoom, createLoading} = useChatRooms(user);
+    const {handleCreateRoom: createAndJoinChatRoom, handleJoinRoom} = useChatRooms(user);
 
     const [searchTerm, setSearchTerm] = useState("");
     const [debouncedSearchTerm, setDebouncedSearchTerm] = useState("");
@@ -51,10 +49,6 @@ export const useRoomSearch = () => {
             })
             .catch(() => setRooms([]));
     }, [debouncedSearchTerm, runSearchRoomThunk]);
-
-    const handleJoinRoom = (roomId: number) => {
-        runJoinChatRoom(roomId);
-    };
 
     const clearSearch = () => {
         setSearchTerm("");

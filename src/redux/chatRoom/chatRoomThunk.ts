@@ -612,8 +612,8 @@ export const selectAndLoadChatRoomThunk = createAsyncThunk<
 );
 
 /**
- * Handles joining a room from outside the sidebar (e.g. Popular Rooms).
- * Joins the room, loads its details, and notifies the backend of the
+ * Handles opening a room from outside the sidebar (e.g. search or Popular Rooms).
+ * Selects an existing room or joins it, loads its details, and notifies the backend of the
  * active room change so the previous room's active count is decremented.
  */
 export const joinAndSelectChatRoomThunk = createAsyncThunk<
@@ -624,6 +624,13 @@ export const joinAndSelectChatRoomThunk = createAsyncThunk<
     "chat/joinAndSelectChatRoom",
     async (chatRoomId, {getState, dispatch}) => {
         const state = getState();
+        const joinedRoom = state.chatRoom.joinedUserChatRooms.find(room => room.chatRoomId === chatRoomId);
+
+        if (joinedRoom) {
+            await dispatch(selectAndLoadChatRoomThunk(joinedRoom)).unwrap();
+            return;
+        }
+
         const currentChatRoom = selectSelectedChatRoomState(state);
 
         // Join the room (the fulfilled reducer adds it to joinedUserChatRooms

@@ -4,6 +4,7 @@ import {
     Bell,
     CalendarDays,
     CheckCircle2,
+    Clock3,
     Flag,
     LucideIcon,
     Megaphone,
@@ -29,6 +30,11 @@ const NOTIFICATION_VISUALS: Record<NotificationType, NotificationVisual> = {
         iconClass: "text-orange-500",
         bgClass: "bg-orange-500/15",
     },
+    [NotificationType.AD_SUBMITTED]: {
+        icon: Megaphone,
+        iconClass: "text-blue-500",
+        bgClass: "bg-blue-500/15",
+    },
     [NotificationType.AD_APPROVED]: {
         icon: CheckCircle2,
         iconClass: "text-green-500",
@@ -39,8 +45,18 @@ const NOTIFICATION_VISUALS: Record<NotificationType, NotificationVisual> = {
         iconClass: "text-red-500",
         bgClass: "bg-red-500/15",
     },
+    [NotificationType.AD_CANCELED]: {
+        icon: Ban,
+        iconClass: "text-orange-500",
+        bgClass: "bg-orange-500/15",
+    },
     [NotificationType.AD_COMPLETED]: {
         icon: Flag,
+        iconClass: "text-blue-500",
+        bgClass: "bg-blue-500/15",
+    },
+    [NotificationType.PROMOTION_SUBMITTED]: {
+        icon: Megaphone,
         iconClass: "text-blue-500",
         bgClass: "bg-blue-500/15",
     },
@@ -54,10 +70,20 @@ const NOTIFICATION_VISUALS: Record<NotificationType, NotificationVisual> = {
         iconClass: "text-red-500",
         bgClass: "bg-red-500/15",
     },
+    [NotificationType.PROMOTION_CANCEL_REQUESTED]: {
+        icon: Clock3,
+        iconClass: "text-blue-500",
+        bgClass: "bg-blue-500/15",
+    },
     [NotificationType.PROMOTION_CANCELED]: {
         icon: Ban,
         iconClass: "text-orange-500",
         bgClass: "bg-orange-500/15",
+    },
+    [NotificationType.ROOM_PROMOTION_SUBMITTED]: {
+        icon: Rocket,
+        iconClass: "text-blue-500",
+        bgClass: "bg-blue-500/15",
     },
     [NotificationType.ROOM_PROMOTION_APPROVED]: {
         icon: Rocket,
@@ -68,6 +94,11 @@ const NOTIFICATION_VISUALS: Record<NotificationType, NotificationVisual> = {
         icon: XCircle,
         iconClass: "text-red-500",
         bgClass: "bg-red-500/15",
+    },
+    [NotificationType.ROOM_PROMOTION_CANCEL_REQUESTED]: {
+        icon: Clock3,
+        iconClass: "text-blue-500",
+        bgClass: "bg-blue-500/15",
     },
     [NotificationType.ROOM_PROMOTION_CANCELED]: {
         icon: Ban,

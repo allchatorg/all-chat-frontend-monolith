@@ -1,4 +1,5 @@
 import {useCallback, useEffect, useRef, useState} from "react";
+import {useRouter} from "next/navigation";
 import {ReportNotification} from "@/models/ReportNotification";
 import {useDispatch, useSelector} from "react-redux";
 import {useReportNotification} from "@/lib/hooks/useReportNotification";
@@ -59,7 +60,10 @@ import {adminRoomPromotionsApi} from "@ads/store/services/adminRoomPromotionsApi
 import {AppNotification} from "@/models/AppNotification";
 import {NotificationType} from "@/models/NotificationType";
 import {notificationReceived} from "@/redux/notifications/notificationsSlice";
-import {fetchUnreadCountThunk} from "@/redux/notifications/notificationsThunk";
+import {fetchNotificationsThunk, fetchUnreadCountThunk} from "@/redux/notifications/notificationsThunk";
+import {getNotificationRoute} from "@/features/notifications/notificationRoutes";
+import {adsApi as adsPortalApi} from "@ads/store/services/adsApi";
+import {adminAdsApi} from "@ads/store/services/adminAdsApi";
 
 const WS_URL = process.env.NEXT_PUBLIC_WS_URL || "http://localhost:8080/ws";
 const PUBLIC_TOPIC = ["/topic/public-chat"];
@@ -70,6 +74,7 @@ export function useStompWithRedux(
     onMessage?: (topic: string, message: IMessage) => void
 ) {
     const dispatch = useDispatch<AppDispatch>();
+    const router = useRouter();
     const userChatRooms = useSelector((state: RootState) =>
         state.chatRoom.joinedUserChatRooms
     );
@@ -84,6 +89,7 @@ export function useStompWithRedux(
     const subscriptionsRef = useRef<Record<string, StompSubscription>>({});
     const [isConnected, setIsConnected] = useState(false);
     const reconnectTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+    const shownNotificationIdsRef = useRef(new Set<number>());
 
     const userRef = useRef(user);
     const loadedChatRoomsRef = useRef(loadedChatRooms);
@@ -93,6 +99,10 @@ export function useStompWithRedux(
     useEffect(() => {
         userRef.current = user;
     }, [user]);
+
+    useEffect(() => {
+        shownNotificationIdsRef.current.clear();
+    }, [user?.id]);
 
     useEffect(() => {
         loadedChatRoomsRef.current = loadedChatRooms;
@@ -183,16 +193,51 @@ export function useStompWithRedux(
                                     }
                                 },
                             });
-                        } else if ([NotificationType.AD_APPROVED, NotificationType.AD_COMPLETED,
-                            NotificationType.PROMOTION_APPROVED, NotificationType.ROOM_PROMOTION_APPROVED,
-                            NotificationType.MODERATOR_ACCEPTED].includes(notification.type)) {
-                            toast.success(notification.title, {duration: 8000});
-                        } else if ([NotificationType.AD_REJECTED, NotificationType.PROMOTION_DENIED,
-                            NotificationType.PROMOTION_CANCELED, NotificationType.ROOM_PROMOTION_DENIED,
-                            NotificationType.ROOM_PROMOTION_CANCELED].includes(notification.type)) {
-                            toast.error(notification.title, {duration: 8000});
                         } else {
-                            toast.info(notification.title, {duration: 8000});
+                            if (shownNotificationIdsRef.current.has(notification.id)) break;
+                            shownNotificationIdsRef.current.add(notification.id);
+                            // Bound session memory while suppressing repeated deliveries.
+                            if (shownNotificationIdsRef.current.size > 200) {
+                                const oldestId = shownNotificationIdsRef.current.values().next().value;
+                                if (oldestId !== undefined) shownNotificationIdsRef.current.delete(oldestId);
+                            }
+                            // Notifications arrive after commit. Refresh an open
+                            // purchase page even if an earlier room broadcast raced
+                            // the transaction or a cancellation request had no broadcast.
+                            if (notification.referenceType === "AD") {
+                                dispatch(adsPortalApi.util.invalidateTags(['Ads']));
+                                dispatch(adminAdsApi.util.invalidateTags(['AdminAds']));
+                            } else if (notification.referenceType === "PROMOTED_MESSAGE") {
+                                dispatch(promotedMessagesApi.util.invalidateTags(['PromotedMessages']));
+                                dispatch(adminPromotedMessagesApi.util.invalidateTags(['AdminPromotedMessages']));
+                            } else if (notification.referenceType === "ROOM_PROMOTION") {
+                                dispatch(roomPromotionsApi.util.invalidateTags(['RoomPromotions']));
+                                dispatch(adminRoomPromotionsApi.util.invalidateTags(['AdminRoomPromotions']));
+                            }
+                            const route = getNotificationRoute(notification);
+                            const options = {
+                                id: `notification-${notification.id}`,
+                                duration: 8000,
+                                description: notification.body?.trim() || undefined,
+                                action: route ? {
+                                    label: "View details",
+                                    onClick: () => router.push(route),
+                                } : undefined,
+                            };
+
+                            if ([NotificationType.AD_APPROVED, NotificationType.AD_COMPLETED,
+                                NotificationType.PROMOTION_APPROVED, NotificationType.ROOM_PROMOTION_APPROVED,
+                                NotificationType.MODERATOR_ACCEPTED].includes(notification.type)) {
+                                toast.success(notification.title, options);
+                            } else if ([NotificationType.AD_REJECTED, NotificationType.PROMOTION_DENIED,
+                                NotificationType.ROOM_PROMOTION_DENIED].includes(notification.type)) {
+                                toast.error(notification.title, options);
+                            } else if ([NotificationType.AD_CANCELED, NotificationType.PROMOTION_CANCELED,
+                                NotificationType.ROOM_PROMOTION_CANCELED].includes(notification.type)) {
+                                toast.warning(notification.title, options);
+                            } else {
+                                toast.info(notification.title, options);
+                            }
                         }
                         break;
 
@@ -338,7 +383,7 @@ export function useStompWithRedux(
                 onMessageRef.current(topic, message);
             }
         },
-        [dispatch, handleReportNotification, handleIdVerificationResult]
+        [dispatch, router, handleReportNotification, handleIdVerificationResult]
     );
 
     const disconnect = useCallback(() => {
@@ -390,6 +435,11 @@ export function useStompWithRedux(
         });
     }, [userChatRooms, user?.claimed, handleWebSocketMessage]);
 
+    const manageSubscriptionsRef = useRef(manageSubscriptions);
+    useEffect(() => {
+        manageSubscriptionsRef.current = manageSubscriptions;
+    }, [manageSubscriptions]);
+
     // Initialize WebSocket connection
     const isInitialConnect = useRef(true);
     const backgroundedAtRef = useRef<number | null>(null);
@@ -415,12 +465,16 @@ export function useStompWithRedux(
             onConnect: () => {
                 console.log("[STOMP] Connected");
                 subscriptionsRef.current = {};
+                // Subscribe before refreshing persisted notifications so new
+                // deliveries cannot slip between the fetch and subscription.
+                manageSubscriptionsRef.current(client);
                 if (!isInitialConnect.current) {
                     dispatch(setStompReconnected(true));
                     setTimeout(() => dispatch(setStompReconnected(false)), 500);
                     // Notifications created while the socket was down were never pushed.
                     if (userRef.current?.id) {
                         dispatch(fetchUnreadCountThunk());
+                        dispatch(fetchNotificationsThunk({page: 0, size: 10}));
                     }
                 }
                 isInitialConnect.current = false;
