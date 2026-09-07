@@ -4,6 +4,7 @@ import React, {useRef} from "react";
 import {EditorContent, useEditor, useEditorState} from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
 import {Placeholder} from "@tiptap/extensions";
+import {Slice} from "@tiptap/pm/model";
 import {Bold, Italic} from "lucide-react";
 import {Button} from "@ads/components/ui/button";
 import {cn} from "@ads/lib/utils";
@@ -53,6 +54,9 @@ export default function AdTextEditor({value, onChange, placeholder}: AdTextEdito
         enablePasteRules: false,
         immediatelyRender: false,
         editorProps: {
+            // Join copied paragraphs to the text at the cursor instead of
+            // inserting a separate block. Internal line breaks and marks stay intact.
+            transformPasted: (slice) => Slice.maxOpen(slice.content),
             attributes: {
                 class: cn(
                     "min-h-24 max-h-60 w-full overflow-y-auto rounded-md border border-border",

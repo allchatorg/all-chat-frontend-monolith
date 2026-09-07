@@ -2,6 +2,7 @@ import React, {useEffect, useRef} from "react";
 import {EditorContent, useEditor, type Editor} from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
 import {Placeholder} from "@tiptap/extensions";
+import {Slice} from "@tiptap/pm/model";
 import {cn} from "@/lib/utils";
 import {docToMarkers} from "@/features/chatroom/utils/messageMarkers";
 
@@ -67,6 +68,9 @@ export const ChatComposerEditor: React.FC<ChatComposerEditorProps> = ({
         enablePasteRules: false,
         immediatelyRender: false,
         editorProps: {
+            // Join copied paragraphs to the text at the cursor instead of
+            // inserting a separate block. Internal line breaks and marks stay intact.
+            transformPasted: (slice) => Slice.maxOpen(slice.content),
             attributes: {
                 class: cn(
                     "glass-input min-h-10 max-h-[120px] w-full overflow-y-auto rounded-md border",

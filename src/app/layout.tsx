@@ -36,7 +36,12 @@ export default function RootLayout({
 }>) {
     return (
         <html lang="en" className="h-full">
-        <body className={`${geistSans.variable} ${geistMono.variable} app-background flex flex-col h-full`}>
+        {/* Extensions such as ColorZilla add body attributes before hydration.
+            Suppress warnings on this element; descendants are still checked. */}
+        <body
+            className={`${geistSans.variable} ${geistMono.variable} app-background flex flex-col h-full`}
+            suppressHydrationWarning
+        >
         <RouteProgressBar/>
         <AppProviders>
             <AppShell>

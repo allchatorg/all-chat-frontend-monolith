@@ -225,7 +225,8 @@ export const PromoteRoomModal: React.FC<PromoteRoomModalProps> = ({chatRoomId, c
                             <span className="font-semibold">$2.50</span> will be held on your card until an admin
                             reviews the promotion. The hold is released in full if the promotion is denied or a
                             cancellation request is accepted while pending. Once approved, newer room promotions can
-                            eventually push this room beyond the first 25 Promoted pages.
+                            eventually push this room beyond the first 25 Promoted pages at which point it will
+                            disappear.
                         </div>
 
                         {errorMessage && (
