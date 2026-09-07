@@ -11,6 +11,7 @@ import {
     fetchPromotedRoomsPaginatedThunk,
     fetchTopOnlineRoomsPaginatedThunk,
     fetchTopReactedMessagesThunk,
+    getTopReactedMessagesRequestKey,
     joinChatRoomThunk,
     joinRandomChatRoomThunk,
     leaveChatRoomThunk,
@@ -53,6 +54,8 @@ interface ChatRoomState {
     searchedMessages: PaginatedResponse<Message> | null;
     searchMessagesParams: SearchMessageRequest | null;
     topReactedMessages: PaginatedResponse<Message> | null;
+    topReactedMessagesRequestId: string | null;
+    topReactedMessagesRequestKey: string | null;
     promotedMessages: PaginatedResponse<Message> | null;
     // Bumped on every PROMOTED_MESSAGE_UPDATE for the selected room so an open
     // Promoted Messages sidebar refetches its page.
@@ -87,6 +90,8 @@ const chatRoomInitialState: ChatRoomState = {
     searchedMessages: null,
     searchMessagesParams: null,
     topReactedMessages: null,
+    topReactedMessagesRequestId: null,
+    topReactedMessagesRequestKey: null,
     promotedMessages: null,
     promotionUpdateCounter: 0,
     roomPromotionUpdateCounter: 0,
@@ -929,15 +934,27 @@ const chatSlice = createSlice({
                     state.searchedMessages = null;
                 }
             });
-            builder.addCase(fetchTopReactedMessagesThunk.fulfilled, (state, action) => {
-                const {roomId} = action.meta.arg;
-                const topReactedMessages = action.payload;
-
-                if (state.selectedChatRoom?.id === roomId) {
-                    state.topReactedMessages = topReactedMessages;
-                } else {
+            builder.addCase(fetchTopReactedMessagesThunk.pending, (state, action) => {
+                const requestKey = getTopReactedMessagesRequestKey(action.meta.arg);
+                if (state.topReactedMessagesRequestKey !== requestKey) {
                     state.topReactedMessages = null;
                 }
+                state.topReactedMessagesRequestId = action.meta.requestId;
+                state.topReactedMessagesRequestKey = requestKey;
+            });
+            builder.addCase(fetchTopReactedMessagesThunk.fulfilled, (state, action) => {
+                if (state.topReactedMessagesRequestId !== action.meta.requestId) return;
+                state.topReactedMessagesRequestId = null;
+
+                // A late response must not replace a newer page/filter or clear
+                // the results belonging to a different selected room.
+                if (state.selectedChatRoom?.id === action.meta.arg.roomId) {
+                    state.topReactedMessages = action.payload;
+                }
+            });
+            builder.addCase(fetchTopReactedMessagesThunk.rejected, (state, action) => {
+                if (state.topReactedMessagesRequestId !== action.meta.requestId) return;
+                state.topReactedMessagesRequestId = null;
             });
             builder.addCase(fetchPromotedMessagesThunk.fulfilled, (state, action) => {
                 const {roomId} = action.meta.arg;

@@ -30,6 +30,7 @@ import {CreateChatRoomRequest} from "@/models/CreateChatRoomRequest";
 import {User} from "@/models/User";
 import {ApiError} from "@/models/ApiError";
 import {useThunk} from "@/lib/hooks/useThunk";
+import {toast} from "sonner";
 
 interface UseChatRooms {
     userChatRooms: UserChatRoom[];
@@ -83,7 +84,13 @@ export const useChatRooms = (user: User | null, chatRoomId?: number): UseChatRoo
     // ── Effect 1: Initial fetch of joined rooms ──────────────────────
     useEffect(() => {
         if (!!user && !userChatRoomsIsLoading && !userChatRooms.length) {
-            runFetchUserChatRooms();
+            void runFetchUserChatRooms().catch((error: Error) => {
+                // Other hook instances or Strict Mode may already be fetching.
+                // Consume that cancellation without reporting a failed request.
+                if (error.name !== "ConditionError") {
+                    toast.error(error.message, {id: "load-joined-chat-rooms"});
+                }
+            });
         }
     }, [user?.id, runFetchUserChatRooms]);
 
@@ -135,7 +142,7 @@ export const useChatRooms = (user: User | null, chatRoomId?: number): UseChatRoo
 
     // ── Return ───────────────────────────────────────────────────────
 
-    const formatError = (err: unknown) => (err ? String(err) : null);
+    const formatError = (err: ApiError | null) => err?.message ?? null;
 
     return {
         userChatRooms,
@@ -148,7 +155,7 @@ export const useChatRooms = (user: User | null, chatRoomId?: number): UseChatRoo
         chatRoomError: null,
 
         joinLoading,
-        joinError: joinError ? joinError.toString() : null,
+        joinError: formatError(joinError),
         leaveLoading,
         leaveError: formatError(leaveError),
         createLoading,

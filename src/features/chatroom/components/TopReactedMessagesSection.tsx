@@ -3,11 +3,10 @@ import {Card, CardContent, CardFooter, CardHeader, CardTitle} from "@/components
 import {X} from "lucide-react";
 import {Button} from "@/components/ui/button";
 import {useDispatch, useSelector} from "react-redux";
-import {AppDispatch} from "@/redux/store";
+import {AppDispatch, RootState} from "@/redux/store";
 import {setActiveLeftSidebar} from "@/redux/settings/settingsSlice";
 import {selectSelectedChatRoomState, selectTopReactedMessagesState} from "@/redux/chatRoom/chatRoomSelectors";
 import PaginationFooter from "@/components/PaginationFooter";
-import {useThunk} from "@/lib/hooks/useThunk";
 import {fetchTopReactedMessagesThunk} from "@/redux/chatRoom/chatRoomThunk";
 import MessageItem from "@/features/chatroom/components/MessageItem";
 import {setJumpToMessageId} from "@/redux/chatRoom/chatRoomUiSlice";
@@ -22,41 +21,44 @@ const POLL_INTERVAL = 10000;
 export const TopReactedMessagesSection: React.FC = () => {
     const dispatch = useDispatch<AppDispatch>();
     const isMobile = useIsMobile();
-    const [fetchTopReactedMessages] = useThunk(fetchTopReactedMessagesThunk);
     const [period, setPeriod] = useState<TopReactedPeriodEnum>(TopReactedPeriodEnum.ALL_TIME);
 
-    const activeRoom = useSelector(selectSelectedChatRoomState);
+    const roomId = useSelector((state: RootState) =>
+        selectSelectedChatRoomState(state)?.id);
     const topReactedMessagesState = useSelector(selectTopReactedMessagesState);
-    const {content = [], totalPages = 0, number: pageIndex = 0} = topReactedMessagesState || {};
+    const {content = [], totalPages = 0} = topReactedMessagesState || {};
+
+    // Request state must not depend on the response: updating `number` after a
+    // page fetch would otherwise trigger another fetch for that same page.
+    const [pageIndex, setPageIndex] = useState(0);
+    const [pageRoomId, setPageRoomId] = useState(roomId);
+    if (pageRoomId !== roomId) {
+        setPageRoomId(roomId);
+        setPageIndex(0);
+    }
 
     const currentPage = pageIndex + 1;
 
     useEffect(() => {
-        if (!activeRoom) return;
-        fetchTopReactedMessages({roomId: activeRoom.id, page: pageIndex, size: PAGE_SIZE, period});
-    }, [activeRoom?.id, pageIndex, period, fetchTopReactedMessages]);
-
-    useEffect(() => {
-        if (!activeRoom) return;
-        const interval = setInterval(() => {
-            fetchTopReactedMessages({roomId: activeRoom.id, page: pageIndex, size: PAGE_SIZE, period});
-        }, POLL_INTERVAL);
+        if (roomId == null) return;
+        const fetchPage = () => {
+            void dispatch(fetchTopReactedMessagesThunk({roomId, page: pageIndex, size: PAGE_SIZE, period}));
+        };
+        fetchPage();
+        const interval = setInterval(fetchPage, POLL_INTERVAL);
         return () => clearInterval(interval);
-    }, [activeRoom?.id, pageIndex, period, fetchTopReactedMessages]);
+    }, [roomId, pageIndex, period, dispatch]);
 
     const handleClose = () => dispatch(setActiveLeftSidebar(null));
 
     const handlePageChange = (page: number) => {
-        if (!activeRoom || page < 1 || page > totalPages) return;
-        fetchTopReactedMessages({roomId: activeRoom.id, page: page - 1, size: PAGE_SIZE, period});
+        if (roomId == null || page < 1 || page > totalPages) return;
+        setPageIndex(page - 1);
     };
 
     const handlePeriodChange = (value: string) => {
-        const nextPeriod = value as TopReactedPeriodEnum;
-        setPeriod(nextPeriod);
-        if (activeRoom && pageIndex !== 0) {
-            fetchTopReactedMessages({roomId: activeRoom.id, page: 0, size: PAGE_SIZE, period: nextPeriod});
-        }
+        setPeriod(value as TopReactedPeriodEnum);
+        setPageIndex(0);
     };
 
     const handleMessageClick = (message: Message) => {
@@ -102,7 +104,7 @@ export const TopReactedMessagesSection: React.FC = () => {
             <CardContent className="flex flex-1 flex-col overflow-hidden px-4 pb-0">
                 <div aria-orientation={"vertical"} className="flex-1 overflow-y-auto">
                     <div className="space-y-4">
-                        {!activeRoom ? (
+                        {roomId == null ? (
                             <div className="py-8 text-center text-muted-foreground text-sm">Select a room to view top
                                 reacted messages.</div>
                         ) : content.length === 0 ? (

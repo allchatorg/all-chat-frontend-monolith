@@ -75,9 +75,10 @@ export const useRoomSearch = () => {
     };
 
     const filteredRooms = useMemo(() => {
-        if (!searchTerm.trim()) return rooms;
+        const normalizedQuery = searchTerm.trim().toLowerCase();
+        if (!normalizedQuery) return rooms;
         return rooms.filter((room) =>
-            room.roomName.toLowerCase().includes(searchTerm.toLowerCase())
+            room.roomName.toLowerCase().includes(normalizedQuery)
         );
     }, [searchTerm, rooms]);
 

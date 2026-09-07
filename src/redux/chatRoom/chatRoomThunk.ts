@@ -318,9 +318,24 @@ export const fetchPromotedRoomsPaginatedThunk = createAsyncThunk<
     }
 );
 
+interface FetchTopReactedMessagesParams {
+    roomId: number;
+    page?: number;
+    size?: number;
+    period?: TopReactedPeriodEnum;
+}
+
+export const getTopReactedMessagesRequestKey = ({
+    roomId,
+    page = 0,
+    size = 10,
+    period = TopReactedPeriodEnum.ALL_TIME,
+}: FetchTopReactedMessagesParams) => `${roomId}:${page}:${size}:${period}`;
+
 export const fetchTopReactedMessagesThunk = createAsyncThunk<
     PaginatedResponse<Message>,
-    { roomId: number; page?: number; size?: number; period?: TopReactedPeriodEnum }>(
+    FetchTopReactedMessagesParams,
+    { state: RootState }>(
     "chat/fetchTopReactedMessages",
     async ({roomId, page = 0, size = 10, period = TopReactedPeriodEnum.ALL_TIME}, {rejectWithValue}) => {
         try {
@@ -328,6 +343,15 @@ export const fetchTopReactedMessagesThunk = createAsyncThunk<
         } catch (err: any) {
             return rejectWithValue(err.response?.data || err.message);
         }
+    },
+    {
+        condition: (params, {getState}) => {
+            const {topReactedMessagesRequestId, topReactedMessagesRequestKey} = getState().chatRoom;
+            // Skip duplicate in-flight requests from Strict Mode effect replays
+            // or polling; a different room/page/period can load immediately.
+            return !topReactedMessagesRequestId
+                || topReactedMessagesRequestKey !== getTopReactedMessagesRequestKey(params);
+        },
     }
 );
 
