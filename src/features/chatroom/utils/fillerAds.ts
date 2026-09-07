@@ -87,7 +87,7 @@ export function buildFillerAdMessage(): Message {
     return {
         id: creative.id,
         content,
-        createdAt: new Date(),
+        createdAt: new Date().toISOString(),
         senderId: FILLER_SENDER_ID,
         senderUsername: creative.brandName,
         senderRole: Role.USER,

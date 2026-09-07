@@ -134,7 +134,7 @@ function createPreviewMessage({
                               }: {
     id: number;
     content: string;
-    createdAt: Date;
+    createdAt: string;
     senderId: number;
     senderUsername: string;
     senderRole: Role;
@@ -142,7 +142,7 @@ function createPreviewMessage({
     color: string;
     chatRoomId: number;
     chatRoomName: string;
-    editedAt?: Date;
+    editedAt?: string;
 }): Message {
     return {
         id,
@@ -164,7 +164,7 @@ function createPreviewMessage({
 }
 
 export function createConversation(advertMessage: Message): Message[] {
-    const adTimestamp = advertMessage.createdAt.getTime();
+    const adTimestamp = new Date(advertMessage.createdAt).getTime();
 
     return [
         createPreviewMessage({
@@ -175,7 +175,7 @@ export function createConversation(advertMessage: Message): Message[] {
             senderCountryCode: "NL",
             chatRoomId: advertMessage.chatRoomId,
             chatRoomName: advertMessage.chatRoomName,
-            createdAt: new Date(adTimestamp - 6 * 60 * 1000),
+            createdAt: new Date(adTimestamp - 6 * 60 * 1000).toISOString(),
             content: "heyy have you heard that you can also advertise on allchat?",
             color: "#F8FAFC",
         }),
@@ -187,7 +187,7 @@ export function createConversation(advertMessage: Message): Message[] {
             senderCountryCode: "ES",
             chatRoomId: advertMessage.chatRoomId,
             chatRoomName: advertMessage.chatRoomName,
-            createdAt: new Date(adTimestamp - 3 * 60 * 1000),
+            createdAt: new Date(adTimestamp - 3 * 60 * 1000).toISOString(),
             content: "yeah! i saw some ads earlier today, looks super cool!",
             color: "#EEF2FF",
         }),

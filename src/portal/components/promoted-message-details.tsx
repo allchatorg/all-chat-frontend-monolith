@@ -73,7 +73,7 @@ export default function PromotedMessageDetails({data, className, isAdmin = false
     const previewMessage: Message = {
         id: data.messageId,
         content: data.messageContent,
-        createdAt: new Date(data.messageCreatedAt),
+        createdAt: data.messageCreatedAt,
         senderId: data.userId ?? 0,
         senderUsername: data.messageSenderUsername,
         senderRole: Role.USER,

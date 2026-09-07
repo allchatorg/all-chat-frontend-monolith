@@ -27,7 +27,8 @@ export interface PromotionInfo {
 export interface Message {
     id: number;
     content: string;
-    createdAt: Date;
+    // Keep API timestamps serializable in Redux; parse only when formatting or comparing.
+    createdAt: string;
     senderId: number;
     senderUsername: string;
     senderRole: Role;
@@ -36,7 +37,7 @@ export interface Message {
     chatRoomId: number;
     chatRoomName: string;
     bannedUser: boolean;
-    editedAt?: Date;
+    editedAt?: string;
     color: string;
     deleted: boolean;
     attachments: Attachment[];

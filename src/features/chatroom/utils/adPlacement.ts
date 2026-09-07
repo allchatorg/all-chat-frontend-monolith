@@ -71,7 +71,7 @@ export function buildAdvertMessage(ad: Message, chatRoom: AdChatRoom, placement:
         ...ad,
         chatRoomId: chatRoom.id,
         chatRoomName: chatRoom.name,
-        createdAt: new Date(placement.placedAt),
+        createdAt: placement.placedAt,
         advert: true,
     };
 }

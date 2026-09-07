@@ -8,7 +8,7 @@ export interface User {
     username: string;
     email?: string | null;
     phoneNumber?: string | null;
-    phoneNumberVerificationDate?: Date;
+    phoneNumberVerificationDate?: string;
     isOver18: boolean;
     claimed: boolean;
     banned: boolean;

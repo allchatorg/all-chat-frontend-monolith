@@ -79,7 +79,7 @@ export function buildPreviewMessages(ad: PreviewAdData): Message[] {
     const advertMessage: Message = {
         id: DEFAULT_MESSAGE_ID,
         content: ad.content?.trim() ?? "",
-        createdAt: new Date(),
+        createdAt: new Date().toISOString(),
         senderId: DEFAULT_SENDER_ID,
         senderUsername: ad.brandName?.trim() || DEFAULT_SENDER_USERNAME,
         senderRole: ad.senderRole ? Role[ad.senderRole] : Role.USER,

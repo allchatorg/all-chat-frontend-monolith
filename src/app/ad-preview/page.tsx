@@ -152,14 +152,14 @@ function parseBooleanLike(value: unknown): boolean | undefined {
     return undefined;
 }
 
-function parseDateLike(value: unknown): Date | undefined {
+function parseDateLike(value: unknown): string | undefined {
     if (value instanceof Date && !Number.isNaN(value.getTime())) {
-        return value;
+        return value.toISOString();
     }
 
     if (typeof value === "number" && Number.isFinite(value)) {
         const date = new Date(value);
-        return Number.isNaN(date.getTime()) ? undefined : date;
+        return Number.isNaN(date.getTime()) ? undefined : date.toISOString();
     }
 
     if (typeof value !== "string") {
@@ -172,7 +172,7 @@ function parseDateLike(value: unknown): Date | undefined {
     }
 
     const date = /^\d+$/.test(trimmed) ? new Date(Number(trimmed)) : new Date(trimmed);
-    return Number.isNaN(date.getTime()) ? undefined : date;
+    return Number.isNaN(date.getTime()) ? undefined : date.toISOString();
 }
 
 function parseRoleLike(value: unknown): Role | undefined {
@@ -481,7 +481,7 @@ function buildPreviewData(params: SearchParamsLike): PreviewBuildResult {
             createdAt:
                 parseDateLike(getParamValue(params, ["createdAt"])) ??
                 parseDateLike(getObjectValue(messageRecord, "createdAt")) ??
-                new Date(),
+                new Date().toISOString(),
             senderId:
                 parseNumberLike(getParamValue(params, ["senderId"])) ??
                 parseNumberLike(getObjectValue(messageRecord, "senderId")) ??
