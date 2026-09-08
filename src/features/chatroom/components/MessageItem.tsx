@@ -4,6 +4,7 @@ import {setActiveRightSidebar} from "@/redux/settings/settingsSlice";
 import {VideoLinkPreview} from "@/features/chatroom/components/VideoLinkPreview";
 import {FormattedMessageText} from "@/features/chatroom/components/FormattedMessageText";
 import {extractFormattedUrls} from "@/features/chatroom/utils/messageMarkers";
+import {getMessageTextColor} from "@/features/chatroom/utils/messageTextColor";
 import {Message} from "@/models/message";
 import {useAttachmentHook} from "@/lib/hooks/useAttachmentHook";
 import {getVideoEmbed, isSupportedVideoPlatform} from "@/lib/utils/urlThumbnailExtractionUtils";
@@ -124,17 +125,6 @@ const MessageItem: React.FC<{
                 onDelete={interactionsDisabled ? undefined : (!message.deleted && message.content ? onRemoveAttachment : undefined)}
             />
         );
-    };
-
-    const getTextColor = (bgColor: string): "black" | "white" => {
-        const hex = bgColor.replace("#", "");
-        const r = parseInt(hex.substring(0, 2), 16);
-        const g = parseInt(hex.substring(2, 4), 16);
-        const b = parseInt(hex.substring(4, 6), 16);
-
-        const brightness = (r * 299 + g * 587 + b * 114) / 1000;
-
-        return brightness > 128 ? "black" : "white";
     };
 
     const BannedUserBadge = () => (
@@ -311,11 +301,12 @@ const MessageItem: React.FC<{
                         )}
                         style={{
                             backgroundColor: message.color,
-                            color: getTextColor(message.color),
+                            color: getMessageTextColor(message.color),
                         }}
                     >
                         <div className="text-sm font-normal whitespace-pre-wrap [word-break:break-word] min-w-0">
-                            <FormattedMessageText text={message.content} interactionsDisabled={interactionsDisabled}/>
+                            <FormattedMessageText text={message.content} interactionsDisabled={interactionsDisabled}
+                                                  backgroundColor={message.color}/>
                         </div>
                     </div>
 

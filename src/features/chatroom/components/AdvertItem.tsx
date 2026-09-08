@@ -12,6 +12,7 @@ import {selectClickedAdIds, selectClickedAdLinkKeys} from "@/redux/ads/adsSelect
 import {registerAdClick, registerAdLinkClick} from "@/api/ads/adsAPI";
 import {isFillerAdId} from "@/features/chatroom/utils/fillerAds";
 import {FormattedMessageText} from "@/features/chatroom/components/FormattedMessageText";
+import {getMessageTextColor} from "@/features/chatroom/utils/messageTextColor";
 
 const AdvertMessageItem: React.FC<{
     message: Message;
@@ -76,17 +77,6 @@ const AdvertMessageItem: React.FC<{
         );
     };
 
-    const getTextColor = (bgColor: string): "black" | "white" => {
-        const hex = bgColor.replace("#", "");
-        const r = parseInt(hex.substring(0, 2), 16);
-        const g = parseInt(hex.substring(2, 4), 16);
-        const b = parseInt(hex.substring(4, 6), 16);
-
-        const brightness = (r * 299 + g * 587 + b * 114) / 1000;
-
-        return brightness > 128 ? "black" : "white";
-    };
-
     return (
         <div className={clsx("flex flex-col justify-items-center items-start pl-4 max-w-full min-w-0")}>
             {message.attachments?.map((attachment: Attachment) => (
@@ -104,7 +94,7 @@ const AdvertMessageItem: React.FC<{
                         )}
                         style={{
                             backgroundColor: message.color,
-                            color: getTextColor(message.color),
+                            color: getMessageTextColor(message.color),
                         }}
                     >
                         <div
@@ -113,6 +103,7 @@ const AdvertMessageItem: React.FC<{
                                 text={message.content}
                                 interactionsDisabled={interactionsDisabled}
                                 onLinkClick={handleLinkClick}
+                                backgroundColor={message.color}
                             />
                         </div>
                     </div>

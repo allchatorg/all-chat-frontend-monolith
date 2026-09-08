@@ -145,6 +145,7 @@ html, body {
     :root {
         --background: 0 0% 100%;
         --foreground: 222.2 84% 4.9%;
+        --message-greentext: #166534;
         --card: 0 0% 100%;
         --card-foreground: 222.2 84% 4.9%;
         --popover: 0 0% 100%;
@@ -225,6 +226,7 @@ html, body {
     }
 
     .dark {
+        --message-greentext: #86efac;
         --background: 222.2 84% 4.9%;
         --foreground: 210 40% 98%;
         --card: 222.2 84% 4.9%;
@@ -1202,6 +1204,11 @@ html, body {
 /* Add touch-action to prevent browser's native pull-to-refresh from interfering */
 .overflow-y-auto {
     touch-action: pan-y;
+}
+
+/* Shared by rendered messages and the composer's ephemeral decorations. */
+.message-greentext {
+    color: var(--message-greentext);
 }
 
 /* Tiptap composer placeholder (decoration rendered by the Placeholder extension) */

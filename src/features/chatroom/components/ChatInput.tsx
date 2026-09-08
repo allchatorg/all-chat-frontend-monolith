@@ -74,11 +74,11 @@ const validateMessage = ({
     if (isUploading) return {valid: false, reason: "Uploading attachment..."};
     if (trimmed === "" && !uploadedAttachment)
         return {valid: false, reason: "Cannot send an empty message"};
-    if (stripMarkers(trimmed).length > maxMessageLength)
+    if (stripMarkers(inputText).length > maxMessageLength)
         return {valid: false, reason: "Message exceeds maximum length"};
-    if (trimmed.length > MAX_RAW_MESSAGE_LENGTH)
+    if (inputText.length > MAX_RAW_MESSAGE_LENGTH)
         return {valid: false, reason: "Message formatting is too large"};
-    if (editingMessage && trimmed === (editingMessage.content ?? "").trim())
+    if (editingMessage && inputText === (editingMessage.content ?? ""))
         return {valid: false, reason: "No changes detected"};
 
     return {valid: true};
@@ -343,7 +343,9 @@ const ChatInput: React.FC<ChatInputProps> = ({
             ? {...uploadedAttachment, tags: selectedTags}
             : undefined;
 
-        onSendMessage(inputText.trim(), attachmentToSend, editingMessage?.id);
+        // Leading spaces and blank lines affect greentext. Preserve nonempty
+        // content exactly as previewed; attachment-only messages stay empty.
+        onSendMessage(inputText.trim() ? inputText : "", attachmentToSend, editingMessage?.id);
 
         stopDictation();
         editor?.commands.clearContent();
@@ -388,7 +390,7 @@ const ChatInput: React.FC<ChatInputProps> = ({
             return;
         }
 
-        onEditMessage(inputText.trim());
+        onEditMessage(inputText.trim() ? inputText : "");
         onCancelEdit();
     };
 
@@ -559,15 +561,15 @@ const ChatInput: React.FC<ChatInputProps> = ({
         ? messageSendingDisabledReason
         : disabledReason;
     const trimmedInput = inputText.trim();
-    const originalContent = editingMessage?.content?.trim() ?? "";
+    const originalContent = editingMessage?.content ?? "";
     // The editor state is canonical marker text; round-trip the stored original
     // so legacy strings that serialize differently don't fake a change.
     const canonicalOriginal = isEditing
-        ? docToMarkers(markersToDoc(editingMessage?.content ?? "")).trim()
+        ? docToMarkers(markersToDoc(editingMessage?.content ?? ""))
         : "";
     const hasAttachment = !!uploadedAttachment;
     const hasContent = trimmedInput.length > 0;
-    const isUnchanged = isEditing && (trimmedInput === originalContent || trimmedInput === canonicalOriginal);
+    const isUnchanged = isEditing && (inputText === originalContent || inputText === canonicalOriginal);
     const disableConfirmEdit =
         (!hasContent && !hasAttachment) || !isConnected || isOverLimit || isUploading || isUnchanged;
 
@@ -785,6 +787,9 @@ const ChatInput: React.FC<ChatInputProps> = ({
                         editingMessage
                             ? "Editing mode — press Enter to save, or Esc to cancel"
                             : "Press Enter to send, Shift+Enter for new line"
+                    )}
+                    {canUseTextInput && (
+                        <span className="block">Start a line with &gt; for greentext.</span>
                     )}
                     {!isConnected && ` • ${disabledReason || "Connecting to chat..."}`}
                     {!isEditing && messageSendingBlocked && ` • ${messageSendingDisabledReason}`}

@@ -5,6 +5,7 @@ import {Placeholder} from "@tiptap/extensions";
 import {Slice} from "@tiptap/pm/model";
 import {cn} from "@/lib/utils";
 import {docToMarkers} from "@/features/chatroom/utils/messageMarkers";
+import {Greentext} from "@/features/chatroom/utils/greentextExtension";
 
 // Transactions dispatched by the dictation helpers carry this meta flag so
 // ChatInput can tell user edits (which commit the interim tail) apart from
@@ -20,7 +21,7 @@ interface ChatComposerEditorProps {
     onReady: (editor: Editor) => void;
 }
 
-// WYSIWYG replacement for the composer textarea: bold/italic only. The rich
+// WYSIWYG replacement for the composer textarea with bold, italic and greentext. The rich
 // document never leaves this component — every update is serialized to the
 // **bold**/*italic* marker string that the rest of the app (and the backend)
 // works with.
@@ -63,6 +64,7 @@ export const ChatComposerEditor: React.FC<ChatComposerEditorProps> = ({
             Placeholder.configure({
                 placeholder: () => placeholderRef.current,
             }),
+            Greentext,
         ],
         enableInputRules: false,
         enablePasteRules: false,

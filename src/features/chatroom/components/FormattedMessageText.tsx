@@ -2,16 +2,19 @@ import {tokenize} from "@/features/chatroom/utils/messageMarkers";
 import {useDialog} from "@/components/providers/DialogProvider";
 import {isTrustedDomain} from "@/features/chatroom/utils/externalLinks";
 import ExternalLinkWarning from "@/features/chatroom/components/ExternalLinkWarning";
+import {getGreentextColor} from "@/features/chatroom/utils/greentextColor";
 
-// Renders message content with **bold** / *italic* markers applied and URLs
+// Renders message content with >greentext, **bold** / *italic* markers and URLs
 // linkified. Replaces the old plain linkifyText helper in MessageItem.
 // Links to domains outside the trusted list open a "Leaving allchat" dialog first.
 export const FormattedMessageText: React.FC<{
     text: string,
     interactionsDisabled?: boolean,
     onLinkClick?: (url: string) => void,
-}> = ({text, interactionsDisabled = false, onLinkClick}) => {
+    backgroundColor?: string,
+}> = ({text, interactionsDisabled = false, onLinkClick, backgroundColor}) => {
     const {open, close} = useDialog();
+    const greentextColor = backgroundColor ? getGreentextColor(backgroundColor) : undefined;
 
     return (
         <>
@@ -42,7 +45,15 @@ export const FormattedMessageText: React.FC<{
                 if (segment.italic) node = <em>{node}</em>;
                 if (segment.bold) node = <strong>{node}</strong>;
 
-                return <span key={index}>{node}</span>;
+                return (
+                    <span
+                        key={index}
+                        className={segment.greentext ? "message-greentext" : undefined}
+                        style={segment.greentext && greentextColor ? {color: greentextColor} : undefined}
+                    >
+                        {node}
+                    </span>
+                );
             })}
         </>
     );

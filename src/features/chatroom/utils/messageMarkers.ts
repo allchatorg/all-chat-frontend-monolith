@@ -1,5 +1,5 @@
 // Parser/serializer for the chat formatting wire format: **bold**, *italic*,
-// ***bold italic***. Message content is stored on the backend as this plain
+// ***bold italic***, and >greentext lines. Message content is stored on the backend as this plain
 // marker string (max 500 chars); the composer works on rich text and converts
 // through these helpers. Markers never pair across newlines.
 
@@ -8,6 +8,13 @@ export interface Segment {
     bold: boolean;
     italic: boolean;
     isUrl: boolean;
+    greentext: boolean;
+}
+
+// Check visible text so a leading > stays green when bold/italic is toggled.
+// The pointer remains literal content, including in previews and character counts.
+export function isGreentextLine(line: string): boolean {
+    return line.startsWith(">");
 }
 
 // Must stay identical to the URL regex previously used by linkifyText/extractUrls.
@@ -74,7 +81,7 @@ function tokenizeLine(line: string): Segment[] {
         if (last && !isUrl && !last.isUrl && last.bold === bold && last.italic === italic) {
             last.text += text;
         } else {
-            segments.push({ text, bold, italic, isUrl });
+            segments.push({ text, bold, italic, isUrl, greentext: false });
         }
     };
 
@@ -113,18 +120,21 @@ function tokenizeLine(line: string): Segment[] {
         i = run.start + run.length;
     }
 
+    if (isGreentextLine(segments[0]?.text ?? "")) {
+        segments.forEach((segment) => { segment.greentext = true; });
+    }
     return segments;
 }
 
 export function tokenize(text: string): Segment[] {
     const segments: Segment[] = [];
-    const lines = text.split("\n");
+    const lines = text.split(/\r\n?|\n/);
     lines.forEach((line, idx) => {
         segments.push(...tokenizeLine(line));
         if (idx < lines.length - 1) {
             const last = segments[segments.length - 1];
-            if (last && !last.isUrl && !last.bold && !last.italic) last.text += "\n";
-            else segments.push({ text: "\n", bold: false, italic: false, isUrl: false });
+            if (last && !last.isUrl && !last.bold && !last.italic && !last.greentext) last.text += "\n";
+            else segments.push({ text: "\n", bold: false, italic: false, isUrl: false, greentext: false });
         }
     });
     return segments;
@@ -231,7 +241,7 @@ export function docToMarkers(doc: PmNode): string {
 }
 
 export function markersToDoc(text: string): PmNode {
-    const paragraphs = text.split("\n").map((line): PmNode => {
+    const paragraphs = text.split(/\r\n?|\n/).map((line): PmNode => {
         const content = tokenizeLine(line)
             .filter((s) => s.text)
             .map((s): PmNode => {

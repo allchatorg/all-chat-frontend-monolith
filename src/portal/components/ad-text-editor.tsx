@@ -9,6 +9,7 @@ import {Bold, Italic} from "lucide-react";
 import {Button} from "@ads/components/ui/button";
 import {cn} from "@ads/lib/utils";
 import {docToMarkers, markersToDoc} from "@/features/chatroom/utils/messageMarkers";
+import {Greentext} from "@/features/chatroom/utils/greentextExtension";
 
 interface AdTextEditorProps {
     value: string;
@@ -16,7 +17,7 @@ interface AdTextEditorProps {
     placeholder: string;
 }
 
-// WYSIWYG field for ad text content: bold/italic only, same wire format as
+// WYSIWYG field for ad text content: bold, italic and greentext, same wire format as
 // chat messages. The rich document never leaves this component — every update
 // is serialized to the **bold**/*italic* marker string stored in textContent.
 export default function AdTextEditor({value, onChange, placeholder}: AdTextEditorProps) {
@@ -48,6 +49,7 @@ export default function AdTextEditor({value, onChange, placeholder}: AdTextEdito
             Placeholder.configure({
                 placeholder,
             }),
+            Greentext,
         ],
         content: markersToDoc(initialValueRef.current),
         enableInputRules: false,
@@ -120,6 +122,7 @@ export default function AdTextEditor({value, onChange, placeholder}: AdTextEdito
                 ))}
             </div>
             <EditorContent editor={editor}/>
+            <p className="text-xs text-muted-foreground">Start a line with &gt; for greentext.</p>
         </div>
     );
 }
