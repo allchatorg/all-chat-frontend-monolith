@@ -22,6 +22,7 @@ export function RoomTabContent({
                                    onToggleSound,
                                    style,
                                    isDragging,
+                                   isSortable = true,
                                    innerRef,
                                    attributes,
                                    listeners
@@ -34,6 +35,7 @@ export function RoomTabContent({
     onToggleSound: (e: MouseEvent<HTMLButtonElement>) => void;
     style?: React.CSSProperties;
     isDragging?: boolean;
+    isSortable?: boolean;
     innerRef?: (node: HTMLElement | null) => void;
     attributes?: any;
     listeners?: any;
@@ -116,12 +118,21 @@ export function RoomTabContent({
         <div
             ref={innerRef}
             style={style}
+            role="button"
+            tabIndex={0}
+            onKeyDown={(event) => {
+                if (event.target === event.currentTarget && (event.key === "Enter" || event.key === " ")) {
+                    event.preventDefault();
+                    onTabClick();
+                }
+            }}
             {...attributes}
             {...listeners}
             className={`
-                mt-4 ml-1 group relative flex flex-col items-center justify-center min-w-0 shrink-0 cursor-grab active:cursor-grabbing
+                mt-4 ml-1 group relative flex flex-col items-center justify-center min-w-0 shrink-0
                 gap-1 whitespace-nowrap px-4 py-0 transition-all duration-200
                 room-tab rounded-t-xl
+                ${isSortable ? 'cursor-grab active:cursor-grabbing' : 'cursor-pointer'}
                 ${isDragging ? 'opacity-30' : 'opacity-100'}
                 ${tabAccentClass}
                 ${tabStateClass}
@@ -239,7 +250,7 @@ export function RoomTabItem(props: Parameters<typeof RoomTabContent>[0] & { inde
         transform,
         transition,
         isDragging
-    } = useSortable({id: props.room.chatRoomId});
+    } = useSortable({id: props.room.chatRoomId, disabled: props.isSortable === false});
 
     const style = {
         transform: CSS.Translate.toString(transform),
@@ -251,8 +262,8 @@ export function RoomTabItem(props: Parameters<typeof RoomTabContent>[0] & { inde
             {...props}
             innerRef={setNodeRef}
             style={style}
-            attributes={attributes}
-            listeners={listeners}
+            attributes={props.isSortable === false ? undefined : attributes}
+            listeners={props.isSortable === false ? undefined : listeners}
             isDragging={isDragging}
         />
     );

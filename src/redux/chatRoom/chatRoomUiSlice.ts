@@ -9,8 +9,11 @@ import {
     leaveChatRoomThunk
 } from "@/redux/chatRoom/chatRoomThunk";
 
+export type ChatRoomTabSortMode = 'manual' | 'alphabetical';
+
 interface ChatRoomUiState {
     chatroomOrder: number[];
+    chatRoomTabSortMode: ChatRoomTabSortMode;
     chatRoomScrollPositions: Record<number, number>;
     chatRoomsTopMostVisibleMessageId: Record<number, number>;
     jumpToMessageId?: number | null;
@@ -26,6 +29,7 @@ interface ChatRoomUiState {
 
 const initialState: ChatRoomUiState = {
     chatroomOrder: [],
+    chatRoomTabSortMode: 'manual',
     chatRoomScrollPositions: {},
     chatRoomsTopMostVisibleMessageId: {},
     jumpToMessageId: null,
@@ -42,6 +46,9 @@ const chatRoomUiSlice = createSlice({
     reducers: {
         setChatroomOrder(state, action: PayloadAction<number[]>) {
             state.chatroomOrder = action.payload;
+        },
+        setChatRoomTabSortMode(state, action: PayloadAction<ChatRoomTabSortMode>) {
+            state.chatRoomTabSortMode = action.payload;
         },
         setChatRoomScrollPosition(
             state,
@@ -141,6 +148,7 @@ const chatRoomUiSlice = createSlice({
 
 export const {
     setChatroomOrder,
+    setChatRoomTabSortMode,
     setChatRoomScrollPosition,
     setChatRoomTopMostVisibleMessageId,
     setJumpToMessageId,

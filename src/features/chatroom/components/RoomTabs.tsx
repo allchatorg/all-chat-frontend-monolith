@@ -3,6 +3,7 @@ import {UserChatRoom} from "@/models/UserChatRoom";
 import {RoomTabContent, RoomTabItem} from "@/features/chatroom/components/RoomTabItem";
 import {useChatRoomSoundSettings} from "@/lib/hooks/useChatRoomSoundSettings";
 import {ScrollArea, ScrollBar} from "@/components/ui/scroll-area";
+import type {ChatRoomTabSortMode} from "@/redux/chatRoom/chatRoomUiSlice";
 import {
     closestCenter,
     DndContext,
@@ -28,7 +29,8 @@ interface RoomTabsProps {
     onSelectUserChatRoom: (userChatRoom: UserChatRoom) => void,
     onCloseUserChatRoomTab: (userChatRoom: UserChatRoom) => void,
     onOpenCreateRoom?: () => void,
-    onReorderRooms?: (rooms: UserChatRoom[]) => void
+    onReorderRooms?: (rooms: UserChatRoom[]) => void,
+    sortMode: ChatRoomTabSortMode
 }
 
 export default function RoomTabs({
@@ -37,11 +39,13 @@ export default function RoomTabs({
                                      onSelectUserChatRoom,
                                      onCloseUserChatRoomTab,
                                      onOpenCreateRoom,
-                                     onReorderRooms
+                                     onReorderRooms,
+                                     sortMode
                                  }: RoomTabsProps) {
 
     const {getMuted, toggleSound} = useChatRoomSoundSettings();
     const [activeId, setActiveId] = useState<number | null>(null);
+    const canReorder = sortMode === "manual" && !!onReorderRooms;
 
     const sensors = useSensors(
         useSensor(MouseSensor, {
@@ -68,7 +72,7 @@ export default function RoomTabs({
     const handleDragEnd = (event: DragEndEvent) => {
         const {active, over} = event;
 
-        if (over && active.id !== over.id) {
+        if (canReorder && over && active.id !== over.id) {
             const oldIndex = rooms.findIndex((room) => room.chatRoomId === active.id);
             const newIndex = rooms.findIndex((room) => room.chatRoomId === over.id);
 
@@ -86,7 +90,7 @@ export default function RoomTabs({
         );
     }
 
-    const activeRoom = activeId ? rooms.find(r => r.chatRoomId === activeId) : null;
+    const activeRoom = activeId !== null ? rooms.find(r => r.chatRoomId === activeId) : null;
 
     return (
         <ScrollArea
@@ -96,6 +100,7 @@ export default function RoomTabs({
                 collisionDetection={closestCenter}
                 onDragStart={handleDragStart}
                 onDragEnd={handleDragEnd}
+                onDragCancel={() => setActiveId(null)}
             >
                 <SortableContext
                     items={rooms.map((r) => r.chatRoomId)}
@@ -109,6 +114,7 @@ export default function RoomTabs({
                                     id={selectedUserChatRoom?.chatRoomId}
                                     room={room}
                                     index={index}
+                                    isSortable={canReorder}
                                     isSoundOn={!getMuted(room.chatRoomId)}
                                     onTabClick={() => onSelectUserChatRoom(room)}
                                     onToggleSound={(e) => {

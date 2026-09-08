@@ -6,7 +6,10 @@ import {CardTitle} from "@/components/ui/card";
 import {
     Archive,
     ArchiveRestore,
+    ArrowDownAZ,
+    Check,
     Flame,
+    GripHorizontal,
     Loader2,
     Megaphone,
     MessageSquare,
@@ -22,7 +25,20 @@ import {useTopReactedSidebar} from "@/lib/hooks/useTopReactedSidebar";
 import {usePromotedMessagesSidebar} from "@/lib/hooks/usePromotedMessagesSidebar";
 import {ChatRoomNoiseLevelEnum} from "@/models/ChatRoomNoiseLevelEnum";
 import {useIsMobile} from "@/lib/hooks/useIsMobile";
-import {DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger} from "@/components/ui/dropdown-menu";
+import {
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuLabel,
+    DropdownMenuPortal,
+    DropdownMenuRadioGroup,
+    DropdownMenuRadioItem,
+    DropdownMenuSeparator,
+    DropdownMenuSub,
+    DropdownMenuSubContent,
+    DropdownMenuSubTrigger,
+    DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import {useRoleAccess} from "@/lib/hooks/useRoleAccess";
 import {useDialog} from "@/components/providers/DialogProvider";
 import {ConfirmModal} from "@/components/ConfirmModal";
@@ -35,6 +51,10 @@ import {toast} from "sonner";
 import {Role} from "@/models/Role";
 import PromoteRoomModal from "@/features/chatroom/components/PromoteRoomModal";
 import {ClaimAccountPrompt} from "@/features/auth/components/ClaimAccountPrompt";
+import {useDispatch, useSelector} from "react-redux";
+import type {AppDispatch} from "@/redux/store";
+import {selectChatRoomTabSortMode} from "@/redux/chatRoom/chatRoomSelectors";
+import {setChatRoomTabSortMode} from "@/redux/chatRoom/chatRoomUiSlice";
 
 interface ChatSectionHeaderProps {
     chatRoomId?: number;
@@ -71,6 +91,8 @@ const ChatSectionHeader: React.FC<ChatSectionHeaderProps> = ({
                                                                  onTogglePopularitySidebar,
                                                              }) => {
     const isMobile = useIsMobile();
+    const dispatch = useDispatch<AppDispatch>();
+    const roomTabSortMode = useSelector(selectChatRoomTabSortMode);
     const [isExpanded, setIsExpanded] = useState(false);
     const noiseIndicator = getNoiseIndicator(noiseLevel);
     const {isAdmin, isStaffMember, currentRole} = useRoleAccess();
@@ -194,15 +216,46 @@ const ChatSectionHeader: React.FC<ChatSectionHeaderProps> = ({
         }
     };
 
-    const renderArchiveMenuButton = (
+    const roomTabOrderOptions = (
+        <DropdownMenuRadioGroup
+            aria-label="Room tab order"
+            value={roomTabSortMode}
+            onValueChange={(value) => {
+                if (value === "manual" || value === "alphabetical") {
+                    dispatch(setChatRoomTabSortMode(value));
+                }
+            }}
+        >
+            <DropdownMenuRadioItem
+                value="manual"
+                indicator={<Check className="h-4 w-4" aria-hidden="true"/>}
+                className="cursor-pointer gap-2 py-2.5 focus:bg-white/30 dark:focus:bg-white/10"
+            >
+                <GripHorizontal className="h-4 w-4 shrink-0 text-muted-foreground" aria-hidden="true"/>
+                <span className="flex min-w-0 flex-col gap-0.5">
+                    <span>Manual</span>
+                    <span className="text-xs text-muted-foreground">Drag tabs to rearrange</span>
+                </span>
+            </DropdownMenuRadioItem>
+            <DropdownMenuRadioItem
+                value="alphabetical"
+                indicator={<Check className="h-4 w-4" aria-hidden="true"/>}
+                className="cursor-pointer gap-2 py-2.5 focus:bg-white/30 dark:focus:bg-white/10"
+            >
+                <ArrowDownAZ className="h-4 w-4 shrink-0 text-muted-foreground" aria-hidden="true"/>
+                <span className="flex min-w-0 flex-col gap-0.5">
+                    <span>Alphabetical (A–Z)</span>
+                    <span className="text-xs text-muted-foreground">Sort by room name</span>
+                </span>
+            </DropdownMenuRadioItem>
+        </DropdownMenuRadioGroup>
+    );
+
+    const renderChatOptionsMenu = (
         buttonClassName: string,
         iconClassName: string,
         variant: "ghost" | "outline" | "secondary"
     ) => {
-        if (!canManageArchive) {
-            return null;
-        }
-
         return (
             <DropdownMenu modal={false}>
                 <DropdownMenuTrigger asChild>
@@ -210,22 +263,49 @@ const ChatSectionHeader: React.FC<ChatSectionHeaderProps> = ({
                         variant={variant}
                         size="sm"
                         className={buttonClassName}
-                        aria-label={isArchived ? "Unarchive room options" : "Archive room options"}
-                        title={isArchived ? "Unarchive room options" : "Archive room options"}
-                        disabled={actionLoading}
+                        aria-label="Chat options"
+                        title="Chat options"
                     >
                         {actionLoading ? <Loader2 className={`${iconClassName} animate-spin`}/> :
                             <MoreVertical className={iconClassName}/>}
                     </Button>
                 </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="glass-popover w-48">
-                    <DropdownMenuItem className="justify-between focus:bg-white/30 dark:focus:bg-white/10"
-                                      onSelect={handleArchiveToggle}>
-                        {isArchived ? "Unarchive room" : "Archive room"}
-                        {isArchived
-                            ? <ArchiveRestore className="h-4 w-4 shrink-0"/>
-                            : <Archive className="h-4 w-4 shrink-0"/>}
-                    </DropdownMenuItem>
+                <DropdownMenuContent
+                    align="end"
+                    collisionPadding={8}
+                    className={`glass-popover max-w-[calc(100vw-1rem)] ${isMobile ? "w-60" : "w-52"}`}
+                >
+                    {isMobile ? (
+                        <>
+                            <DropdownMenuLabel className="text-xs text-muted-foreground">Room tab order</DropdownMenuLabel>
+                            {roomTabOrderOptions}
+                        </>
+                    ) : (
+                        <DropdownMenuSub>
+                            <DropdownMenuSubTrigger className="cursor-pointer focus:bg-white/30 data-[state=open]:bg-white/30 dark:focus:bg-white/10 dark:data-[state=open]:bg-white/10">
+                                <ArrowDownAZ aria-hidden="true"/>
+                                Room tab order
+                            </DropdownMenuSubTrigger>
+                            <DropdownMenuPortal>
+                                <DropdownMenuSubContent className="glass-popover w-56" collisionPadding={8}>
+                                    {roomTabOrderOptions}
+                                </DropdownMenuSubContent>
+                            </DropdownMenuPortal>
+                        </DropdownMenuSub>
+                    )}
+                    {canManageArchive && (
+                        <>
+                            <DropdownMenuSeparator/>
+                            <DropdownMenuItem className="justify-between focus:bg-white/30 dark:focus:bg-white/10"
+                                              disabled={actionLoading}
+                                              onSelect={handleArchiveToggle}>
+                                {isArchived ? "Unarchive room" : "Archive room"}
+                                {isArchived
+                                    ? <ArchiveRestore className="h-4 w-4 shrink-0"/>
+                                    : <Archive className="h-4 w-4 shrink-0"/>}
+                            </DropdownMenuItem>
+                        </>
+                    )}
                 </DropdownMenuContent>
             </DropdownMenu>
         );
@@ -293,7 +373,7 @@ const ChatSectionHeader: React.FC<ChatSectionHeaderProps> = ({
                         buttonClassName="glass-control z-10 h-10 w-10 p-2"
                         iconClassName="h-5 w-5"
                     />
-                    {renderArchiveMenuButton("glass-control h-10 w-10 p-0", "h-5 w-5", "outline")}
+                    {renderChatOptionsMenu("glass-control z-10 h-10 w-10 p-2", "h-5 w-5", "outline")}
                 </div>
             </CardTitle>
         );
@@ -301,20 +381,21 @@ const ChatSectionHeader: React.FC<ChatSectionHeaderProps> = ({
 
     // Mobile layout
     return (
-        <CardTitle className="chat-header-floating flex items-center gap-2">
+        <CardTitle className="chat-header-floating flex min-w-0 flex-wrap items-center gap-2">
             {!isExpanded ? (
                 <>
-                    {/* Default view - chatroom name with message count, then buttons on right */}
-                    <div className={`w-3 h-3 shrink-0 rounded-full ${noiseIndicator.color}`}
-                         title={noiseIndicator.title}></div>
-                    <span className="truncate" title={chatRoomName}>{chatRoomName}</span>
-                    <div className="flex shrink-0 items-center gap-1">
-                        <MessageSquare className="h-3.5 w-3.5 text-muted-foreground"/>
-                        <span className="text-sm font-normal text-muted-foreground whitespace-nowrap">
-                            {totalMessages}
-                        </span>
+                    <div className="flex min-w-0 flex-1 basis-32 items-center gap-2">
+                        <div className={`w-3 h-3 shrink-0 rounded-full ${noiseIndicator.color}`}
+                             title={noiseIndicator.title}></div>
+                        <span className="min-w-0 flex-1 truncate" title={chatRoomName}>{chatRoomName}</span>
+                        <div className="flex shrink-0 items-center gap-1">
+                            <MessageSquare className="h-3.5 w-3.5 text-muted-foreground"/>
+                            <span className="text-sm font-normal text-muted-foreground whitespace-nowrap">
+                                {totalMessages}
+                            </span>
+                        </div>
                     </div>
-                    <div className="ml-auto flex items-center gap-1">
+                    <div className="ml-auto flex max-w-full flex-wrap items-center justify-end gap-1 [&>button]:shrink-0">
                         {canPromoteRoom && (
                             <Button
                                 onClick={handlePromoteRoom}
@@ -372,13 +453,13 @@ const ChatSectionHeader: React.FC<ChatSectionHeaderProps> = ({
                         >
                             <Search className="h-4 w-4"/>
                         </Button>
-                        {renderArchiveMenuButton("glass-control h-8 w-8 p-0", "h-4 w-4", "ghost")}
+                        {renderChatOptionsMenu("glass-control h-8 w-8 p-0", "h-4 w-4", "ghost")}
                     </div>
                 </>
             ) : (
                 <>
                     {/* Search view */}
-                    <div className="flex-1 animate-in slide-in-from-right-2 duration-200">
+                    <div className="min-w-0 flex-1 animate-in slide-in-from-right-2 duration-200">
                         <ChatSearchBar/>
                     </div>
                     <Button

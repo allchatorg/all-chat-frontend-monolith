@@ -21,6 +21,7 @@ import {setShowAppBackground} from "@/redux/settings/settingsSlice";
 import {RadioGroup, RadioGroupItem} from "@/components/ui/radio-group";
 import {useChatRoomSoundSettings} from "@/lib/hooks/useChatRoomSoundSettings";
 import {NotificationSoundMode} from "@/models/NotificationSoundMode";
+import {RoomTabOrderSettings} from "@/features/auth/components/RoomTabOrderSettings";
 
 const NOTIFICATION_SOUND_MODE_OPTIONS: {
     mode: NotificationSoundMode;
@@ -217,6 +218,7 @@ export const ProfileSettings = ({isMobile = false}: ProfileSettingsProps) => {
                             Select the theme for the dashboard.
                         </p>
                     </div>
+                    <RoomTabOrderSettings/>
                     <div className="space-y-2">
                         <Label>Notification sounds</Label>
                         <RadioGroup

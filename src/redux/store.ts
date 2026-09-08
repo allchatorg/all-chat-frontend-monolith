@@ -58,7 +58,7 @@ const chatRoomPersistConfig = {
 const chatRoomUiPersistConfig = {
     key: 'chatRoomUi',
     storage,
-    whitelist: ['chatroomOrder']
+    whitelist: ['chatroomOrder', 'chatRoomTabSortMode']
 };
 
 const privateChatPersistConfig = {

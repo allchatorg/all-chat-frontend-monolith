@@ -1,12 +1,13 @@
 "use client";
 import {Button} from "@/components/ui/button";
-import {Book, Bug, LogOut, Megaphone, Menu, MoreVertical, Settings, Shield} from "lucide-react";
+import {ArrowDownAZ, Book, Bug, LogOut, Megaphone, Menu, MoreVertical, Settings, Shield} from "lucide-react";
 import Image from "next/image";
 import {usePathname, useRouter} from "next/navigation";
 import {useDialog} from "./providers/DialogProvider";
 import {useDispatch, useSelector} from "react-redux";
 import {selectUser} from "@/redux/user/userSelectors";
 import {SettingsComponent} from "@/features/auth/components/SettingsComponent";
+import {RoomTabOrderSettings} from "@/features/auth/components/RoomTabOrderSettings";
 import {AppDispatch} from "@/redux/store";
 import {useState} from "react";
 import {useThemedLogo} from "@/lib/hooks/useThemedLogo";
@@ -282,6 +283,19 @@ export function Navbar() {
                                     </Button>
                                 </DropdownMenuTrigger>
                                 <DropdownMenuContent align="end" className="glass-popover">
+                                    {isGuest && (
+                                        <DropdownMenuItem className="cursor-pointer gap-2"
+                                                          onSelect={() => {
+                                                              setTimeout(() => open(
+                                                                  <div className="w-[80vw] max-w-sm">
+                                                                      <RoomTabOrderSettings/>
+                                                                  </div>
+                                                              ), 100);
+                                                          }}>
+                                            <ArrowDownAZ className="h-4 w-4"/>
+                                            Room tab order
+                                        </DropdownMenuItem>
+                                    )}
                                     {!isStaffOrHigher && (
                                         <DropdownMenuItem className="cursor-pointer gap-2 md:hidden"
                                                           onSelect={handleAdvertiseClick}>

@@ -12,15 +12,17 @@ import {useRouter, useSearchParams} from "next/navigation";
 import {Spinner} from "@/components/Spinner";
 import {useDialog} from "@/components/providers/DialogProvider";
 import {CreateChatRoomForm} from "@/features/chatroom/components/CreateChatRoomForm";
-import {useDispatch} from "react-redux";
+import {useDispatch, useSelector} from "react-redux";
 import {AppDispatch} from "@/redux/store";
 import {UserChatRoom} from "@/models/UserChatRoom";
 import {setChatroomOrder} from "@/redux/chatRoom/chatRoomUiSlice";
+import {selectChatRoomTabSortMode} from "@/redux/chatRoom/chatRoomSelectors";
 import ChatSectionSkeleton from "@/features/chatroom/components/ChatSectionSkeleton";
 
 export default function Home() {
     const {open} = useDialog();
     const dispatch = useDispatch<AppDispatch>();
+    const roomTabSortMode = useSelector(selectChatRoomTabSortMode);
     const router = useRouter();
     const searchParams = useSearchParams();
     const chatRoomId = searchParams.get("chatRoomId")
@@ -70,6 +72,7 @@ export default function Home() {
                         onCloseUserChatRoomTab={handleLeaveRoom}
                         onOpenCreateRoom={handleOpenCreateRoomDialog}
                         onReorderRooms={handleReorder}
+                        sortMode={roomTabSortMode}
                     />
                 </div>
                 <div className="min-h-0 flex-1">

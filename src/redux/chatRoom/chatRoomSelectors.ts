@@ -2,12 +2,25 @@ import {RootState} from "@/redux/store";
 import {createSelector} from "@reduxjs/toolkit";
 import {UserChatRoom} from "@/models/UserChatRoom";
 
+export const selectChatRoomTabSortMode = (state: RootState) =>
+    state.chatRoomUi.chatRoomTabSortMode;
+
 export const selectJoinedUserChatRoomsState = createSelector(
     [
         (state: RootState) => state.chatRoom.joinedUserChatRooms,
-        (state: RootState) => state.chatRoomUi.chatroomOrder
+        (state: RootState) => state.chatRoomUi.chatroomOrder,
+        selectChatRoomTabSortMode,
     ],
-    (joinedUserChatRooms, chatroomOrder) => {
+    (joinedUserChatRooms, chatroomOrder, chatRoomTabSortMode) => {
+        if (chatRoomTabSortMode === 'alphabetical') {
+            return [...joinedUserChatRooms].sort((firstRoom, secondRoom) =>
+                firstRoom.chatRoomName.localeCompare(secondRoom.chatRoomName, undefined, {
+                    sensitivity: 'base',
+                    numeric: true,
+                })
+            );
+        }
+
         if (!chatroomOrder || chatroomOrder.length === 0) return joinedUserChatRooms;
 
         const roomsMap = new Map(joinedUserChatRooms.map(room => [room.chatRoomId, room]));
