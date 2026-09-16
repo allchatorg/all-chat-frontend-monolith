@@ -21,13 +21,13 @@ import {
 } from "lucide-react";
 import ChatSearchBar from "@/features/chatroom/components/ChatSearchBar";
 import NotificationSoundModeMenu from "@/components/NotificationSoundModeMenu";
+import {RadioMenuSub} from "@/features/radio/components/RadioMenu";
+import {RadioMenuContent, RadioMenuRoot} from "@/features/radio/components/RadioMenuRoot";
 import {useTopReactedSidebar} from "@/lib/hooks/useTopReactedSidebar";
 import {usePromotedMessagesSidebar} from "@/lib/hooks/usePromotedMessagesSidebar";
 import {ChatRoomNoiseLevelEnum} from "@/models/ChatRoomNoiseLevelEnum";
 import {useIsMobile} from "@/lib/hooks/useIsMobile";
 import {
-    DropdownMenu,
-    DropdownMenuContent,
     DropdownMenuItem,
     DropdownMenuLabel,
     DropdownMenuPortal,
@@ -57,6 +57,7 @@ import {selectChatRoomTabSortMode} from "@/redux/chatRoom/chatRoomSelectors";
 import {setChatRoomTabSortMode} from "@/redux/chatRoom/chatRoomUiSlice";
 
 interface ChatSectionHeaderProps {
+    showRadio?: boolean;
     chatRoomId?: number;
     chatRoomName: string;
     isArchived?: boolean;
@@ -82,6 +83,7 @@ const getNoiseIndicator = (level: ChatRoomNoiseLevelEnum) => {
 const ARCHIVE_HIDDEN_ROOM_NAMES = new Set(["super admins", "admins", "moderators"]);
 
 const ChatSectionHeader: React.FC<ChatSectionHeaderProps> = ({
+                                                                 showRadio = false,
                                                                  chatRoomId,
                                                                  chatRoomName,
                                                                  isArchived = false,
@@ -257,7 +259,7 @@ const ChatSectionHeader: React.FC<ChatSectionHeaderProps> = ({
         variant: "ghost" | "outline" | "secondary"
     ) => {
         return (
-            <DropdownMenu modal={false}>
+            <RadioMenuRoot>
                 <DropdownMenuTrigger asChild>
                     <Button
                         variant={variant}
@@ -270,7 +272,7 @@ const ChatSectionHeader: React.FC<ChatSectionHeaderProps> = ({
                             <MoreVertical className={iconClassName}/>}
                     </Button>
                 </DropdownMenuTrigger>
-                <DropdownMenuContent
+                <RadioMenuContent
                     align="end"
                     collisionPadding={8}
                     className={`glass-popover max-w-[calc(100vw-1rem)] ${isMobile ? "w-60" : "w-52"}`}
@@ -293,6 +295,12 @@ const ChatSectionHeader: React.FC<ChatSectionHeaderProps> = ({
                             </DropdownMenuPortal>
                         </DropdownMenuSub>
                     )}
+                    {showRadio && (
+                        <>
+                            <DropdownMenuSeparator/>
+                            <RadioMenuSub/>
+                        </>
+                    )}
                     {canManageArchive && (
                         <>
                             <DropdownMenuSeparator/>
@@ -306,8 +314,8 @@ const ChatSectionHeader: React.FC<ChatSectionHeaderProps> = ({
                             </DropdownMenuItem>
                         </>
                     )}
-                </DropdownMenuContent>
-            </DropdownMenu>
+                </RadioMenuContent>
+            </RadioMenuRoot>
         );
     };
 
@@ -472,6 +480,7 @@ const ChatSectionHeader: React.FC<ChatSectionHeaderProps> = ({
                     >
                         <X className="h-4 w-4"/>
                     </Button>
+                    {renderChatOptionsMenu("glass-control h-8 w-8 shrink-0 p-0", "h-4 w-4", "ghost")}
                 </>
             )}
         </CardTitle>

@@ -5,6 +5,7 @@ import {AttachmentType} from "@/models/AttachmentType";
 import {ActiveRightPanel} from "@/models/ActiveRightPanel";
 import {ActiveLeftPanel} from "@/models/ActiveLeftPanel";
 import {NotificationSoundMode} from "@/models/NotificationSoundMode";
+import {DEFAULT_RADIO_VOLUME, normalizeRadioVolume, RadioStationMode} from "@/features/radio/types";
 
 interface AttachmentTypesState {
     attachmentTypes: AttachmentType[];
@@ -23,6 +24,9 @@ interface SettingsState {
     userDisplayColor: string;
     mediaPlayerMuted: boolean;
     showAppBackground: boolean;
+    radioStationMode: RadioStationMode;
+    radioVolume: number;
+    radioMuted: boolean;
 }
 
 const initialState: SettingsState = {
@@ -39,7 +43,10 @@ const initialState: SettingsState = {
     notificationSoundMode: {},
     userDisplayColor: "#000000",
     mediaPlayerMuted: true,
-    showAppBackground: true
+    showAppBackground: true,
+    radioStationMode: 'theme',
+    radioVolume: DEFAULT_RADIO_VOLUME,
+    radioMuted: false,
 };
 
 const settingsSlice = createSlice({
@@ -88,6 +95,15 @@ const settingsSlice = createSlice({
         setShowAppBackground(state, action: PayloadAction<boolean>) {
             state.showAppBackground = action.payload;
         },
+        setRadioStationMode(state, action: PayloadAction<RadioStationMode>) {
+            state.radioStationMode = action.payload;
+        },
+        setRadioVolume(state, action: PayloadAction<number>) {
+            state.radioVolume = normalizeRadioVolume(action.payload);
+        },
+        setRadioMuted(state, action: PayloadAction<boolean>) {
+            state.radioMuted = action.payload;
+        },
     },
     extraReducers: (builder) => {
         builder
@@ -116,7 +132,10 @@ export const {
     setSoundSettings,
     setNotificationSoundMode,
     setMediaPlayerMuted,
-    setShowAppBackground
+    setShowAppBackground,
+    setRadioStationMode,
+    setRadioVolume,
+    setRadioMuted,
 } = settingsSlice.actions;
 
 export default settingsSlice.reducer;

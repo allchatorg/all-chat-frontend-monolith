@@ -304,6 +304,7 @@ const ChatSection: React.FC<ChatSectionProps> = ({
         >
             <CardHeader className="relative z-30 rounded-none bg-transparent p-2 px-5 shadow-none">
                 <ChatSectionHeader
+                    showRadio
                     chatRoomId={chatRoom.id}
                     chatRoomName={chatRoom.name}
                     isArchived={chatRoom.isArchived}

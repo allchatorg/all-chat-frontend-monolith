@@ -9,10 +9,12 @@ import {useDispatch, useSelector} from "react-redux";
 import {AppDispatch} from "@/redux/store";
 import {selectPrivateSidebarVisible} from "@/redux/privateChat/privateChatSelectors";
 import {togglePrivateSidebar} from "@/redux/privateChat/privateChatUiSlice";
-import {DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger,} from "@/components/ui/dropdown-menu";
+import {DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger,} from "@/components/ui/dropdown-menu";
 import {PrivateChatDTO} from "@/models/PrivateChatDTO";
 import PrivateChatSearchBar from "@/features/privateChat/components/PrivateChatSearchBar";
 import NotificationSoundModeMenu from "@/components/NotificationSoundModeMenu";
+import {RadioMenuSub} from "@/features/radio/components/RadioMenu";
+import {RadioMenuContent, RadioMenuRoot} from "@/features/radio/components/RadioMenuRoot";
 
 interface PrivateChatSectionHeaderProps {
     conversation: PrivateChatDTO;
@@ -43,7 +45,7 @@ const PrivateChatSectionHeader: React.FC<PrivateChatSectionHeaderProps> = ({
     const showSidebarToggle = isMobile || !sidebarVisible;
 
     const renderOptionsMenu = (buttonClassName: string, iconClassName: string) => (
-        <DropdownMenu modal={false}>
+        <RadioMenuRoot>
             <DropdownMenuTrigger asChild>
                 <Button
                     variant="outline"
@@ -55,15 +57,17 @@ const PrivateChatSectionHeader: React.FC<PrivateChatSectionHeaderProps> = ({
                     <MoreVertical className={iconClassName}/>
                 </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="glass-popover w-48">
+            <RadioMenuContent align="end" className="glass-popover w-48">
+                <RadioMenuSub/>
+                <DropdownMenuSeparator/>
                 <DropdownMenuItem
                     className="cursor-pointer text-red-600 focus:text-red-600 focus:bg-red-100 dark:focus:bg-red-900"
                     onSelect={onHideConversation}
                 >
                     Hide conversation
                 </DropdownMenuItem>
-            </DropdownMenuContent>
-        </DropdownMenu>
+            </RadioMenuContent>
+        </RadioMenuRoot>
     );
 
     // Desktop layout — search bar lives inline in the header
@@ -151,7 +155,7 @@ const PrivateChatSectionHeader: React.FC<PrivateChatSectionHeaderProps> = ({
                 </>
             ) : (
                 <>
-                    <div className="flex-1 animate-in slide-in-from-right-2 duration-200">
+                    <div className="min-w-0 flex-1 animate-in slide-in-from-right-2 duration-200">
                         <PrivateChatSearchBar/>
                     </div>
                     <Button
@@ -164,6 +168,7 @@ const PrivateChatSectionHeader: React.FC<PrivateChatSectionHeaderProps> = ({
                     >
                         <X className="h-4 w-4"/>
                     </Button>
+                    {renderOptionsMenu("glass-control h-8 w-8 shrink-0 p-0", "h-4 w-4")}
                 </>
             )}
         </CardTitle>

@@ -40,7 +40,7 @@ const adsPortalApis = [userApi, paymentApi, adFormatsApi, fileApi, adsPortalApi,
 const settingsPersistConfig = {
     key: 'settings',
     storage,
-    whitelist: ['chatRoomSoundSetting', 'notificationSoundMode', 'mediaPlayerMuted', 'showAppBackground'],
+    whitelist: ['chatRoomSoundSetting', 'notificationSoundMode', 'mediaPlayerMuted', 'showAppBackground', 'radioStationMode', 'radioVolume', 'radioMuted'],
 };
 
 const adsPersistConfig = {

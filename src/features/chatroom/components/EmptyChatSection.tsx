@@ -4,6 +4,7 @@ import {Card, CardContent, CardHeader, CardTitle} from "@/components/ui/card";
 import {Flame, MessageCircle, Users} from "lucide-react";
 import {usePopularitySidebar} from "@/lib/hooks/usePopularitySidebar";
 import {useTopReactedSidebar} from "@/lib/hooks/useTopReactedSidebar";
+import {RadioOptionsMenu} from "@/features/radio/components/RadioMenu";
 
 interface EmptyChatSectionProps {
     className?: string,
@@ -24,11 +25,11 @@ const EmptyChatSection: React.FC<EmptyChatSectionProps> = ({className = "", onOp
     return (
         <Card
             className={`glass-panel chat-section-edge w-full h-full mx-auto flex flex-col rounded-b-xl border-t-0 ${className}`}>
-            <CardHeader className="rounded-none bg-transparent pb-3 shadow-none">
-                <CardTitle className="chat-header-floating flex items-center gap-2">
-                    <div className="h-3 w-3 rounded-full bg-gray-400 dark:bg-gray-600"></div>
-                    No Chat Selected
-                    <div className="flex items-center ml-auto gap-2">
+            <CardHeader className="relative z-30 rounded-none bg-transparent p-2 px-5 shadow-none">
+                <CardTitle className="chat-header-floating flex min-w-0 items-center gap-2">
+                    <div className="h-3 w-3 shrink-0 rounded-full bg-gray-400 dark:bg-gray-600"></div>
+                    <span className="min-w-0 flex-1 truncate">No Chat Selected</span>
+                    <div className="ml-auto flex shrink-0 items-center gap-2">
                         <Button
                             onClick={onToggleTopReactedSidebar}
                             variant="outline"
@@ -69,6 +70,7 @@ const EmptyChatSection: React.FC<EmptyChatSectionProps> = ({className = "", onOp
                                 {popularitySidebarActive ? "Hide" : "Show"} Active Rooms
                             </span>
                         </Button>
+                        <RadioOptionsMenu buttonClassName="glass-control h-10 w-10 shrink-0 p-2" iconClassName="h-5 w-5"/>
                     </div>
                 </CardTitle>
             </CardHeader>

@@ -22,6 +22,7 @@ import {RadioGroup, RadioGroupItem} from "@/components/ui/radio-group";
 import {useChatRoomSoundSettings} from "@/lib/hooks/useChatRoomSoundSettings";
 import {NotificationSoundMode} from "@/models/NotificationSoundMode";
 import {RoomTabOrderSettings} from "@/features/auth/components/RoomTabOrderSettings";
+import {RadioSettingsCard} from "@/features/radio/components/RadioSettingsCard";
 
 const NOTIFICATION_SOUND_MODE_OPTIONS: {
     mode: NotificationSoundMode;
@@ -263,6 +264,7 @@ export const ProfileSettings = ({isMobile = false}: ProfileSettingsProps) => {
                     </div>
                 </CardContent>
             </Card>
+            <RadioSettingsCard/>
             <ColorPicker currentColor={user ? user.displayColor : "F00000"} onColorChange={handleColorChange}
                          isLoading={changeColorIsLoading}/>
         </div>

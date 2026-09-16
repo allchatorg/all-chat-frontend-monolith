@@ -10,6 +10,7 @@ import {MediaOverlayProvider} from "./MediaOverlayProvider";
 import {PersistGate} from "redux-persist/integration/react";
 import {VerificationBlockingOverlay} from "@/components/VerificationBlockingOverlay";
 import {SplashOffline} from "@/components/SplashOffline";
+import {RadioProvider} from "./RadioProvider";
 
 export function AppProviders({children}: { children: ReactNode }) {
     return (
@@ -21,14 +22,16 @@ export function AppProviders({children}: { children: ReactNode }) {
                     enableSystem
                     disableTransitionOnChange
                 >
-                    <MediaOverlayProvider>
-                        <DialogProvider>
-                            <VerificationBlockingOverlay>
-                                <SplashOffline/>
-                                {children}
-                            </VerificationBlockingOverlay>
-                        </DialogProvider>
-                    </MediaOverlayProvider>
+                    <RadioProvider>
+                        <MediaOverlayProvider>
+                            <DialogProvider>
+                                <VerificationBlockingOverlay>
+                                    <SplashOffline/>
+                                    {children}
+                                </VerificationBlockingOverlay>
+                            </DialogProvider>
+                        </MediaOverlayProvider>
+                    </RadioProvider>
                 </ThemeProvider>
             </PersistGate>
         </Provider>
