@@ -1,33 +1,41 @@
 "use client";
-import React from "react";
+import React, {useRef} from "react";
 import {useDispatch, useSelector} from "react-redux";
 import {selectActiveRightPanel} from "@/redux/settings/settingsSelector";
 import PopularChatRoomsSection from "./PopularChatRoomsSection";
 import SearchChatRoomMessages from "./SearchChatRoomMessages";
 import ModView from "@/features/chatroom/components/ModView";
-import {AnimatePresence, motion} from "framer-motion";
 import {setActiveRightSidebar} from "@/redux/settings/settingsSlice";
-import {
-    sidePanelDesktopClass,
-    sidePanelMobileClass,
-    sidePanelMobileContentClass
-} from "@/features/chatroom/components/sidePanelGlassClasses";
+import {sidePanelDesktopClass} from "@/features/chatroom/components/sidePanelGlassClasses";
+import {BottomSheet} from "@/components/ui/bottom-sheet";
+import {useIsMobile} from "@/lib/hooks/useIsMobile";
+import {selectSelectedChatRoomState} from "@/redux/chatRoom/chatRoomSelectors";
+import {selectModPanelLoadedUser} from "@/redux/modPanel/modPanelSelector";
 
 
 const RightPanel = () => {
     const activePanel = useSelector(selectActiveRightPanel);
     const dispatch = useDispatch();
+    const isMobile = useIsMobile();
+    const selectedRoom = useSelector(selectSelectedChatRoomState);
+    const selectedModUser = useSelector(selectModPanelLoadedUser);
+    const lastPanel = useRef(activePanel);
+    if (activePanel) lastPanel.current = activePanel;
+    const displayedPanel = isMobile ? activePanel ?? lastPanel.current : activePanel;
 
     let content;
-    switch (activePanel) {
+    let title = "Rooms";
+    switch (displayedPanel) {
         case "top-online":
-            content = <PopularChatRoomsSection/>;
+            content = <PopularChatRoomsSection showHeader={!isMobile}/>;
             break;
         case "search-chatroom-messages":
-            content = <SearchChatRoomMessages/>;
+            content = <SearchChatRoomMessages showHeader={!isMobile}/>;
+            title = selectedRoom?.name ? `Search ${selectedRoom.name} messages` : "Search messages";
             break;
         case "mod-view":
-            content = <ModView/>;
+            content = <ModView showHeader={!isMobile}/>;
+            title = selectedModUser?.username ?? "Moderation";
             break;
         default:
             content = null;
@@ -37,44 +45,19 @@ const RightPanel = () => {
         dispatch(setActiveRightSidebar(null));
     };
 
-    if (!content && !activePanel) return null;
+    if (!isMobile) return content ? <div className={sidePanelDesktopClass}>{content}</div> : null;
 
     return (
-        <>
-            {/* Desktop View */}
-            {content && (
-                <div className={sidePanelDesktopClass}>
-                    {content}
-                </div>
-            )}
-
-            {/* Mobile View */}
-            <AnimatePresence>
-                {content && (
-                    <>
-                        <motion.div
-                            initial={{opacity: 0}}
-                            animate={{opacity: 1}}
-                            exit={{opacity: 0}}
-                            onClick={handleClose}
-                            className="lg:hidden fixed inset-0 bg-slate-950/15 dark:bg-black/50 z-40 backdrop-blur-xs"
-                        />
-                        <motion.div
-                            initial={{y: "100%"}}
-                            animate={{y: 0}}
-                            exit={{y: "100%"}}
-                            transition={{type: "spring", damping: 25, stiffness: 200}}
-                            className={sidePanelMobileClass}
-                            onClick={(e) => e.stopPropagation()}
-                        >
-                            <div className={sidePanelMobileContentClass}>
-                                {content}
-                            </div>
-                        </motion.div>
-                    </>
-                )}
-            </AnimatePresence>
-        </>
+        <BottomSheet
+            open={!!activePanel}
+            onOpenChange={(open) => { if (!open) handleClose(); }}
+            title={title}
+            size="tall"
+            scrollable={false}
+            bodyClassName="px-0"
+        >
+            {content}
+        </BottomSheet>
     );
 };
 

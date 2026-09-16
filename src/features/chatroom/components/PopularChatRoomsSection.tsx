@@ -28,7 +28,7 @@ const POLL_INTERVAL = 10000;
 
 type RoomsTab = "active" | "promoted";
 
-const PopularChatRoomsSection: React.FC = () => {
+const PopularChatRoomsSection: React.FC<{showHeader?: boolean}> = ({showHeader = true}) => {
     const {user} = useUser();
     const dispatch = useDispatch<AppDispatch>();
     const isMobile = useIsMobile();
@@ -135,20 +135,20 @@ const PopularChatRoomsSection: React.FC = () => {
     };
 
     return (
-        <Card className="bg-transparent! flex h-full w-full flex-col border-0 shadow-none">
-            <CardHeader className="pb-3">
+        <Card className="bg-transparent! flex h-full min-h-0 w-full flex-col border-0 shadow-none">
+            {showHeader && <CardHeader className="shrink-0 pb-3">
                 <div className="flex justify-between items-center">
                     <div className="w-6 h-6"></div>
                     <CardTitle className="text-base font-semibold tracking-tight">
                         {isActiveTab ? "Active Rooms" : "Promoted Rooms"}
                     </CardTitle>
-                    <Button variant="ghost" size="sm" onClick={handleClose} className="glass-control">
+                    <Button variant="ghost" size="sm" onClick={handleClose} className="glass-control" aria-label="Close rooms">
                         <X className="h-4 w-4"/>
                     </Button>
                 </div>
-            </CardHeader>
+            </CardHeader>}
 
-            <div className="px-4 pb-3">
+            <div className="shrink-0 px-4 pb-3">
                 <Tabs value={tab} onValueChange={(value) => setTab(value as RoomsTab)}>
                     <TabsList className="glass-surface grid w-full grid-cols-2">
                         <TabsTrigger value="active">Active</TabsTrigger>
@@ -158,7 +158,7 @@ const PopularChatRoomsSection: React.FC = () => {
             </div>
 
             {isActiveTab && (
-                <div className="flex flex-col space-y-2 px-4 pb-3">
+                <div className="flex shrink-0 flex-col space-y-2 px-4 pb-3">
                     {/* Sort by filter */}
                     <div
                         className="glass-surface flex items-center rounded-lg p-2 transition">
@@ -197,8 +197,8 @@ const PopularChatRoomsSection: React.FC = () => {
                 </div>
             )}
 
-            <CardContent className="flex flex-1 flex-col overflow-hidden px-4">
-                <div aria-orientation={"vertical"} className="flex-1 overflow-y-auto">
+            <CardContent className="flex min-h-0 flex-1 flex-col overflow-hidden px-4">
+                <div aria-orientation={"vertical"} className="min-h-0 flex-1 overflow-y-auto overscroll-contain">
                     <div className="space-y-2">
                         {isActiveTab ? (
                             isLoading && content.length === 0 ? (
@@ -243,7 +243,7 @@ const PopularChatRoomsSection: React.FC = () => {
                 </div>
             </CardContent>
 
-            <CardFooter>
+            <CardFooter className="shrink-0">
                 {isActiveTab ? (
                     <PaginationFooter
                         className="w-full"

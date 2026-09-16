@@ -19,10 +19,12 @@ import {useIsMobile} from "@/lib/hooks/useIsMobile";
 interface ModViewProps {
     isOpen?: boolean;
     onClose?: () => void;
+    showHeader?: boolean;
 }
 
 const ModView: React.FC<ModViewProps> = ({
                                              isOpen = true,
+                                             showHeader = true,
                                              onClose = () => {
                                              }
                                          }) => {
@@ -64,20 +66,21 @@ const ModView: React.FC<ModViewProps> = ({
     };
 
     return (
-        <div className="glass-panel flex h-full w-full flex-col rounded-xl border">
-            <div className="flex items-center justify-between border-b p-4">
+        <div className="glass-panel flex h-full min-h-0 w-full flex-col rounded-xl border">
+            {showHeader && <div className="flex shrink-0 items-center justify-between border-b p-4">
                 <h2 className="text-lg font-semibold text-card-foreground">{user?.username}</h2>
                 <Button
                     variant="ghost"
                     size="icon"
                     className="glass-control"
+                    aria-label="Close moderation panel"
                     onClick={() => dispatch(setActiveRightSidebar(isMobile ? null : 'top-online'))}
                 >
                     <X className="h-4 w-4"/>
                 </Button>
 
-            </div>
-            <div className="border-b p-4">
+            </div>}
+            <div className="shrink-0 border-b p-4">
                 <div className="flex gap-2 mb-3">
                     {canActOn(useRoleAccess().currentRole, user ? user.role : Role.UNCLAIMED_USER) &&
                         <div className="flex-1">
@@ -144,7 +147,7 @@ const ModView: React.FC<ModViewProps> = ({
             </div>
 
 
-            <div className="flex-1 overflow-auto">
+            <div className="min-h-0 flex-1 overflow-auto overscroll-contain">
                 {loading ? (
                     <div className="p-4 text-muted-foreground">Loading...</div>
                 ) : (
@@ -156,7 +159,7 @@ const ModView: React.FC<ModViewProps> = ({
                 )}
             </div>
 
-            <div className="glass-surface rounded-b-lg border-t p-4">
+            <div className="glass-surface shrink-0 rounded-b-lg border-t p-4">
                 <div className="flex items-center space-x-2">
                     <User className="h-4 w-4 text-muted-foreground"/>
                     <span className="text-sm text-muted-foreground">Role:</span>

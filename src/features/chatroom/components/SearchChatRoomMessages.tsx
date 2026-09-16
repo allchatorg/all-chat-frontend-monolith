@@ -20,7 +20,7 @@ import {useIsMobile} from "@/lib/hooks/useIsMobile";
 
 const PAGE_SIZE = 10;
 
-const SearchChatroomMessages: React.FC = () => {
+const SearchChatroomMessages: React.FC<{showHeader?: boolean}> = ({showHeader = true}) => {
     const dispatch = useDispatch<AppDispatch>();
     const {user} = useUser();
     const [searchMessages, isLoading, error] = useThunk(searchChatRoomMessagesThunk);
@@ -45,15 +45,17 @@ const SearchChatroomMessages: React.FC = () => {
     };
 
     const handleJumpToMessageClick = (message: Message) => {
+        // Also covers blocked search results, which bypass MessageItem's close handler.
+        if (isMobile) dispatch(setActiveRightSidebar(null));
         dispatch(setJumpToMessageId(null));
         setTimeout(() => dispatch(setJumpToMessageId(message.id)));
     };
 
     return (
-        <div className="h-full">
+        <div className="flex h-full min-h-0 flex-col">
             <SearchMessagesDisplay
                 title={`Search ${selectedChatRoom?.name} Messages`}
-                showTitle={true}
+                showTitle={showHeader}
                 messages={content}
                 isLoading={isLoading}
                 error={error}

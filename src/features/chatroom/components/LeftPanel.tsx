@@ -1,30 +1,29 @@
 "use client";
-import React from "react";
+import React, {useRef} from "react";
 import {useDispatch, useSelector} from "react-redux";
 import {selectActiveLeftPanel} from "@/redux/settings/settingsSelector";
 import TopReactedMessagesSection from "./TopReactedMessagesSection";
 import PromotedMessagesSection from "./PromotedMessagesSection";
-import {AnimatePresence, motion} from "framer-motion";
 import {setActiveLeftSidebar} from "@/redux/settings/settingsSlice";
 import {useIsMobile} from "@/lib/hooks/useIsMobile";
-import {
-    sidePanelDesktopClass,
-    sidePanelMobileClass,
-    sidePanelMobileContentClass
-} from "@/features/chatroom/components/sidePanelGlassClasses";
+import {sidePanelDesktopClass} from "@/features/chatroom/components/sidePanelGlassClasses";
+import {BottomSheet} from "@/components/ui/bottom-sheet";
 
 const LeftPanel = () => {
     const activePanel = useSelector(selectActiveLeftPanel);
     const dispatch = useDispatch();
     const isMobile = useIsMobile();
+    const lastPanel = useRef(activePanel);
+    if (activePanel) lastPanel.current = activePanel;
+    const displayedPanel = isMobile ? activePanel ?? lastPanel.current : activePanel;
 
     let content;
-    switch (activePanel) {
+    switch (displayedPanel) {
         case "top-reacted-messages":
-            content = <TopReactedMessagesSection/>;
+            content = <TopReactedMessagesSection showHeader={!isMobile}/>;
             break;
         case "promoted-messages":
-            content = <PromotedMessagesSection/>;
+            content = <PromotedMessagesSection showHeader={!isMobile}/>;
             break;
         default:
             content = null;
@@ -34,35 +33,19 @@ const LeftPanel = () => {
         dispatch(setActiveLeftSidebar(null));
     };
 
+    if (!isMobile) return content ? <div className={sidePanelDesktopClass}>{content}</div> : null;
+
     return (
-        <AnimatePresence>
-            {content && isMobile && (
-                <motion.div
-                    key="backdrop"
-                    initial={{opacity: 0}}
-                    animate={{opacity: 1}}
-                    exit={{opacity: 0}}
-                    onClick={handleClose}
-                    className="lg:hidden fixed inset-0 bg-slate-950/15 dark:bg-black/50 z-40 backdrop-blur-xs"
-                />
-            )}
-            {content && (
-                <motion.div
-                    key="panel"
-                    initial={{y: isMobile ? "100%" : 0}}
-                    animate={{y: 0}}
-                    exit={{y: isMobile ? "100%" : 0}}
-                    transition={{type: "spring", damping: 25, stiffness: 200}}
-                    className={isMobile ? sidePanelMobileClass : sidePanelDesktopClass}
-                    onClick={(e) => e.stopPropagation()}
-                >
-                    {/* Keep one content instance across desktop and mobile layouts. */}
-                    <div className={sidePanelMobileContentClass}>
-                        {content}
-                    </div>
-                </motion.div>
-            )}
-        </AnimatePresence>
+        <BottomSheet
+            open={!!activePanel}
+            onOpenChange={(open) => { if (!open) handleClose(); }}
+            title={displayedPanel === "promoted-messages" ? "Promoted messages" : "Top reacted messages"}
+            size="tall"
+            scrollable={false}
+            bodyClassName="px-0"
+        >
+            {content}
+        </BottomSheet>
     );
 };
 

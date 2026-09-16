@@ -1,4 +1,5 @@
 import React, {useEffect, useRef} from "react";
+import * as Dialog from "@radix-ui/react-dialog";
 import {Download, FileVideo, Music, X} from "lucide-react";
 import {Attachment} from "@/models/Attachment";
 import {AttachmentTypeEnum} from "@/models/AttachmentTypeEnum";
@@ -44,32 +45,11 @@ const MediaOverlay: React.FC<MediaOverlayProps> = ({
     const dispatch = useDispatch<AppDispatch>();
     const isMuted = useSelector((state: RootState) => state.settings.mediaPlayerMuted);
     const overlayRef = useRef<HTMLDivElement>(null);
+    const previousFocusRef = useRef<HTMLElement | null>(null);
     const externalVideoPlayerRef = useRef<HTMLDivElement>(null);
     const videoRef = useRef<HTMLVideoElement>(null);
     const audioRef = useRef<HTMLAudioElement>(null);
     const isExternalVideo = media?.kind === "externalVideo";
-
-    useEffect(() => {
-        const handleEscape = (e: KeyboardEvent) => {
-            if (e.key !== "Escape") return;
-
-            e.preventDefault();
-            onClose();
-        };
-
-        if (isOpen) window.addEventListener("keydown", handleEscape, true);
-        return () => window.removeEventListener("keydown", handleEscape, true);
-    }, [isOpen, onClose]);
-
-    useEffect(() => {
-        if (!isOpen) return;
-
-        const animationFrame = window.requestAnimationFrame(() => {
-            overlayRef.current?.focus({preventScroll: true});
-        });
-
-        return () => window.cancelAnimationFrame(animationFrame);
-    }, [isOpen, isExternalVideo]);
 
     useEffect(() => {
         if (!isOpen || !isExternalVideo) return;
@@ -89,7 +69,7 @@ const MediaOverlay: React.FC<MediaOverlayProps> = ({
         };
 
         window.addEventListener("blur", restoreOverlayFocus);
-        return () => window.removeEventListener("blur-sm", restoreOverlayFocus);
+        return () => window.removeEventListener("blur", restoreOverlayFocus);
     }, [isOpen, isExternalVideo]);
 
     if (!isOpen || !media) return null;
@@ -274,58 +254,78 @@ const MediaOverlay: React.FC<MediaOverlayProps> = ({
     };
 
     return (
-        <div ref={overlayRef}
-             className="fixed inset-0 z-100 flex items-center justify-center bg-black bg-opacity-90 p-4 sm:p-8"
-             style={{
-                 height: "100dvh",
-                 width: "100vw"
-             }}
-             tabIndex={-1}
-             onClick={handleBackdropClick}>
+        <Dialog.Root open={isOpen} onOpenChange={(open) => { if (!open) onClose(); }}>
+            <Dialog.Portal>
+                <Dialog.Overlay className="fixed inset-0 z-100"/>
+                {/* Share Radix's modal stack with bottom sheets so media opened from a
+                    panel receives pointer/keyboard focus and returns to that panel. */}
+                <Dialog.Content ref={overlayRef}
+                     className="fixed inset-0 z-100 flex items-center justify-center bg-black bg-opacity-90 p-4 sm:p-8"
+                     aria-describedby={undefined}
+                     style={{
+                         height: "100dvh",
+                         width: "100vw"
+                     }}
+                     tabIndex={-1}
+                     onOpenAutoFocus={(event) => {
+                         previousFocusRef.current = document.activeElement instanceof HTMLElement ? document.activeElement : null;
+                         event.preventDefault();
+                         overlayRef.current?.focus({preventScroll: true});
+                     }}
+                     onCloseAutoFocus={(event) => {
+                         event.preventDefault();
+                         if (previousFocusRef.current?.isConnected) previousFocusRef.current.focus({preventScroll: true});
+                     }}
+                     onClick={handleBackdropClick}>
+                    <Dialog.Title className="sr-only">
+                        {media.kind === "attachment" ? media.attachment.name : media.title ?? `${media.platform} video`}
+                    </Dialog.Title>
 
-            <div
-                className="relative flex max-h-[90%] w-full h-full min-h-0 min-w-0 items-center justify-center flex-1 pb-[5dvh] sm:pb-0">
-                {renderMediaContent()}
-            </div>
+                    <div
+                        className="relative flex max-h-[90%] w-full h-full min-h-0 min-w-0 items-center justify-center flex-1 pb-[5dvh] sm:pb-0">
+                        {renderMediaContent()}
+                    </div>
 
-            <button
-                onClick={onClose}
-                className="absolute top-4 right-4 z-50 rounded-full bg-black bg-opacity-50 p-2 text-white transition-colors hover:bg-opacity-70"
-                aria-label="Close"
-            >
-                <X className="h-6 w-6"/>
-            </button>
+                    <button
+                        onClick={onClose}
+                        className="absolute top-4 right-4 z-50 rounded-full bg-black bg-opacity-50 p-2 text-white transition-colors hover:bg-opacity-70"
+                        aria-label="Close"
+                    >
+                        <X className="h-6 w-6"/>
+                    </button>
 
-            {showDownloadButton && media.kind === "attachment" && (
-                <button
-                    onClick={event => {
-                        event.preventDefault();
-                        event.stopPropagation();
-                        handleDownload();
-                    }}
-                    className="absolute top-4 right-16 z-50 rounded-full bg-black bg-opacity-50 p-2 text-white transition-colors hover:bg-opacity-70"
-                    aria-label="Download"
-                >
-                    <Download className="h-6 w-6"/>
-                </button>
-            )}
-
-            {media.kind === "attachment" ? (
-                <div className="absolute top-4 left-4 z-50 rounded-lg bg-black bg-opacity-50 px-3 py-2 text-white">
-                    <p className="text-sm font-medium truncate max-w-[200px]"
-                       title={media.attachment.name}>{media.attachment.name}</p>
-                    {showFileSize && (
-                        <p className="text-xs opacity-70">{(media.attachment.size / 1024 / 1024).toFixed(2)} MB</p>
+                    {showDownloadButton && media.kind === "attachment" && (
+                        <button
+                            onClick={event => {
+                                event.preventDefault();
+                                event.stopPropagation();
+                                handleDownload();
+                            }}
+                            className="absolute top-4 right-16 z-50 rounded-full bg-black bg-opacity-50 p-2 text-white transition-colors hover:bg-opacity-70"
+                            aria-label="Download"
+                        >
+                            <Download className="h-6 w-6"/>
+                        </button>
                     )}
-                </div>
-            ) : (
-                <div className="absolute top-4 left-4 z-50 rounded-lg bg-black bg-opacity-50 px-3 py-2 text-white">
-                    <p className="text-sm font-medium truncate max-w-[200px]" title={media.url}>
-                        {media.title ?? media.platform}
-                    </p>
-                </div>
-            )}
-        </div>
+
+                    {media.kind === "attachment" ? (
+                        <div className="absolute top-4 left-4 z-50 rounded-lg bg-black bg-opacity-50 px-3 py-2 text-white">
+                            <p className="text-sm font-medium truncate max-w-[200px]"
+                               title={media.attachment.name}>{media.attachment.name}</p>
+                            {showFileSize && (
+                                <p className="text-xs opacity-70">{(media.attachment.size / 1024 / 1024).toFixed(2)} MB</p>
+                            )}
+                        </div>
+                    ) : (
+                        <div className="absolute top-4 left-4 z-50 rounded-lg bg-black bg-opacity-50 px-3 py-2 text-white">
+                            <p className="text-sm font-medium truncate max-w-[200px]" title={media.url}>
+                                {media.title ?? media.platform}
+                            </p>
+                        </div>
+                    )}
+                </Dialog.Content>
+            </Dialog.Portal>
+        </Dialog.Root>
     );
 };
 

@@ -20,7 +20,7 @@ import {useIsMobile} from "@/lib/hooks/useIsMobile";
 
 const PAGE_SIZE = 10;
 
-export const PromotedMessagesSection: React.FC = () => {
+export const PromotedMessagesSection: React.FC<{showHeader?: boolean}> = ({showHeader = true}) => {
     const dispatch = useDispatch<AppDispatch>();
     const isMobile = useIsMobile();
     const [fetchPromotedMessages] = useThunk(fetchPromotedMessagesThunk);
@@ -62,20 +62,20 @@ export const PromotedMessagesSection: React.FC = () => {
     };
 
     return (
-        <Card className="bg-transparent! flex h-full w-full flex-col border-0 shadow-none">
-            <CardHeader className="pb-3">
+        <Card className="bg-transparent! flex h-full min-h-0 w-full flex-col border-0 shadow-none">
+            {showHeader && <CardHeader className="shrink-0 pb-3">
                 <div className="flex justify-between items-center">
                     <div className="w-6 h-6"></div>
                     <CardTitle className="text-base font-semibold tracking-tight text-center">Promoted
                         Messages</CardTitle>
-                    <Button variant="ghost" size="sm" onClick={handleClose} className="glass-control">
+                    <Button variant="ghost" size="sm" onClick={handleClose} className="glass-control" aria-label="Close promoted messages">
                         <X className="h-4 w-4"/>
                     </Button>
                 </div>
-            </CardHeader>
+            </CardHeader>}
 
-            <CardContent className="flex flex-1 flex-col overflow-hidden px-4 pb-0">
-                <div aria-orientation={"vertical"} className="flex-1 overflow-y-auto">
+            <CardContent className="flex min-h-0 flex-1 flex-col overflow-hidden px-4 pb-0">
+                <div aria-orientation={"vertical"} className="min-h-0 flex-1 overflow-y-auto overscroll-contain">
                     <div className="space-y-4">
                         {!activeRoom ? (
                             <div className="py-8 text-center text-muted-foreground text-sm">Select a room to view
@@ -101,7 +101,7 @@ export const PromotedMessagesSection: React.FC = () => {
             </CardContent>
 
             {totalPages > 1 && (
-                <CardFooter className="p-0">
+                <CardFooter className="shrink-0 p-0">
                     <PaginationFooter
                         className="w-full"
                         totalPages={totalPages}

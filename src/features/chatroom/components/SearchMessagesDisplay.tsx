@@ -46,7 +46,7 @@ const SearchMessagesDisplay: React.FC<Props> = ({
                 <>
                     <CardHeader className="flex shrink-0 flex-row items-center justify-between p-4">
                         <CardTitle>{title}</CardTitle>
-                        <Button variant="ghost" size="sm" className="glass-control" onClick={onClose}>
+                        <Button variant="ghost" size="sm" className="glass-control" onClick={onClose} aria-label="Close message search">
                             <X className="h-4 w-4"/>
                         </Button>
                     </CardHeader>
