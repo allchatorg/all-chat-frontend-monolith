@@ -2,12 +2,24 @@ import {normalizeRadioVolume, RadioStatus} from './types';
 
 type PlaybackUpdate = (status: RadioStatus, error: string | null) => void;
 
-/** One stream and one gain stage, independent of notification and attachment audio. */
+export async function supportsRadioVolume(): Promise<boolean> {
+    const audio = new Audio();
+    try {
+        // WebKit exposes this even before loading media. Newer iPads support
+        // element volume, so detecting iOS from the user agent is insufficient.
+        return !audio.matches(':volume-locked');
+    } catch {
+        // Older browsers do not recognize this selector. A locked element can
+        // briefly echo a volume write before reverting it in a queued task.
+        audio.volume = 0.5;
+        await new Promise<void>(resolve => window.setTimeout(resolve, 0));
+        return audio.volume === 0.5;
+    }
+}
+
+/** One native stream, independent of notification and attachment audio. */
 export class RadioAudioController {
     private audio: HTMLAudioElement | null = null;
-    private context: AudioContext | null = null;
-    private source: MediaElementAudioSourceNode | null = null;
-    private gain: GainNode | null = null;
     private wantsPlayback = false;
     private attempt = 0;
     private timeout: number | undefined;
@@ -34,7 +46,7 @@ export class RadioAudioController {
         this.timeout = window.setTimeout(() => {
             this.timeout = undefined;
             if (!this.wantsPlayback) return;
-            if (this.context?.state !== 'running') this.update('interrupted');
+            if (this.audio?.paused) this.update('interrupted');
             else if (this.audio && !this.audio.paused && this.audio.readyState >= HTMLMediaElement.HAVE_FUTURE_DATA) {
                 this.update('playing');
             } else this.fail('The radio connection timed out. Try again.');
@@ -46,30 +58,17 @@ export class RadioAudioController {
         this.update('error', message);
     }
 
-    private ensureGraph(volume: number, muted: boolean) {
-        if (this.audio && this.context && this.gain) return;
-        const AudioContextConstructor = window.AudioContext
-            || (window as unknown as {webkitAudioContext?: typeof AudioContext}).webkitAudioContext;
-        if (!AudioContextConstructor) throw new Error('This browser cannot play radio with volume control.');
-
+    private ensureAudio() {
+        if (this.audio) return;
         const audio = new Audio();
         audio.crossOrigin = 'anonymous';
         audio.preload = 'none';
-        audio.volume = 1;
-        audio.muted = false;
-        const context = new AudioContextConstructor();
         this.audio = audio;
-        this.context = context;
-        this.source = context.createMediaElementSource(audio);
-        this.gain = context.createGain();
-        this.gain.gain.value = muted ? 0 : normalizeRadioVolume(volume) / 100;
-        this.source.connect(this.gain);
-        this.gain.connect(context.destination);
 
         audio.onplaying = () => {
             if (!this.wantsPlayback || audio.paused || audio.currentSrc !== this.currentUrl) return;
             this.clearTimeout();
-            this.update(context.state === 'running' ? 'playing' : 'interrupted');
+            this.update('playing');
         };
         audio.onwaiting = () => {
             if (!this.wantsPlayback) return;
@@ -94,52 +93,32 @@ export class RadioAudioController {
         audio.onended = () => {
             if (this.wantsPlayback) this.fail('The radio stream ended. Try again.');
         };
-        context.onstatechange = () => {
-            if (!this.wantsPlayback) return;
-            if (context.state === 'running') {
-                if (!audio.paused && audio.readyState >= HTMLMediaElement.HAVE_FUTURE_DATA) {
-                    this.clearTimeout();
-                    this.update('playing');
-                }
-            } else {
-                this.clearTimeout();
-                this.update('interrupted');
-            }
-        };
     }
 
     setVolume(volume: number, muted: boolean) {
-        if (!this.gain || !this.context) return;
-        const gain = this.gain.gain;
-        const now = this.context.currentTime;
-        const target = muted ? 0 : normalizeRadioVolume(volume) / 100;
-        gain.cancelScheduledValues(now);
-        if (!this.wantsPlayback || this.audio?.paused || this.context.state !== 'running') {
-            // Apply the saved level before starting/resuming, including a muted
-            // context that iOS suspended. Only smooth changes to audible audio.
-            gain.setValueAtTime(target, now);
-            return;
-        }
-        gain.setValueAtTime(gain.value, now);
-        gain.linearRampToValueAtTime(target, now + 0.02);
+        if (!this.audio) return;
+        const level = normalizeRadioVolume(volume) / 100;
+        // Safari can play live MP3 outside a MediaElementAudioSourceNode, so a
+        // GainNode cannot reliably attenuate or mute it (WebKit bug 180696).
+        // Native mute also handles zero volume on devices with locked volume.
+        this.audio.volume = level;
+        this.audio.muted = muted || level === 0;
     }
 
-    // Both resume() and play() are invoked synchronously within the caller's
-    // Play gesture. Awaiting metadata or resume() first loses activation on iOS.
+    // Invoke play() synchronously within the caller's gesture. Awaiting
+    // metadata first loses activation on iOS.
     play(url: string, volume: number, muted: boolean) {
         if (this.disposed) return;
         try {
-            this.ensureGraph(volume, muted);
+            this.ensureAudio();
         } catch {
             this.release();
-            this.destroyGraph();
             this.update('error', 'This browser could not initialize radio audio. Try again.');
             return;
         }
         const audio = this.audio!;
-        const context = this.context!;
         if (this.currentUrl === url && this.wantsPlayback && !audio.paused
-            && context.state === 'running' && audio.readyState >= HTMLMediaElement.HAVE_FUTURE_DATA) {
+            && audio.readyState >= HTMLMediaElement.HAVE_FUTURE_DATA) {
             this.setVolume(volume, muted);
             this.update('playing');
             return;
@@ -156,11 +135,10 @@ export class RadioAudioController {
         this.watchBuffering();
 
         try {
-            const resume = context.resume();
             const play = audio.play();
-            void Promise.all([resume, play]).then(() => {
+            void play.then(() => {
                 if (attempt !== this.attempt || !this.wantsPlayback) return;
-                if (context.state !== 'running' || audio.paused) {
+                if (audio.paused) {
                     this.clearTimeout();
                     this.update('interrupted');
                 } else if (audio.readyState >= HTMLMediaElement.HAVE_FUTURE_DATA) {
@@ -193,26 +171,13 @@ export class RadioAudioController {
         }
     }
 
-    private destroyGraph() {
+    dispose() {
+        this.disposed = true;
+        this.release();
         if (this.audio) {
             this.audio.onplaying = this.audio.onwaiting = this.audio.onstalled = null;
             this.audio.onpause = this.audio.onerror = this.audio.onended = null;
         }
-        this.source?.disconnect();
-        this.gain?.disconnect();
-        if (this.context) {
-            this.context.onstatechange = null;
-            void this.context.close().catch(() => undefined);
-        }
         this.audio = null;
-        this.source = null;
-        this.context = null;
-        this.gain = null;
-    }
-
-    dispose() {
-        this.disposed = true;
-        this.release();
-        this.destroyGraph();
     }
 }

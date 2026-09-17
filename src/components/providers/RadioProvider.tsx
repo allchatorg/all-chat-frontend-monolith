@@ -8,9 +8,9 @@ import {RootState} from '@/redux/store';
 import {selectUser} from '@/redux/user/userSelectors';
 import {setRadioMuted, setRadioStationMode, setRadioVolume} from '@/redux/settings/settingsSlice';
 import {getRadioNowPlaying, getRadioStations} from '@/features/radio/api';
-import {RadioAudioController} from '@/features/radio/RadioAudioController';
+import {RadioAudioController, supportsRadioVolume} from '@/features/radio/RadioAudioController';
 import {
-    AzuraCastStation, normalizeRadioVolume, RADIO_STATIONS, RadioNowPlaying,
+    AzuraCastStation, DEFAULT_RADIO_VOLUME, normalizeRadioVolume, RADIO_STATIONS, RadioNowPlaying,
     RadioStationDefinition, RadioStationKey, RadioStationMode, RadioStatus,
 } from '@/features/radio/types';
 
@@ -23,6 +23,7 @@ interface RadioContextValue {
     error: string | null;
     metadataError: string | null;
     volume: number;
+    canSetVolume: boolean | null;
     setVolume: (volume: number) => void;
     muted: boolean;
     setMuted: (muted: boolean) => void;
@@ -72,6 +73,7 @@ export function RadioProvider({children}: {children: React.ReactNode}) {
     const [playbackError, setPlaybackError] = useState<string | null>(null);
     const [isListening, setIsListening] = useState(false);
     const [mediaSuspended, setSuspendedState] = useState(false);
+    const [canSetVolume, setCanSetVolume] = useState<boolean | null>(null);
     const controller = useRef<RadioAudioController | null>(null);
     const listeningRef = useRef(false);
     const suspendedRef = useRef(false);
@@ -148,6 +150,14 @@ export function RadioProvider({children}: {children: React.ReactNode}) {
     useEffect(() => {
         controller.current?.setVolume(volume, muted);
     }, [volume, muted]);
+
+    useEffect(() => {
+        let active = true;
+        void supportsRadioVolume().then(supported => {
+            if (active) setCanSetVolume(supported);
+        });
+        return () => { active = false; };
+    }, []);
 
     useEffect(() => () => {
         listeningRef.current = false;
@@ -233,11 +243,27 @@ export function RadioProvider({children}: {children: React.ReactNode}) {
         dispatch(setRadioStationMode(mode));
     }, [dispatch]);
     const setVolume = useCallback((value: number) => {
-        dispatch(setRadioVolume(value));
-    }, [dispatch]);
+        const current = runtime.current;
+        current.volume = normalizeRadioVolume(value);
+        // Apply controls during the gesture, not only in the settings effect.
+        // The slider can also unmute in this event, so keep the ref in sync.
+        controller.current?.setVolume(current.volume, current.muted);
+        dispatch(setRadioVolume(current.volume));
+        if (current.volume > 0 && !current.muted && listeningRef.current) startCurrentStation();
+    }, [dispatch, startCurrentStation]);
     const setMuted = useCallback((value: boolean) => {
+        const current = runtime.current;
+        current.muted = value;
+        if (!value && current.volume === 0) {
+            current.volume = DEFAULT_RADIO_VOLUME;
+            dispatch(setRadioVolume(current.volume));
+        }
+        controller.current?.setVolume(current.volume, value);
         dispatch(setRadioMuted(value));
-    }, [dispatch]);
+        // Safari may pause when unmuting outside a gesture. Recover only when
+        // the user still intends to listen; this also respects media overlays.
+        if (!value && listeningRef.current) startCurrentStation();
+    }, [dispatch, startCurrentStation]);
     const retry = useCallback(() => {
         setPlaybackError(null);
         setRefreshVersion(version => version + 1);
@@ -258,7 +284,7 @@ export function RadioProvider({children}: {children: React.ReactNode}) {
             stationMode, setStationMode, station, nowPlaying, status,
             error: playbackError ?? (nowPlaying ? null : current?.error ?? null),
             metadataError: current?.error ?? null,
-            volume, setVolume, muted, setMuted, play, pause, retry,
+            volume, canSetVolume, setVolume, muted, setMuted, play, pause, retry,
             canPlay: enabled && !!resolvedStation && nowPlaying?.is_online === true,
             isListening, enabled, setMediaSuspended,
         }}>

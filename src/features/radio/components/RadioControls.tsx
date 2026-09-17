@@ -88,15 +88,18 @@ export function useRadioDisplay() {
 }
 
 export function RadioVolumeControl({className, touchFriendly = false}: {className?: string; touchFriendly?: boolean}) {
-    const {volume, setVolume, muted, setMuted} = useRadio();
+    const {volume, setVolume, muted, setMuted, canSetVolume} = useRadio();
     const id = useId();
-    const VolumeIcon = muted || volume === 0 ? VolumeX : volume < 50 ? Volume1 : Volume2;
+    const effectivelyMuted = muted || volume === 0;
+    const VolumeIcon = effectivelyMuted ? VolumeX : canSetVolume === true && volume < 50 ? Volume1 : Volume2;
 
     return (
         <div className={cn("space-y-1", className)}>
             <div className="flex items-center justify-between gap-3 text-xs">
                 <Label id={id} className="text-xs font-medium">Radio volume</Label>
-                <span className="tabular-nums text-muted-foreground">{muted ? `Muted · ${volume}%` : `${volume}%`}</span>
+                <span className="tabular-nums text-muted-foreground">
+                    {canSetVolume === false ? effectivelyMuted ? 'Muted' : null : effectivelyMuted ? `Muted · ${volume}%` : `${volume}%`}
+                </span>
             </div>
             <div className="flex items-center gap-3">
                 <Button
@@ -104,15 +107,18 @@ export function RadioVolumeControl({className, touchFriendly = false}: {classNam
                     size="icon"
                     variant="ghost"
                     className={cn("glass-control h-8 w-8 shrink-0 rounded-lg", touchFriendly && "h-11 w-11")}
-                    onClick={() => setMuted(!muted)}
-                    aria-label={muted ? "Unmute radio" : "Mute radio"}
-                    aria-pressed={muted}
-                    title={muted ? "Unmute radio" : "Mute radio"}
+                    onClick={() => setMuted(!effectivelyMuted)}
+                    aria-label={effectivelyMuted ? "Unmute radio" : "Mute radio"}
+                    aria-pressed={effectivelyMuted}
+                    title={effectivelyMuted ? "Unmute radio" : "Mute radio"}
                 >
                     <VolumeIcon className="h-4 w-4" aria-hidden="true"/>
                 </Button>
-                <Slider
+                {canSetVolume === false ? (
+                    <p className="text-xs leading-relaxed text-muted-foreground">Use your device’s volume controls to adjust the radio.</p>
+                ) : <Slider
                     className={touchFriendly ? "h-11" : undefined}
+                    disabled={canSetVolume !== true}
                     min={0}
                     max={100}
                     step={1}
@@ -123,7 +129,7 @@ export function RadioVolumeControl({className, touchFriendly = false}: {classNam
                         setVolume(value);
                         if (value > 0 && muted) setMuted(false);
                     }}
-                />
+                />}
             </div>
         </div>
     );

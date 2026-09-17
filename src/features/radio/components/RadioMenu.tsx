@@ -18,11 +18,12 @@ import {RADIO_STATION_OPTIONS, useRadioDisplay, useRadioPlaybackControl} from '.
 import {RadioMenuContent, RadioMenuRoot, useRadioMenu} from './RadioMenuRoot';
 
 function RadioMenuControls() {
-    const {station, stationMode, setStationMode, volume, setVolume, muted, setMuted} = useRadio();
+    const {station, stationMode, setStationMode, volume, setVolume, muted, setMuted, canSetVolume} = useRadio();
     const {statusLabel, detail} = useRadioDisplay();
     const playback = useRadioPlaybackControl();
     const volumeLabelId = useId();
     const volumeRef = useRef<HTMLDivElement>(null);
+    const effectivelyMuted = muted || volume === 0;
 
     return (
         <>
@@ -63,15 +64,18 @@ function RadioMenuControls() {
             </DropdownMenuRadioGroup>
             <DropdownMenuSeparator/>
             <DropdownMenuCheckboxItem
-                checked={muted}
+                checked={effectivelyMuted}
                 onCheckedChange={setMuted}
                 onSelect={(event) => event.preventDefault()}
                 className="cursor-pointer py-2"
             >
                 Mute radio
             </DropdownMenuCheckboxItem>
-            <DropdownMenuItem
+            {canSetVolume === false ? (
+                <p className="px-2 py-2 text-xs leading-relaxed text-muted-foreground">Use your device’s volume controls to adjust the radio.</p>
+            ) : <DropdownMenuItem
                 className="block px-2 py-2 focus:bg-transparent"
+                disabled={canSetVolume !== true}
                 textValue="Radio volume"
                 onSelect={(event) => event.preventDefault()}
                 onFocus={(event) => {
@@ -83,10 +87,11 @@ function RadioMenuControls() {
             >
                 <div className="flex items-center justify-between gap-3 text-xs">
                     <span id={volumeLabelId}>Radio volume</span>
-                    <span className="tabular-nums text-muted-foreground">{muted ? `Muted · ${volume}%` : `${volume}%`}</span>
+                    <span className="tabular-nums text-muted-foreground">{effectivelyMuted ? `Muted · ${volume}%` : `${volume}%`}</span>
                 </div>
                 <Slider
                     ref={volumeRef}
+                    disabled={canSetVolume !== true}
                     min={0}
                     max={100}
                     step={1}
@@ -104,7 +109,7 @@ function RadioMenuControls() {
                         if (value > 0 && muted) setMuted(false);
                     }}
                 />
-            </DropdownMenuItem>
+            </DropdownMenuItem>}
         </>
     );
 }
