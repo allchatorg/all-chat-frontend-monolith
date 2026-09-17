@@ -108,12 +108,19 @@ const SearchRooms: React.FC = () => {
                             onChange={(e) => setSearchTerm(e.target.value)}
                             onKeyDown={(e) => {
                                 if (e.key === "Enter" && searchTerm.trim()) {
+                                    e.preventDefault();
+                                    // Wait for results for this query, including the debounce delay.
+                                    if (searchRoomIsLoading || lastSearchedTerm !== searchTerm.trim()) {
+                                        setOpenPopover(true);
+                                        return;
+                                    }
                                     if (showCreateOption) {
                                         handleDesktopCreate();
+                                        clearSearch();
                                     } else if (rooms.length > 0) {
                                         handleDesktopJoin(rooms[0].roomId);
+                                        clearSearch();
                                     }
-                                    clearSearch();
                                 }
                             }}
                             className="glass-input box-border h-9 min-h-9 w-full rounded-md py-2 pr-10 pl-10 text-sm

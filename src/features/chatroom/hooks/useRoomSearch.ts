@@ -42,12 +42,19 @@ export const useRoomSearch = () => {
             setLastSearchedTerm("");
             return;
         }
+        let active = true;
         runSearchRoomThunk(debouncedSearchTerm)
             .then((data) => {
+                if (!active) return;
                 setRooms(data);
                 setLastSearchedTerm(debouncedSearchTerm);
             })
-            .catch(() => setRooms([]));
+            .catch(() => {
+                if (active) setRooms([]);
+            });
+        return () => {
+            active = false;
+        };
     }, [debouncedSearchTerm, runSearchRoomThunk]);
 
     const clearSearch = () => {
