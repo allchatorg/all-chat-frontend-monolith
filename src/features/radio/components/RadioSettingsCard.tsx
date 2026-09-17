@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import {Radio} from "lucide-react";
+import {IconRadio} from "@tabler/icons-react";
 import {useRadio} from "@/components/providers/RadioProvider";
 import {Card, CardContent, CardDescription, CardHeader, CardTitle} from "@/components/ui/card";
 import {Label} from "@/components/ui/label";
@@ -17,7 +17,7 @@ export function RadioSettingsCard() {
     return (
         <Card>
             <CardHeader>
-                <CardTitle className="flex items-center gap-2"><Radio className="h-5 w-5" aria-hidden="true"/>Radio</CardTitle>
+                <CardTitle className="flex items-center gap-2"><IconRadio className="h-5 w-5" aria-hidden="true"/>Radio</CardTitle>
                 <CardDescription>Two stations for your day and night. Choose a station or let your theme decide.</CardDescription>
             </CardHeader>
             <CardContent className="space-y-5">

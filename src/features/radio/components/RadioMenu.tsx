@@ -1,7 +1,8 @@
 "use client";
 
 import React, {useId, useRef} from 'react';
-import {ChevronRight, MoreVertical, Radio} from 'lucide-react';
+import {ChevronRight, MoreVertical} from 'lucide-react';
+import {IconRadio} from '@tabler/icons-react';
 import {Button} from '@/components/ui/button';
 import {Slider} from '@/components/ui/slider';
 import {
@@ -127,7 +128,7 @@ export function RadioMenuSub() {
                 aria-haspopup="dialog"
                 onSelect={(event) => requestSheet(event.currentTarget as HTMLElement)}
             >
-                <Radio className="h-4 w-4" aria-hidden="true"/>
+                <IconRadio className="h-4 w-4" aria-hidden="true"/>
                 Radio
                 <span className="ml-auto text-xs text-muted-foreground">{station.name}</span>
                 <ChevronRight className="h-4 w-4" aria-hidden="true"/>
@@ -138,7 +139,7 @@ export function RadioMenuSub() {
     return (
         <DropdownMenuSub>
             <DropdownMenuSubTrigger className="cursor-pointer gap-2 py-2.5">
-                <Radio className="h-4 w-4" aria-hidden="true"/>
+                <IconRadio className="h-4 w-4" aria-hidden="true"/>
                 Radio
                 <span className="ml-auto text-xs text-muted-foreground">{station.name}</span>
             </DropdownMenuSubTrigger>
