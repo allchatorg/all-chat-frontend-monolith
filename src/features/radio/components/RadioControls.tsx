@@ -6,7 +6,7 @@ import {useRadio} from "@/components/providers/RadioProvider";
 import {Button} from "@/components/ui/button";
 import {Label} from "@/components/ui/label";
 import {Slider} from "@/components/ui/slider";
-import type {RadioStationMode} from "@/features/radio/types";
+import {RADIO_STATIONS, type RadioStationMode} from "@/features/radio/types";
 import {cn} from "@/lib/utils";
 
 export const RADIO_STATION_OPTIONS: {
@@ -15,9 +15,9 @@ export const RADIO_STATION_OPTIONS: {
     description: string;
     Icon: typeof Sun;
 }[] = [
-    {value: "theme", label: "Follow theme", description: "Daybreak in light mode, Nightwave in dark mode.", Icon: SunMoon},
-    {value: "daybreak", label: "Daybreak", description: "Keep Daybreak playing in either theme.", Icon: Sun},
-    {value: "nightwave", label: "Nightwave", description: "Keep Nightwave playing in either theme.", Icon: MoonStar},
+    {value: "theme", label: "Follow theme", description: `${RADIO_STATIONS.daybreak.name} in light mode, ${RADIO_STATIONS.nightwave.name} in dark mode.`, Icon: SunMoon},
+    {value: "daybreak", label: RADIO_STATIONS.daybreak.name, description: `Keep ${RADIO_STATIONS.daybreak.name} playing in either theme.`, Icon: Sun},
+    {value: "nightwave", label: RADIO_STATIONS.nightwave.name, description: `Keep ${RADIO_STATIONS.nightwave.name} playing in either theme.`, Icon: MoonStar},
 ];
 
 export function useRadioPlaybackControl() {

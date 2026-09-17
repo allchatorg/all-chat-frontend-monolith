@@ -1,11 +1,12 @@
+// Persisted preference keys stay stable when station names or URL stubs change.
 export type RadioStationKey = 'daybreak' | 'nightwave';
 export type RadioStationMode = 'theme' | RadioStationKey;
 
 export interface RadioStationDefinition {
     key: RadioStationKey;
+    id: number;
     name: string;
     description: string;
-    shortcode: string;
 }
 
 export interface AzuraCastStation {
@@ -29,15 +30,15 @@ export type RadioStatus = 'idle' | 'loading' | 'buffering' | 'playing' | 'paused
 export const RADIO_STATIONS: Record<RadioStationKey, RadioStationDefinition> = {
     daybreak: {
         key: 'daybreak',
-        name: 'Daybreak',
-        description: 'Upbeat indie, funk and chill pop.',
-        shortcode: 'allchat_radio',
+        id: 1,
+        name: 'Frutiger Aero',
+        description: 'Frutiger Aero for light mode.',
     },
     nightwave: {
         key: 'nightwave',
-        name: 'Nightwave',
-        description: 'Lo-fi, ambient and downtempo electronic.',
-        shortcode: 'nightwave',
+        id: 2,
+        name: 'Synthwave',
+        description: 'Synthwave for dark mode.',
     },
 };
 

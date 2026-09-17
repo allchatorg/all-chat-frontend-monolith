@@ -170,13 +170,16 @@ export function RadioProvider({children}: {children: React.ReactNode}) {
             try {
                 if (discover || !discovered) {
                     const stations = await getRadioStations(abort.signal);
-                    discovered = stations.find(item => item.shortcode === RADIO_STATIONS[stationKey].shortcode) ?? null;
+                    // Names and URL stubs are editable in AzuraCast; IDs are stable.
+                    discovered = stations.find(item => item.id === RADIO_STATIONS[stationKey].id) ?? null;
                 }
                 if (!discovered) {
                     if (!abort.signal.aborted) setSnapshot({key: stationKey, station: null, data: null, loading: false, error: null});
                     return;
                 }
                 const data = await getRadioNowPlaying(discovered.id, abort.signal);
+                // Refresh the stream URL if its stub changes during this session.
+                discovered = data.station;
                 if (!abort.signal.aborted) setSnapshot({key: stationKey, station: discovered, data, loading: false, error: null});
             } catch {
                 if (abort.signal.aborted) return;
