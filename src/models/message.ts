@@ -12,6 +12,7 @@ export interface ReplyInfo {
     color?: string;
     /** null when the replied-to message was removed and the viewer may not see its content */
     content: string | null;
+    stickerId?: string | null;
     deleted: boolean;
     hasAttachment: boolean;
     /** name of the first attachment on the replied-to message, when one is present */
@@ -29,6 +30,7 @@ export interface PromotionInfo {
 export interface Message {
     id: number;
     content: string;
+    stickerId?: string | null;
     // Keep API timestamps serializable in Redux; parse only when formatting or comparing.
     createdAt: string;
     senderId: number;

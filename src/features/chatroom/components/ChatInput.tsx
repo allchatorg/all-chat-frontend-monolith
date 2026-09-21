@@ -2,7 +2,13 @@ import {ChatUserName} from "@/features/chatroom/components/ChatUserName";
 import React, {useEffect, useRef, useState} from "react";
 import {Button} from "@/components/ui/button";
 import {Textarea} from "@/components/ui/textarea";
-import {Bold, Check, ChevronUp, Italic, Lock, Paperclip, Reply, Send, Smile, X} from "lucide-react";
+import {Bold, Check, ChevronUp, Diamond, Italic, LoaderCircle, Lock, Paperclip, Reply, Send, Smile, Sticker, X} from "lucide-react";
+import Image from "next/image";
+import {useSelector} from "react-redux";
+import {selectUser} from "@/redux/user/userSelectors";
+import {StickerPicker} from "@/features/stickers/StickerPicker";
+import {getStickerLabel, ProSticker} from "@/features/stickers/catalog";
+import {useProDialog} from "@/features/pro/useProDialog";
 import {DictationButton} from "@/features/chatroom/components/DictationButton";
 import {ChatComposerEditor, DICTATION_META} from "@/features/chatroom/components/ChatComposerEditor";
 import {FormatToggles} from "@/features/chatroom/components/FormatToggles";
@@ -38,7 +44,7 @@ interface ChatInputProps {
     disabledReason?: string;
     messageSendingBlocked?: boolean;
     messageSendingDisabledReason?: string;
-    onSendMessage: (message: string, attachment?: Attachment, editingMessageId?: number) => void;
+    onSendMessage: (message: string, attachment?: Attachment, editingMessageId?: number, stickerId?: string) => Promise<void>;
     onEditMessage: (content: string) => void;
     maxMessageLength?: number;
     attachmentTypes?: AttachmentType[];
@@ -61,6 +67,7 @@ const validateMessage = ({
                              maxMessageLength,
                              isUploading,
                              editingMessage,
+                             stickerId,
                          }: {
     inputText: string;
     uploadedAttachment: Attachment | null;
@@ -68,12 +75,13 @@ const validateMessage = ({
     maxMessageLength: number;
     isUploading: boolean;
     editingMessage?: Message | null;
+    stickerId?: string;
 }): { valid: boolean; reason?: string } => {
     const trimmed = inputText.trim();
 
     if (!isConnected) return {valid: false, reason: "Not connected"};
     if (isUploading) return {valid: false, reason: "Uploading attachment..."};
-    if (trimmed === "" && !uploadedAttachment)
+    if (trimmed === "" && !uploadedAttachment && !stickerId && !editingMessage?.stickerId && !editingMessage?.attachments?.length)
         return {valid: false, reason: "Cannot send an empty message"};
     if (stripMarkers(inputText).length > maxMessageLength)
         return {valid: false, reason: "Message exceeds maximum length"};
@@ -196,6 +204,8 @@ const ChatInput: React.FC<ChatInputProps> = ({
     const {open, close} = useDialog();
     const {attachmentTypes} = useAttachmentHook();
     const isMobile = useIsMobile();
+    const proActive = useSelector(selectUser)?.proActive === true;
+    const openPro = useProDialog();
 
     const [isOpenEmojiPopover, setIsOpenEmojiPopover] = useState(false);
     const {resolvedTheme} = useTheme();
@@ -213,6 +223,10 @@ const ChatInput: React.FC<ChatInputProps> = ({
     const [supportedFileTypes, setSupportedFileTypes] = useState<string[]>();
     const [isUploading, setIsUploading] = useState(false);
     const [isCooldown, setIsCooldown] = useState(false);
+    const [selectedSticker, setSelectedSticker] = useState<ProSticker | null>(null);
+    const [isSending, setIsSending] = useState(false);
+    const sendingRef = useRef(false);
+    const lastEditorSyncRef = useRef<{message: Message | null; editor: Editor} | null>(null);
 
     // Length of the live, not-yet-final dictation segment currently sitting at
     // the end of the editor document. Each interim update replaces this tail so
@@ -270,7 +284,12 @@ const ChatInput: React.FC<ChatInputProps> = ({
     }, [isListening]);
 
     useEffect(() => {
-        if (!editor) return;
+        // A message-menu edit may arrive while a send is pending. Wait for the
+        // send to settle before replacing the draft, and do not clear a failed
+        // draft merely because isSending changed.
+        if (!editor || isSending) return;
+        if (lastEditorSyncRef.current?.message === editingMessage && lastEditorSyncRef.current?.editor === editor) return;
+        lastEditorSyncRef.current = {message: editingMessage, editor};
         if (editingMessage) {
             stopDictation();
             // Prefill the editor from the stored marker string — the user edits
@@ -282,7 +301,7 @@ const ChatInput: React.FC<ChatInputProps> = ({
             editor.commands.clearContent();
             setInputText("");
         }
-    }, [editingMessage, stopDictation, editor]);
+    }, [editingMessage, stopDictation, editor, isSending]);
 
     // Stop dictation if sending becomes blocked or the connection drops.
     useEffect(() => {
@@ -314,10 +333,16 @@ const ChatInput: React.FC<ChatInputProps> = ({
             .join(",")
         : "";
 
-    const handleSendMessage = () => {
-        if (isCooldown) return;
+    const handleSendMessage = async () => {
+        if (isCooldown || sendingRef.current) return;
         if (messageSendingBlocked) {
             toast.error(messageSendingDisabledReason);
+            return;
+        }
+
+        if (selectedSticker && !proActive) {
+            toast.error("An active allchat Pro subscription is needed to send stickers.");
+            openPro();
             return;
         }
 
@@ -333,6 +358,7 @@ const ChatInput: React.FC<ChatInputProps> = ({
             isConnected: isConnected && !messageSendingBlocked,
             maxMessageLength,
             isUploading,
+            stickerId: selectedSticker?.id,
         });
 
         if (!valid) {
@@ -344,26 +370,40 @@ const ChatInput: React.FC<ChatInputProps> = ({
             ? {...uploadedAttachment, tags: selectedTags}
             : undefined;
 
-        // Leading spaces and blank lines affect greentext. Preserve nonempty
-        // content exactly as previewed; attachment-only messages stay empty.
-        onSendMessage(inputText.trim() ? inputText : "", attachmentToSend, editingMessage?.id);
-
+        sendingRef.current = true;
+        setIsSending(true);
         stopDictation();
-        editor?.commands.clearContent();
-        setInputText("");
-        setSelectedFile(null);
-        setUploadedAttachment(null);
-        setSelectedTags([]);
-        setIsNsfw(false);
-
-        setIsCooldown(true);
-
-        setTimeout(() => {
-            setIsCooldown(false);
-        }, 500);
+        try {
+            // Preserve greentext indentation. Stickers and attachments may be sent alone.
+            await onSendMessage(inputText.trim() ? inputText : "", attachmentToSend, editingMessage?.id, selectedSticker?.id);
+            editor?.commands.clearContent();
+            setInputText("");
+            setSelectedFile(null);
+            setUploadedAttachment(null);
+            setSelectedTags([]);
+            setIsNsfw(false);
+            setSelectedSticker(null);
+            setIsCooldown(true);
+            setTimeout(() => setIsCooldown(false), 500);
+        } catch (error) {
+            const failure = error as {response?: {data?: {message?: string}}; message?: string} | null;
+            toast.error(failure?.response?.data?.message || failure?.message || "Failed to send message. Your draft is ready to retry.");
+        } finally {
+            sendingRef.current = false;
+            setIsSending(false);
+            // Disabling contenteditable during the request can move focus to
+            // the page. Restore typing after React enables it again, without
+            // taking focus from another control the user chose meanwhile.
+            requestAnimationFrame(() => {
+                if (editor && !editor.isDestroyed && document.activeElement === document.body) {
+                    editor.commands.focus();
+                }
+            });
+        }
     };
 
     const handleEditMessage = () => {
+        if (sendingRef.current) return;
         if (inputText.includes(".onion") || stripMarkers(inputText).includes(".onion")) {
             open(<OnionLinkWarning onClose={close}/>);
             return;
@@ -401,6 +441,7 @@ const ChatInput: React.FC<ChatInputProps> = ({
     };
 
     const handleComposerEscape = () => {
+        if (sendingRef.current) return true;
         if (editingMessage) {
             onCancelEdit();
             return true;
@@ -556,8 +597,8 @@ const ChatInput: React.FC<ChatInputProps> = ({
     const remainingChars = maxMessageLength - visibleLength;
     const isOverLimit = visibleLength > maxMessageLength || inputText.length > MAX_RAW_MESSAGE_LENGTH;
     const isEditing = !!editingMessage;
-    const canSendNewMessage = isConnected && !messageSendingBlocked;
-    const canUseTextInput = isEditing ? isConnected : canSendNewMessage;
+    const canSendNewMessage = isConnected && !messageSendingBlocked && !isSending;
+    const canUseTextInput = (isEditing ? isConnected : canSendNewMessage) && !isSending;
     const newMessageDisabledReason = messageSendingBlocked
         ? messageSendingDisabledReason
         : disabledReason;
@@ -570,9 +611,22 @@ const ChatInput: React.FC<ChatInputProps> = ({
         : "";
     const hasAttachment = !!uploadedAttachment;
     const hasContent = trimmedInput.length > 0;
+    const hasExistingMedia = !!editingMessage?.stickerId || !!editingMessage?.attachments?.length;
     const isUnchanged = isEditing && (inputText === originalContent || inputText === canonicalOriginal);
     const disableConfirmEdit =
-        (!hasContent && !hasAttachment) || !isConnected || isOverLimit || isUploading || isUnchanged;
+        (!hasContent && !hasAttachment && !hasExistingMedia) || !isConnected || isOverLimit || isUploading || isUnchanged || isSending;
+
+    const stickerPicker = (
+        <StickerPicker
+            proActive={proActive}
+            disabled={!canSendNewMessage || isUploading || isEditing || isCooldown}
+            selectedStickerId={selectedSticker?.id}
+            onSelect={sticker => {
+                setSelectedSticker(sticker);
+                editor?.commands.focus();
+            }}
+        />
+    );
 
     return (
         <div className="composer-floating relative mt-1 bg-transparent px-2 py-3 shadow-none">
@@ -600,12 +654,19 @@ const ChatInput: React.FC<ChatInputProps> = ({
                     {replyingToMessage.content && (
                         <span className="truncate min-w-0 flex-1">{stripMarkers(replyingToMessage.content)}</span>
                     )}
+                    {replyingToMessage.stickerId && (
+                        <span className="flex min-w-0 items-center gap-1 truncate">
+                            <Sticker aria-hidden="true" className="h-3 w-3 shrink-0"/>
+                            <span className="truncate">{getStickerLabel(replyingToMessage.stickerId) ?? 'Sticker'}</span>
+                        </span>
+                    )}
                     <Button
                         type="button"
                         variant="ghost"
                         size="icon"
                         className="h-6 w-6 shrink-0 text-muted-foreground hover:text-foreground"
                         onClick={() => onCancelReply?.()}
+                        disabled={isSending}
                         title="Cancel reply"
                     >
                         <X className="h-3.5 w-3.5"/>
@@ -615,11 +676,22 @@ const ChatInput: React.FC<ChatInputProps> = ({
             {!editingMessage && selectedFile && (
                 <AttachmentPreview
                     file={selectedFile}
-                    onRemove={handleRemoveFile}
-                    onEdit={handleEditFile}
+                    onRemove={() => {if (!isSending) void handleRemoveFile();}}
+                    onEdit={() => {if (!isSending) handleEditFile();}}
                     nsfw={isNsfw}
                     isUploading={isUploading}
                 />
+            )}
+
+            {!editingMessage && selectedSticker && (
+                <div className="glass-surface mb-2 flex items-center gap-3 rounded-lg border border-violet-500/20 px-3 py-2">
+                    <Image src={selectedSticker.src} alt={`${selectedSticker.name} sticker ready to send`} width={64} height={64} unoptimized className="h-16 w-16 shrink-0 object-contain"/>
+                    <div className="min-w-0 flex-1">
+                        <p className="truncate text-sm font-semibold">{selectedSticker.name}</p>
+                        <p className="mt-1 flex items-center gap-1 text-xs text-muted-foreground"><Diamond aria-hidden="true" className="h-3 w-3"/>{proActive ? 'Sticker ready to send' : 'allchat Pro is required to send this sticker'}</p>
+                    </div>
+                    <Button type="button" variant="ghost" size="icon" disabled={isSending} onClick={() => {setSelectedSticker(null); editor?.commands.focus();}} aria-label={`Remove ${selectedSticker.name} sticker`} title="Remove sticker" className="h-8 w-8 shrink-0"><X aria-hidden="true" className="h-4 w-4"/></Button>
+                </div>
             )}
 
             {isMobile && actionsExpanded && (
@@ -659,7 +731,7 @@ const ChatInput: React.FC<ChatInputProps> = ({
             <div className="flex gap-2 items-center">
                 <ChatComposerEditor
                     placeholder={
-                        canUseTextInput
+                        isSending ? "Sending message..." : canUseTextInput
                             ? editingMessage
                                 ? "Edit your message..."
                                 : "Type your message..."
@@ -681,6 +753,8 @@ const ChatInput: React.FC<ChatInputProps> = ({
                                 size="icon"
                                 className="glass-control shrink-0 h-10 w-10"
                                 disabled={!canSendNewMessage}
+                                aria-label="Choose an emoji"
+                                title="Emoji"
                             >
                                 <Smile className="h-4 w-4"/>
                             </Button>
@@ -700,6 +774,8 @@ const ChatInput: React.FC<ChatInputProps> = ({
                         </PopoverContent>
                     </Popover>
                 )}
+
+                {!editingMessage && stickerPicker}
 
                 {!isMobile && <FormatToggles editor={editor} disabled={!canUseTextInput}/>}
 
@@ -768,15 +844,16 @@ const ChatInput: React.FC<ChatInputProps> = ({
                         className="glass-control h-10 w-10 text-foreground hover:text-foreground"
                         onClick={handleSendMessage}
                         disabled={
-                            (!inputText.trim() && !uploadedAttachment) ||
+                            (!inputText.trim() && !uploadedAttachment && !selectedSticker) ||
                             !canSendNewMessage ||
                             isOverLimit ||
-                            isUploading
+                            isUploading || isCooldown || isSending
                         }
                         size="icon"
                         title="Send"
+                        aria-label={isSending ? "Sending message" : "Send message"}
                     >
-                        <Send className="h-4 w-4"/>
+                        {isSending ? <LoaderCircle aria-hidden="true" className="h-4 w-4 animate-spin"/> : <Send aria-hidden="true" className="h-4 w-4"/>}
                     </Button>
                 )}
             </div>

@@ -1,4 +1,5 @@
-import {Check, Diamond, MessageCircle, Minus, SlidersHorizontal, Smile, Sparkles} from 'lucide-react';
+import {Check, Diamond, MessageCircle, Minus, Smile, Sparkles, Sticker} from 'lucide-react';
+import Image from 'next/image';
 import {ProBadge} from '@/components/ProBadge';
 import {cn} from '@/lib/utils';
 
@@ -7,6 +8,7 @@ const benefits = [
     {label: 'Media & file sharing', basic: true},
     {label: 'Emoji reactions & replies', basic: true},
     {label: 'Light & dark themes', basic: true},
+    {label: '17 exclusive character stickers', basic: false},
     {label: 'Exclusive Pro badge', basic: false},
     {label: 'Show or hide your Pro badge', basic: false},
 ];
@@ -57,20 +59,21 @@ export function ProBenefits({username}: {username: string}) {
                     <div className="p-5">
                         <p className="flex items-center gap-1 text-[10px] font-bold uppercase tracking-widest text-violet-600 dark:text-violet-300"><Diamond className="h-3 w-3"/>Pro exclusive</p>
                         <h3 className="mt-2 font-bold">Small badge. Big personality.</h3>
-                        <p className="mt-2 text-sm leading-6 text-muted-foreground">A purple Pro badge next to your name in chats, replies, and messages. A little detail that stands out.</p>
+                        <p className="mt-2 text-sm leading-6 text-muted-foreground">A purple Pro badge next to your name in chats, replies, and messages. Show or hide it anytime in Appearance.</p>
                     </div>
                 </article>
                 <article className="overflow-hidden rounded-2xl border border-violet-200 bg-card dark:border-violet-500/30">
-                    <div aria-hidden="true" className="flex h-36 items-center justify-center overflow-hidden bg-fuchsia-50 dark:bg-fuchsia-950/20">
-                        <div className="w-48 rotate-3 space-y-3 rounded-2xl border border-fuchsia-200/60 bg-white p-4 shadow-lg shadow-fuchsia-900/5">
-                            <div className="flex items-center gap-2 text-xs font-semibold text-slate-600"><SlidersHorizontal className="h-4 w-4 text-violet-500"/>Make it yours</div>
-                            <div className="flex items-center justify-between"><ProBadge className="dark:text-violet-700"/><span className="flex h-6 w-11 items-center justify-end rounded-full bg-violet-600 px-1"><span className="h-4 w-4 rounded-full bg-white shadow-sm"/></span></div>
+                    <div aria-hidden="true" className="flex h-36 items-center justify-center overflow-hidden bg-fuchsia-50 px-4 dark:bg-fuchsia-950/20">
+                        <div className="flex -rotate-6 items-center rounded-2xl border border-fuchsia-200/60 bg-white/70 p-2 shadow-lg shadow-fuchsia-900/5 dark:bg-violet-950/50">
+                            <Image src="/stickers/pro/pepe.png" alt="" width={82} height={90} unoptimized className="h-[90px] w-[82px] object-contain"/>
+                            <Image src="/stickers/pro/wojak.png" alt="" width={82} height={90} unoptimized className="h-[90px] w-[82px] object-contain"/>
+                            <Image src="/stickers/pro/gondola.png" alt="" width={82} height={90} unoptimized className="h-[90px] w-[82px] object-contain"/>
                         </div>
                     </div>
                     <div className="p-5">
-                        <p className="flex items-center gap-1 text-[10px] font-bold uppercase tracking-widest text-violet-600 dark:text-violet-300"><Diamond className="h-3 w-3"/>Pro exclusive</p>
-                        <h3 className="mt-2 font-bold">Your badge. Your call.</h3>
-                        <p className="mt-2 text-sm leading-6 text-muted-foreground">Show a little sparkle or keep things subtle. Show or hide your badge anytime in Appearance.</p>
+                        <p className="flex items-center gap-1 text-[10px] font-bold uppercase tracking-widest text-violet-600 dark:text-violet-300"><Sticker className="h-3 w-3"/>Pro exclusive</p>
+                        <h3 className="mt-2 font-bold">A sticker for the moment.</h3>
+                        <p className="mt-2 text-sm leading-6 text-muted-foreground">Unlock 17 internet classics, from Wojak and Pepe to Gondola. Send them in rooms and private chats, with or without a caption.</p>
                     </div>
                 </article>
             </div>

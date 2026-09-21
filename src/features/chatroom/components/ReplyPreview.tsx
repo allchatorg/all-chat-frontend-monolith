@@ -1,10 +1,11 @@
 import {UserName} from "@/components/UserName";
 import React from "react";
 import {ReplyInfo} from "@/models/message";
-import {Paperclip} from "lucide-react";
+import {Paperclip, Sticker} from "lucide-react";
 import {cn} from "@/lib/utils";
 import {stripMarkers} from "@/features/chatroom/utils/messageMarkers";
 import {useProDialog} from "@/features/pro/useProDialog";
+import {getStickerLabel} from "@/features/stickers/catalog";
 
 interface ReplyPreviewProps {
     replyTo: ReplyInfo;
@@ -30,6 +31,7 @@ const ReplyPreview: React.FC<ReplyPreviewProps> = ({replyTo, isOwn = false, onJu
     const clickable = !removed && !!onJump;
     const hasContent = !removed && (replyTo.content ?? "").length > 0;
     const showAttachmentIcon = !removed && replyTo.hasAttachment;
+    const showSticker = !removed && !!replyTo.stickerId;
 
     const handleClick = (e: React.MouseEvent) => {
         e.stopPropagation();
@@ -81,7 +83,7 @@ const ReplyPreview: React.FC<ReplyPreviewProps> = ({replyTo, isOwn = false, onJu
                                 </button>
                             )}
                         />
-                        {(showAttachmentIcon || hasContent) && (
+                        {(showAttachmentIcon || hasContent || showSticker) && (
                             <button
                                 type="button"
                                 onClick={clickable ? handleClick : undefined}
@@ -92,6 +94,14 @@ const ReplyPreview: React.FC<ReplyPreviewProps> = ({replyTo, isOwn = false, onJu
                                     clickable ? "cursor-pointer hover:text-foreground" : "cursor-default"
                                 )}
                             >
+                                {showSticker && (
+                                    <>
+                                        <Sticker className="h-3 w-3 shrink-0" aria-hidden="true"/>
+                                        <span className="truncate min-w-0">
+                                            {getStickerLabel(replyTo.stickerId) ?? "Unknown"} sticker
+                                        </span>
+                                    </>
+                                )}
                                 {showAttachmentIcon && (
                                     <Paperclip className="h-3 w-3 shrink-0" aria-label="Attachment"/>
                                 )}

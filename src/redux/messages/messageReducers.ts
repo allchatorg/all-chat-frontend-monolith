@@ -130,6 +130,7 @@ export function patchReplyPreviewsForEditedMessage(messages: Message[], edited: 
                 replyTo: {
                     ...message.replyTo,
                     content: edited.content,
+                    stickerId: edited.stickerId ?? null,
                     // Removing an attachment is broadcast as an edit, so refresh the flag/name too
                     hasAttachment: (edited.attachments?.length ?? 0) > 0,
                     attachmentName: edited.attachments?.[0]?.name ?? null,
@@ -157,6 +158,7 @@ export function patchReplyPreviewsForDeletedMessage(
                     ...message.replyTo,
                     deleted: true,
                     content: retainContent ? message.replyTo.content : null,
+                    stickerId: retainContent ? message.replyTo.stickerId : null,
                 },
             }
             : message

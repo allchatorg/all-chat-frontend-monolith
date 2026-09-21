@@ -20,7 +20,7 @@ import ChatSectionSkeleton from "@/features/chatroom/components/ChatSectionSkele
 import {ChatRoomNoiseLevelEnum} from "@/models/ChatRoomNoiseLevelEnum";
 import {useDispatch, useSelector} from "react-redux";
 import {selectEditingMessage, selectReplyingToMessage} from "@/redux/chatRoom/chatRoomSelectors";
-import {AppDispatch} from "@/redux/store";
+import {AppDispatch, store} from "@/redux/store";
 import {setEditingMessage, setJumpToMessageId, setReplyingToMessage} from "@/redux/chatRoom/chatRoomUiSlice";
 import {trackAttachmentUploaded, trackMessageDeleted, trackMessageSent} from "@/lib/analytics";
 import {useAdServing} from "@/hooks/useAdServing";
@@ -222,7 +222,7 @@ const ChatSection: React.FC<ChatSectionProps> = ({
 
     const noiseLevel = selectedUserChatRoom?.roomPopulation.noiseLevel || ChatRoomNoiseLevelEnum.CONVERSATIONAL;
 
-    const handleSendMessage = (messageContent: string, attachment?: Attachment) => {
+    const handleSendMessage = async (messageContent: string, attachment?: Attachment, _editingMessageId?: number, stickerId?: string) => {
         try {
             trackMessageSent({
                 room_id: String(chatRoom.id),
@@ -237,13 +237,13 @@ const ChatSection: React.FC<ChatSectionProps> = ({
             chatRoomId: chatRoom.id,
             attachments: attachment ? [attachment] : [],
             replyToMessageId: replyingToMessage?.id,
+            stickerId,
         };
 
-        if (replyingToMessage) {
-            dispatch(setReplyingToMessage(null));
-        }
-
-        sendMessageThunk(messageToSend).then(() => {
+        await sendMessageThunk(messageToSend).then(() => {
+            if (replyingToMessage && selectReplyingToMessage(store.getState())?.id === replyingToMessage.id) {
+                dispatch(setReplyingToMessage(null));
+            }
             if (attachment) {
                 try {
                     trackAttachmentUploaded({

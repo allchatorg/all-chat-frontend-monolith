@@ -19,6 +19,7 @@ import {EditHistoryButton} from "@/features/chatroom/components/EditHistoryButto
 import {useIsMobile} from "@/lib/hooks/useIsMobile";
 import {ReactionButton} from "@/features/chatroom/components/ReactionButton";
 import {useRoleAccess} from "@/lib/hooks/useRoleAccess";
+import {StickerMessage} from "@/features/chatroom/components/StickerMessage";
 
 const MessageItem: React.FC<{
     message: Message,
@@ -123,7 +124,7 @@ const MessageItem: React.FC<{
                 attachment={attachment}
                 tags={attachment.tags.map(tag => tag.name)}
                 onClick={interactionsDisabled ? undefined : () => handleAttachmentClick(attachment)}
-                onDelete={interactionsDisabled ? undefined : (!message.deleted && message.content ? onRemoveAttachment : undefined)}
+                onDelete={interactionsDisabled ? undefined : (!message.deleted && (message.content || message.stickerId) ? onRemoveAttachment : undefined)}
             />
         );
     };
@@ -219,6 +220,8 @@ const MessageItem: React.FC<{
                             ))}
                         </div>
 
+                        {message.stickerId && <StickerMessage stickerId={message.stickerId}/>}
+
                         {message.content && (
                             <div
                                 className="text-sm text-foreground transition-colors whitespace-pre-wrap [word-break:break-word] min-w-0 max-w-full">
@@ -290,9 +293,11 @@ const MessageItem: React.FC<{
                 ))}
             </div>
 
-            {message.content && (
+            {message.stickerId && <StickerMessage stickerId={message.stickerId}/>}
+
+            {(message.content || message.stickerId) && (
                 <div className={clsx("flex flex-col max-w-full min-w-0", isOwn ? "items-end" : "items-start")}>
-                    <div
+                    {message.content && <div
                         className={clsx(
                             "shadow-sm rounded-lg px-3 py-2 wrap-break-word max-w-full min-w-0",
                             className,
@@ -309,7 +314,7 @@ const MessageItem: React.FC<{
                             <FormattedMessageText text={message.content} interactionsDisabled={interactionsDisabled}
                                                   backgroundColor={message.color}/>
                         </div>
-                    </div>
+                    </div>}
 
                     {message.editedAt && showEditButton && !interactionsDisabled && (
                         <div className={clsx("mt-0.5", isOwn ? "self-end" : "self-start")}>

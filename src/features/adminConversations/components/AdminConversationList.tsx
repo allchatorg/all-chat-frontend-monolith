@@ -9,6 +9,7 @@ import {ScrollArea} from "@/components/ui/scroll-area";
 import {Ban, ChevronLeft, ChevronRight, Loader2, MessagesSquare, Search} from "lucide-react";
 import {cn} from "@/lib/utils";
 import {AdminConversationDTO} from "@/models/AdminConversationDTO";
+import {getStickerLabel} from "@/features/stickers/catalog";
 
 interface AdminConversationListProps {
     conversations: AdminConversationDTO[];
@@ -38,6 +39,7 @@ const previewText = (conversation: AdminConversationDTO): string => {
     if (!last) return "No messages";
     if (last.deleted) return "Message deleted";
     if (last.content && last.content.trim().length > 0) return last.content;
+    if (last.stickerId) return `${getStickerLabel(last.stickerId) ?? "Unknown"} sticker`;
     if (last.attachments && last.attachments.length > 0) return "Attachment";
     return "…";
 };

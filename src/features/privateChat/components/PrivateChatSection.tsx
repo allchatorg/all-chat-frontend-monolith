@@ -10,7 +10,7 @@ import ConversationView from "@/features/chatroom/components/ConversationView";
 import PrivateChatSectionHeader from "@/features/privateChat/components/PrivateChatSectionHeader";
 import ChatSectionSkeleton from "@/features/chatroom/components/ChatSectionSkeleton";
 import {useDispatch, useSelector} from "react-redux";
-import {AppDispatch} from "@/redux/store";
+import {AppDispatch, store} from "@/redux/store";
 import {useUser} from "@/lib/hooks/useUser";
 import {useChatScrollAndPagination} from "@/lib/hooks/useChatScrollAndPagination";
 import {PRIVATE_CHAT_PAGING_CONFIG} from "@/lib/hooks/privateChatPagingConfig";
@@ -29,7 +29,6 @@ import {
     setPrivateReplyingToMessage,
 } from "@/redux/privateChat/privateChatUiSlice";
 import {trackAttachmentUploaded, trackMessageDeleted, trackMessageSent} from "@/lib/analytics";
-import {toast} from "sonner";
 
 interface PrivateChatSectionProps {
     conversation: PrivateChatDTO;
@@ -141,7 +140,7 @@ const PrivateChatSection: React.FC<PrivateChatSectionProps> = ({
         acknowledgeMessage({roomId: chatRoom.id, messageId: lastMessage.id});
     };
 
-    const handleSendMessage = (content: string, attachment?: Attachment) => {
+    const handleSendMessage = async (content: string, attachment?: Attachment, _editingMessageId?: number, stickerId?: string) => {
         try {
             trackMessageSent({
                 room_id: String(chatRoom.id),
@@ -151,16 +150,16 @@ const PrivateChatSection: React.FC<PrivateChatSectionProps> = ({
         } catch {
         }
 
-        if (replyingToMessage) {
-            dispatch(setPrivateReplyingToMessage(null));
-        }
-
-        sendMessage({
+        await sendMessage({
             content,
             chatRoomId: chatRoom.id,
             attachments: attachment ? [attachment] : [],
             replyToMessageId: replyingToMessage?.id,
+            stickerId,
         }).then(() => {
+            if (replyingToMessage && selectPrivateReplyingToMessage(store.getState())?.id === replyingToMessage.id) {
+                dispatch(setPrivateReplyingToMessage(null));
+            }
             if (attachment) {
                 try {
                     trackAttachmentUploaded({
@@ -178,12 +177,10 @@ const PrivateChatSection: React.FC<PrivateChatSectionProps> = ({
             }
         }).catch((err) => {
             if (err?.status === 403) {
-                toast.error("You can't message this user.");
                 // Refresh conversation list so the `blocked` flag updates
                 dispatch(fetchPrivateChatsThunk());
-            } else {
-                toast.error(err?.message || "Failed to send message.");
             }
+            throw err;
         });
     };
 

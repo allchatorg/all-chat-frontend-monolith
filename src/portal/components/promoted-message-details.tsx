@@ -73,6 +73,7 @@ export default function PromotedMessageDetails({data, className, isAdmin = false
     const previewMessage: Message = {
         id: data.messageId,
         content: data.messageContent,
+        stickerId: data.messageStickerId,
         createdAt: data.messageCreatedAt,
         senderId: data.userId ?? 0,
         senderUsername: data.messageSenderUsername,

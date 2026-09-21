@@ -18,6 +18,7 @@ export interface PromotedMessage {
     id: number;
     messageId: number;
     messageContent: string;
+    messageStickerId?: string | null;
     chatRoomId: number;
     chatRoomName: string;
     status: PromotedMessageStatus;
