@@ -1,7 +1,7 @@
 // Parser/serializer for the chat formatting wire format: **bold**, *italic*,
-// ***bold italic***, and >greentext lines. Message content is stored on the backend as this plain
-// marker string (max 500 chars); the composer works on rich text and converts
-// through these helpers. Markers never pair across newlines.
+// ***bold italic***, and >greentext lines. The backend stores this plain marker
+// string within the current account's raw formatting limit. The composer works
+// on rich text and converts through these helpers. Markers never pair across newlines.
 
 export interface Segment {
     text: string;

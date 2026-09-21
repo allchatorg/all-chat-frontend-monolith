@@ -8,7 +8,6 @@ import {
     fetchJoinedUserChatRoomsThunk,
     handleReconnectionThunk,
     joinAndSelectChatRoomThunk,
-    joinChatRoomThunk,
     leaveChatRoomThunk,
     resolveSelectedRoomThunk,
     selectAndLoadChatRoomThunk,
@@ -50,7 +49,7 @@ interface UseChatRooms {
     createError: Error | ApiError | null;
 
     handleSelectRoom: (userChatRoom: UserChatRoom) => void;
-    handleJoinRoom: (chatRoomId: number) => void;
+    handleJoinRoom: (chatRoomId: number) => Promise<boolean>;
     handleLeaveRoom: (userChatRoomToLeave: UserChatRoom) => void;
     handleCreateRoom: (createChatRoomRequest: CreateChatRoomRequest) => Promise<void>;
 }
@@ -74,7 +73,7 @@ export const useChatRooms = (user: User | null, chatRoomId?: number): UseChatRoo
     // useThunk is still used for create/join/leave to get the error state,
     // and for the initial fetch loading/error.
     const [runFetchUserChatRooms, fetchLoading, fetchError] = useThunk(fetchJoinedUserChatRoomsThunk);
-    const [runJoinChatRoom, , joinError] = useThunk(joinChatRoomThunk);
+    const [runJoinAndSelectChatRoom, , joinError] = useThunk(joinAndSelectChatRoomThunk);
     const [runLeaveChatRoom, , leaveError] = useThunk(leaveChatRoomThunk);
     const [runCreateAndJoin, , createError] = useThunk(createChatRoomThunk);
 
@@ -107,7 +106,7 @@ export const useChatRooms = (user: User | null, chatRoomId?: number): UseChatRoo
     // ── Effect 3: Resolve selected room ──────────────────────────────
     // Single entry point for URL-nav, first-room selection, and room details loading.
     useEffect(() => {
-        if (!user || userChatRooms.length === 0) return;
+        if (!user || (userChatRooms.length === 0 && !chatRoomId)) return;
 
         // For URL-based room IDs, only resolve once per chatRoomId value
         if (chatRoomId && resolvedUrlRoomRef.current === chatRoomId) return;
@@ -116,7 +115,11 @@ export const useChatRooms = (user: User | null, chatRoomId?: number): UseChatRoo
             resolvedUrlRoomRef.current = chatRoomId;
         }
 
-        dispatch(resolveSelectedRoomThunk({urlRoomId: chatRoomId}));
+        void dispatch(resolveSelectedRoomThunk({urlRoomId: chatRoomId})).unwrap().catch((error) => {
+            toast.error(typeof error === "string" ? error : error?.message || "Failed to open the chatroom.", {
+                id: `open-chat-room-${chatRoomId ?? "selected"}`,
+            });
+        });
     }, [user?.id, userChatRooms.length, chatRoomId, dispatch]);
 
     // ── Handlers exposed to consumers ────────────────────────────────
@@ -128,9 +131,15 @@ export const useChatRooms = (user: User | null, chatRoomId?: number): UseChatRoo
         dispatch(selectAndLoadChatRoomThunk(userChatRoom));
     }, [user, selectedUserChatRoom?.id, dispatch]);
 
-    const handleJoinRoom = useCallback((chatRoomId: number) => {
-        dispatch(joinAndSelectChatRoomThunk(chatRoomId));
-    }, [dispatch]);
+    const handleJoinRoom = useCallback(async (chatRoomId: number): Promise<boolean> => {
+        try {
+            await runJoinAndSelectChatRoom(chatRoomId);
+            return true;
+        } catch (error: any) {
+            toast.error(error?.message || "Failed to join the chatroom.");
+            return false;
+        }
+    }, [runJoinAndSelectChatRoom]);
 
     const handleLeaveRoom = useCallback((userChatRoomToLeave: UserChatRoom) => {
         runLeaveChatRoom(userChatRoomToLeave.chatRoomId);

@@ -7,6 +7,7 @@ import {Card, CardContent, CardDescription, CardHeader, CardTitle} from '@/compo
 import {Label} from '@/components/ui/label'
 import {ShieldCheck} from 'lucide-react'
 import {ConfirmationMessage} from '@/components/ConfirmationMessage'
+import {ACCOUNT_LIMITS} from '@/lib/accountLimits'
 
 interface EmailVerificationProps {
     email: string | null | undefined,
@@ -45,7 +46,7 @@ export const EmailVerification: React.FC<EmailVerificationProps> = ({
                     Email Verification
                 </CardTitle>
                 <CardDescription>
-                    Verify your email address to secure your account.
+                    Verify your email address to secure your account and join up to {ACCOUNT_LIMITS.verifiedRooms} chatrooms with Basic.
                 </CardDescription>
             </CardHeader>
 

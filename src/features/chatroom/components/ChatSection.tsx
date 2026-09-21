@@ -5,6 +5,7 @@ import {Card, CardHeader} from "@/components/ui/card";
 import {ChatRoom} from "@/models/ChatRoom";
 import {Attachment} from "@/models/Attachment";
 import {useUser} from "@/lib/hooks/useUser";
+import {getAccountLimits} from "@/lib/accountLimits";
 import ChatSectionHeader from "@/features/chatroom/components/ChatSectionHeader";
 import ConversationView from "@/features/chatroom/components/ConversationView";
 import {UserChatRoom} from "@/models/UserChatRoom";
@@ -39,8 +40,6 @@ interface ChatSectionProps {
     selectedUserChatRoom: UserChatRoom | null | undefined,
     className?: string;
 }
-
-const MAX_MESSAGE_LENGTH = 500;
 
 const ChatSection: React.FC<ChatSectionProps> = ({
                                                      chatRoom,
@@ -222,7 +221,7 @@ const ChatSection: React.FC<ChatSectionProps> = ({
 
     const noiseLevel = selectedUserChatRoom?.roomPopulation.noiseLevel || ChatRoomNoiseLevelEnum.CONVERSATIONAL;
 
-    const handleSendMessage = (messageContent: string, attachment?: Attachment) => {
+    const handleSendMessage = async (messageContent: string, attachment?: Attachment) => {
         try {
             trackMessageSent({
                 room_id: String(chatRoom.id),
@@ -239,33 +238,28 @@ const ChatSection: React.FC<ChatSectionProps> = ({
             replyToMessageId: replyingToMessage?.id,
         };
 
-        if (replyingToMessage) {
-            dispatch(setReplyingToMessage(null));
+        await sendMessageThunk(messageToSend);
+        if (attachment) {
+            try {
+                trackAttachmentUploaded({
+                    file_type: String(attachment.mime),
+                    file_size: attachment.size,
+                    room_id: String(chatRoom.id),
+                });
+            } catch {
+            }
         }
-
-        sendMessageThunk(messageToSend).then(() => {
-            if (attachment) {
-                try {
-                    trackAttachmentUploaded({
-                        file_type: String(attachment.mime),
-                        file_size: attachment.size,
-                        room_id: String(chatRoom.id),
-                    });
-                } catch {
-                }
-            }
-            if (isLastMessageInMemory()) {
-                scrollToBottom();
-            } else {
-                handleJumpToPresent();
-            }
-        })
+        if (isLastMessageInMemory()) {
+            scrollToBottom();
+        } else {
+            handleJumpToPresent();
+        }
     };
 
-    const handleEditMessage = (newContent: string) => {
+    const handleEditMessage = async (newContent: string) => {
         if (!editingMessage) return;
 
-        editMessage({messageId: editingMessage.id, editMessageRequest: {content: newContent}})
+        await editMessage({messageId: editingMessage.id, editMessageRequest: {content: newContent}});
     }
 
     const handleCancelEdit = () => {
@@ -330,7 +324,7 @@ const ChatSection: React.FC<ChatSectionProps> = ({
                 interactionsDisabled={chatRoom.isArchived}
                 archivedRoom={chatRoom.isArchived}
                 isConnected={isConnected}
-                maxMessageLength={MAX_MESSAGE_LENGTH}
+                maxMessageLength={getAccountLimits(user).messageCharacters}
                 editingMessage={editingMessage}
                 replyingToMessage={replyingToMessage}
                 onSendMessage={handleSendMessage}

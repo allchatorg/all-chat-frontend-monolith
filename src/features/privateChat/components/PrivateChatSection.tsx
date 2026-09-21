@@ -12,6 +12,7 @@ import ChatSectionSkeleton from "@/features/chatroom/components/ChatSectionSkele
 import {useDispatch, useSelector} from "react-redux";
 import {AppDispatch} from "@/redux/store";
 import {useUser} from "@/lib/hooks/useUser";
+import {getAccountLimits} from "@/lib/accountLimits";
 import {useChatScrollAndPagination} from "@/lib/hooks/useChatScrollAndPagination";
 import {PRIVATE_CHAT_PAGING_CONFIG} from "@/lib/hooks/privateChatPagingConfig";
 import {useThunk} from "@/lib/hooks/useThunk";
@@ -39,8 +40,6 @@ interface PrivateChatSectionProps {
     onHideConversation: () => void;
     onOpenMobileSidebar?: () => void;
 }
-
-const MAX_MESSAGE_LENGTH = 500;
 
 const PrivateChatSection: React.FC<PrivateChatSectionProps> = ({
                                                                    conversation,
@@ -141,7 +140,7 @@ const PrivateChatSection: React.FC<PrivateChatSectionProps> = ({
         acknowledgeMessage({roomId: chatRoom.id, messageId: lastMessage.id});
     };
 
-    const handleSendMessage = (content: string, attachment?: Attachment) => {
+    const handleSendMessage = async (content: string, attachment?: Attachment) => {
         try {
             trackMessageSent({
                 room_id: String(chatRoom.id),
@@ -151,45 +150,42 @@ const PrivateChatSection: React.FC<PrivateChatSectionProps> = ({
         } catch {
         }
 
-        if (replyingToMessage) {
-            dispatch(setPrivateReplyingToMessage(null));
-        }
-
-        sendMessage({
-            content,
-            chatRoomId: chatRoom.id,
-            attachments: attachment ? [attachment] : [],
-            replyToMessageId: replyingToMessage?.id,
-        }).then(() => {
-            if (attachment) {
-                try {
-                    trackAttachmentUploaded({
-                        file_type: String(attachment.mime),
-                        file_size: attachment.size,
-                        room_id: String(chatRoom.id),
-                    });
-                } catch {
-                }
-            }
-            if (isLastMessageInMemory()) {
-                scrollToBottom();
-            } else {
-                handleJumpToPresent();
-            }
-        }).catch((err) => {
+        try {
+            await sendMessage({
+                content,
+                chatRoomId: chatRoom.id,
+                attachments: attachment ? [attachment] : [],
+                replyToMessageId: replyingToMessage?.id,
+            });
+        } catch (err: any) {
             if (err?.status === 403) {
-                toast.error("You can't message this user.");
-                // Refresh conversation list so the `blocked` flag updates
+                // Refresh the conversation's blocked flag while the composer
+                // preserves the rejected draft and reports the failure once.
                 dispatch(fetchPrivateChatsThunk());
-            } else {
-                toast.error(err?.message || "Failed to send message.");
+                throw Object.assign(new Error("You can't message this user."), {status: 403});
             }
-        });
+            throw err;
+        }
+        if (attachment) {
+            try {
+                trackAttachmentUploaded({
+                    file_type: String(attachment.mime),
+                    file_size: attachment.size,
+                    room_id: String(chatRoom.id),
+                });
+            } catch {
+            }
+        }
+        if (isLastMessageInMemory()) {
+            scrollToBottom();
+        } else {
+            handleJumpToPresent();
+        }
     };
 
-    const handleEditMessage = (newContent: string) => {
+    const handleEditMessage = async (newContent: string) => {
         if (!editingMessage) return;
-        editMessage({messageId: editingMessage.id, editMessageRequest: {content: newContent}});
+        await editMessage({messageId: editingMessage.id, editMessageRequest: {content: newContent}});
     };
 
     const handleCancelEdit = () => {
@@ -235,7 +231,7 @@ const PrivateChatSection: React.FC<PrivateChatSectionProps> = ({
                 interactionsDisabled={false}
                 archivedRoom={false}
                 isConnected={!!chatRoom}
-                maxMessageLength={MAX_MESSAGE_LENGTH}
+                maxMessageLength={getAccountLimits(user).messageCharacters}
                 editingMessage={editingMessage}
                 replyingToMessage={replyingToMessage}
                 onSendMessage={handleSendMessage}

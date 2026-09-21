@@ -11,6 +11,7 @@ import {AlertTriangle, Mail, ShieldCheck} from "lucide-react";
 import {selectUser} from "@/redux/user/userSelectors";
 import {sendEmailVerificationThunk, verifyEmailThunk} from "@/redux/user/usersThunk";
 import {useThunk} from "@/lib/hooks/useThunk";
+import {ACCOUNT_LIMITS} from "@/lib/accountLimits";
 
 const VerifyMail: React.FC = () => {
     const user = useSelector(selectUser);
@@ -48,7 +49,8 @@ const VerifyMail: React.FC = () => {
                     Verify your email
                 </CardTitle>
                 <CardDescription>
-                    Secure your account by verifying your email address.</CardDescription>
+                    Verify your email to secure your account and join up to {ACCOUNT_LIMITS.verifiedRooms} chatrooms with Basic.
+                </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
                 <div>
