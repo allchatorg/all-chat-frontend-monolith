@@ -1,5 +1,7 @@
 'use client';
 
+import {UserName} from "@/components/UserName";
+
 import * as React from 'react';
 import {useCallback, useEffect, useState} from 'react';
 import {useParams, useRouter} from "next/navigation";
@@ -250,7 +252,7 @@ export default function AppealDetailPage() {
                                 href={`/users/${summary.userId}/details`}
                                 className="font-medium text-blue-600 hover:underline dark:text-blue-400"
                             >
-                                {summary.username}
+                                <UserName userId={summary.userId} username={summary.username}/>
                             </Link>
                             <span className="text-muted-foreground">
                                 · {appeal.priorBanCount} prior ban{appeal.priorBanCount === 1 ? "" : "s"}

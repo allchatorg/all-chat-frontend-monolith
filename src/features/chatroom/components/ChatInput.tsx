@@ -1,3 +1,7 @@
+import {fontPresetStyle} from "@/lib/fontPresets";
+import {useUserFonts} from "@/lib/hooks/useUserFonts";
+import {useSelector} from "react-redux";
+import {selectUser} from "@/redux/user/userSelectors";
 import {ChatUserName} from "@/features/chatroom/components/ChatUserName";
 import React, {useEffect, useRef, useState} from "react";
 import {Button} from "@/components/ui/button";
@@ -200,6 +204,13 @@ const ChatInput: React.FC<ChatInputProps> = ({
     const [isOpenEmojiPopover, setIsOpenEmojiPopover] = useState(false);
     const {resolvedTheme} = useTheme();
 
+    const user = useSelector(selectUser);
+    const fonts = useUserFonts(user?.id, user ?? undefined);
+    const replyFonts = useUserFonts(replyingToMessage?.senderId, {
+        usernameFont: replyingToMessage?.senderUsernameFont,
+        messageFont: replyingToMessage?.senderMessageFont,
+        fontRevision: replyingToMessage?.senderFontRevision,
+    });
     // `inputText` holds the serialized **bold**/*italic* marker string mirrored
     // from the rich editor on every update — it is what gets validated, counted
     // against the length limit, and sent to the backend.
@@ -584,7 +595,7 @@ const ChatInput: React.FC<ChatInputProps> = ({
                     <span
                         className="min-w-0 max-w-[40%] font-medium"
                     >
-                        <ChatUserName userId={replyingToMessage.senderId} username={replyingToMessage.senderUsername} proBadgeVisible={replyingToMessage.senderProBadgeVisible} proBadgeRevision={replyingToMessage.senderProBadgeRevision}/>
+                        <ChatUserName userId={replyingToMessage.senderId} username={replyingToMessage.senderUsername} proBadgeVisible={replyingToMessage.senderProBadgeVisible} proBadgeRevision={replyingToMessage.senderProBadgeRevision} usernameFont={replyingToMessage.senderUsernameFont} messageFont={replyingToMessage.senderMessageFont} fontRevision={replyingToMessage.senderFontRevision}/>
                     </span>
                     {replyingToMessage.attachments?.length > 0 && (
                         <Paperclip className="h-3 w-3 shrink-0" aria-label="Attachment"/>
@@ -598,7 +609,7 @@ const ChatInput: React.FC<ChatInputProps> = ({
                         </span>
                     )}
                     {replyingToMessage.content && (
-                        <span className="truncate min-w-0 flex-1">{stripMarkers(replyingToMessage.content)}</span>
+                        <span className="truncate min-w-0 flex-1" style={fontPresetStyle(replyFonts.messageFont)}>{stripMarkers(replyingToMessage.content)}</span>
                     )}
                     <Button
                         type="button"
@@ -658,6 +669,7 @@ const ChatInput: React.FC<ChatInputProps> = ({
 
             <div className="flex gap-2 items-center">
                 <ChatComposerEditor
+                    style={fontPresetStyle(fonts.messageFont)}
                     placeholder={
                         canUseTextInput
                             ? editingMessage

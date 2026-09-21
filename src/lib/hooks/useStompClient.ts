@@ -64,7 +64,8 @@ import {fetchNotificationsThunk, fetchUnreadCountThunk} from "@/redux/notificati
 import {getNotificationRoute} from "@/features/notifications/notificationRoutes";
 import {adsApi as adsPortalApi} from "@ads/store/services/adsApi";
 import {adminAdsApi} from "@ads/store/services/adminAdsApi";
-import {applyProBadgeUpdate, clearProBadgeStore, ProBadgeUpdate, refreshRegisteredProBadges} from "@/lib/proBadgeStore";
+import {applyProBadgeUpdate, ProBadgeUpdate, refreshRegisteredProBadges} from "@/lib/proBadgeStore";
+import {applyFontUpdate, ingestFontSnapshots} from '@/lib/fontStore';
 import {getMe} from "@/api/user/userAPI";
 import {setUser} from "@/redux/user/userSlice";
 
@@ -119,10 +120,11 @@ export function useStompWithRedux(
 
     useEffect(() => {
         shownNotificationIdsRef.current.clear();
-        clearProBadgeStore();
     }, [user?.id]);
 
     useEffect(() => {
+        if (user) applyFontUpdate({userId: user.id, usernameFont: user.usernameFont,
+            messageFont: user.messageFont, fontRevision: user.fontRevision});
         if (user?.proBadgeVisible !== undefined) {
             applyProBadgeUpdate({
                 userId: user.id,
@@ -130,7 +132,7 @@ export function useStompWithRedux(
                 proBadgeRevision: user.proBadgeRevision ?? 0,
             });
         }
-    }, [user?.id, user?.proBadgeVisible, user?.proBadgeRevision]);
+    }, [user?.id, user?.proBadgeVisible, user?.proBadgeRevision, user?.usernameFont, user?.messageFont, user?.fontRevision]);
 
     useEffect(() => {
         loadedChatRoomsRef.current = loadedChatRooms;
@@ -153,6 +155,7 @@ export function useStompWithRedux(
             try {
                 const parsedMessage: WebSocketMessage = JSON.parse(message.body);
                 const {type, data} = parsedMessage;
+                ingestFontSnapshots(data);
                 const msg = data as Message;
 
                 const user = userRef.current;

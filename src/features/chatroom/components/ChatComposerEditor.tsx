@@ -14,6 +14,7 @@ export const DICTATION_META = "dictation";
 
 interface ChatComposerEditorProps {
     placeholder: string;
+    style?: React.CSSProperties;
     editable: boolean;
     onSerializedChange: (serialized: string, isDictation: boolean) => void;
     onEnter: () => void;
@@ -27,6 +28,7 @@ interface ChatComposerEditorProps {
 // works with.
 export const ChatComposerEditor: React.FC<ChatComposerEditorProps> = ({
                                                                           placeholder,
+                                                                          style,
                                                                           editable,
                                                                           onSerializedChange,
                                                                           onEnter,
@@ -111,6 +113,7 @@ export const ChatComposerEditor: React.FC<ChatComposerEditorProps> = ({
     return (
         <EditorContent
             editor={editor}
+            style={style}
             className={cn(
                 "chat-composer flex-1 min-w-0",
                 !editable && "cursor-not-allowed opacity-50 [&_*]:pointer-events-none"

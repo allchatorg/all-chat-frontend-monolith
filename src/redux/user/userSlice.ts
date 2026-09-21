@@ -18,6 +18,7 @@ import {
 } from "@/redux/user/usersThunk";
 import {Tag} from "@/models/Tag";
 import {claimAccountThunk, logoutThunk} from "../auth/authThunk";
+import {mergeOwnerFonts} from '@/lib/fontPresets';
 
 interface UserState {
     user: User | null;
@@ -33,6 +34,8 @@ const initialState: UserState = {
 
 function mergeOwnerSnapshot(current: User | null, incoming: User | null): User | null {
     if (!current || !incoming || current.id !== incoming.id) return incoming;
+
+    incoming = mergeOwnerFonts(current, incoming);
 
     const currentRevision = current.proBadgeRevision ?? 0;
     const incomingRevision = incoming.proBadgeRevision ?? 0;

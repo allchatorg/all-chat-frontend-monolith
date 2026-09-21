@@ -14,6 +14,9 @@ export function addReactionRequestToMessage(
         username: reactionRequest.reactedBy.username,
         proBadgeVisible: reactionRequest.reactedBy.proBadgeVisible,
         proBadgeRevision: reactionRequest.reactedBy.proBadgeRevision,
+        usernameFont: reactionRequest.reactedBy.usernameFont,
+        messageFont: reactionRequest.reactedBy.messageFont,
+        fontRevision: reactionRequest.reactedBy.fontRevision,
     };
     const userCount = (message.reactions[reactionIndex]?.usersCount || 0) + 1;
 
@@ -130,6 +133,12 @@ export function patchReplyPreviewsForEditedMessage(messages: Message[], edited: 
                 replyTo: {
                     ...message.replyTo,
                     content: edited.content,
+                    ...(edited.senderUsernameFont !== undefined && edited.senderMessageFont !== undefined
+                        && edited.senderFontRevision !== undefined ? {
+                            senderUsernameFont: edited.senderUsernameFont,
+                            senderMessageFont: edited.senderMessageFont,
+                            senderFontRevision: edited.senderFontRevision,
+                        } : {}),
                     // Removing an attachment is broadcast as an edit, so refresh the flag/name too
                     hasAttachment: (edited.attachments?.length ?? 0) > 0,
                     attachmentName: edited.attachments?.[0]?.name ?? null,

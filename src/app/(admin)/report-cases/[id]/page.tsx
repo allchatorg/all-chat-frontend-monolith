@@ -1,4 +1,5 @@
 'use client';
+import {UserName} from "@/components/UserName";
 import * as React from 'react';
 import {useCallback, useEffect} from 'react';
 import {AdminPageHeader} from "@/components/AdminPageHeader";
@@ -308,7 +309,11 @@ export default function Page() {
                     {hasUnderageReport && (
                         <div className="flex flex-wrap items-center gap-2">
                             <span className="text-sm font-medium">
-                                Reported user{reportedMessage?.senderUsername ? `: ${reportedMessage.senderUsername}` : ""}
+                                Reported user{reportedMessage?.senderUsername && <>: <UserName
+                                    userId={reportedMessage.senderId} username={reportedMessage.senderUsername}
+                                    usernameFont={reportedMessage.senderUsernameFont} messageFont={reportedMessage.senderMessageFont}
+                                    fontRevision={reportedMessage.senderFontRevision}
+                                    proBadgeVisible={reportedMessage.senderProBadgeVisible} proBadgeRevision={reportedMessage.senderProBadgeRevision}/></>}
                             </span>
                             <IdVerificationStatusBadge status={reportedUserIdStatus}/>
                         </div>

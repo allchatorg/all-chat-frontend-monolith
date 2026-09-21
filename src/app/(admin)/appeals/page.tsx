@@ -1,5 +1,7 @@
 'use client'
 
+import {UserName} from "@/components/UserName";
+
 import {Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle} from "@/components/ui/card";
 import React, {useEffect, useState} from 'react';
 import {useRouter} from "next/navigation";
@@ -110,7 +112,7 @@ export default function Appeals() {
                                             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
                                                 <div className="flex items-center gap-2">
                                                     <User className="h-4 w-4 text-muted-foreground shrink-0"/>
-                                                    <span className="font-medium">{appeal.username}</span>
+                                                    <span className="font-medium"><UserName userId={appeal.userId} username={appeal.username}/></span>
                                                     <span className="text-xs text-muted-foreground">
                                                         #{appeal.id}
                                                     </span>

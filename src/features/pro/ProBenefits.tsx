@@ -9,6 +9,7 @@ const benefits = [
     {label: 'Light & dark themes', basic: true},
     {label: 'Exclusive Pro badge', basic: false},
     {label: 'Show or hide your Pro badge', basic: false},
+    {label: 'Username & message font presets', basic: false},
 ];
 
 export function ProBenefits({username}: {username: string}) {
@@ -69,8 +70,8 @@ export function ProBenefits({username}: {username: string}) {
                     </div>
                     <div className="p-5">
                         <p className="flex items-center gap-1 text-[10px] font-bold uppercase tracking-widest text-violet-600 dark:text-violet-300"><Diamond className="h-3 w-3"/>Pro exclusive</p>
-                        <h3 className="mt-2 font-bold">Your badge. Your call.</h3>
-                        <p className="mt-2 text-sm leading-6 text-muted-foreground">Show a little sparkle or keep things subtle. Show or hide your badge anytime in Appearance.</p>
+                        <h3 className="mt-2 font-bold">Your style. Your call.</h3>
+                        <p className="mt-2 text-sm leading-6 text-muted-foreground">Choose from a few familiar fonts for your username and messages. Show or hide your badge, and make it yours in Appearance.</p>
                     </div>
                 </article>
             </div>

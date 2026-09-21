@@ -1,3 +1,5 @@
+import {fontPresetStyle} from "@/lib/fontPresets";
+import {useUserFonts} from "@/lib/hooks/useUserFonts";
 import {ChatUserName} from "@/features/chatroom/components/ChatUserName";
 import clsx from "clsx";
 import {useDispatch} from "react-redux";
@@ -45,6 +47,12 @@ const MessageItem: React.FC<{
           onRemoveAttachment,
           interactionsDisabled = false,
       }) => {
+    const fonts = useUserFonts(message.advert ? undefined : message.senderId, {
+        usernameFont: message.senderUsernameFont,
+        messageFont: message.senderMessageFont,
+        fontRevision: message.senderFontRevision,
+    });
+    const messageFontStyle = message.advert ? undefined : fontPresetStyle(fonts.messageFont);
     const dispatch = useDispatch();
     const isMobile = useIsMobile();
     const {isPrincipal, isStaffMember} = useRoleAccess();
@@ -187,7 +195,7 @@ const MessageItem: React.FC<{
                     <div className="min-w-0 flex-1">
                         <div className="mb-1 flex items-center gap-2">
                                 <span className="min-w-0 text-sm font-medium transition-colors text-foreground">
-                                    <ChatUserName userId={message.senderId} username={message.senderUsername} proBadgeVisible={message.senderProBadgeVisible} proBadgeRevision={message.senderProBadgeRevision}/>
+                                    <ChatUserName userId={message.senderId} username={message.senderUsername} proBadgeVisible={message.senderProBadgeVisible} proBadgeRevision={message.senderProBadgeRevision} usernameFont={message.senderUsernameFont} messageFont={message.senderMessageFont} fontRevision={message.senderFontRevision}/>
                                 </span>
                             {message.bannedUser && <BannedUserBadge/>}
                             {message.deleted && <DeletedBadge/>}
@@ -221,7 +229,8 @@ const MessageItem: React.FC<{
 
                         {message.content && (
                             <div
-                                className="text-sm text-foreground transition-colors whitespace-pre-wrap [word-break:break-word] min-w-0 max-w-full">
+                                className="text-sm text-foreground transition-colors whitespace-pre-wrap [word-break:break-word] min-w-0 max-w-full"
+                                style={messageFontStyle}>
                                 <FormattedMessageText text={message.content} interactionsDisabled={interactionsDisabled}/>
                             </div>
                         )}
@@ -252,8 +261,8 @@ const MessageItem: React.FC<{
             {/* Header with sender name and badges */}
             {!isOwn && (showSenderName || message.bannedUser || message.deleted || showChatRoomName || showPromotedBadge || showPromotionPendingBadge) && (
                 <div
-                    className="text-xs font-medium transition-colors text-muted-foreground flex items-center gap-1 mb-1">
-                    {showSenderName && <ChatUserName userId={message.senderId} username={message.senderUsername} proBadgeVisible={message.senderProBadgeVisible} proBadgeRevision={message.senderProBadgeRevision}/>}
+                    className="text-xs font-medium transition-colors text-muted-foreground flex min-w-0 max-w-full items-center gap-1 mb-1">
+                    {showSenderName && <ChatUserName userId={message.senderId} username={message.senderUsername} proBadgeVisible={message.senderProBadgeVisible} proBadgeRevision={message.senderProBadgeRevision} usernameFont={message.senderUsernameFont} messageFont={message.senderMessageFont} fontRevision={message.senderFontRevision}/>}
                     {message.bannedUser && <BannedUserBadge/>}
                     {message.deleted && <DeletedBadge/>}
                     {showPromotedBadge && <PromotedBadge/>}
@@ -305,7 +314,7 @@ const MessageItem: React.FC<{
                             color: getMessageTextColor(message.color),
                         }}
                     >
-                        <div className="text-sm font-normal whitespace-pre-wrap [word-break:break-word] min-w-0">
+                        <div className="text-sm font-normal whitespace-pre-wrap [word-break:break-word] min-w-0" style={messageFontStyle}>
                             <FormattedMessageText text={message.content} interactionsDisabled={interactionsDisabled}
                                                   backgroundColor={message.color}/>
                         </div>

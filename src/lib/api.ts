@@ -1,6 +1,11 @@
 import axios, {AxiosError, AxiosInstance, InternalAxiosRequestConfig} from "axios";
 import {getSessionToken, removeSessionToken} from "@/lib/tokenManager";
 import {Ban} from "@/models/Ban";
+import {getFontStoreGeneration, ingestFontSnapshots} from '@/lib/fontStore';
+
+interface AppearanceRequestConfig extends InternalAxiosRequestConfig {
+    fontStoreGeneration?: number;
+}
 
 const api: AxiosInstance = axios.create({
     baseURL: process.env.NEXT_PUBLIC_BASE_API,
@@ -27,6 +32,7 @@ const CREDENTIAL_ENDPOINTS = new Set([
 
 api.interceptors.request.use(
     (config: InternalAxiosRequestConfig): InternalAxiosRequestConfig => {
+        (config as AppearanceRequestConfig).fontStoreGeneration = getFontStoreGeneration();
         const sessionToken = getSessionToken();
         if (sessionToken && config.headers && !CREDENTIAL_ENDPOINTS.has(config.url ?? "")) {
             config.headers['X-Auth-Token'] = sessionToken.token;
@@ -36,7 +42,10 @@ api.interceptors.request.use(
 
 
 api.interceptors.response.use(
-    (response) => response,
+    (response) => {
+        ingestFontSnapshots(response.data, (response.config as AppearanceRequestConfig).fontStoreGeneration);
+        return response;
+    },
     (error: AxiosError<any>) => {
         if (error.response && isBanResponse(error.response)) {
             // Keep the session token: banned users stay authenticated so they can reach

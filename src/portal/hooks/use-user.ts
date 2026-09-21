@@ -1,9 +1,10 @@
+import type {FontSnapshot} from "@/lib/fontPresets";
 import {UserRole} from "@ads/models/user-role";
 import {useAppSelector} from "@ads/store/hooks";
 import {selectCurrentUser, selectIsAdmin, selectIsAuthenticated, selectIsSuperAdmin} from "@ads/store/slices/authSlice";
 import {Role} from "@ads/store/services/userApi";
 
-export interface User {
+export interface User extends Partial<FontSnapshot> {
     id: string;
     name: string;
     email: string;
@@ -36,6 +37,9 @@ export function useUser() {
             role: mapRole(currentUser.role),
             proBadgeVisible: currentUser.proBadgeVisible,
             proBadgeRevision: currentUser.proBadgeRevision,
+            usernameFont: currentUser.usernameFont,
+            messageFont: currentUser.messageFont,
+            fontRevision: currentUser.fontRevision,
         }
         : {
             id: "",

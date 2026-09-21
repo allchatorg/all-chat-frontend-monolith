@@ -1,3 +1,5 @@
+import {fontPresetStyle} from "@/lib/fontPresets";
+import {useUserFonts} from "@/lib/hooks/useUserFonts";
 import {UserName} from "@/components/UserName";
 import React from "react";
 import {ReplyInfo} from "@/models/message";
@@ -25,6 +27,11 @@ interface ReplyPreviewProps {
  * text); if the original is attachment-only, the icon and name are shown alone.
  */
 const ReplyPreview: React.FC<ReplyPreviewProps> = ({replyTo, isOwn = false, onJump}) => {
+    const fonts = useUserFonts(replyTo.senderId, {
+        usernameFont: replyTo.senderUsernameFont,
+        messageFont: replyTo.senderMessageFont,
+        fontRevision: replyTo.senderFontRevision,
+    });
     const openPro = useProDialog();
     const removed = replyTo.content === null;
     const clickable = !removed && !!onJump;
@@ -64,6 +71,9 @@ const ReplyPreview: React.FC<ReplyPreviewProps> = ({replyTo, isOwn = false, onJu
                             username={replyTo.senderUsername}
                             proBadgeVisible={replyTo.senderProBadgeVisible}
                             proBadgeRevision={replyTo.senderProBadgeRevision}
+                            usernameFont={replyTo.senderUsernameFont}
+                            messageFont={replyTo.senderMessageFont}
+                            fontRevision={replyTo.senderFontRevision}
                             className="max-w-[50%] font-medium"
                             onProClick={openPro}
                             renderUsername={username => (
@@ -101,7 +111,8 @@ const ReplyPreview: React.FC<ReplyPreviewProps> = ({replyTo, isOwn = false, onJu
                                     </span>
                                 )}
                                 {hasContent && (
-                                    <span className={cn("truncate min-w-0", replyTo.deleted && "italic")}>
+                                    <span className={cn("truncate min-w-0", replyTo.deleted && "italic")}
+                                          style={fontPresetStyle(fonts.messageFont)}>
                                         {stripMarkers(replyTo.content ?? "")}
                                     </span>
                                 )}

@@ -1,3 +1,4 @@
+import {UserName} from "@/components/UserName";
 import React from "react";
 import {Report, ReportOrigin} from "@/models/Report";
 import {Card, CardContent, CardHeader} from "@/components/ui/card";
@@ -18,7 +19,14 @@ const ReportCard: React.FC<ReportCardProps> = ({report}) => {
             <CardHeader>
                 <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
                     <div className="flex items-center gap-2">
-                        <span className="font-medium text-foreground">{reporterLabel}</span>
+                        <span className="font-medium text-foreground">
+                            {isSystemReport || !report.reporter ? reporterLabel : (
+                                <UserName userId={report.reporter.id} username={reporterLabel}
+                                          usernameFont={report.reporter.usernameFont} messageFont={report.reporter.messageFont}
+                                          fontRevision={report.reporter.fontRevision}
+                                          proBadgeVisible={report.reporter.proBadgeVisible} proBadgeRevision={report.reporter.proBadgeRevision}/>
+                            )}
+                        </span>
                         {isSystemReport && (
                             <Badge variant="secondary">
                                 System

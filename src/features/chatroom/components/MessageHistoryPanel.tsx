@@ -40,7 +40,7 @@ export const MessageHistoryPanel: React.FC<MessageHistoryPanelProps> = ({
                             </p>
                         </div>
                         <Badge variant="secondary" className="glass-pill text-xs text-(--glass-panel-fg)">
-                            <ChatUserName userId={currentMessage.senderId} username={currentMessage.senderUsername} proBadgeVisible={currentMessage.senderProBadgeVisible} proBadgeRevision={currentMessage.senderProBadgeRevision}/>
+                            <ChatUserName userId={currentMessage.senderId} username={currentMessage.senderUsername} proBadgeVisible={currentMessage.senderProBadgeVisible} proBadgeRevision={currentMessage.senderProBadgeRevision} usernameFont={currentMessage.senderUsernameFont} messageFont={currentMessage.senderMessageFont} fontRevision={currentMessage.senderFontRevision}/>
                         </Badge>
                     </div>
                 </div>

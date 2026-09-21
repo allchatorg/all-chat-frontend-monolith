@@ -231,6 +231,9 @@ const ChatMessage: React.FC<ChatMessageProps> = ({
                                                  role={message.senderRole}
                                                  proBadgeVisible={message.senderProBadgeVisible}
                                                  proBadgeRevision={message.senderProBadgeRevision}
+                                                 usernameFont={message.senderUsernameFont}
+                                                 messageFont={message.senderMessageFont}
+                                                 fontRevision={message.senderFontRevision}
                                                  disabled={interactionsDisabled}/>
                             </span>
                         </div>
@@ -313,6 +316,9 @@ const ChatMessage: React.FC<ChatMessageProps> = ({
                                          role={message.senderRole}
                                          proBadgeVisible={message.senderProBadgeVisible}
                                          proBadgeRevision={message.senderProBadgeRevision}
+                                         usernameFont={message.senderUsernameFont}
+                                         messageFont={message.senderMessageFont}
+                                         fontRevision={message.senderFontRevision}
                                          disabled={interactionsDisabled}/>
                     </span>
                     {!message.deleted && <CountryFlag countryCode={message.senderCountryCode}/>}
