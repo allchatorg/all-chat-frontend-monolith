@@ -579,7 +579,9 @@ const ChatInput: React.FC<ChatInputProps> = ({
     const isOverLimit = visibleLength > maxMessageLength || inputText.length > MAX_RAW_MESSAGE_LENGTH;
     const isEditing = !!editingMessage;
     const canSendNewMessage = isConnected && !messageSendingBlocked && !isSending;
-    const canUseTextInput = (isEditing ? isConnected : canSendNewMessage) && !isSending;
+    // Keep helper text mounted while sending so the composer height stays stable.
+    const isTextInputAvailable = isConnected && (isEditing || !messageSendingBlocked);
+    const canUseTextInput = isTextInputAvailable && !isSending;
     const newMessageDisabledReason = messageSendingBlocked
         ? messageSendingDisabledReason
         : disabledReason;
@@ -815,7 +817,7 @@ const ChatInput: React.FC<ChatInputProps> = ({
                             ? "Editing mode — press Enter to save, or Esc to cancel"
                             : "Press Enter to send, Shift+Enter for new line"
                     )}
-                    {canUseTextInput && (
+                    {isTextInputAvailable && (
                         <span className="block">Start a line with &gt; for greentext.</span>
                     )}
                     {!isConnected && ` • ${disabledReason || "Connecting to chat..."}`}
