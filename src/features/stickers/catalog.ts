@@ -28,6 +28,17 @@ export const PRO_REACTIONS: readonly ProReaction[] = [
 
 const reactionPrefix = 'allchat:';
 const reactionsByToken = new Map(PRO_REACTIONS.map(reaction => [toCustomReactionToken(reaction.id), reaction]));
+const stickersById = new Map(PRO_REACTIONS.map(sticker => [sticker.id, sticker]));
+
+/** Sticker messages use a short catalog ID, never a URL or a reaction token. */
+export function getSticker(id?: string | null): ProReaction | undefined {
+    return id ? stickersById.get(id) : undefined;
+}
+
+export function getStickerLabel(id?: string | null): string {
+    const sticker = getSticker(id);
+    return sticker ? `${sticker.name} sticker` : 'Unavailable sticker';
+}
 
 export function toCustomReactionToken(id: string): string {
     return `${reactionPrefix}${id}`;

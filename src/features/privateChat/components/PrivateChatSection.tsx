@@ -140,7 +140,7 @@ const PrivateChatSection: React.FC<PrivateChatSectionProps> = ({
         acknowledgeMessage({roomId: chatRoom.id, messageId: lastMessage.id});
     };
 
-    const handleSendMessage = async (content: string, attachment?: Attachment, _editingMessageId?: number) => {
+    const handleSendMessage = async (content: string, attachment?: Attachment, _editingMessageId?: number, stickerId?: string) => {
         try {
             trackMessageSent({
                 room_id: String(chatRoom.id),
@@ -155,6 +155,7 @@ const PrivateChatSection: React.FC<PrivateChatSectionProps> = ({
             chatRoomId: chatRoom.id,
             attachments: attachment ? [attachment] : [],
             replyToMessageId: replyingToMessage?.id,
+            ...(stickerId ? {stickerId} : {}),
         }).then(() => {
             if (replyingToMessage && selectPrivateReplyingToMessage(store.getState())?.id === replyingToMessage.id) {
                 dispatch(setPrivateReplyingToMessage(null));
@@ -183,13 +184,13 @@ const PrivateChatSection: React.FC<PrivateChatSectionProps> = ({
         });
     };
 
-    const handleEditMessage = (newContent: string) => {
+    const handleEditMessage = async (newContent: string) => {
         if (!editingMessage) return;
-        editMessage({messageId: editingMessage.id, editMessageRequest: {content: newContent}});
+        await editMessage({messageId: editingMessage.id, editMessageRequest: {content: newContent}});
     };
 
     const handleCancelEdit = () => {
-        dispatch(setPrivateEditingMessage(null));
+        if (selectPrivateEditingMessage(store.getState())?.id === editingMessage?.id) dispatch(setPrivateEditingMessage(null));
     };
 
     const handleRemoveMessage = async (messageId: number) => {

@@ -2,12 +2,12 @@ import {ChatUserName} from "@/features/chatroom/components/ChatUserName";
 import React, {useEffect, useRef, useState} from "react";
 import {Button} from "@/components/ui/button";
 import {Textarea} from "@/components/ui/textarea";
-import {Bold, Check, ChevronUp, Italic, LoaderCircle, Lock, Paperclip, Reply, Send, Smile, X} from "lucide-react";
+import {Bold, Check, ChevronUp, Italic, LoaderCircle, Lock, Paperclip, Reply, Send, Smile, Sticker, X} from "lucide-react";
 import {DictationButton} from "@/features/chatroom/components/DictationButton";
 import {ChatComposerEditor, DICTATION_META} from "@/features/chatroom/components/ChatComposerEditor";
 import {FormatToggles} from "@/features/chatroom/components/FormatToggles";
 import {MobileActionsPanel, MobileActionsToggle} from "@/features/chatroom/components/MobileComposerActions";
-import {docToMarkers, markersToDoc, stripMarkers} from "@/features/chatroom/utils/messageMarkers";
+import {chatPreviewText, chatVisibleText, docToMarkers, markersToDoc, stripMarkers} from "@/features/chatroom/utils/messageMarkers";
 import type {Editor} from "@tiptap/react";
 import {useSpeechRecognition} from "@/lib/hooks/useSpeechRecognition";
 import AttachmentPreview from "@/features/chatroom/components/AttachmentPreview";
@@ -27,10 +27,8 @@ import {ApiError} from "@/models/ApiError";
 import OnionLinkWarning from "@/features/chatroom/components/OnionLinkWarning";
 import {Message} from "@/models/message";
 import {useIsMobile} from "@/lib/hooks/useIsMobile";
-import {Popover, PopoverContent, PopoverTrigger} from "@/components/ui/popover";
-import data from "@emoji-mart/data";
-import Picker from "@emoji-mart/react";
-import {useTheme} from "next-themes";
+import {ChatExpressionPicker} from "@/features/chatroom/components/ChatExpressionPicker";
+import {getSticker, getStickerLabel, ProReaction} from "@/features/stickers/catalog";
 import imageCompression from "browser-image-compression";
 
 interface ChatInputProps {
@@ -38,8 +36,8 @@ interface ChatInputProps {
     disabledReason?: string;
     messageSendingBlocked?: boolean;
     messageSendingDisabledReason?: string;
-    onSendMessage: (message: string, attachment?: Attachment, editingMessageId?: number) => Promise<void>;
-    onEditMessage: (content: string) => void;
+    onSendMessage: (message: string, attachment?: Attachment, editingMessageId?: number, stickerId?: string) => Promise<void>;
+    onEditMessage: (content: string) => void | Promise<void>;
     maxMessageLength?: number;
     attachmentTypes?: AttachmentType[];
     editingMessage?: Message | null;
@@ -50,8 +48,8 @@ interface ChatInputProps {
 
 const MAX_FILE_SIZE = 11 * 1024 * 1024; // 11MB
 // Mirrors MessagesServiceImpl.MAX_RAW_LENGTH: the visible (stripped) length is
-// what counts against maxMessageLength; the raw marker string is hard-capped at
-// 4x that (worst-case marker overhead the editor can produce).
+// what counts against maxMessageLength, with custom emoji counting as one.
+// Formatting and emoji markers still share the existing raw storage cap.
 const MAX_RAW_MESSAGE_LENGTH = 2000;
 
 const validateMessage = ({
@@ -75,7 +73,7 @@ const validateMessage = ({
     if (isUploading) return {valid: false, reason: "Uploading attachment..."};
     if (trimmed === "" && !uploadedAttachment && !editingMessage?.attachments?.length)
         return {valid: false, reason: "Cannot send an empty message"};
-    if (stripMarkers(inputText).length > maxMessageLength)
+    if (chatVisibleText(inputText).length > maxMessageLength)
         return {valid: false, reason: "Message exceeds maximum length"};
     if (inputText.length > MAX_RAW_MESSAGE_LENGTH)
         return {valid: false, reason: "Message formatting is too large"};
@@ -103,6 +101,16 @@ export function ChatInputShowcase({
                     className="flex-1 min-h-10 max-h-[120px] resize-none focus-visible:ring-0 focus-visible:ring-offset-0 focus:border-primary"
                     rows={1}
                 />
+
+                <Button
+                    type="button"
+                    variant="outline"
+                    size="icon"
+                    tabIndex={-1}
+                    className="hidden h-10 w-10 shrink-0 md:inline-flex"
+                >
+                    <Sticker className="h-4 w-4"/>
+                </Button>
 
                 <Button
                     type="button"
@@ -197,9 +205,6 @@ const ChatInput: React.FC<ChatInputProps> = ({
     const {attachmentTypes} = useAttachmentHook();
     const isMobile = useIsMobile();
 
-    const [isOpenEmojiPopover, setIsOpenEmojiPopover] = useState(false);
-    const {resolvedTheme} = useTheme();
-
     // `inputText` holds the serialized **bold**/*italic* marker string mirrored
     // from the rich editor on every update — it is what gets validated, counted
     // against the length limit, and sent to the backend.
@@ -231,7 +236,7 @@ const ChatInput: React.FC<ChatInputProps> = ({
         const {state} = editor.view;
         const end = state.doc.content.size - 1;
         const from = Math.max(0, end - interimLenRef.current);
-        const before = state.doc.textBetween(0, from, "\n");
+        const before = state.doc.textBetween(0, from, "\n", node => node.type.name === 'hardBreak' ? '\n' : '\uFFFC');
         const sep = before && text && !before.endsWith(" ") ? " " : "";
         const insert = sep + text;
         const tr = state.tr.insertText(insert, from, end);
@@ -283,7 +288,7 @@ const ChatInput: React.FC<ChatInputProps> = ({
             stopDictation();
             // Prefill the editor from the stored marker string — the user edits
             // rich text, never raw markers.
-            editor.commands.setContent(markersToDoc(editingMessage.content ?? ""));
+            editor.commands.setContent(markersToDoc(editingMessage.content ?? "", {customEmojis: true}));
             setInputText(docToMarkers(editor.getJSON()));
             editor.commands.focus("end");
         } else {
@@ -383,7 +388,27 @@ const ChatInput: React.FC<ChatInputProps> = ({
         }
     };
 
-    const handleEditMessage = () => {
+    const handleSendSticker = async (sticker: ProReaction) => {
+        if (sendingRef.current || isCooldown) throw new Error('Please wait before sending another message.');
+        if (!isConnected) throw new Error(disabledReason || 'Not connected');
+        if (messageSendingBlocked) throw new Error(messageSendingDisabledReason);
+        if (editingMessage || isUploading) throw new Error('Finish your current edit or upload before sending a sticker.');
+
+        sendingRef.current = true;
+        setIsSending(true);
+        stopDictation();
+        try {
+            // Stickers send on selection. Keep any text and attachment draft intact.
+            await onSendMessage('', undefined, undefined, sticker.id);
+            setIsCooldown(true);
+            setTimeout(() => setIsCooldown(false), 500);
+        } finally {
+            sendingRef.current = false;
+            setIsSending(false);
+        }
+    };
+
+    const handleEditMessage = async () => {
         if (sendingRef.current) return;
         if (inputText.includes(".onion") || stripMarkers(inputText).includes(".onion")) {
             open(<OnionLinkWarning onClose={close}/>);
@@ -412,8 +437,24 @@ const ChatInput: React.FC<ChatInputProps> = ({
             return;
         }
 
-        onEditMessage(inputText.trim() ? inputText : "");
-        onCancelEdit();
+        sendingRef.current = true;
+        setIsSending(true);
+        stopDictation();
+        try {
+            await onEditMessage(inputText.trim() ? inputText : "");
+            onCancelEdit();
+        } catch (error) {
+            const failure = error as {response?: {data?: {message?: string}}; message?: string} | null;
+            toast.error(failure?.response?.data?.message || failure?.message || 'Could not save your edit. Your draft is ready to retry.');
+        } finally {
+            sendingRef.current = false;
+            setIsSending(false);
+            requestAnimationFrame(() => {
+                if (editor && !editor.isDestroyed && document.activeElement === document.body) {
+                    editor.commands.focus();
+                }
+            });
+        }
     };
 
     const handleComposerEnter = () => {
@@ -574,7 +615,7 @@ const ChatInput: React.FC<ChatInputProps> = ({
         );
     };
 
-    const visibleLength = stripMarkers(inputText).length;
+    const visibleLength = chatVisibleText(inputText).length;
     const remainingChars = maxMessageLength - visibleLength;
     const isOverLimit = visibleLength > maxMessageLength || inputText.length > MAX_RAW_MESSAGE_LENGTH;
     const isEditing = !!editingMessage;
@@ -590,7 +631,7 @@ const ChatInput: React.FC<ChatInputProps> = ({
     // The editor state is canonical marker text; round-trip the stored original
     // so legacy strings that serialize differently don't fake a change.
     const canonicalOriginal = isEditing
-        ? docToMarkers(markersToDoc(editingMessage?.content ?? ""))
+        ? docToMarkers(markersToDoc(editingMessage?.content ?? "", {customEmojis: true}))
         : "";
     const hasAttachment = !!uploadedAttachment;
     const hasContent = trimmedInput.length > 0;
@@ -598,6 +639,33 @@ const ChatInput: React.FC<ChatInputProps> = ({
     const isUnchanged = isEditing && (inputText === originalContent || inputText === canonicalOriginal);
     const disableConfirmEdit =
         (!hasContent && !hasAttachment && !hasExistingMedia) || !isConnected || isOverLimit || isUploading || isUnchanged || isSending;
+
+    const expressionPicker = (
+        <ChatExpressionPicker
+            disabled={!canUseTextInput || isUploading || (!isEditing && isCooldown)}
+            pending={isSending}
+            allowStickers={!isEditing}
+            onEmojiSelect={emoji => {
+                if (!editor || editor.isDestroyed || !editor.isEditable || !canUseTextInput) throw new Error('The composer is currently unavailable.');
+                if (emoji.kind === 'unicode') {
+                    if (!editor.chain().focus().insertContent(emoji.native).run()) throw new Error('Could not insert your emoji. Please try again.');
+                    return;
+                }
+                if (!getSticker(emoji.id)) throw new Error('This emoji is unavailable.');
+                const before = editor.state.selection.$from.parent.textBetween(0, editor.state.selection.$from.parentOffset, '', '\uFFFC');
+                // Separate an inserted image from a preceding URL so its marker stays an emoji on reload.
+                const nodes = [
+                    ...(/https?:\/\/\S*$/.test(before) ? [{type: 'text', text: ' '}] : []),
+                    {type: 'customEmoji', attrs: {id: emoji.id}},
+                ];
+                if (!editor.chain().focus().insertContent(nodes).run()) throw new Error('Could not insert your emoji. Please try again.');
+            }}
+            onStickerSelect={handleSendSticker}
+            onRestoreComposerFocus={() => {
+                if (editor && !editor.isDestroyed) editor.commands.focus();
+            }}
+        />
+    );
 
     return (
         <div className="composer-floating relative mt-1 bg-transparent px-2 py-3 shadow-none">
@@ -623,7 +691,13 @@ const ChatInput: React.FC<ChatInputProps> = ({
                         </span>
                     )}
                     {replyingToMessage.content && (
-                        <span className="truncate min-w-0 flex-1">{stripMarkers(replyingToMessage.content)}</span>
+                        <span className="truncate min-w-0 flex-1">{chatPreviewText(replyingToMessage.content)}</span>
+                    )}
+                    {replyingToMessage.stickerId && !replyingToMessage.deleted && (
+                        <span className="flex min-w-0 flex-1 items-center gap-1.5">
+                            <Sticker aria-hidden="true" className="h-3.5 w-3.5 shrink-0"/>
+                            <span className="truncate">{getStickerLabel(replyingToMessage.stickerId)}</span>
+                        </span>
                     )}
                     <Button
                         type="button"
@@ -650,6 +724,7 @@ const ChatInput: React.FC<ChatInputProps> = ({
 
             {isMobile && actionsExpanded && (
                 <MobileActionsPanel>
+                    {expressionPicker}
                     <FormatToggles editor={editor} disabled={!canUseTextInput}/>
                     {!editingMessage && (
                         <>
@@ -685,7 +760,7 @@ const ChatInput: React.FC<ChatInputProps> = ({
             <div className="flex gap-2 items-center">
                 <ChatComposerEditor
                     placeholder={
-                        isSending ? "Sending message..." : canUseTextInput
+                        isSending ? (isEditing ? "Saving changes..." : "Sending message...") : canUseTextInput
                             ? editingMessage
                                 ? "Edit your message..."
                                 : "Type your message..."
@@ -698,36 +773,7 @@ const ChatInput: React.FC<ChatInputProps> = ({
                     onReady={setEditor}
                 />
 
-                {!editingMessage && !isMobile && (
-                    <Popover open={isOpenEmojiPopover} onOpenChange={setIsOpenEmojiPopover}>
-                        <PopoverTrigger asChild>
-                            <Button
-                                type="button"
-                                variant="outline"
-                                size="icon"
-                                className="glass-control shrink-0 h-10 w-10"
-                                disabled={!canSendNewMessage}
-                                aria-label="Choose an emoji"
-                                title="Emoji"
-                            >
-                                <Smile className="h-4 w-4"/>
-                            </Button>
-                        </PopoverTrigger>
-                        <PopoverContent
-                            align="end"
-                            sideOffset={4}
-                            className="glass-popover p-0 border-none shadow-lg w-auto"
-                        >
-                            <Picker
-                                data={data}
-                                theme={resolvedTheme}
-                                onEmojiSelect={(emoji: any) => {
-                                    editor?.chain().focus().insertContent(emoji.native).run();
-                                }}
-                            />
-                        </PopoverContent>
-                    </Popover>
-                )}
+                {!isMobile && expressionPicker}
 
                 {!isMobile && <FormatToggles editor={editor} disabled={!canUseTextInput}/>}
 
@@ -776,6 +822,7 @@ const ChatInput: React.FC<ChatInputProps> = ({
                             className="glass-control h-10 w-10 text-foreground hover:text-foreground"
                             variant="secondary"
                             onClick={() => onCancelEdit && onCancelEdit()}
+                            disabled={isSending}
                             size="icon"
                             title="Cancel edit"
                         >

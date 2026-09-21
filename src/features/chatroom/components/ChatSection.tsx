@@ -222,7 +222,7 @@ const ChatSection: React.FC<ChatSectionProps> = ({
 
     const noiseLevel = selectedUserChatRoom?.roomPopulation.noiseLevel || ChatRoomNoiseLevelEnum.CONVERSATIONAL;
 
-    const handleSendMessage = async (messageContent: string, attachment?: Attachment, _editingMessageId?: number) => {
+    const handleSendMessage = async (messageContent: string, attachment?: Attachment, _editingMessageId?: number, stickerId?: string) => {
         try {
             trackMessageSent({
                 room_id: String(chatRoom.id),
@@ -237,6 +237,7 @@ const ChatSection: React.FC<ChatSectionProps> = ({
             chatRoomId: chatRoom.id,
             attachments: attachment ? [attachment] : [],
             replyToMessageId: replyingToMessage?.id,
+            ...(stickerId ? {stickerId} : {}),
         };
 
         await sendMessageThunk(messageToSend).then(() => {
@@ -261,14 +262,14 @@ const ChatSection: React.FC<ChatSectionProps> = ({
         })
     };
 
-    const handleEditMessage = (newContent: string) => {
+    const handleEditMessage = async (newContent: string) => {
         if (!editingMessage) return;
 
-        editMessage({messageId: editingMessage.id, editMessageRequest: {content: newContent}})
+        await editMessage({messageId: editingMessage.id, editMessageRequest: {content: newContent}});
     }
 
     const handleCancelEdit = () => {
-        dispatch(setEditingMessage(null));
+        if (selectEditingMessage(store.getState())?.id === editingMessage?.id) dispatch(setEditingMessage(null));
     }
 
     const handleRemoveMessage = async (messageId: number) => {

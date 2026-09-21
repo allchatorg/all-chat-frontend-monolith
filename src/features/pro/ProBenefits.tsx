@@ -8,7 +8,7 @@ const benefits = [
     {label: 'Media & file sharing', basic: true},
     {label: 'Emoji reactions & replies', basic: true},
     {label: 'Light & dark themes', basic: true},
-    {label: '17 exclusive character reactions', basic: false},
+    {label: '17 exclusive stickers & custom emojis', basic: false},
     {label: 'Exclusive Pro badge', basic: false},
     {label: 'Show or hide your Pro badge', basic: false},
 ];
@@ -79,7 +79,7 @@ export function ProBenefits({username}: {username: string}) {
                     <div className="p-5">
                         <p className="flex items-center gap-1 text-[10px] font-bold uppercase tracking-widest text-violet-600 dark:text-violet-300"><Smile className="h-3 w-3"/>Pro exclusive</p>
                         <h3 className="mt-2 font-bold">React with a familiar face.</h3>
-                        <p className="mt-2 text-sm leading-6 text-muted-foreground">Unlock 17 exclusive character reactions, from Wojak and Pepe to Gondola. Add them to messages in rooms and private chats.</p>
+                        <p className="mt-2 text-sm leading-6 text-muted-foreground">Unlock 17 exclusive characters, from Wojak and Pepe to Gondola. Send them as stickers, add them as emojis in your messages, or use them to react.</p>
                     </div>
                 </article>
             </div>

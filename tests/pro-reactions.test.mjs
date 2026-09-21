@@ -240,12 +240,12 @@ test('the open reacting-users panel receives live membership, counts, and final 
 const reply = {id: 20, content: 'A reply', replyTo: {id: 10, content: 'old caption', deleted: false,
     hasAttachment: true, attachmentName: 'before.png'}};
 
-test('ordinary reply edits refresh text and attachments without introducing sticker fields', () => {
+test('ordinary reply edits refresh text and attachments and clear sticker metadata', () => {
     const [updated] = patchReplyPreviewsForEditedMessage([reply], {id: 10, content: 'edited', attachments: []});
     assert.equal(updated.replyTo.content, 'edited');
     assert.equal(updated.replyTo.hasAttachment, false);
     assert.equal(updated.replyTo.attachmentName, null);
-    assert.equal(Object.hasOwn(updated.replyTo, 'stickerId'), false);
+    assert.equal(updated.replyTo.stickerId, null);
     assert.equal(reply.replyTo.content, 'old caption');
     const [withAttachment] = patchReplyPreviewsForEditedMessage([updated], {id: 10, content: 'new caption', attachments: [{name: 'after.png'}]});
     assert.equal(withAttachment.replyTo.hasAttachment, true);

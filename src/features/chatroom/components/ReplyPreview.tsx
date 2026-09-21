@@ -1,10 +1,12 @@
 import {UserName} from "@/components/UserName";
 import React from "react";
 import {ReplyInfo} from "@/models/message";
-import {Paperclip} from "lucide-react";
+import {Paperclip, Sticker} from "lucide-react";
 import {cn} from "@/lib/utils";
-import {stripMarkers} from "@/features/chatroom/utils/messageMarkers";
+import {chatPreviewText} from "@/features/chatroom/utils/messageMarkers";
 import {useProDialog} from "@/features/pro/useProDialog";
+import {getStickerLabel} from "@/features/stickers/catalog";
+import {useRoleAccess} from "@/lib/hooks/useRoleAccess";
 
 interface ReplyPreviewProps {
     replyTo: ReplyInfo;
@@ -26,10 +28,12 @@ interface ReplyPreviewProps {
  */
 const ReplyPreview: React.FC<ReplyPreviewProps> = ({replyTo, isOwn = false, onJump}) => {
     const openPro = useProDialog();
-    const removed = replyTo.content === null;
+    const {isStaffMember} = useRoleAccess();
+    const removed = replyTo.content === null || Boolean(replyTo.deleted && replyTo.stickerId && !isStaffMember());
     const clickable = !removed && !!onJump;
     const hasContent = !removed && (replyTo.content ?? "").length > 0;
     const showAttachmentIcon = !removed && replyTo.hasAttachment;
+    const showSticker = !removed && Boolean(replyTo.stickerId);
 
     const handleClick = (e: React.MouseEvent) => {
         e.stopPropagation();
@@ -81,7 +85,7 @@ const ReplyPreview: React.FC<ReplyPreviewProps> = ({replyTo, isOwn = false, onJu
                                 </button>
                             )}
                         />
-                        {(showAttachmentIcon || hasContent) && (
+                        {(showAttachmentIcon || hasContent || showSticker) && (
                             <button
                                 type="button"
                                 onClick={clickable ? handleClick : undefined}
@@ -92,6 +96,12 @@ const ReplyPreview: React.FC<ReplyPreviewProps> = ({replyTo, isOwn = false, onJu
                                     clickable ? "cursor-pointer hover:text-foreground" : "cursor-default"
                                 )}
                             >
+                                {showSticker && (
+                                    <>
+                                        <Sticker className="h-3 w-3 shrink-0" aria-hidden="true"/>
+                                        <span className="truncate min-w-0">{getStickerLabel(replyTo.stickerId)}</span>
+                                    </>
+                                )}
                                 {showAttachmentIcon && (
                                     <Paperclip className="h-3 w-3 shrink-0" aria-label="Attachment"/>
                                 )}
@@ -102,7 +112,7 @@ const ReplyPreview: React.FC<ReplyPreviewProps> = ({replyTo, isOwn = false, onJu
                                 )}
                                 {hasContent && (
                                     <span className={cn("truncate min-w-0", replyTo.deleted && "italic")}>
-                                        {stripMarkers(replyTo.content ?? "")}
+                                        {chatPreviewText(replyTo.content ?? "")}
                                     </span>
                                 )}
                             </button>
