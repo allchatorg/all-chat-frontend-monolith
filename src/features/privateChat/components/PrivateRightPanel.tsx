@@ -1,5 +1,6 @@
 "use client";
 
+import {UserName} from "@/components/UserName";
 import React from "react";
 import {X} from "lucide-react";
 import {useDispatch, useSelector} from "react-redux";
@@ -66,7 +67,7 @@ const PrivateRightPanelContent: React.FC<{showHeader?: boolean}> = ({showHeader 
             {showHeader && (
                 <>
                     <CardHeader className="flex shrink-0 flex-row items-center justify-between gap-2 p-4">
-                        <CardTitle className="text-sm">Search messages with {counterpartName}</CardTitle>
+                        <CardTitle className="text-sm">Search messages with <UserName userId={conversation?.counterpart?.id} username={counterpartName} proBadgeVisible={conversation?.counterpart?.proBadgeVisible} proBadgeRevision={conversation?.counterpart?.proBadgeRevision}/></CardTitle>
                         <Button variant="ghost" size="sm" className="glass-control" onClick={handleClose} aria-label="Close message search">
                             <X className="h-4 w-4"/>
                         </Button>

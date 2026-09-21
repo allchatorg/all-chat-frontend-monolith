@@ -6,6 +6,10 @@ import {IdVerificationStatus} from "@/models/IdVerificationStatus";
 export interface User {
     id: number;
     username: string;
+    proActive?: boolean;
+    showProBadge?: boolean;
+    proBadgeVisible?: boolean;
+    proBadgeRevision?: number;
     email?: string | null;
     phoneNumber?: string | null;
     phoneNumberVerificationDate?: string;
@@ -27,4 +31,4 @@ export interface User {
     appliedForModerator?: boolean;
 }
 
-export type UserMinimal = Pick<User, "id" | "username">;
+export type UserMinimal = Pick<User, "id" | "username" | "proBadgeVisible" | "proBadgeRevision">;

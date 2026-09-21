@@ -43,7 +43,7 @@ api.interceptors.response.use(
             // the whitelisted ban-appeal endpoints. Skip the redirect when already on a
             // /banned page, otherwise its own API calls would loop the navigation.
             const banData: Ban = error.response.data;
-            if (!window.location.pathname.startsWith('/banned')) {
+            if (!window.location.pathname.startsWith('/banned') && window.location.pathname !== '/settings/subscriptions') {
                 window.location.href = `/banned?ban=${encodeURIComponent(JSON.stringify(banData))}`;
             }
         }

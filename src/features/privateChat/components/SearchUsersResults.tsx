@@ -1,3 +1,4 @@
+import {UserName} from "@/components/UserName";
 import React from "react";
 import {User, UserSearch} from "lucide-react";
 import {UserMinimalDTO} from "@/models/UserMinimalDTO";
@@ -44,7 +45,7 @@ const SearchUsersResults: React.FC<SearchUsersResultsProps> = ({
                                         </div>
                                         <div className="min-w-0 flex-1">
                                             <p className="truncate font-medium text-foreground">
-                                                {user.username}
+                                                <UserName userId={user.id} username={user.username} proBadgeVisible={user.proBadgeVisible} proBadgeRevision={user.proBadgeRevision}/>
                                             </p>
                                             {hasConversation && (
                                                 <p className="text-xs text-muted-foreground">

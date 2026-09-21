@@ -57,7 +57,7 @@ export default function Page() {
                     <div>
                         <h4 className="text-sm font-semibold text-blue-900 dark:text-blue-100">Secure Payment Processing</h4>
                         <p className="text-sm text-blue-700 dark:text-blue-300 mt-1">
-                            AllChat does not store your payment details. Your cards are securely saved by our payment
+                            allchat does not store your payment details. Your cards are securely saved by our payment
                             provider, Stripe. You can remove them at any time.
                         </p>
                     </div>

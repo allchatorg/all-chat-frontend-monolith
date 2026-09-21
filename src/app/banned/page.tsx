@@ -243,6 +243,7 @@ function BannedPageContent() {
                                 </Button>
                             </div>
                         )}
+                        {hasSession && <Button className="w-full" variant="link" onClick={() => router.push(ROUTES.SUBSCRIPTIONS)}>Manage or cancel Pro subscription</Button>}
                     </div>
                 </div>
             </div>

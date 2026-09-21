@@ -1,6 +1,6 @@
 "use client";
 import {Button} from "@/components/ui/button";
-import {ArrowDownAZ, Book, Bug, LogOut, Megaphone, Menu, MoreVertical, Settings, Shield} from "lucide-react";
+import {ArrowDownAZ, Book, Bug, Diamond, LogOut, Megaphone, Menu, MoreVertical, Settings, Shield} from "lucide-react";
 import Image from "next/image";
 import {usePathname, useRouter} from "next/navigation";
 import {useDialog} from "./providers/DialogProvider";
@@ -33,6 +33,10 @@ import {
 import {selectJoinedUserChatRoomsState} from "@/redux/chatRoom/chatRoomSelectors";
 import {BUG_REPORTS_CHATROOM_NAME, isBugReportsChatRoomName} from "@/lib/chatRooms";
 import {toast} from "sonner";
+import {useProDialog} from '@/features/pro/useProDialog';
+
+// Keep the branded button independent of the navbar's generic .text-white recoloring.
+const PRO_NAV_BUTTON_CLASS_NAME = 'relative isolate overflow-hidden rounded-full border border-white/15 bg-clip-padding bg-linear-to-r from-[#4039bd] to-[#4267df] font-semibold text-[#fff] shadow-none [text-shadow:none] hover:from-[#3730a3] hover:to-[#3658c7] hover:text-[#fff] focus-visible:ring-blue-300 dark:border-blue-300/35 dark:from-[#454bc4] dark:to-[#315fd3] dark:text-[#fff] dark:hover:from-[#4b53d0] dark:hover:to-[#3868df] dark:hover:text-[#fff]';
 
 export function Navbar() {
     const {open, close} = useDialog();
@@ -44,6 +48,8 @@ export function Navbar() {
     const {isStaffMember} = useRoleAccess();
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
     const logoSrc = useThemedLogo();
+
+    const openPro = useProDialog();
 
     const handleLogout = () => {
         if (user?.role !== Role.GUEST && user?.role !== Role.UNCLAIMED_USER) {
@@ -229,6 +235,7 @@ export function Navbar() {
                 <div className="flex items-center gap-2 md:gap-4 ml-auto">
                     {user && (
                         <div className="flex items-center gap-2 md:gap-4">
+                            <Button onClick={openPro} aria-label="Explore allchat Pro" className={`${PRO_NAV_BUTTON_CLASS_NAME} hidden h-9 gap-2 px-3 md:inline-flex`}><Diamond className="h-4 w-4"/><span className="hidden xl:inline">allchat</span> Pro</Button>
                             <div className="hidden md:flex items-center gap-2">
                                 {!isStaffOrHigher && (
                                     <Button
@@ -265,10 +272,8 @@ export function Navbar() {
                                     title="Settings"
                                     onClick={() =>
                                         open(
-                                            <div
-                                                className="w-[80vw] md:min-w-[800px] md:max-w-[800px] max-h-[500px]">
-                                                <SettingsComponent/>
-                                            </div>
+                                            <SettingsComponent/>,
+                                            {title: 'Settings', className: 'h-dvh w-screen max-w-none overflow-hidden rounded-none border-0 p-0 sm:h-[min(760px,90dvh)] sm:w-[92vw] sm:max-w-5xl sm:rounded-2xl'}
                                         )
                                     }
                                 >
@@ -342,6 +347,7 @@ export function Navbar() {
                         </div>
                     )}
                 </div>
+                <div className="w-full md:hidden"><Button onClick={openPro} className={`${PRO_NAV_BUTTON_CLASS_NAME} h-8 w-full justify-between px-4 text-xs`}><span className="flex items-center gap-2"><Diamond className="h-3.5 w-3.5"/>allchat Pro</span><span className="font-normal text-inherit">{user?.proActive ? 'Your Pro perks' : 'Make your mark'}</span></Button></div>
             </nav>
 
         </div>);

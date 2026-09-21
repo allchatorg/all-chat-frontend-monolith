@@ -2,7 +2,7 @@ import {AzuraCastStation, RadioNowPlaying} from './types';
 
 const BASE_URL = 'https://radio.allchat.org';
 
-// Public radio requests must never use AllChat's authenticated Axios client.
+// Public radio requests must never use allchat's authenticated Axios client.
 async function request(path: string, signal: AbortSignal): Promise<unknown> {
     const controller = new AbortController();
     const abort = () => controller.abort();

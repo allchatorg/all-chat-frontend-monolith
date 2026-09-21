@@ -7,13 +7,16 @@ import {Button} from "@/components/ui/button";
 import {useThunk} from "@/lib/hooks/useThunk";
 import {ShieldBan, ShieldCheck} from "lucide-react";
 import {isStaff, Role} from "@/models/Role";
+import {UserName} from "@/components/UserName";
+import {useProDialog} from "@/features/pro/useProDialog";
 
 
 interface UserActionPopupProps {
     userId: number;
     username: string;
     role: Role;
-    children: React.ReactNode;
+    proBadgeVisible?: boolean;
+    proBadgeRevision?: number;
     disabled?: boolean;
 }
 
@@ -21,13 +24,19 @@ export const UserActionPopup: React.FC<UserActionPopupProps> = ({
                                                                     userId,
                                                                     username,
                                                                     role,
-                                                                    children,
+                                                                    proBadgeVisible,
+                                                                    proBadgeRevision,
                                                                     disabled = false,
                                                                 }) => {
     const {user} = useSelector((state: RootState) => state.user);
     const [blockUser] = useThunk(blockUserThunk);
     const [unblockUser] = useThunk(unblockUserThunk);
     const [isOpen, setIsOpen] = useState(false);
+    const openPro = useProDialog();
+    const handleOpenPro = () => {
+        setIsOpen(false);
+        openPro();
+    };
 
     const isBlocked = user?.blockedUsers?.some(u => u.id === userId);
     const isTargetStaff = isStaff(role);
@@ -55,8 +64,21 @@ export const UserActionPopup: React.FC<UserActionPopupProps> = ({
     };
 
     const content = (
-        <span className={`flex items-center gap-1 ${roleStyles}`}>
-            {children}
+        <span className={`flex min-w-0 items-center gap-1 ${roleStyles}`}>
+            <UserName
+                userId={userId}
+                username={username}
+                proBadgeVisible={proBadgeVisible}
+                proBadgeRevision={proBadgeRevision}
+                onProClick={handleOpenPro}
+                renderUsername={!isTargetStaff && !disabled ? name => (
+                    <PopoverTrigger asChild>
+                        <button type="button" onClick={event => event.stopPropagation()} className="inline-flex min-w-0 cursor-pointer text-left hover:underline decoration-dotted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
+                            {name}
+                        </button>
+                    </PopoverTrigger>
+                ) : undefined}
+            />
             {showShield && (
                 <span title={formatRoleName(role)} className="cursor-help flex items-center">
                     <ShieldCheck className="h-4 w-4 outline-hidden" style={{shapeRendering: 'crispEdges'}}/>
@@ -74,7 +96,7 @@ export const UserActionPopup: React.FC<UserActionPopupProps> = ({
     }
 
     const handleBlock = () => {
-        blockUser({id: userId, username});
+        blockUser({id: userId, username, proBadgeVisible, proBadgeRevision});
         setIsOpen(false); // Close popup after blocking
     };
 
@@ -83,17 +105,9 @@ export const UserActionPopup: React.FC<UserActionPopupProps> = ({
         setIsOpen(false); // Close popup after unblocking
     };
 
-    const handleClick = (e: React.MouseEvent) => {
-        e.stopPropagation();
-    }
-
     return (
         <Popover open={isOpen} onOpenChange={setIsOpen}>
-            <PopoverTrigger asChild onClick={handleClick}>
-                <span className="cursor-pointer hover:underline decoration-dotted block-hover-trigger">
-                    {content}
-                </span>
-            </PopoverTrigger>
+            {content}
             <PopoverContent
                 className="w-56 p-4 shadow-lg border-2"
                 onClick={(e) => e.stopPropagation()}
@@ -102,7 +116,7 @@ export const UserActionPopup: React.FC<UserActionPopupProps> = ({
             >
                 <div className="flex flex-col gap-3">
                     <div className="font-semibold text-base pb-2 text-center truncate border-b-2 border-border">
-                        {username}
+                        <UserName userId={userId} username={username} proBadgeVisible={proBadgeVisible} proBadgeRevision={proBadgeRevision} onProClick={handleOpenPro}/>
                     </div>
                     {isBlocked ? (
                         <Button

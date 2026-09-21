@@ -31,12 +31,35 @@ const initialState: UserState = {
     error: null,
 };
 
+function mergeOwnerSnapshot(current: User | null, incoming: User | null): User | null {
+    if (!current || !incoming || current.id !== incoming.id) return incoming;
+
+    const currentRevision = current.proBadgeRevision ?? 0;
+    const incomingRevision = incoming.proBadgeRevision ?? 0;
+    // A delayed account refresh must not undo a newer appearance/billing update.
+    if (incomingRevision < currentRevision ||
+        (incoming.proBadgeRevision === undefined && current.proBadgeRevision !== undefined)) {
+        return {
+            ...incoming,
+            proActive: current.proActive,
+            showProBadge: current.showProBadge,
+            proBadgeVisible: current.proBadgeVisible,
+            proBadgeRevision: current.proBadgeRevision,
+        };
+    }
+    // Expiry can hide a badge before the scheduled revision is published.
+    if (incomingRevision === currentRevision && current.proBadgeVisible === false) {
+        return {...incoming, proBadgeVisible: false};
+    }
+    return incoming;
+}
+
 const userSlice = createSlice({
     name: "user",
     initialState,
     reducers: {
         setUser(state, action) {
-            state.user = action.payload.user;
+            state.user = mergeOwnerSnapshot(state.user, action.payload.user);
             state.error = null;
         },
     },
@@ -48,7 +71,7 @@ const userSlice = createSlice({
             })
             .addCase(fetchMe.fulfilled, (state, action) => {
                 state.loading = false;
-                state.user = action.payload;
+                state.user = mergeOwnerSnapshot(state.user, action.payload);
             })
             .addCase(fetchMe.rejected, (state, action) => {
                 state.loading = false;
@@ -92,13 +115,13 @@ const userSlice = createSlice({
             })
             .addCase(verifyEmailThunk.fulfilled, (state, action) => {
                 state.loading = false;
-                state.user = action.payload;
+                state.user = mergeOwnerSnapshot(state.user, action.payload);
             })
             .addCase(verifyEmailUpdateThunk.pending, (state) => {
                 state.error = null;
             })
             .addCase(verifyEmailUpdateThunk.fulfilled, (state, action) => {
-                state.user = action.payload;
+                state.user = mergeOwnerSnapshot(state.user, action.payload);
             })
             .addCase(verifyEmailUpdateThunk.rejected, (state, action) => {
                 state.error = action.payload as string;
@@ -107,14 +130,14 @@ const userSlice = createSlice({
                 state.error = null;
             })
             .addCase(verifyPhoneThunk.fulfilled, (state, action) => {
-                state.user = action.payload;
+                state.user = mergeOwnerSnapshot(state.user, action.payload);
             })
             .addCase(verifyPhoneThunk.rejected, (state, action) => {
                 state.error = action.payload as string;
             })
             .addCase(claimAccountThunk.fulfilled, (state, action: PayloadAction<User>) => {
                 state.loading = false;
-                state.user = action.payload;
+                state.user = mergeOwnerSnapshot(state.user, action.payload);
             })
             .addCase(updateBlurredContentThunk.fulfilled, (state, action: PayloadAction<Tag[]>) => {
                 if (state.user) {

@@ -15,6 +15,7 @@ export const ROUTES = {
     LOGIN: '/auth?view=login',
     APPLY_MODERATOR: '/moderator-apply',
     PRIVATE_CHAT: '/private',
+    SUBSCRIPTIONS: '/settings/subscriptions',
 } as const;
 
 export const PUBLIC_ROUTES = [
@@ -27,6 +28,7 @@ export const PUBLIC_ROUTES = [
 export const PROTECTED_ROUTES = [
     ROUTES.HOME,
     ROUTES.APPLY_MODERATOR,
+    ROUTES.SUBSCRIPTIONS,
 ] as const;
 
 export const STAFF_ROUTES = [

@@ -1,5 +1,6 @@
 "use client";
 
+import {UserName} from "@/components/UserName";
 import React, {useEffect, useRef, useState} from "react";
 import {
     Command,
@@ -111,7 +112,7 @@ export function UserSearchCommand({
                                 <CommandItem key={user.id} value={String(user.id)} onSelect={handleSelect}>
                                     <UserIcon className="mr-2 h-4 w-4"/>
                                     <div className="flex flex-col">
-                                        <span className="font-medium">{user.username}</span>
+                                        <span className="font-medium"><UserName userId={user.id} username={user.username} proBadgeVisible={user.proBadgeVisible} proBadgeRevision={user.proBadgeRevision}/></span>
                                         <span className="text-xs text-muted-foreground">ID: {user.id}</span>
                                     </div>
                                 </CommandItem>

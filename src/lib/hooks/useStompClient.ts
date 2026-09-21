@@ -8,7 +8,7 @@ import {IdVerificationResultNotification} from "@/models/IdVerificationResultNot
 import {fetchMe} from "@/redux/user/usersThunk";
 import SockJS from "sockjs-client";
 import {Client, IMessage, StompSubscription} from "@stomp/stompjs";
-import {AppDispatch, resetApp, RootState} from "@/redux/store";
+import {AppDispatch, resetApp, RootState, store} from "@/redux/store";
 import {getSessionToken, removeSessionToken} from "@/lib/tokenManager";
 import {
     addMessageReaction,
@@ -64,11 +64,28 @@ import {fetchNotificationsThunk, fetchUnreadCountThunk} from "@/redux/notificati
 import {getNotificationRoute} from "@/features/notifications/notificationRoutes";
 import {adsApi as adsPortalApi} from "@ads/store/services/adsApi";
 import {adminAdsApi} from "@ads/store/services/adminAdsApi";
+import {applyProBadgeUpdate, clearProBadgeStore, ProBadgeUpdate, refreshRegisteredProBadges} from "@/lib/proBadgeStore";
+import {getMe} from "@/api/user/userAPI";
+import {setUser} from "@/redux/user/userSlice";
 
 const WS_URL = process.env.NEXT_PUBLIC_WS_URL || "http://localhost:8080/ws";
 const PUBLIC_TOPIC = ["/topic/public-chat"];
 const USER_TOPIC_DESTINATION = "/topic/user.";
 const PRIVATE_MESSAGES_QUEUE = "/user/queue/private-messages";
+
+async function refreshCurrentProUser(): Promise<void> {
+    const userId = selectUser(store.getState())?.id;
+    const token = getSessionToken()?.token;
+    if (!userId || !token) return;
+    try {
+        const user = await getMe();
+        if (user.id !== userId || selectUser(store.getState())?.id !== userId ||
+            getSessionToken()?.token !== token) return;
+        store.dispatch(setUser({user}));
+    } catch {
+        // A background Pro refresh must not invalidate an otherwise usable session.
+    }
+}
 
 export function useStompWithRedux(
     onMessage?: (topic: string, message: IMessage) => void
@@ -102,7 +119,18 @@ export function useStompWithRedux(
 
     useEffect(() => {
         shownNotificationIdsRef.current.clear();
+        clearProBadgeStore();
     }, [user?.id]);
+
+    useEffect(() => {
+        if (user?.proBadgeVisible !== undefined) {
+            applyProBadgeUpdate({
+                userId: user.id,
+                proBadgeVisible: user.proBadgeVisible,
+                proBadgeRevision: user.proBadgeRevision ?? 0,
+            });
+        }
+    }, [user?.id, user?.proBadgeVisible, user?.proBadgeRevision]);
 
     useEffect(() => {
         loadedChatRoomsRef.current = loadedChatRooms;
@@ -240,6 +268,13 @@ export function useStompWithRedux(
                             }
                         }
                         break;
+
+                    case WebSocketMessageType.PRO_BADGE_UPDATED: {
+                        const update = data as ProBadgeUpdate;
+                        applyProBadgeUpdate(update);
+                        if (update.userId === userRef.current?.id) void refreshCurrentProUser();
+                        break;
+                    }
 
                     case WebSocketMessageType.ROLE_UPDATE_NOTIFICATION:
                         if (!user) return;
@@ -468,6 +503,8 @@ export function useStompWithRedux(
                 // Subscribe before refreshing persisted notifications so new
                 // deliveries cannot slip between the fetch and subscription.
                 manageSubscriptionsRef.current(client);
+                refreshRegisteredProBadges();
+                if (userRef.current?.id) void refreshCurrentProUser();
                 if (!isInitialConnect.current) {
                     dispatch(setStompReconnected(true));
                     setTimeout(() => dispatch(setStompReconnected(false)), 500);

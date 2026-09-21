@@ -3,13 +3,17 @@
 import {IconLogout} from "@tabler/icons-react"
 import {Avatar, AvatarFallback, AvatarImage,} from "@ads/components/ui/avatar"
 import {SidebarMenu, SidebarMenuButton, SidebarMenuItem,} from "@ads/components/ui/sidebar"
+import {UserName} from "@/components/UserName";
 
 export function NavUser({
                             user,
                             onLogout,
                         }: {
     user: {
+        id?: number
         name: string
+        proBadgeVisible?: boolean
+        proBadgeRevision?: number
         email: string
         avatar: string
     }
@@ -38,7 +42,7 @@ export function NavUser({
                         <AvatarFallback className="rounded-lg">{initials}</AvatarFallback>
                     </Avatar>
                     <div className="grid flex-1 text-left text-sm leading-tight">
-                        <span className="truncate font-medium">{user.name}</span>
+                        <UserName userId={user.id} username={user.name} proBadgeVisible={user.proBadgeVisible} proBadgeRevision={user.proBadgeRevision} className="font-medium"/>
                         <span className="text-muted-foreground truncate text-xs">
                             {user.email}
                         </span>

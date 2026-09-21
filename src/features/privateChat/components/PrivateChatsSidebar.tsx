@@ -1,5 +1,6 @@
 "use client";
 
+import {UserName} from "@/components/UserName";
 import React, {MouseEvent, useEffect, useRef, useState} from "react";
 import {Ban, Loader2, MessageCircleX, MoreVertical, User as UserIcon, Volume2, VolumeX, X} from "lucide-react";
 import {PrivateChatDTO} from "@/models/PrivateChatDTO";
@@ -104,7 +105,7 @@ function ConversationRowContent({
             <div className="min-w-0 flex-1">
                 <div className="flex items-center gap-2">
                     <span className="truncate font-medium text-foreground">
-                        {counterpartName}
+                        <UserName userId={conversation.counterpart?.id} username={counterpartName} proBadgeVisible={conversation.counterpart?.proBadgeVisible} proBadgeRevision={conversation.counterpart?.proBadgeRevision}/>
                     </span>
                     {conversation.blocked && (
                         <span title="Blocked"

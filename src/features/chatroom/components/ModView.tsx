@@ -1,3 +1,4 @@
+import {ChatUserName} from "@/features/chatroom/components/ChatUserName";
 import React from 'react';
 import {Ban, Copy, Eye, Flag, Shield, User, X} from 'lucide-react';
 import {ModMainScreen} from "@/features/chatroom/components/ModMainScreen";
@@ -68,7 +69,7 @@ const ModView: React.FC<ModViewProps> = ({
     return (
         <div className="glass-panel flex h-full min-h-0 w-full flex-col rounded-xl border">
             {showHeader && <div className="flex shrink-0 items-center justify-between border-b p-4">
-                <h2 className="text-lg font-semibold text-card-foreground">{user?.username}</h2>
+                <h2 className="text-lg font-semibold text-card-foreground"><ChatUserName userId={user?.id} username={user?.username ?? ""} proBadgeVisible={user?.proBadgeVisible} proBadgeRevision={user?.proBadgeRevision}/></h2>
                 <Button
                     variant="ghost"
                     size="icon"

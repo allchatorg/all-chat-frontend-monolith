@@ -1,5 +1,6 @@
 "use client";
 
+import {UserName} from "@/components/UserName";
 import React from "react";
 import {Input} from "@/components/ui/input";
 import {Badge} from "@/components/ui/badge";
@@ -94,7 +95,7 @@ const AdminConversationList: React.FC<AdminConversationListProps> = ({
                                         )}
                                     >
                                         <div className="flex items-center gap-2">
-                                            <span className="truncate font-medium">@{counterpartName}</span>
+                                            <span className="truncate font-medium"><UserName userId={conversation.counterpart?.id} username={"@" + counterpartName} proBadgeVisible={conversation.counterpart?.proBadgeVisible} proBadgeRevision={conversation.counterpart?.proBadgeRevision}/></span>
                                             {conversation.blocked && (
                                                 <Ban className="h-3.5 w-3.5 shrink-0 text-red-500"/>
                                             )}

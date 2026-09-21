@@ -1,3 +1,4 @@
+import {ChatUserName} from "@/features/chatroom/components/ChatUserName";
 import {useEffect, useState} from "react";
 import {ScrollArea} from "@/components/ui/scroll-area";
 import {Badge} from "@/components/ui/badge";
@@ -113,7 +114,7 @@ export default function MessageReactionsPanel() {
                                             className="glass-surface p-3 rounded-lg transition-colors"
                                         >
                                             <p className="text-sm font-medium text-foreground truncate">
-                                                {user.username}
+                                                <ChatUserName userId={user.id} username={user.username} proBadgeVisible={user.proBadgeVisible} proBadgeRevision={user.proBadgeRevision}/>
                                             </p>
                                         </div>
                                     ))

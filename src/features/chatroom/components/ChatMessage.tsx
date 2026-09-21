@@ -226,12 +226,12 @@ const ChatMessage: React.FC<ChatMessageProps> = ({
                             data-message-reaction-block="true"
                             className="pr-4 pb-1 px-1 text-xs font-medium transition-colors text-muted-foreground flex items-center gap-1 justify-end">
                             {!message.deleted && <CountryFlag countryCode={message.senderCountryCode}/>}
-                            <span>
+                            <span className="min-w-0">
                                 <UserActionPopup userId={message.senderId} username={message.senderUsername}
                                                  role={message.senderRole}
-                                                 disabled={interactionsDisabled}>
-                                    {message.senderUsername}
-                                </UserActionPopup>
+                                                 proBadgeVisible={message.senderProBadgeVisible}
+                                                 proBadgeRevision={message.senderProBadgeRevision}
+                                                 disabled={interactionsDisabled}/>
                             </span>
                         </div>
                     )}
@@ -308,12 +308,12 @@ const ChatMessage: React.FC<ChatMessageProps> = ({
                 <div
                     data-message-reaction-block="true"
                     className="pl-4 pb-1 px-1 text-xs font-medium transition-colors text-muted-foreground flex items-center gap-1">
-                    <span>
+                    <span className="min-w-0">
                         <UserActionPopup userId={message.senderId} username={message.senderUsername}
                                          role={message.senderRole}
-                                         disabled={interactionsDisabled}>
-                            {message.senderUsername}
-                        </UserActionPopup>
+                                         proBadgeVisible={message.senderProBadgeVisible}
+                                         proBadgeRevision={message.senderProBadgeRevision}
+                                         disabled={interactionsDisabled}/>
                     </span>
                     {!message.deleted && <CountryFlag countryCode={message.senderCountryCode}/>}
                     {isBlocked && isRevealed && !interactionsDisabled && (

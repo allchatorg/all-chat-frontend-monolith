@@ -8,6 +8,8 @@ export interface User {
     name: string;
     email: string;
     role: UserRole;
+    proBadgeVisible?: boolean;
+    proBadgeRevision?: number;
 }
 
 // Map backend/store Role enum to UI UserRole enum
@@ -32,6 +34,8 @@ export function useUser() {
             name: `${currentUser.firstName ?? ''} ${currentUser.lastName ?? ''}`.trim() || currentUser.email,
             email: currentUser.email,
             role: mapRole(currentUser.role),
+            proBadgeVisible: currentUser.proBadgeVisible,
+            proBadgeRevision: currentUser.proBadgeRevision,
         }
         : {
             id: "",

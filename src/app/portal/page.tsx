@@ -98,7 +98,7 @@ export default function Home() {
                     <div className="mb-8 sm:mb-12">
                         <Image
                             src={logoSrc}
-                            alt="AllChat Ads Portal"
+                            alt="allchat Ads Portal"
                             width={640}
                             height={220}
                             priority

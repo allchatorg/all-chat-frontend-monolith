@@ -63,6 +63,12 @@ export function AppShell({children}: { children: React.ReactNode }) {
         );
     }
 
+    // Billing stays accessible to restricted accounts without initializing chat
+    // requests that can otherwise redirect them back to their restriction page.
+    if (pathname === ROUTES.SUBSCRIPTIONS) {
+        return <AuthGuard>{children}<Toaster/><RateLimitDialog/></AuthGuard>;
+    }
+
     return (
         <AuthGuard>
             <StompBridge/>

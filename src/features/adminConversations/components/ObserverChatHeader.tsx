@@ -1,5 +1,6 @@
 "use client";
 
+import {UserName} from "@/components/UserName";
 import React from "react";
 import {Button} from "@/components/ui/button";
 import {CardTitle} from "@/components/ui/card";
@@ -36,7 +37,7 @@ const ObserverChatHeader: React.FC<ObserverChatHeaderProps> = ({
                 <Users className="h-4 w-4 text-muted-foreground"/>
             </div>
             <span className="truncate">
-                @{targetName} <span className="text-muted-foreground">↔</span> @{counterpartName}
+                <UserName userId={conversation.target?.id} username={"@" + targetName} proBadgeVisible={conversation.target?.proBadgeVisible} proBadgeRevision={conversation.target?.proBadgeRevision}/> <span className="text-muted-foreground">↔</span> <UserName userId={conversation.counterpart?.id} username={"@" + counterpartName} proBadgeVisible={conversation.counterpart?.proBadgeVisible} proBadgeRevision={conversation.counterpart?.proBadgeRevision}/>
             </span>
             {conversation.blocked && (
                 <span title="One participant has blocked the other" className="inline-flex items-center text-red-500">

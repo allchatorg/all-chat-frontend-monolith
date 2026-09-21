@@ -1,3 +1,4 @@
+import {ChatUserName} from "@/features/chatroom/components/ChatUserName";
 import clsx from "clsx";
 import {useDispatch} from "react-redux";
 import {setActiveRightSidebar} from "@/redux/settings/settingsSlice";
@@ -185,8 +186,8 @@ const MessageItem: React.FC<{
                 <div className="flex items-start gap-3">
                     <div className="min-w-0 flex-1">
                         <div className="mb-1 flex items-center gap-2">
-                                <span className="text-sm font-medium transition-colors text-foreground">
-                                    {message.senderUsername}
+                                <span className="min-w-0 text-sm font-medium transition-colors text-foreground">
+                                    <ChatUserName userId={message.senderId} username={message.senderUsername} proBadgeVisible={message.senderProBadgeVisible} proBadgeRevision={message.senderProBadgeRevision}/>
                                 </span>
                             {message.bannedUser && <BannedUserBadge/>}
                             {message.deleted && <DeletedBadge/>}
@@ -252,7 +253,7 @@ const MessageItem: React.FC<{
             {!isOwn && (showSenderName || message.bannedUser || message.deleted || showChatRoomName || showPromotedBadge || showPromotionPendingBadge) && (
                 <div
                     className="text-xs font-medium transition-colors text-muted-foreground flex items-center gap-1 mb-1">
-                    {showSenderName && <span>{message.senderUsername}</span>}
+                    {showSenderName && <ChatUserName userId={message.senderId} username={message.senderUsername} proBadgeVisible={message.senderProBadgeVisible} proBadgeRevision={message.senderProBadgeRevision}/>}
                     {message.bannedUser && <BannedUserBadge/>}
                     {message.deleted && <DeletedBadge/>}
                     {showPromotedBadge && <PromotedBadge/>}

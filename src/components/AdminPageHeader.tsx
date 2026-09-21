@@ -1,3 +1,4 @@
+import {UserName} from "@/components/UserName";
 import {Card} from "@/components/ui/card";
 import React, {ReactNode} from "react";
 import {LucideIcon} from "lucide-react";
@@ -26,7 +27,7 @@ export function AdminPageHeader({title, description, icon: Icon, user, children}
                             {description && user && ": "}
                             {user && (
                                 <span className="font-semibold text-foreground">
-                                    {user.username} (ID: {user.id})
+                                    <UserName userId={user.id} username={user.username} proBadgeVisible={user.proBadgeVisible} proBadgeRevision={user.proBadgeRevision}/> (ID: {user.id})
                                 </span>
                             )}
                         </p>

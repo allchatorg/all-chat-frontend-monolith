@@ -7,6 +7,8 @@ export interface ReplyInfo {
     id: number;
     senderId: number;
     senderUsername: string;
+    senderProBadgeVisible?: boolean;
+    senderProBadgeRevision?: number;
     color?: string;
     /** null when the replied-to message was removed and the viewer may not see its content */
     content: string | null;
@@ -31,6 +33,8 @@ export interface Message {
     createdAt: string;
     senderId: number;
     senderUsername: string;
+    senderProBadgeVisible?: boolean;
+    senderProBadgeRevision?: number;
     senderRole: Role;
     senderCountryCode?: string;
     senderIdVerificationStatus?: IdVerificationStatus;

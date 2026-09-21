@@ -1,3 +1,4 @@
+import {ChatUserName} from "@/features/chatroom/components/ChatUserName";
 import React, {useEffect, useRef, useState} from "react";
 import {Button} from "@/components/ui/button";
 import {Textarea} from "@/components/ui/textarea";
@@ -581,10 +582,9 @@ const ChatInput: React.FC<ChatInputProps> = ({
                     <Reply className="h-3.5 w-3.5 shrink-0"/>
                     <span className="shrink-0">Replying to</span>
                     <span
-                        className="font-medium shrink-0"
-                        style={replyingToMessage.color ? {color: replyingToMessage.color} : undefined}
+                        className="min-w-0 max-w-[40%] font-medium"
                     >
-                        {replyingToMessage.senderUsername}
+                        <ChatUserName userId={replyingToMessage.senderId} username={replyingToMessage.senderUsername} proBadgeVisible={replyingToMessage.senderProBadgeVisible} proBadgeRevision={replyingToMessage.senderProBadgeRevision}/>
                     </span>
                     {replyingToMessage.attachments?.length > 0 && (
                         <Paperclip className="h-3 w-3 shrink-0" aria-label="Attachment"/>

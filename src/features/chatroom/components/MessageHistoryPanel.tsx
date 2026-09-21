@@ -1,3 +1,4 @@
+import {ChatUserName} from "@/features/chatroom/components/ChatUserName";
 import React from 'react';
 import {ScrollArea} from "@/components/ui/scroll-area";
 import {Badge} from "@/components/ui/badge";
@@ -39,7 +40,7 @@ export const MessageHistoryPanel: React.FC<MessageHistoryPanelProps> = ({
                             </p>
                         </div>
                         <Badge variant="secondary" className="glass-pill text-xs text-(--glass-panel-fg)">
-                            {currentMessage.senderUsername}
+                            <ChatUserName userId={currentMessage.senderId} username={currentMessage.senderUsername} proBadgeVisible={currentMessage.senderProBadgeVisible} proBadgeRevision={currentMessage.senderProBadgeRevision}/>
                         </Badge>
                     </div>
                 </div>

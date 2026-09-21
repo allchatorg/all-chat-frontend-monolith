@@ -15,6 +15,8 @@ import {ClaimUser} from "@/features/auth/components/ClaimUser";
 import {useThunk} from "@/lib/hooks/useThunk";
 import {claimAccountThunk} from "@/redux/auth/authThunk";
 import {toast} from "sonner";
+import {ROUTES} from '@/routes';
+import Link from 'next/link';
 
 interface VerificationBlockingOverlayProps {
     children: React.ReactNode;
@@ -46,7 +48,7 @@ export const VerificationBlockingOverlay: React.FC<VerificationBlockingOverlayPr
 
         if (user.role === 'GUEST') return 'NONE';
         // Never block the ban/appeal pages with the verification dialog.
-        if (pathname.startsWith('/banned')) return 'NONE';
+        if (pathname.startsWith('/banned') || pathname === ROUTES.SUBSCRIPTIONS) return 'NONE';
         if (!isClaimed && required !== 'NONE') return 'CLAIM';
         if (required === 'EMAIL' && !emailVerified) return 'EMAIL';
         if (required === 'PHONE') {
@@ -125,6 +127,7 @@ export const VerificationBlockingOverlay: React.FC<VerificationBlockingOverlayPr
                     {show === 'EMAIL' && <VerifyMail/>}
                     {show === 'PHONE' && <VerifyPhone/>}
                     {show === 'ID' && <VerifyIdentity/>}
+                    <Link href={ROUTES.SUBSCRIPTIONS} className="text-center text-xs text-muted-foreground underline underline-offset-4">Manage or cancel your Pro subscription</Link>
                 </DialogContent>
             </Dialog>
         </>

@@ -11,6 +11,7 @@ import {PromotedMessageEvent} from "@/models/PromotedMessageEvent";
 import {RoomPromotionEvent} from "@/models/RoomPromotionEvent";
 import {IdVerificationResultNotification} from "@/models/IdVerificationResultNotification";
 import {AppNotification} from "@/models/AppNotification";
+import {ProBadgeUpdate} from "@/models/ProBadgeUpdate";
 
 export type WebSocketMessage =
     | {
@@ -31,6 +32,9 @@ export type WebSocketMessage =
 } | {
     type: WebSocketMessageType.NOTIFICATION;
     data: AppNotification;
+} | {
+    type: WebSocketMessageType.PRO_BADGE_UPDATED;
+    data: ProBadgeUpdate;
 } | {
     type: WebSocketMessageType.ROLE_UPDATE_NOTIFICATION;
     data: RoleUpdateNotification;

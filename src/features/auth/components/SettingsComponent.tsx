@@ -1,131 +1,76 @@
-import React, {useEffect, useState} from 'react'
-import {Button} from "@/components/ui/button";
-import {ArrowLeft, Ban, Settings, User} from "lucide-react";
-import {ProfileSettings} from "./ProfileSettings";
-import {AccountSettings} from "./AccountSettings";
-import {useThunk} from "@/lib/hooks/useThunk";
-import {getAllTagsThunk} from "@/redux/settings/settingsThunk";
-import {BlockedUsersSettings} from "./BlockedUsersSettings";
-import {useIsMobile} from "@/lib/hooks/useIsMobile";
+'use client';
 
-const DEFAULT_TAB = 'profile';
+import React, {useEffect, useState} from 'react';
+import {ArrowLeft, Ban, CreditCard, Diamond, Palette, Settings, User} from 'lucide-react';
+import {useRouter} from 'next/navigation';
+import {useSelector} from 'react-redux';
+import {Button} from '@/components/ui/button';
+import {useDialog} from '@/components/providers/DialogProvider';
+import {ProfileSettings} from './ProfileSettings';
+import {AccountSettings} from './AccountSettings';
+import {AppearanceSettings} from './AppearanceSettings';
+import {BlockedUsersSettings} from './BlockedUsersSettings';
+import {useThunk} from '@/lib/hooks/useThunk';
+import {getAllTagsThunk} from '@/redux/settings/settingsThunk';
+import {useIsMobile} from '@/lib/hooks/useIsMobile';
+import {selectUser} from '@/redux/user/userSelectors';
+import {ProOffer} from '@/features/pro/ProOffer';
+import {SubscriptionsSettings} from '@/features/pro/SubscriptionsSettings';
+import {ROUTES} from '@/routes';
 
-export const SettingsComponent = ({defaultTab}: { defaultTab?: string }) => {
-    const [runGetAllTags, getAllTagsIsLoading, getAllTagsError] = useThunk(getAllTagsThunk);
-    const isMobile = useIsMobile();
-
-    const [activeTab, setActiveTab] = useState(defaultTab || DEFAULT_TAB);
-
-    const [showMobileDetail, setShowMobileDetail] = useState(!!defaultTab && isMobile);
-
-    useEffect(() => {
-        runGetAllTags();
-    }, [runGetAllTags]);
-
-    useEffect(() => {
-        if (isMobile && defaultTab) {
-            setShowMobileDetail(true);
-        }
-    }, [defaultTab, isMobile]);
-
-    const tabs = [
+const GROUPS = [
+    {label: 'User settings', tabs: [
         {id: 'profile', label: 'Profile', icon: User},
         {id: 'account', label: 'Account', icon: Settings},
-        {id: 'blocked', label: 'Blocked Users', icon: Ban}
-    ];
+        {id: 'appearance', label: 'Appearance', icon: Palette},
+        {id: 'blocked', label: 'Blocked users', icon: Ban},
+    ]},
+    {label: 'Billing settings', tabs: [
+        {id: 'pro', label: 'allchat Pro', icon: Diamond},
+        {id: 'subscriptions', label: 'Subscriptions', icon: CreditCard},
+    ]},
+];
 
-    const handleTabClick = (tabId: string) => {
-        setActiveTab(tabId);
-        if (isMobile) {
+export const SettingsComponent = ({defaultTab}: {defaultTab?: string}) => {
+    const [runGetAllTags] = useThunk(getAllTagsThunk);
+    const isMobile = useIsMobile();
+    const user = useSelector(selectUser);
+    const router = useRouter();
+    const {close} = useDialog();
+    const [activeTab, setActiveTab] = useState(defaultTab || 'profile');
+    const [showMobileDetail, setShowMobileDetail] = useState(Boolean(defaultTab));
+
+    useEffect(() => {void runGetAllTags().catch(() => {});}, [runGetAllTags]);
+    useEffect(() => {
+        if (defaultTab) {
+            setActiveTab(defaultTab);
             setShowMobileDetail(true);
         }
-    };
+    }, [defaultTab]);
 
-    const handleBack = () => {
-        setShowMobileDetail(false);
-    };
-
+    const handleTabClick = (id: string) => {setActiveTab(id); setShowMobileDetail(true);};
     const renderContent = () => {
         switch (activeTab) {
-            case 'profile':
-                return <ProfileSettings isMobile={isMobile}/>;
-            case 'account':
-                return <AccountSettings isMobile={isMobile}/>;
-            case 'blocked':
-                return <BlockedUsersSettings isMobile={isMobile}/>;
-            default:
-                return <ProfileSettings isMobile={isMobile}/>;
+            case 'account': return <AccountSettings isMobile={isMobile}/>;
+            case 'appearance': return <AppearanceSettings isMobile={isMobile} onExplorePro={() => handleTabClick('pro')}/>;
+            case 'blocked': return <BlockedUsersSettings isMobile={isMobile}/>;
+            case 'pro': return <ProOffer onManage={() => handleTabClick('subscriptions')} onClaim={() => {
+                if (!user || user.role === 'GUEST') {close(); router.push(`${ROUTES.REGISTER}&redirect=${encodeURIComponent(ROUTES.SUBSCRIPTIONS)}`);}
+                else handleTabClick('account');
+            }}/>;
+            case 'subscriptions': return <SubscriptionsSettings onExplore={() => handleTabClick('pro')}/>;
+            default: return <ProfileSettings isMobile={isMobile}/>;
         }
     };
 
-    if (isMobile) {
-        if (!showMobileDetail) {
-            return (
-                <div className="flex flex-col h-full w-full bg-background p-4">
-                    <h1 className="text-2xl font-bold mb-6">Settings</h1>
-                    <nav className="space-y-2">
-                        {tabs.map((tab) => {
-                            const Icon = tab.icon;
-                            return (
-                                <Button
-                                    key={tab.id}
-                                    variant="outline"
-                                    className="w-full justify-start h-12 text-lg"
-                                    onClick={() => handleTabClick(tab.id)}
-                                >
-                                    <Icon className="mr-3 h-5 w-5"/>
-                                    {tab.label}
-                                </Button>
-                            );
-                        })}
-                    </nav>
-                </div>
-            );
-        } else {
-            return (
-                <div className="flex flex-col h-full w-full bg-background">
-                    <div className="flex items-center py-4 border-b">
-                        <Button variant="ghost" size="icon" onClick={handleBack} className="mr-2">
-                            <ArrowLeft className="h-5 w-5"/>
-                        </Button>
-                        <h2 className="text-lg font-semibold capitalize">
-                            {tabs.find(t => t.id === activeTab)?.label || 'Settings'}
-                        </h2>
-                    </div>
-                    <div className="flex-1 pt-4 overflow-auto">
-                        {renderContent()}
-                    </div>
-                </div>
-            );
-        }
-    }
+    const navigation = <nav aria-label="Settings sections" className="space-y-6 px-3 pb-5">{GROUPS.map(group => <div key={group.label}><h2 className="mb-2 px-3 text-[11px] font-bold uppercase tracking-wider text-muted-foreground">{group.label}</h2><div className="space-y-1">{group.tabs.map(tab => <Button key={tab.id} variant={activeTab === tab.id ? 'secondary' : 'ghost'} aria-current={activeTab === tab.id ? 'page' : undefined} className={`w-full justify-start ${isMobile ? 'h-12' : ''} ${tab.id === 'pro' ? 'text-violet-600 dark:text-violet-300' : ''}`} onClick={() => handleTabClick(tab.id)}><tab.icon className="mr-2 h-4 w-4"/>{tab.label}</Button>)}</div></div>)}</nav>;
 
-    return (
-        <div className="flex h-full w-full bg-background">
-            <div className="w-64 border-r bg-card">
-                <div className="p-6">
-                    <h1 className="text-xl font-bold">Settings</h1>
-                </div>
-                <nav className="px-3 space-y-1">
-                    {tabs.map((tab) => {
-                        const Icon = tab.icon;
-                        return (
-                            <Button
-                                key={tab.id}
-                                variant={activeTab === tab.id ? "secondary" : "ghost"}
-                                className="w-full justify-start"
-                                onClick={() => handleTabClick(tab.id)}
-                            >
-                                <Icon className="mr-2 h-4 w-4"/>
-                                {tab.label}
-                            </Button>
-                        );
-                    })}
-                </nav>
-            </div>
-            <div className="flex-1 overflow-auto">
-                {renderContent()}
-            </div>
-        </div>
-    );
-}
+    if (isMobile) return <div className="flex h-full min-h-0 w-full flex-col bg-background">
+        {showMobileDetail ? <>
+            <div className="flex shrink-0 items-center border-b py-3 pr-9"><Button variant="ghost" size="icon" aria-label="Back to settings" onClick={() => setShowMobileDetail(false)}><ArrowLeft className="h-5 w-5"/></Button><h2 className="text-lg font-semibold">{GROUPS.flatMap(group => group.tabs).find(tab => tab.id === activeTab)?.label}</h2></div>
+            <div className={`min-h-0 flex-1 overflow-y-auto ${activeTab === 'pro' ? '' : 'p-4'}`}>{renderContent()}</div>
+        </> : <><h1 className="p-6 text-2xl font-bold">Settings</h1>{navigation}</>}
+    </div>;
+
+    return <div className="flex h-full min-h-0 w-full bg-background"><aside className="w-52 shrink-0 overflow-y-auto border-r bg-muted/25"><h1 className="p-6 text-xl font-bold">Settings</h1>{navigation}</aside><div className="min-w-0 flex-1 overflow-y-auto">{renderContent()}</div></div>;
+};

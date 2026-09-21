@@ -220,7 +220,7 @@ export function AppSidebar({...props}: React.ComponentProps<typeof Sidebar>) {
                 >
                     <img
                         src={logoSrc}
-                        alt="AllChat Logo"
+                        alt="allchat Logo"
                         className="w-44 h-auto mb-4"
                     />
                 </div>
@@ -235,7 +235,10 @@ export function AppSidebar({...props}: React.ComponentProps<typeof Sidebar>) {
             <SidebarFooter>
                 <NotificationBell/>
                 <NavUser user={{
+                    id: Number(user.id) || undefined,
                     name: user.name,
+                    proBadgeVisible: user.proBadgeVisible,
+                    proBadgeRevision: user.proBadgeRevision,
                     email: user.email,
                     avatar: "/avatars/shadcn.jpg",
                 }} onLogout={handleLogout}/>

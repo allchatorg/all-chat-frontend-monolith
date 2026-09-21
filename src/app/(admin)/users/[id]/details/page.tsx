@@ -1,5 +1,6 @@
 'use client';
 
+import {UserName} from "@/components/UserName";
 import {Card, CardContent, CardHeader, CardTitle} from '@/components/ui/card';
 import {Activity, Calendar, Clock, Crown, Globe, HardDrive, Hash, HistoryIcon, Mail, Shield, User} from 'lucide-react';
 import React, {useEffect} from 'react';
@@ -171,7 +172,7 @@ export default function UserDetailsPage() {
                             <User className="h-4 w-4 text-muted-foreground"/>
                             <div>
                                 <p className="text-sm font-medium">Username</p>
-                                <p className="text-sm text-muted-foreground">{user.username}</p>
+                                <p className="text-sm text-muted-foreground"><UserName userId={user.id} username={user.username} proBadgeVisible={user.proBadgeVisible} proBadgeRevision={user.proBadgeRevision}/></p>
                             </div>
                         </div>
 

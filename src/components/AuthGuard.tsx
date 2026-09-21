@@ -11,9 +11,9 @@ import {useTimeZoneSync} from "@/lib/hooks/useTimeZoneSync";
 
 export default function AuthGuard({children}: { children: React.ReactNode }) {
     const {user, error, isInitializing} = useUser();
-    useTimeZoneSync(user);
     const {ipDetails, isLoading: isIpDetailsLoading} = useIpDetails();
     const pathname = usePathname();
+    useTimeZoneSync(pathname === ROUTES.SUBSCRIPTIONS ? null : user);
     const searchParams = useSearchParams();
     const router = useRouter();
     const redirectAfterAuth = sanitizeRedirectParam(searchParams.get("redirect"));
@@ -76,6 +76,9 @@ function getRedirectPath({
 }): string | null {
     // Unauthenticated users
     if (!isAuthenticated) {
+        if (pathname === ROUTES.SUBSCRIPTIONS) {
+            return `${ROUTES.LOGIN}&redirect=${encodeURIComponent(ROUTES.SUBSCRIPTIONS)}`;
+        }
         if (isProtectedRoute(pathname)) {
             return ROUTES.REGISTER;
         }
@@ -88,8 +91,11 @@ function getRedirectPath({
     // Banned users are corralled to the ban info / appeal pages; the backend
     // enforces the same boundary via the AccessRestrictionFilter whitelist.
     if (isBanned) {
-        return pathname.startsWith(ROUTES.BANNED) ? null : ROUTES.BANNED;
+        return pathname.startsWith(ROUTES.BANNED) || pathname === ROUTES.SUBSCRIPTIONS ? null : ROUTES.BANNED;
     }
+
+    // Existing subscribers must retain access to invoices and cancellation.
+    if (pathname === ROUTES.SUBSCRIPTIONS) return null;
 
     // Authenticated users
     if (hasFlaggedIp && isGuest) {

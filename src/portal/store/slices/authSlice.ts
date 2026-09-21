@@ -16,6 +16,8 @@ export interface AuthUser {
     lastName: string;
     email: string;
     role: Role;
+    proBadgeVisible?: boolean;
+    proBadgeRevision?: number;
 }
 
 const chatUser = (state: RootState) => (state as any)?.user?.user ?? null;
@@ -40,6 +42,8 @@ const toAuthUser = (u: any): AuthUser | null => {
         lastName: '',
         email: u.email ?? '',
         role: isAdminLevel(u.role) ? Role.ADMIN : Role.USER,
+        proBadgeVisible: u.proBadgeVisible,
+        proBadgeRevision: u.proBadgeRevision,
     };
 };
 

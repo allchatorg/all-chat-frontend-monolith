@@ -91,7 +91,7 @@ export const Sidebar: React.FC<SidebarProps> = ({className = "", onClose}) => {
             <div className="flex items-center border-b border-border p-3 -mt-px">
                 <Image
                     src={logoSrc}
-                    alt="AllChat"
+                    alt="allchat"
                     width={120}
                     height={36}
                     priority

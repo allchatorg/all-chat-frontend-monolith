@@ -1,4 +1,5 @@
 import {useMemo} from "react";
+import {UserName} from "@/components/UserName";
 import {ColumnDef} from "@tanstack/table-core";
 import {ReportCaseSummary} from "@/models/ReportCaseSummary";
 import {Button} from "@/components/ui/button";
@@ -108,7 +109,7 @@ export function useReportCasesTableColumns({
                     const senderUsername = row.original.message?.senderUsername as string;
                     return (
                         <div className="font-medium">
-                            {senderUsername || "Unknown"}
+                            <UserName userId={row.original.message?.senderId} username={senderUsername || "Unknown"} proBadgeVisible={row.original.message?.senderProBadgeVisible} proBadgeRevision={row.original.message?.senderProBadgeRevision}/>
                         </div>
                     );
                 }

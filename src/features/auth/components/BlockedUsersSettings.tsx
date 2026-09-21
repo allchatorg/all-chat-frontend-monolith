@@ -9,6 +9,7 @@ import {Separator} from "@/components/ui/separator";
 import {Ban} from "lucide-react";
 
 import {UserMinimal} from "@/models/User";
+import {UserName} from '@/components/UserName';
 
 interface BlockedUsersSettingsProps {
     isMobile?: boolean;
@@ -61,8 +62,8 @@ export const BlockedUsersSettings = ({isMobile = false}: BlockedUsersSettingsPro
                                 key={blockedUser.id}
                                 className="flex items-center justify-between py-2 px-3 md:py-3 md:px-4 rounded-lg border bg-card hover:bg-accent/50 transition-colors"
                             >
-                                <div className="flex items-center">
-                                    <p className="font-medium">{blockedUser.username}</p>
+                                <div className="flex min-w-0 items-center pr-3">
+                                    <UserName userId={blockedUser.id} username={blockedUser.username} proBadgeVisible={blockedUser.proBadgeVisible} proBadgeRevision={blockedUser.proBadgeRevision} className="font-medium"/>
                                 </div>
                                 <Button
                                     variant="outline"

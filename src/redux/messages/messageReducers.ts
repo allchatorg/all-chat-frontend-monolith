@@ -12,6 +12,8 @@ export function addReactionRequestToMessage(
     const userMinimal = {
         id: reactionRequest.reactedBy.id,
         username: reactionRequest.reactedBy.username,
+        proBadgeVisible: reactionRequest.reactedBy.proBadgeVisible,
+        proBadgeRevision: reactionRequest.reactedBy.proBadgeRevision,
     };
     const userCount = (message.reactions[reactionIndex]?.usersCount || 0) + 1;
 

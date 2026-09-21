@@ -19,6 +19,7 @@ import {useRoleAccess} from "@/lib/hooks/useRoleAccess";
 import {Permission} from "@/models/Permission";
 import {useRouter} from "next/navigation";
 import {formatFileSize} from "@/lib/utils";
+import {UserName} from "@/components/UserName";
 
 const availableRoles: Role[] = Object.values(Role).filter(
     role => role !== Role.GUEST && role !== Role.UNCLAIMED_USER && role !== Role.SUPER_ADMIN
@@ -48,7 +49,7 @@ export function useUserTableColumns({
                     </Button>
                 ),
                 cell: ({row}) => (
-                    <div className="font-medium">{row.getValue("username")}</div>
+                    <UserName userId={row.original.id} username={row.original.username} proBadgeVisible={row.original.proBadgeVisible} proBadgeRevision={row.original.proBadgeRevision} className="font-medium"/>
                 )
             },
             {

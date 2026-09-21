@@ -1,5 +1,6 @@
 "use client";
 
+import {UserName} from "@/components/UserName";
 import React, {MouseEvent, useState} from "react";
 import {PrivateChatDTO} from "@/models/PrivateChatDTO";
 import {ScrollArea, ScrollBar} from "@/components/ui/scroll-area";
@@ -102,7 +103,7 @@ function PrivateRoomTabContent({
 
             <div className="flex max-w-48 items-center gap-2">
                 <span className="truncate text-base font-medium" title={counterpartName}>
-                    {counterpartName}
+                    <UserName userId={conversation.counterpart?.id} username={counterpartName} proBadgeVisible={conversation.counterpart?.proBadgeVisible} proBadgeRevision={conversation.counterpart?.proBadgeRevision}/>
                 </span>
                 {conversation.blocked && (
                     <span title="Blocked" className="inline-flex items-center text-red-500">

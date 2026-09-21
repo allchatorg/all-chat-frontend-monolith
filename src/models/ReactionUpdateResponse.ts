@@ -8,5 +8,7 @@ export interface ReactionUpdateResponse {
     reactedBy: {
         id: number;
         username: string;
+        proBadgeVisible?: boolean;
+        proBadgeRevision?: number;
     };
 }

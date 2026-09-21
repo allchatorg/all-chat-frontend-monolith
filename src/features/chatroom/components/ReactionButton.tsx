@@ -1,3 +1,4 @@
+import {ChatUserName} from "@/features/chatroom/components/ChatUserName";
 import React, {useRef} from 'react';
 import {Reaction} from '@/models/Reaction';
 import {Tooltip, TooltipContent, TooltipProvider, TooltipTrigger} from '@/components/ui/tooltip';
@@ -131,7 +132,7 @@ export const ReactionButton: React.FC<ReactionButtonProps> = ({
                                         .slice(0, 3)
                                         .map((user, index, array) => (
                                             <span key={user.id}>
-                                                {user.username}
+                                                <ChatUserName userId={user.id} username={user.username} proBadgeVisible={user.proBadgeVisible} proBadgeRevision={user.proBadgeRevision}/>
                                                 {index < array.length - 1 ? ', ' : ''}
                                             </span>
                                         ))}

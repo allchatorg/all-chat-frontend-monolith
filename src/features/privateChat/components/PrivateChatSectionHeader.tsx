@@ -1,5 +1,6 @@
 "use client";
 
+import {UserName} from "@/components/UserName";
 import React, {useState} from "react";
 import {Button} from "@/components/ui/button";
 import {CardTitle} from "@/components/ui/card";
@@ -89,7 +90,7 @@ const PrivateChatSectionHeader: React.FC<PrivateChatSectionHeaderProps> = ({
                 <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-muted">
                     <UserIcon className="h-4 w-4 text-muted-foreground"/>
                 </div>
-                <span className="truncate">{counterpartName}</span>
+                <span className="truncate"><UserName userId={conversation.counterpart?.id} username={counterpartName} proBadgeVisible={conversation.counterpart?.proBadgeVisible} proBadgeRevision={conversation.counterpart?.proBadgeRevision}/></span>
                 {conversation.blocked && (
                     <span title="Blocked" className="inline-flex items-center text-red-500">
                         <Ban className="h-4 w-4"/>
@@ -128,7 +129,7 @@ const PrivateChatSectionHeader: React.FC<PrivateChatSectionHeaderProps> = ({
                     <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-muted">
                         <UserIcon className="h-4 w-4 text-muted-foreground"/>
                     </div>
-                    <span className="truncate">{counterpartName}</span>
+                    <span className="truncate"><UserName userId={conversation.counterpart?.id} username={counterpartName} proBadgeVisible={conversation.counterpart?.proBadgeVisible} proBadgeRevision={conversation.counterpart?.proBadgeRevision}/></span>
                     {conversation.blocked && (
                         <span title="Blocked" className="inline-flex items-center text-red-500">
                             <Ban className="h-4 w-4"/>
