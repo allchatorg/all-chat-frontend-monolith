@@ -5,7 +5,6 @@ import React, {MouseEvent, useEffect, useRef, useState} from "react";
 import {Ban, Loader2, MessageCircleX, MoreVertical, User as UserIcon, Volume2, VolumeX, X} from "lucide-react";
 import {PrivateChatDTO} from "@/models/PrivateChatDTO";
 import {stripMarkers} from "@/features/chatroom/utils/messageMarkers";
-import {getStickerLabel} from "@/features/stickers/catalog";
 import {Button} from "@/components/ui/button";
 import {ScrollArea} from "@/components/ui/scroll-area";
 import {DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger,} from "@/components/ui/dropdown-menu";
@@ -75,8 +74,7 @@ function ConversationRowContent({
     const counterpartName = conversation.counterpart?.username ?? "Deleted user";
     const last = conversation.lastMessage;
     const lastMessagePreview = last?.deleted ? "Message deleted"
-        : stripMarkers(last?.content?.trim() || "")
-        || (last?.stickerId ? `${getStickerLabel(last.stickerId) ?? "Unknown"} sticker` : "");
+        : stripMarkers(last?.content?.trim() || "");
     const {soundMode} = useChatRoomSoundSettings();
     const isToggleInert = soundMode !== 'ALL';
     const toggleTitle = soundMode === 'MUTED'

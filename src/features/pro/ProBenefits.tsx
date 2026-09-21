@@ -1,4 +1,4 @@
-import {Check, Diamond, MessageCircle, Minus, Smile, Sparkles, Sticker} from 'lucide-react';
+import {Check, Diamond, MessageCircle, Minus, Smile, Sparkles} from 'lucide-react';
 import Image from 'next/image';
 import {ProBadge} from '@/components/ProBadge';
 import {cn} from '@/lib/utils';
@@ -8,7 +8,7 @@ const benefits = [
     {label: 'Media & file sharing', basic: true},
     {label: 'Emoji reactions & replies', basic: true},
     {label: 'Light & dark themes', basic: true},
-    {label: '17 exclusive character stickers', basic: false},
+    {label: '17 exclusive character reactions', basic: false},
     {label: 'Exclusive Pro badge', basic: false},
     {label: 'Show or hide your Pro badge', basic: false},
 ];
@@ -64,16 +64,22 @@ export function ProBenefits({username}: {username: string}) {
                 </article>
                 <article className="overflow-hidden rounded-2xl border border-violet-200 bg-card dark:border-violet-500/30">
                     <div aria-hidden="true" className="flex h-36 items-center justify-center overflow-hidden bg-fuchsia-50 px-4 dark:bg-fuchsia-950/20">
-                        <div className="flex -rotate-6 items-center rounded-2xl border border-fuchsia-200/60 bg-white/70 p-2 shadow-lg shadow-fuchsia-900/5 dark:bg-violet-950/50">
-                            <Image src="/stickers/pro/pepe.png" alt="" width={82} height={90} unoptimized className="h-[90px] w-[82px] object-contain"/>
-                            <Image src="/stickers/pro/wojak.png" alt="" width={82} height={90} unoptimized className="h-[90px] w-[82px] object-contain"/>
-                            <Image src="/stickers/pro/gondola.png" alt="" width={82} height={90} unoptimized className="h-[90px] w-[82px] object-contain"/>
+                        <div className="-rotate-3 rounded-2xl border border-fuchsia-200/60 bg-white/70 p-4 shadow-lg shadow-fuchsia-900/5 dark:bg-violet-950/50">
+                            <p className="text-sm font-medium">That made my day.</p>
+                            <div className="mt-3 flex items-center gap-2">
+                                {['pepe', 'wojak', 'gondola'].map((character, index) => (
+                                    <span key={character} className="flex items-center gap-1 rounded-lg border border-violet-300 bg-violet-100/60 px-2 py-1 text-xs font-semibold text-violet-700 dark:border-violet-500/40 dark:bg-violet-500/10 dark:text-violet-200">
+                                        <Image src={`/stickers/pro/${character}.png`} alt="" width={28} height={28} unoptimized className="h-7 w-7 object-contain"/>
+                                        {index + 1}
+                                    </span>
+                                ))}
+                            </div>
                         </div>
                     </div>
                     <div className="p-5">
-                        <p className="flex items-center gap-1 text-[10px] font-bold uppercase tracking-widest text-violet-600 dark:text-violet-300"><Sticker className="h-3 w-3"/>Pro exclusive</p>
-                        <h3 className="mt-2 font-bold">A sticker for the moment.</h3>
-                        <p className="mt-2 text-sm leading-6 text-muted-foreground">Unlock 17 internet classics, from Wojak and Pepe to Gondola. Send them in rooms and private chats, with or without a caption.</p>
+                        <p className="flex items-center gap-1 text-[10px] font-bold uppercase tracking-widest text-violet-600 dark:text-violet-300"><Smile className="h-3 w-3"/>Pro exclusive</p>
+                        <h3 className="mt-2 font-bold">React with a familiar face.</h3>
+                        <p className="mt-2 text-sm leading-6 text-muted-foreground">Unlock 17 exclusive character reactions, from Wojak and Pepe to Gondola. Add them to messages in rooms and private chats.</p>
                     </div>
                 </article>
             </div>

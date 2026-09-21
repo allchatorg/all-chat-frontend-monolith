@@ -11,6 +11,11 @@ import {CountryFlag} from "@/features/chatroom/components/CountryFlag";
 import {UserActionPopup} from "@/features/chatroom/components/UserActionPopup";
 import {useIsMobile} from "@/lib/hooks/useIsMobile";
 import ReplyPreview from "@/features/chatroom/components/ReplyPreview";
+import {useSelector} from "react-redux";
+import {selectUser} from "@/redux/user/userSelectors";
+import {getCustomReaction, isCustomReactionToken} from "@/features/stickers/catalog";
+import {useProDialog} from "@/features/pro/useProDialog";
+import {toast} from "sonner";
 
 interface ChatMessageProps {
     message: Message;
@@ -85,6 +90,9 @@ const ChatMessage: React.FC<ChatMessageProps> = ({
 
     const [reactToMessage] = useThunk(reactToMessageThunk);
     const [deleteReaction] = useThunk(deleteReactionThunk);
+    const proActive = useSelector(selectUser)?.proActive === true;
+    const openPro = useProDialog();
+    const reactionPendingRef = React.useRef(false);
     const [isRevealed, setIsRevealed] = React.useState(false);
     const [isBlinking, setIsBlinking] = React.useState(false);
     const [isReactionPopoverOpen, setIsReactionPopoverOpen] = React.useState(false);
@@ -96,7 +104,7 @@ const ChatMessage: React.FC<ChatMessageProps> = ({
     const isMenuVisible = showMobileMenu || isReactionPopoverOpen;
     const menuVisibilityClass = isMobile
         ? (isMenuVisible ? 'opacity-100' : 'opacity-0 pointer-events-none')
-        : (isReactionPopoverOpen ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none group-hover:opacity-100 group-hover:pointer-events-auto');
+        : (isReactionPopoverOpen ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none group-hover:opacity-100 group-hover:pointer-events-auto group-focus-within:opacity-100 group-focus-within:pointer-events-auto');
     const popoverSelectionClass = isReactionPopoverOpen ? 'select-none' : '';
 
     const handleReactionPopoverOpenChange = (open: boolean) => {
@@ -131,7 +139,7 @@ const ChatMessage: React.FC<ChatMessageProps> = ({
         if (tapLength > 0 && tapLength < 300) {
             e.preventDefault();
             e.stopPropagation();
-            updateMessageReaction(message.id, "👍", "+1");
+            void updateMessageReaction(message.id, "👍", "+1").catch(showReactionError);
             // Reset to prevent a third tap from triggering another double-tap immediately
             lastTapTimeRef.current = 0;
         } else {
@@ -146,7 +154,7 @@ const ChatMessage: React.FC<ChatMessageProps> = ({
 
         e.preventDefault();
         e.stopPropagation();
-        updateMessageReaction(message.id, "👍", "+1");
+        void updateMessageReaction(message.id, "👍", "+1").catch(showReactionError);
     };
 
     React.useEffect(() => {
@@ -163,14 +171,33 @@ const ChatMessage: React.FC<ChatMessageProps> = ({
 
     const blinkClass = isBlinking ? 'animate-message-blink rounded-lg' : '';
 
-    const updateMessageReaction = (messageId: number, emoji: string, emojiId: string) => {
-        const existingReaction = message.reactions.find(r => r.emoji === emoji);
-        if (existingReaction && existingReaction.reactedByCurrentUser) {
-            deleteReaction({messageId, emoji, emojiId});
-        } else {
-            reactToMessage({messageId, emoji, emojiId});
+    const showReactionError = (error: unknown) => {
+        toast.error(error instanceof Error ? error.message : 'Could not update your reaction. Please try again.');
+    };
+
+    const updateMessageReaction = async (messageId: number, emoji: string, emojiId: string): Promise<void> => {
+        if (reactionPendingRef.current || interactionsDisabled || archivedRoom || message.deleted) return;
+        const existingReaction = message.reactions.find(reaction => reaction.emoji === emoji);
+        const removing = existingReaction?.reactedByCurrentUser === true;
+        if (isCustomReactionToken(emoji) || isCustomReactionToken(emojiId)) {
+            if (!getCustomReaction(emoji) || emoji !== emojiId) throw new Error('This character reaction is unavailable.');
+            if (!removing && !proActive) {
+                setIsReactionPopoverOpen(false);
+                openPro();
+                return;
+            }
         }
-    }
+        reactionPendingRef.current = true;
+        try {
+            if (removing) {
+                await deleteReaction({messageId, emoji, emojiId});
+            } else {
+                await reactToMessage({messageId, emoji, emojiId});
+            }
+        } finally {
+            reactionPendingRef.current = false;
+        }
+    };
 
     const handleEditMessage = (message: Message) => {
         onStartEditMessage?.(message);

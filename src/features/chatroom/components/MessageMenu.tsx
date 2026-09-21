@@ -1,9 +1,9 @@
-import React, {useState} from "react";
+import React, {useRef, useState} from "react";
 import {Button} from "@/components/ui/button";
 import {DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger,} from "@/components/ui/dropdown-menu";
 import {Flag, Megaphone, MoreHorizontal, Pencil, Reply, Shield, Smile, Trash2} from "lucide-react";
 import {Popover, PopoverContent, PopoverTrigger} from "@/components/ui/popover";
-import {useDispatch} from "react-redux";
+import {useDispatch, useSelector} from "react-redux";
 import {AppDispatch} from "@/redux/store";
 import {setActiveRightSidebar} from "@/redux/settings/settingsSlice";
 import {setSelectedUserInfo} from "@/redux/modPanel/modPanelSlice";
@@ -15,14 +15,13 @@ import {ClaimAccountPrompt} from "@/features/auth/components/ClaimAccountPrompt"
 import RemovePromotedMessageDialog from "@/features/chatroom/components/RemovePromotedMessageDialog";
 import {GuestModalWrapper} from "@/components/GuestModalWrapper";
 import {canActOn, Role} from "@/models/Role";
-import data from "@emoji-mart/data";
-import Picker from "@emoji-mart/react";
-import {setMessageReactions} from "@/redux/chatRoom/chatRoomUiSlice";
-import {fetchMessageReactionDetailsThunk} from "@/redux/chatRoom/chatRoomThunk";
+import {setMessageReactions, setSelectedReaction} from "@/redux/chatRoom/chatRoomUiSlice";
 import MessageReactionsPanel from "@/features/chatroom/components/MessageReactionsPanel";
 import {cn} from "@/lib/utils";
 import {Message} from "@/models/message";
-import {useTheme} from "next-themes";
+import {ReactionPicker} from "@/features/stickers/ReactionPicker";
+import {selectUser} from "@/redux/user/userSelectors";
+import {useProDialog} from "@/features/pro/useProDialog";
 
 interface MessageMenuProps {
     message: Message,
@@ -31,7 +30,7 @@ interface MessageMenuProps {
     userName?: string;
     role: Role;
     removeMessage?: (messageId: number) => void;
-    updateMessageReaction: (messageId: number, emoji: string, emojiId: string) => void;
+    updateMessageReaction: (messageId: number, emoji: string, emojiId: string) => Promise<void>;
     setEditingMessage: (message: Message) => void;
     onReply?: (message: Message) => void;
     direction?: "ltr" | "rtl";
@@ -78,7 +77,9 @@ export const MessageMenu: React.FC<MessageMenuProps> = ({
     const {isPrincipal, isStaffMember, currentRole} = useRoleAccess();
     const [internalEmojiPopoverOpen, setInternalEmojiPopoverOpen] = useState(false);
     const [isRemovePromotedDialogOpen, setIsRemovePromotedDialogOpen] = useState(false);
-    const {resolvedTheme} = useTheme();
+    const proActive = useSelector(selectUser)?.proActive === true;
+    const openPro = useProDialog();
+    const upgradingRef = useRef(false);
     // An active promotion locks the message against edits: the promoted content
     // must stay what was reviewed/paid for. Removal of a PENDING one is handled
     // in handleRemoveMessage below.
@@ -191,7 +192,7 @@ export const MessageMenu: React.FC<MessageMenuProps> = ({
                 {canOpenActionsMenu && (
                     <DropdownMenu dir={direction} modal={false}>
                         <DropdownMenuTrigger asChild>
-                            <Button variant="outline" size="icon" className="glass-control">
+                            <Button variant="outline" size="icon" className="glass-control" aria-label="Message actions">
                                 <MoreHorizontal className="h-4 w-4"/>
                             </Button>
                         </DropdownMenuTrigger>
@@ -201,11 +202,7 @@ export const MessageMenu: React.FC<MessageMenuProps> = ({
                                     className="justify-between"
                                     onClick={() => {
                                         dispatch(setMessageReactions(message.reactions));
-                                        dispatch(fetchMessageReactionDetailsThunk({
-                                            messageId: messageId,
-                                            emoji: message.reactions[0].emoji,
-                                            limit: 3
-                                        }));
+                                        dispatch(setSelectedReaction(message.reactions[0]));
                                         open(<MessageReactionsPanel/>, {className: 'p-0 border-0'});
                                     }}
                                 >
@@ -300,21 +297,31 @@ export const MessageMenu: React.FC<MessageMenuProps> = ({
                 {canAddReaction && (
                     <Popover open={isOpenEmojiPopover} onOpenChange={handleEmojiPopoverOpenChange}>
                         <PopoverTrigger asChild>
-                            <Button variant="outline" size="icon" className="glass-control">
+                            <Button variant="outline" size="icon" className="glass-control" aria-label="Add reaction">
                                 <Smile className="h-4 w-4"/>
                             </Button>
                         </PopoverTrigger>
                         <PopoverContent
                             align="end"
-                            sideOffset={4}
-                            className="glass-popover p-0 border-none shadow-lg"
+                            sideOffset={6}
+                            collisionPadding={12}
+                            aria-label="Choose a message reaction"
+                            className="w-[min(380px,calc(100vw-24px))] overflow-hidden rounded-xl border bg-popover p-0 text-popover-foreground shadow-2xl"
+                            onCloseAutoFocus={event => {
+                                // Keep focus inside the upgrade dialog when opening it from this popover.
+                                if (upgradingRef.current) event.preventDefault();
+                                upgradingRef.current = false;
+                            }}
                         >
-                            <Picker
-                                data={data}
-                                theme={resolvedTheme}
-                                onEmojiSelect={(emoji: any) => {
-                                    updateMessageReaction?.(messageId, emoji.native, emoji.id);
+                            <ReactionPicker
+                                proActive={proActive}
+                                reactions={message.reactions}
+                                onSelect={(emoji, emojiId) => updateMessageReaction(messageId, emoji, emojiId)}
+                                onClose={() => handleEmojiPopoverOpenChange(false)}
+                                onUpgrade={() => {
+                                    upgradingRef.current = true;
                                     handleEmojiPopoverOpenChange(false);
+                                    openPro();
                                 }}
                             />
                         </PopoverContent>

@@ -1,8 +1,8 @@
-# allchat Pro stickers
+# allchat Pro character reaction artwork
 
-Seventeen individual reaction stickers generated with the built-in image generation tool, then resized with Sharp for chat delivery. Each PNG is 320 × 320 pixels and retains the generated alpha channel. Artwork is intentionally free of backgrounds, captions, symbols, and logos.
+Seventeen character images used as custom emoji reactions on messages in rooms and private chats. Active allchat Pro members can add these reactions; everyone can view them. The images were generated with the built-in image generation tool, then resized with Sharp for chat delivery. Each PNG is 320 × 320 pixels and retains the generated alpha channel. Artwork is intentionally free of backgrounds, captions, symbols, and logos.
 
-Generated: 2026-09-21. The character IDs correspond to the sticker catalog. The original generated images are 1254 × 1254 pixels. No external image downloads or vector stand-ins are used. Total PNG payload: 1,505,161 bytes.
+Generated: 2026-09-21. The character IDs correspond to the local reaction catalog and use the `allchat:<id>` reaction token in both `emoji` and `emojiId`. The original generated images are 1254 × 1254 pixels. No external image downloads or vector stand-ins are used. Total PNG payload: 1,505,161 bytes.
 
 All 17 assets were visually checked on a dark background and verified to contain transparent pixels outside the character.
 

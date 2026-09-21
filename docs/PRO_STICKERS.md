@@ -1,51 +1,57 @@
-# allchat Pro stickers
+# allchat Pro character reactions
 
-The composer includes a searchable, responsive sticker picker with 17 transparent
-character stickers. Free users can browse and preview the pack, then open the
-existing allchat Pro dialog. Active Pro users can attach one sticker, optionally
-add a caption or attachment, and send it to a public room or private conversation.
+The message reaction picker includes **Emoji** and **allchat Pro** tabs. Everyone
+can use standard emoji, browse the 17 transparent characters, and view reactions
+on messages. Active Pro members can add character reactions in public rooms and
+private conversations. Locked characters open the existing allchat Pro dialog.
 Badge visibility does not affect access.
 
-The picker supports keyboard focus, Escape, character names and mood search, a
-preview footer, and a removable composer preview. Failed sends preserve the
-draft. The composer blocks duplicate sends while a request is pending.
+The character tab supports name and mood search, keyboard focus, and hover/focus
+previews. Selecting a character adds a reaction directly to the message. Reaction
+chips show the character image and count, toggle the viewer's membership, and
+support tooltips and the reacting-users panel. Members can remove their own
+reactions after Pro expires; adding one always requires current Pro access.
 
-## Message contract
+## Reaction contract
 
-`CreateMessageRequest`, `Message`, and reply previews use an optional `stickerId`.
-The server validates the ID and current subscription on every send. The client
-resolves IDs through `src/features/stickers/catalog.ts`; incoming values cannot
-select arbitrary image URLs. Editing a caption preserves its original sticker.
+Existing reaction endpoints and fields are preserved. A custom reaction uses the
+same reserved token in `emoji` and `emojiId`, for example `allchat:pepe`. The server
+validates matching, known tokens and the current subscription when adding a
+reaction. Unicode emoji keep their existing behavior. Detail request paths
+URI-encode the reaction identity.
 
-Stickers render without a bubble/background in chat, search, history, report
-details, and promoted-message previews. Deleted reply parents follow the existing
-visibility rules. Private conversation and moderation lists show sticker names
-when no caption exists.
+The client resolves character images only through the local catalog in
+`src/features/stickers/catalog.ts`. Incoming tokens cannot select arbitrary image
+URLs. Room access applies to reaction changes and user details. Changes are
+serialized per message and idempotent; user previews do not modify stored
+membership. Public and private chats receive the existing live reaction updates.
 
-## Assets
+Messages, replies, edit history, and promotions have no standalone sticker fields.
+The composer continues to preserve failed drafts, block duplicate pending sends,
+and retain reply state until a send succeeds.
 
-PNG assets live in `public/stickers/pro/`. Their README records the artwork prompt
-set and generation workflow. The catalog and backend allowlist must use the same
-IDs. Both Chad variants have separate entries.
+## Assets and deployment
 
-## Deployment
+All 17 PNG assets remain in `public/stickers/pro/`. Their README preserves the
+original artwork prompts and generation workflow. The local catalog and backend
+allowlist use the same character IDs, including both Chad variants.
 
-Deploy the matching `feature/pro-stickers` backend first. In
-`all-chat-monolith`, apply `docs/sql/pro-stickers.sql` after the existing Pro SQL
-migration and before starting a backend that validates its database schema.
-The migration adds nullable sticker columns to messages and edit history.
-No additional billing configuration or environment variables are needed.
+Deploy the matching `feature/pro-stickers` backend before the frontend. Reactions
+use the existing database schema; no sticker-message migration is needed. No
+additional billing configuration or environment variables are required.
 
 ## Verification
 
 ```sh
-npm run test:stickers
+npm run test:reactions
 npx tsc --noEmit
 npm run build
 ```
 
-The regression tests cover catalog asset resolution and transparent PNG support,
-unknown IDs, reply edits, and immediate sticker redaction for deleted parents.
-Browser checks use local simulated accounts and sends to verify locked previews,
-search, hidden-badge Pro access, sticker-only sending, failed-send draft retention,
-and responsive layout without sending test messages to actual conversations.
+Verify all 17 catalog entries and transparent assets, ordinary emoji, free and
+active/expired Pro access, hidden badges, invalid tokens, removal after expiry,
+encoded details requests, counts, and reload/live-update persistence. Backend
+tests cover private-room access, concurrent/idempotent changes, and non-mutating
+user previews. Browser checks cover desktop/mobile layout, search, keyboard
+access, locked previews, upgrade behavior, and failed reaction requests without
+sending test reactions to actual conversations.

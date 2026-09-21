@@ -1,155 +1,111 @@
-import {ChatUserName} from "@/features/chatroom/components/ChatUserName";
-import React, {useRef} from 'react';
+import {ChatUserName} from '@/features/chatroom/components/ChatUserName';
+import React, {useEffect, useRef, useState} from 'react';
 import {Reaction} from '@/models/Reaction';
 import {Tooltip, TooltipContent, TooltipProvider, TooltipTrigger} from '@/components/ui/tooltip';
-import {Message} from "@/models/message";
-import {useThunk} from "@/lib/hooks/useThunk";
-import {
-    deleteReactionThunk,
-    fetchMessageReactionDetailsThunk,
-    reactToMessageThunk
-} from "@/redux/chatRoom/chatRoomThunk";
-import {useDispatch, useSelector} from "react-redux";
-import {AppDispatch} from "@/redux/store";
-import {setMessageReactions} from "@/redux/chatRoom/chatRoomUiSlice";
-import {selectMessageReactionsState} from "@/redux/chatRoom/chatRoomSelectors";
-import {useDialog} from "@/components/providers/DialogProvider";
-import {useUser} from "@/lib/hooks/useUser";
-import MessageReactionsPanel from "@/features/chatroom/components/MessageReactionsPanel";
+import {Message} from '@/models/message';
+import {useThunk} from '@/lib/hooks/useThunk';
+import {deleteReactionThunk, fetchMessageReactionDetailsThunk, reactToMessageThunk} from '@/redux/chatRoom/chatRoomThunk';
+import {useDispatch, useSelector} from 'react-redux';
+import {AppDispatch} from '@/redux/store';
+import {setMessageReactions, setSelectedReaction} from '@/redux/chatRoom/chatRoomUiSlice';
+import {selectMessageReactionsState} from '@/redux/chatRoom/chatRoomSelectors';
+import {useDialog} from '@/components/providers/DialogProvider';
+import {selectUser} from '@/redux/user/userSelectors';
+import MessageReactionsPanel from '@/features/chatroom/components/MessageReactionsPanel';
+import {ReactionGlyph} from '@/features/stickers/ReactionGlyph';
+import {getReactionLabel, isCustomReactionToken} from '@/features/stickers/catalog';
+import {useProDialog} from '@/features/pro/useProDialog';
+import {toast} from 'sonner';
 
 interface ReactionButtonProps {
-    reaction: Reaction,
-    message: Message,
-    isDisplayOnly?: boolean,
-    disabled?: boolean,
+    reaction: Reaction;
+    message: Message;
+    isDisplayOnly?: boolean;
+    disabled?: boolean;
 }
 
-export const ReactionButton: React.FC<ReactionButtonProps> = ({
-                                                                  reaction,
-                                                                  message,
-                                                                  isDisplayOnly = false,
-                                                                  disabled = false,
-                                                              }) => {
+export const ReactionButton: React.FC<ReactionButtonProps> = ({reaction, message, isDisplayOnly = false, disabled = false}) => {
     const dispatch = useDispatch<AppDispatch>();
     const {open} = useDialog();
-    const {user} = useUser();
-
+    const openPro = useProDialog();
+    const user = useSelector(selectUser);
     const messageReactionsState = useSelector(selectMessageReactionsState);
     const [fetchReactionDetails, reactionDetailsLoading] = useThunk(fetchMessageReactionDetailsThunk);
     const [addReaction] = useThunk(reactToMessageThunk);
     const [removeReaction] = useThunk(deleteReactionThunk);
-
-    const hoverTimeout = useRef<NodeJS.Timeout | null>(null);
-
-    const handleHoverStart = () => {
-        hoverTimeout.current = setTimeout(() => {
-            if (!reactionDetailsLoading) {
-                dispatch(setMessageReactions(message.reactions));
-                fetchReactionDetails({messageId: message.id, emoji: reaction.emoji, limit: 3});
-            }
-        }, 400);
-    };
+    const [pending, setPending] = useState(false);
+    const pendingRef = useRef(false);
+    const hoverTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
+    const label = getReactionLabel(reaction.emoji, reaction.emojiId);
+    const reactedByCurrentUser = Boolean(reaction.reactedByCurrentUser || reaction.users?.some(u => u.id === user?.id));
+    const selectedReaction = messageReactionsState?.selectedReaction;
+    const hasReactionDetails = selectedReaction?.messageId === message.id && selectedReaction.emoji === reaction.emoji;
 
     const handleHoverEnd = () => {
-        if (hoverTimeout.current) {
-            clearTimeout(hoverTimeout.current);
-            hoverTimeout.current = null;
-        }
+        if (hoverTimeout.current) clearTimeout(hoverTimeout.current);
+        hoverTimeout.current = null;
     };
+    useEffect(() => handleHoverEnd, []);
 
-    const handleToolTipContentClick = () => {
+    const handleHoverStart = () => {
+        handleHoverEnd();
+        hoverTimeout.current = setTimeout(() => {
+            dispatch(setMessageReactions(message.reactions));
+            void fetchReactionDetails({messageId: message.id, emoji: reaction.emoji, limit: 3}).catch(() => {
+                // A failed hover preview should not interrupt the chat. The details panel offers retry.
+            });
+        }, 400);
+    };
+    const showDetails = () => {
+        handleHoverEnd();
+        dispatch(setMessageReactions(message.reactions));
+        dispatch(setSelectedReaction(reaction));
         open(<MessageReactionsPanel/>, {className: 'p-0 border-0'});
     };
-
-    const selectedReaction = messageReactionsState?.selectedReaction;
-    const reactedByCurrentUser = reaction.reactedByCurrentUser || reaction.users?.some(u => u.id === user?.id);
-    const hasReactionDetails =
-        selectedReaction?.emoji === reaction.emoji &&
-        selectedReaction?.users &&
-        selectedReaction.users.length > 0;
-
-    const handleReactionClick = () => {
-        reactedByCurrentUser
-            ? removeReaction({messageId: message.id, emoji: reaction.emoji, emojiId: reaction.emojiId})
-            : addReaction({messageId: message.id, emoji: reaction.emoji, emojiId: reaction.emojiId});
+    const handleReactionClick = async () => {
+        if (pendingRef.current) return;
+        if (!reactedByCurrentUser && isCustomReactionToken(reaction.emoji) && !user?.proActive) {
+            handleHoverEnd();
+            openPro();
+            return;
+        }
+        pendingRef.current = true;
+        setPending(true);
+        try {
+            const request = {messageId: message.id, emoji: reaction.emoji, emojiId: reaction.emojiId};
+            await (reactedByCurrentUser ? removeReaction(request) : addReaction(request));
+        } catch (error) {
+            toast.error(error instanceof Error ? error.message : 'Could not update your reaction. Please try again.');
+        } finally {
+            pendingRef.current = false;
+            setPending(false);
+        }
     };
+    const chipClass = `inline-flex items-center gap-1.5 px-1.5 py-1 rounded-lg text-sm font-medium glass-pill ${reactedByCurrentUser
+        ? 'text-blue-700 dark:text-blue-200 bg-blue-100/80 dark:bg-blue-500/25 ring-1 ring-blue-400/70 dark:ring-blue-400/50'
+        : 'text-gray-700 dark:text-zinc-300'}`;
+    const content = <><ReactionGlyph emoji={reaction.emoji} size={22}/><span className="text-xs font-semibold">{reaction.usersCount ?? 0}</span></>;
+    if (isDisplayOnly || disabled) return <span aria-label={`${label}, ${reaction.usersCount ?? 0} reactions`} className={`${chipClass} cursor-default`}>{content}</span>;
 
-    if (isDisplayOnly || disabled) {
-        return (
-            <span
-                className={`
-                    inline-flex items-center gap-1.5 px-1 py-1 rounded-lg text-sm font-medium
-                    glass-pill cursor-default
-                    ${reactedByCurrentUser
-                    ? 'text-blue-700 dark:text-blue-200 bg-blue-100/80 dark:bg-blue-500/25 ring-1 ring-blue-400/70 dark:ring-blue-400/50'
-                    : 'text-gray-700 dark:text-zinc-300'
-                }
-                `}
-            >
-                    <span className="text-base leading-none">{reaction.emoji}</span>
-                    <span className="text-xs font-semibold">{reaction.usersCount ?? 0}</span>
-            </span>
-        );
-    }
-
-    return (
-        <TooltipProvider>
-            <Tooltip>
-                <TooltipTrigger asChild>
-                    <button
-                        onClick={handleReactionClick}
-                        onMouseEnter={handleHoverStart}
-                        onMouseLeave={handleHoverEnd}
-                        className={`
-                            inline-flex items-center gap-1.5 px-1 py-1 rounded-lg text-sm font-medium
-                            transition-all duration-200 ease-in-out
-                            glass-pill
-                            ${reactedByCurrentUser
-                            ? 'text-blue-700 dark:text-blue-200 bg-blue-100/80 dark:bg-blue-500/25 ring-1 ring-blue-400/70 dark:ring-blue-400/50'
-                            : 'text-gray-700 dark:text-zinc-300'
-                        }
-                            hover:shadow-xs active:scale-95
-                        `}
-                    >
-                        <span className="text-base leading-none">{reaction.emoji}</span>
-                        <span className="text-xs font-semibold">{reaction.usersCount ?? 0}</span>
-                    </button>
-                </TooltipTrigger>
-                {!reactionDetailsLoading && (
-                    <TooltipContent className="glass-popover cursor-pointer">
-                        <div className="flex flex-col gap-1" onClick={handleToolTipContentClick}>
-                            <p className="flex items-center gap-1.5">
-                                <span className="text-base">{reaction.emoji}</span>
-                                <span className="font-semibold">
-                                    :{reaction.emojiId}:
-                                </span>
-                            </p>
-
-                            {hasReactionDetails && selectedReaction?.users ? (
-                                <div className="text-sm">
-                                    reacted by:{" "}
-                                    {selectedReaction.users
-                                        .slice(0, 3)
-                                        .map((user, index, array) => (
-                                            <span key={user.id}>
-                                                <ChatUserName userId={user.id} username={user.username} proBadgeVisible={user.proBadgeVisible} proBadgeRevision={user.proBadgeRevision}/>
-                                                {index < array.length - 1 ? ', ' : ''}
-                                            </span>
-                                        ))}
-                                    {(reaction.usersCount ?? 0) > 3 && (
-                                        <span className="underline ml-21">
-                                            and {(reaction.usersCount ?? 0) - 3} more {(reaction.usersCount ?? 0) - 3 === 1 ? 'user' : 'users'}
-                                        </span>
-                                    )}
-                                </div>
-                            ) : (
-                                <span
-                                    className="text-xs text-gray-500 dark:text-zinc-400">Hover to see who reacted</span>
-                            )}
-                        </div>
-                    </TooltipContent>
-                )}
-            </Tooltip>
-        </TooltipProvider>
-    );
+    return <TooltipProvider><Tooltip>
+        <TooltipTrigger asChild>
+            <button type="button" onClick={() => void handleReactionClick()} onMouseEnter={handleHoverStart} onMouseLeave={handleHoverEnd}
+                    onFocus={handleHoverStart} onBlur={handleHoverEnd} disabled={pending} aria-busy={pending} aria-pressed={reactedByCurrentUser}
+                    aria-label={`${reactedByCurrentUser ? 'Remove' : 'Add'} ${label} reaction, ${reaction.usersCount ?? 0} reactions`}
+                    className={`${chipClass} transition-all hover:shadow-xs active:scale-95 focus-visible:outline-2 focus-visible:outline-blue-500 disabled:cursor-wait disabled:opacity-60`}>
+                {content}
+            </button>
+        </TooltipTrigger>
+        <TooltipContent className="glass-popover max-w-xs">
+            <div className="flex flex-col gap-1.5">
+                <p className="flex items-center gap-1.5"><ReactionGlyph emoji={reaction.emoji}/><span className="font-semibold">{label}</span></p>
+                {hasReactionDetails && !reactionDetailsLoading && selectedReaction?.users?.length ? <div className="text-sm">
+                    Reacted by: {selectedReaction.users.slice(0, 3).map((reactor, index) => <span key={reactor.id}>
+                        {index > 0 && ', '}<ChatUserName userId={reactor.id} username={reactor.username} proBadgeVisible={reactor.proBadgeVisible} proBadgeRevision={reactor.proBadgeRevision}/>
+                    </span>)}{(reaction.usersCount ?? 0) > 3 && ` and ${(reaction.usersCount ?? 0) - 3} more`}
+                </div> : <span className="text-xs text-muted-foreground">{reactionDetailsLoading ? 'Loading reactions…' : `${reaction.usersCount ?? 0} reactions`}</span>}
+                <button type="button" onClick={showDetails} className="self-start text-xs underline underline-offset-2">View everyone who reacted</button>
+            </div>
+        </TooltipContent>
+    </Tooltip></TooltipProvider>;
 };

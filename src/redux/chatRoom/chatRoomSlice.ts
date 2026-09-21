@@ -653,13 +653,13 @@ const chatSlice = createSlice({
             );
         },
         removeMessageReaction(
-            state, action: PayloadAction<ReactionUpdateResponse>
+            state, action: PayloadAction<{ reactionRequest: ReactionUpdateResponse; reactedByCurrentUser: boolean }>
         ) {
             if (state.selectedChatRoom) {
-                state.selectedChatRoom = removeChatRoomReaction(state.selectedChatRoom, action.payload);
+                state.selectedChatRoom = removeChatRoomReaction(state.selectedChatRoom, action.payload.reactionRequest, action.payload.reactedByCurrentUser);
             }
             state.loadedChatRooms = state.loadedChatRooms.map(room =>
-                removeChatRoomReaction(room, action.payload)
+                removeChatRoomReaction(room, action.payload.reactionRequest, action.payload.reactedByCurrentUser)
             );
         },
         // Applies a PROMOTED_MESSAGE_UPDATE broadcast: sets (PENDING/APPROVED)

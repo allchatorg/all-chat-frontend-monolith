@@ -5,5 +5,4 @@ export interface CreateMessageRequest {
     chatRoomId: number;
     attachments?: Attachment[];
     replyToMessageId?: number;
-    stickerId?: string;
 }

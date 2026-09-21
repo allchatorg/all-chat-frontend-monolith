@@ -140,7 +140,7 @@ const PrivateChatSection: React.FC<PrivateChatSectionProps> = ({
         acknowledgeMessage({roomId: chatRoom.id, messageId: lastMessage.id});
     };
 
-    const handleSendMessage = async (content: string, attachment?: Attachment, _editingMessageId?: number, stickerId?: string) => {
+    const handleSendMessage = async (content: string, attachment?: Attachment, _editingMessageId?: number) => {
         try {
             trackMessageSent({
                 room_id: String(chatRoom.id),
@@ -155,7 +155,6 @@ const PrivateChatSection: React.FC<PrivateChatSectionProps> = ({
             chatRoomId: chatRoom.id,
             attachments: attachment ? [attachment] : [],
             replyToMessageId: replyingToMessage?.id,
-            stickerId,
         }).then(() => {
             if (replyingToMessage && selectPrivateReplyingToMessage(store.getState())?.id === replyingToMessage.id) {
                 dispatch(setPrivateReplyingToMessage(null));

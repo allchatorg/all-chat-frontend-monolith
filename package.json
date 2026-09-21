@@ -10,7 +10,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "test:stickers": "node --test tests/pro-stickers.test.mjs"
+    "test:reactions": "node --test tests/pro-reactions.test.mjs"
   },
   "dependencies": {
     "@dnd-kit/core": "^6.3.1",

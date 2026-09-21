@@ -5,7 +5,6 @@ import {ReportCaseSummary} from "@/models/ReportCaseSummary";
 import {Button} from "@/components/ui/button";
 import {ArrowUpDown, IdCard, ShieldAlert} from "lucide-react";
 import {ReportType} from "@/models/ReportTypeEnum";
-import {getStickerLabel} from "@/features/stickers/catalog";
 
 type UseReportCasesTableColumnsProps = {
     onViewDetails?: (reportCaseId: string) => void;
@@ -122,10 +121,7 @@ export function useReportCasesTableColumns({
                     if (row.original.csamCase) {
                         return <span className="text-destructive font-medium">REDACTED (CSAM)</span>;
                     }
-                    const message = row.original.message;
-                    const content = message?.content || (message?.stickerId
-                        ? `${getStickerLabel(message.stickerId) ?? "Unknown"} sticker`
-                        : "N/A");
+                    const content = row.original.message?.content as string;
                     return (
                         <div className="max-w-xs truncate" title={content}>
                             {content || "N/A"}

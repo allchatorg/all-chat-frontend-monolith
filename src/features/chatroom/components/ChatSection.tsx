@@ -222,7 +222,7 @@ const ChatSection: React.FC<ChatSectionProps> = ({
 
     const noiseLevel = selectedUserChatRoom?.roomPopulation.noiseLevel || ChatRoomNoiseLevelEnum.CONVERSATIONAL;
 
-    const handleSendMessage = async (messageContent: string, attachment?: Attachment, _editingMessageId?: number, stickerId?: string) => {
+    const handleSendMessage = async (messageContent: string, attachment?: Attachment, _editingMessageId?: number) => {
         try {
             trackMessageSent({
                 room_id: String(chatRoom.id),
@@ -237,7 +237,6 @@ const ChatSection: React.FC<ChatSectionProps> = ({
             chatRoomId: chatRoom.id,
             attachments: attachment ? [attachment] : [],
             replyToMessageId: replyingToMessage?.id,
-            stickerId,
         };
 
         await sendMessageThunk(messageToSend).then(() => {

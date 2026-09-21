@@ -3,11 +3,11 @@ import {ChatRoom} from "@/models/ChatRoom";
 import {Reaction} from "@/models/Reaction";
 import {ReactionUpdateResponse} from "@/models/ReactionUpdateResponse";
 
-export function addReactionRequestToMessage(
-    message: Message,
+export function addReactionRequestToMessage<T extends Pick<Message, "reactions">>(
+    message: T,
     reactionRequest: ReactionUpdateResponse,
     reactedByCurrentUser: boolean
-): Message {
+): T {
     const reactionIndex = message.reactions.findIndex(r => r.emoji === reactionRequest.emoji);
     const userMinimal = {
         id: reactionRequest.reactedBy.id,
@@ -15,7 +15,11 @@ export function addReactionRequestToMessage(
         proBadgeVisible: reactionRequest.reactedBy.proBadgeVisible,
         proBadgeRevision: reactionRequest.reactedBy.proBadgeRevision,
     };
-    const userCount = (message.reactions[reactionIndex]?.usersCount || 0) + 1;
+    const existing = message.reactions[reactionIndex];
+    // A repeated delivery must not count an already-known membership twice.
+    if (existing?.users?.some(user => user.id === reactionRequest.reactedBy.id) ||
+        (reactedByCurrentUser && existing?.reactedByCurrentUser)) return message;
+    const userCount = (existing?.usersCount || 0) + 1;
 
     if (reactionIndex >= 0) {
         return {
@@ -25,7 +29,7 @@ export function addReactionRequestToMessage(
                     ? {
                         ...r,
                         usersCount: userCount,
-                        reactedByCurrentUser: reactedByCurrentUser,
+                        reactedByCurrentUser: r.reactedByCurrentUser || reactedByCurrentUser,
                         users: r.users ? [...r.users, userMinimal] : [userMinimal],
                     }
                     : r
@@ -48,10 +52,11 @@ export function addReactionRequestToMessage(
     };
 }
 
-export function removeReactionRequestFromMessage(
-    message: Message,
-    reactionRequest: ReactionUpdateResponse
-): Message {
+export function removeReactionRequestFromMessage<T extends Pick<Message, "reactions">>(
+    message: T,
+    reactionRequest: ReactionUpdateResponse,
+    removedByCurrentUser: boolean
+): T {
     const reactionIndex = message.reactions.findIndex(r => r.emoji === reactionRequest.emoji);
     if (reactionIndex === -1) {
         return message;
@@ -60,7 +65,7 @@ export function removeReactionRequestFromMessage(
     const existingReaction = message.reactions[reactionIndex];
     const userCount = Math.max((existingReaction.usersCount || 1) - 1, 0);
     const updatedUsers = existingReaction.users?.filter(user => user.id !== reactionRequest.reactedBy.id) || [];
-    const reactedByCurrentUser = updatedUsers.some(user => user.id === reactionRequest.reactedBy.id);
+    const reactedByCurrentUser = existingReaction.reactedByCurrentUser && !removedByCurrentUser;
 
     if (userCount === 0) {
         return {
@@ -103,7 +108,8 @@ export function addChatRoomReaction(
 
 export function removeChatRoomReaction(
     chatRoom: ChatRoom,
-    reactionRequest: ReactionUpdateResponse
+    reactionRequest: ReactionUpdateResponse,
+    removedByCurrentUser: boolean
 ): ChatRoom {
     if (chatRoom.id !== reactionRequest.chatroomId) {
         return chatRoom;
@@ -112,7 +118,7 @@ export function removeChatRoomReaction(
         ...chatRoom,
         messages: chatRoom.messages.map(message =>
             message.id === reactionRequest.messageId
-                ? removeReactionRequestFromMessage(message, reactionRequest)
+                ? removeReactionRequestFromMessage(message, reactionRequest, removedByCurrentUser)
                 : message
         ),
     };
@@ -130,7 +136,6 @@ export function patchReplyPreviewsForEditedMessage(messages: Message[], edited: 
                 replyTo: {
                     ...message.replyTo,
                     content: edited.content,
-                    stickerId: edited.stickerId ?? null,
                     // Removing an attachment is broadcast as an edit, so refresh the flag/name too
                     hasAttachment: (edited.attachments?.length ?? 0) > 0,
                     attachmentName: edited.attachments?.[0]?.name ?? null,
@@ -158,7 +163,6 @@ export function patchReplyPreviewsForDeletedMessage(
                     ...message.replyTo,
                     deleted: true,
                     content: retainContent ? message.replyTo.content : null,
-                    stickerId: retainContent ? message.replyTo.stickerId : null,
                 },
             }
             : message

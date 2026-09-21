@@ -10,7 +10,6 @@ import {Input} from "@ads/components/ui/input"
 import {ArrowUpDown, Eye, Megaphone, Search} from "lucide-react"
 import {useRouter} from "next/navigation"
 import {PromotedMessage, PromotedMessageStatus} from "@ads/models/promoted-message"
-import {getStickerLabel} from "@/features/stickers/catalog"
 
 export type PromotedMessageStatusFilter = PromotedMessageStatus | "ALL"
 
@@ -184,9 +183,7 @@ export function PromotedMessagesTable({
                                     <TableRow key={promotion.id}>
                                         <TableCell className="max-w-[280px]">
                                             <span className="line-clamp-2 whitespace-pre-wrap break-words text-sm">
-                                                {promotion.messageContent || (promotion.messageStickerId
-                                                    ? `${getStickerLabel(promotion.messageStickerId) ?? "Unknown"} sticker`
-                                                    : "Attachment")}
+                                                {promotion.messageContent}
                                             </span>
                                         </TableCell>
                                         <TableCell className="text-muted-foreground">{promotion.chatRoomName}</TableCell>

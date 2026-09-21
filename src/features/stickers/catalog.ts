@@ -1,12 +1,12 @@
-export interface ProSticker {
+export interface ProReaction {
     id: string;
     name: string;
     src: string;
     tags: readonly string[];
 }
 
-/** IDs are persisted on messages. Keep them in sync with the server allowlist. */
-export const PRO_STICKERS: readonly ProSticker[] = [
+/** Canonical allchat:<id> tokens are persisted in both reaction identity fields. */
+export const PRO_REACTIONS: readonly ProReaction[] = [
     {id: 'wojak', name: 'Wojak', tags: ['feels', 'sad', 'feeling']},
     {id: 'soyjak', name: 'Soyjak', tags: ['surprised', 'excited', 'glasses']},
     {id: 'chud', name: 'Chud', tags: ['angry', 'grumpy']},
@@ -24,14 +24,28 @@ export const PRO_STICKERS: readonly ProSticker[] = [
     {id: 'honkler', name: 'Honkler', tags: ['clown', 'frog', 'honk']},
     {id: 'spurdo', name: 'Spurdo', tags: ['bear', 'funny']},
     {id: 'gondola', name: 'Gondola', tags: ['quiet', 'calm', 'observer']},
-].map(sticker => ({...sticker, src: `/stickers/pro/${sticker.id}.png`}));
+].map(reaction => ({...reaction, src: `/stickers/pro/${reaction.id}.png`}));
 
-const stickersById = new Map(PRO_STICKERS.map(sticker => [sticker.id, sticker]));
+const reactionPrefix = 'allchat:';
+const reactionsByToken = new Map(PRO_REACTIONS.map(reaction => [toCustomReactionToken(reaction.id), reaction]));
 
-export function getStickerById(id?: string | null): ProSticker | undefined {
-    return id ? stickersById.get(id) : undefined;
+export function toCustomReactionToken(id: string): string {
+    return `${reactionPrefix}${id}`;
 }
 
-export function getStickerLabel(id?: string | null): string | undefined {
-    return getStickerById(id)?.name;
+/** Recognize even unavailable reserved tokens so they never render as URLs or raw IDs. */
+export function isCustomReactionToken(emoji?: string | null): boolean {
+    return Boolean(emoji?.startsWith(reactionPrefix));
+}
+
+/** Only an exact allowlisted identity may resolve an image. */
+export function getCustomReaction(emoji?: string | null): ProReaction | undefined {
+    return emoji ? reactionsByToken.get(emoji) : undefined;
+}
+
+export function getReactionLabel(emoji: string, emojiId?: string): string {
+    const reaction = getCustomReaction(emoji);
+    if (reaction) return reaction.name;
+    if (isCustomReactionToken(emoji) || isCustomReactionToken(emojiId)) return 'Unavailable reaction';
+    return emojiId?.replaceAll('_', ' ') || emoji;
 }
