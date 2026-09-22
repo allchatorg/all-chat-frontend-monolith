@@ -4,6 +4,9 @@ export const FONT_PRESETS = [
     {id: 'DEFAULT', label: 'Default'},
     {id: 'INTER', label: 'Inter'},
     {id: 'OPEN_SANS', label: 'Open Sans'},
+    {id: 'NUNITO', label: 'Nunito'},
+    {id: 'COMFORTAA', label: 'Comfortaa'},
+    {id: 'CAVEAT', label: 'Caveat'},
 ] as const;
 
 export type FontPreset = typeof FONT_PRESETS[number]['id'];
@@ -19,7 +22,7 @@ export const DEFAULT_FONT_SNAPSHOT: Readonly<FontSnapshot> = Object.freeze({
 });
 
 export function isFontPreset(value: unknown): value is FontPreset {
-    return value === 'DEFAULT' || value === 'INTER' || value === 'OPEN_SANS';
+    return FONT_PRESETS.some(preset => preset.id === value);
 }
 
 export function isFontSnapshot(value: Partial<FontSnapshot> | undefined | null): value is FontSnapshot {
@@ -31,6 +34,9 @@ export function isFontSnapshot(value: Partial<FontSnapshot> | undefined | null):
 export function fontPresetStyle(preset: unknown): CSSProperties {
     if (preset === 'INTER') return {fontFamily: 'var(--font-pro-inter), ui-sans-serif, system-ui, sans-serif'};
     if (preset === 'OPEN_SANS') return {fontFamily: 'var(--font-pro-open-sans), ui-sans-serif, system-ui, sans-serif'};
+    if (preset === 'NUNITO') return {fontFamily: 'var(--font-pro-nunito), ui-sans-serif, system-ui, sans-serif'};
+    if (preset === 'COMFORTAA') return {fontFamily: 'var(--font-pro-comfortaa), ui-sans-serif, system-ui, sans-serif'};
+    if (preset === 'CAVEAT') return {fontFamily: 'var(--font-pro-caveat), cursive'};
     return {};
 }
 

@@ -71,7 +71,7 @@ export function ProBenefits({username}: {username: string}) {
                     <div className="p-5">
                         <p className="flex items-center gap-1 text-[10px] font-bold uppercase tracking-widest text-violet-600 dark:text-violet-300"><Diamond className="h-3 w-3"/>Pro exclusive</p>
                         <h3 className="mt-2 font-bold">Your style. Your call.</h3>
-                        <p className="mt-2 text-sm leading-6 text-muted-foreground">Choose from a few familiar fonts for your username and messages. Show or hide your badge, and make it yours in Appearance.</p>
+                        <p className="mt-2 text-sm leading-6 text-muted-foreground">Choose classic, rounded, or handwritten fonts for your username and messages. Show or hide your badge, and make it yours in Appearance.</p>
                     </div>
                 </article>
             </div>

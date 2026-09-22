@@ -135,7 +135,7 @@ function FontSettingsForm({userId, username, proActive, showProBadge, onExploreP
     return <Card className="overflow-hidden border-violet-200 dark:border-violet-900">
         <CardHeader>
             <CardTitle className="flex items-center gap-2"><Type className="h-5 w-5 text-violet-500"/>Fonts</CardTitle>
-            <CardDescription>Choose a familiar font for your username and messages with allchat Pro.</CardDescription>
+            <CardDescription>Give your username and messages a little more personality with allchat Pro.</CardDescription>
         </CardHeader>
         <CardContent className="space-y-5">
             <div className="grid gap-4 sm:grid-cols-2">
