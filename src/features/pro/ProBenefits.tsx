@@ -13,7 +13,7 @@ const benefits: {label: string; basic: ReactNode; pro: ReactNode}[] = [
         pro: `Up to ${ACCOUNT_LIMITS.proRooms}`,
     },
     {label: 'Characters per message', basic: characters(ACCOUNT_LIMITS.regularMessageCharacters), pro: characters(ACCOUNT_LIMITS.proMessageCharacters)},
-    {label: 'Per video or GIF', basic: megabytes(ACCOUNT_LIMITS.regularVideoBytes), pro: megabytes(ACCOUNT_LIMITS.proVideoBytes)},
+    {label: 'Per file', basic: megabytes(ACCOUNT_LIMITS.regularFileBytes), pro: megabytes(ACCOUNT_LIMITS.proFileBytes)},
     {label: 'Total uploads in any 1-hour window', basic: megabytes(ACCOUNT_LIMITS.regularHourlyUploadBytes), pro: megabytes(ACCOUNT_LIMITS.proHourlyUploadBytes)},
     {label: 'Media & file sharing', basic: true, pro: true},
     {label: 'Emoji reactions & replies', basic: true, pro: true},
@@ -53,12 +53,12 @@ export function ProBenefits({username}: {username: string}) {
                 <article className="overflow-hidden rounded-2xl border border-violet-200 bg-card dark:border-violet-500/30">
                     <div aria-hidden="true" className="flex h-36 items-center justify-center gap-4 overflow-hidden bg-amber-50 px-5 dark:bg-amber-950/20">
                         <div className="-rotate-6 rounded-2xl bg-amber-400 p-4 text-amber-950 shadow-lg shadow-amber-900/10"><CloudUpload className="h-10 w-10 stroke-[1.5]"/></div>
-                        <div className="rotate-3 rounded-2xl border border-amber-200/70 bg-white px-4 py-3 text-amber-950 shadow-lg shadow-amber-900/5"><span className="block text-2xl font-extrabold">{megabytes(ACCOUNT_LIMITS.proVideoBytes)}</span><span className="text-xs">per video</span></div>
+                        <div className="rotate-3 rounded-2xl border border-amber-200/70 bg-white px-4 py-3 text-amber-950 shadow-lg shadow-amber-900/5"><span className="block text-2xl font-extrabold">{megabytes(ACCOUNT_LIMITS.proFileBytes)}</span><span className="text-xs">per file</span></div>
                     </div>
                     <div className="p-5">
                         <p className="text-[10px] font-bold uppercase tracking-widest text-violet-600 dark:text-violet-300">Bigger uploads</p>
                         <h3 className="mt-2 font-bold">Share the whole moment.</h3>
-                        <p className="mt-2 text-sm leading-6 text-muted-foreground">Send videos and GIFs up to {megabytes(ACCOUNT_LIMITS.proVideoBytes)} each, with {megabytes(ACCOUNT_LIMITS.proHourlyUploadBytes)} of total uploads in any 1-hour window.</p>
+                        <p className="mt-2 text-sm leading-6 text-muted-foreground">Send files up to {megabytes(ACCOUNT_LIMITS.proFileBytes)} each, with {megabytes(ACCOUNT_LIMITS.proHourlyUploadBytes)} of total uploads in any 1-hour window.</p>
                     </div>
                 </article>
                 <article className="overflow-hidden rounded-2xl border border-violet-200 bg-card dark:border-violet-500/30">

@@ -93,7 +93,7 @@ export function SubscriptionsSettings({onExplore}: {onExplore?: () => void}) {
                             <ul className="mt-2 grid gap-x-5 gap-y-2 text-muted-foreground sm:grid-cols-2">
                                 <li>{staff ? 'Unlimited joined chatrooms (staff)' : `Up to ${ACCOUNT_LIMITS.proRooms} joined chatrooms`}</li>
                                 <li>{ACCOUNT_LIMITS.proMessageCharacters.toLocaleString('en-US')} characters per message</li>
-                                <li>{ACCOUNT_LIMITS.proVideoBytes / (1024 * 1024)} MB per video or GIF</li>
+                                <li>{ACCOUNT_LIMITS.proFileBytes / (1024 * 1024)} MB per file</li>
                                 <li>{staff ? 'No hourly upload cap (staff)' : `${ACCOUNT_LIMITS.proHourlyUploadBytes / (1024 * 1024)} MB of uploads in any 1-hour window`}</li>
                             </ul>
                             <p className="mt-2 text-muted-foreground">Plus your Pro badge, which you can show or hide in Appearance.</p>

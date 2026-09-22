@@ -1,5 +1,4 @@
 import {AttachmentType} from "@/models/AttachmentType";
-import {AttachmentTypeEnum} from "@/models/AttachmentTypeEnum";
 import {isStaff} from "@/models/Role";
 import {User} from "@/models/User";
 
@@ -14,8 +13,8 @@ export const ACCOUNT_LIMITS = {
     proMessageCharacters: 2500,
     regularRawMessageCharacters: 2000,
     proRawMessageCharacters: 10000,
-    regularVideoBytes: 10 * MEBIBYTE,
-    proVideoBytes: 100 * MEBIBYTE,
+    regularFileBytes: 10 * MEBIBYTE,
+    proFileBytes: 100 * MEBIBYTE,
     regularHourlyUploadBytes: 25 * MEBIBYTE,
     proHourlyUploadBytes: 500 * MEBIBYTE,
 } as const;
@@ -35,10 +34,10 @@ export function getAccountLimits(user: Account) {
     };
 }
 
-// Metadata stays account-independent; only the existing VIDEO category (including
-// GIFs) receives a Pro override. The server remains authoritative for all limits.
+// Pro raises the per-file cap for every supported chat attachment type.
+// The server remains authoritative for file validation and the rolling allowance.
 export function getAttachmentByteLimit(type: AttachmentType, user: Account): number {
-    return user?.proActive && type.fileType === AttachmentTypeEnum.VIDEO
-        ? ACCOUNT_LIMITS.proVideoBytes
+    return user?.proActive
+        ? ACCOUNT_LIMITS.proFileBytes
         : type.maxFileSizeBytes;
 }

@@ -471,6 +471,8 @@ const ChatInput: React.FC<ChatInputProps> = ({
 
         const file = e.target.files?.[0];
         if (!file) return;
+        // Allow selecting the same file again after capacity becomes available.
+        e.target.value = "";
 
         let normalizedFileMimeType = toMimeType(file.type);
         if (normalizedFileMimeType === MimeType.UNKNOWN) {
@@ -507,7 +509,7 @@ const ChatInput: React.FC<ChatInputProps> = ({
         }
         const maxFileSize = getAttachmentByteLimit(attachmentType, user);
         if (file.size > maxFileSize) {
-            toast.error(`File exceeds the ${maxFileSize / (1024 * 1024)} MB limit for ${attachmentType.fileType.toLowerCase()} uploads. (${(file.size / (1024 * 1024)).toFixed(2)} MB selected)`);
+            toast.error(`File exceeds the ${maxFileSize / (1024 * 1024)} MB per-file limit. (${(file.size / (1024 * 1024)).toFixed(2)} MB selected)`);
             e.target.value = "";
             return;
         }
@@ -872,10 +874,10 @@ const ChatInput: React.FC<ChatInputProps> = ({
                     )}
                 </div>
                 <div
-                    className={`${remainingChars < 50 && remainingChars > 0 ? "text-yellow-600" : ""
-                    } ${remainingChars <= 0 ? "text-red-600" : ""} tabular-nums`}
+                    className={`${remainingChars <= maxMessageLength * 0.1 && remainingChars >= 0 ? "text-amber-700 dark:text-amber-300" : ""
+                    } ${remainingChars < 0 ? "text-red-600 dark:text-red-400" : ""} tabular-nums`}
                 >
-                    {isMobile
+                    {remainingChars < 0 ? `${Math.abs(remainingChars).toLocaleString()} character${remainingChars === -1 ? '' : 's'} over limit` : isMobile
                         ? `${visibleLength} / ${maxMessageLength}`
                         : `${remainingChars} characters remaining`}
                 </div>

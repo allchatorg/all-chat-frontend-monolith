@@ -117,10 +117,8 @@ const SearchRooms: React.FC = () => {
                                     }
                                     if (showCreateOption) {
                                         handleDesktopCreate();
-                                        clearSearch();
                                     } else if (rooms.length > 0) {
-                                        handleDesktopJoin(rooms[0].roomId);
-                                        clearSearch();
+                                        void handleDesktopJoin(rooms[0].roomId);
                                     }
                                 }
                             }}
