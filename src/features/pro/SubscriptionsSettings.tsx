@@ -8,8 +8,6 @@ import {Button} from '@/components/ui/button';
 import {AlertDialog, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle} from '@/components/ui/alert-dialog';
 import {cancelProSubscription, openProPortal, proErrorMessage, redirectToStripe, removeScheduledProChange, resumeProSubscription} from './api';
 import {notifyProChanged, useProSubscription} from './useProSubscription';
-import {PRO_REACTIONS} from '@/features/stickers/catalog';
-import {ACCOUNT_LIMITS} from '@/lib/accountLimits';
 import {useSelector} from 'react-redux';
 import {selectUser} from '@/redux/user/userSelectors';
 import {isStaff} from '@/models/Role';
@@ -91,18 +89,6 @@ export function SubscriptionsSettings({onExplore, billingReturn}: {onExplore?: (
                             {billingDate && <div className="sm:col-span-2"><dt className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">{showingAccessEnd ? 'Paid access ends' : 'Next renewal'}</dt><dd className="mt-1 text-sm">{dateLabel(billingDate)}</dd></div>}
                         </dl> : <p className="text-sm leading-6 text-muted-foreground">{current.checkoutPending ? unavailableYearlyCheckout ? 'Your previous checkout has not been resolved yet.' : 'Your checkout is in progress. Complete payment to activate Pro.' : 'You do not have an allchat Pro subscription yet. Get higher limits, custom fonts, exclusive stickers, custom emojis and reactions, and your own Pro badge.'}</p>}
 
-                        {current.proActive && <div className="rounded-xl bg-blue-50 p-4 text-sm dark:bg-blue-500/10">
-                            <h3 className="font-semibold">Your Pro benefits</h3>
-                            <ul className="mt-2 grid gap-x-5 gap-y-2 text-muted-foreground sm:grid-cols-2">
-                                <li>{staff ? 'Unlimited joined chatrooms (staff)' : `Up to ${ACCOUNT_LIMITS.proRooms} joined chatrooms`}</li>
-                                <li>{ACCOUNT_LIMITS.proMessageCharacters.toLocaleString('en-US')} characters per message</li>
-                                <li>{ACCOUNT_LIMITS.proFileBytes / (1024 * 1024)} MB per file</li>
-                                <li>{staff ? 'No hourly upload cap (staff)' : `${ACCOUNT_LIMITS.proHourlyUploadBytes / (1024 * 1024)} MB of uploads in any 1-hour window`}</li>
-                                <li>{PRO_REACTIONS.length} characters for stickers, custom emojis, and reactions</li>
-                                <li>Username and message fonts, with {ACCOUNT_LIMITS.proDailyFontSaves} saves per day</li>
-                            </ul>
-                            <p className="mt-2 text-muted-foreground">Manage your fonts and badge in Appearance. Hiding your badge keeps every Pro benefit active.</p>
-                        </div>}
                         {current.cancelAtPeriodEnd && <p className="rounded-xl bg-muted p-4 text-sm leading-6">Your subscription will not renew. {current.proActive ? `You keep Pro until ${dateLabel(current.paidThrough)}.` : 'You do not currently have paid Pro access.'}</p>}
                         {(current.cancelAtPeriodEnd || (!current.proActive && current.status !== 'NONE' && !current.checkoutPending)) && <p className="text-xs leading-5 text-muted-foreground">{current.proActive ? 'When Pro access ends, Basic limits apply, fonts return to Default, and sending new Pro stickers, emojis, and reactions requires resubscribing.' : 'Basic limits currently apply.'} {roomExpiryDescription}</p>}
                         {current.scheduledInterval && <div className="rounded-xl border border-blue-300 bg-blue-50 p-4 text-sm dark:border-blue-800 dark:bg-blue-950/30"><p className="font-semibold">Changing to {current.scheduledInterval === 'MONTHLY' ? 'monthly' : 'yearly'}</p><p className="mt-1 leading-6">Your {current.scheduledInterval === 'MONTHLY' ? '$5/month' : '$50/year'} plan starts {dateLabel(current.scheduledChangeAt)}. No charge today.</p><Button variant="link" className="mt-1 h-auto px-0 text-blue-700 dark:text-blue-300" disabled={!!action} onClick={() => void mutate('unschedule', removeScheduledProChange, 'Your scheduled plan change was removed.')} >{action === 'unschedule' && <Loader2 className="mr-2 h-4 w-4 animate-spin"/>}Keep {current.interval === 'YEARLY' ? 'yearly' : 'monthly'} plan</Button></div>}
