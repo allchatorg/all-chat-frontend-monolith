@@ -10,7 +10,7 @@ import StompBridge from "@/components/StompBridge";
 import RateLimitDialog from "@/components/RateLimitDialog";
 import GoogleAnalytics from "@/components/GoogleAnalytics";
 import {Footer} from "@/components/Footer";
-import {ROUTES} from "@/routes";
+import {isBillingRoute, ROUTES} from "@/routes";
 
 export function AppShell({children}: { children: React.ReactNode }) {
     const pathname = usePathname();
@@ -65,7 +65,7 @@ export function AppShell({children}: { children: React.ReactNode }) {
 
     // Billing stays accessible to restricted accounts without initializing chat
     // requests that can otherwise redirect them back to their restriction page.
-    if (pathname === ROUTES.SUBSCRIPTIONS) {
+    if (isBillingRoute(pathname)) {
         return <AuthGuard>{children}<Toaster/><RateLimitDialog/></AuthGuard>;
     }
 

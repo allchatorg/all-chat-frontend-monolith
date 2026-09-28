@@ -68,8 +68,8 @@ export function ProOffer({onManage, onClaim}: {onManage: () => void; onClaim: ()
     return (
         <div className="bg-background text-foreground">
             <div className="p-3 pb-0 sm:p-4 sm:pb-0">
-                <section className="relative isolate overflow-hidden rounded-2xl bg-[#4039bd] px-6 py-12 text-center text-white sm:px-12 sm:py-14">
-                    <div aria-hidden="true" className="pointer-events-none absolute inset-0 -z-10 bg-[radial-gradient(ellipse_at_0%_100%,#e58be8_0%,transparent_45%),radial-gradient(ellipse_at_45%_120%,#4d8bff_0%,transparent_65%)]"/>
+                <section className="relative isolate overflow-hidden rounded-2xl bg-[#1749b5] px-6 py-12 text-center text-white sm:px-12 sm:py-14">
+                    <div aria-hidden="true" className="pointer-events-none absolute inset-0 -z-10 bg-[radial-gradient(ellipse_at_0%_100%,#38bdf8_0%,transparent_45%),radial-gradient(ellipse_at_45%_120%,#2563eb_0%,transparent_65%)]"/>
                     <BannerSparkle className="left-[11%] top-9 h-8 w-5 -rotate-6 opacity-95"/>
                     <BannerSparkle className="left-[5%] top-24 h-5 w-3 opacity-90"/>
                     <BannerSparkle className="bottom-20 right-[12%] h-8 w-5 opacity-95"/>
@@ -80,7 +80,7 @@ export function ProOffer({onManage, onClaim}: {onManage: () => void; onClaim: ()
                         <p className="mx-auto mt-4 max-w-sm text-sm leading-6 text-white/90">Bigger uploads, longer messages, more chatrooms, custom fonts, exclusive stickers and emojis, and your own Pro badge.</p>
                         <p className="mt-2 text-sm font-medium text-white sm:text-base">{selectedInterval === 'YEARLY' ? '$50/year' : 'Just $5/month'}. Cancel anytime.</p>
                         <div className="mt-7 flex flex-wrap items-center justify-center gap-3">
-                            <Button onClick={() => void subscribe()} disabled={actionDisabled} className="h-11 max-w-full whitespace-normal rounded-lg bg-white px-5 font-bold text-indigo-600 shadow-none hover:bg-indigo-50">
+                            <Button onClick={() => void subscribe()} disabled={actionDisabled} className="h-11 max-w-full whitespace-normal rounded-lg bg-white px-5 font-bold text-blue-600 shadow-none hover:bg-blue-50">
                                 {redirecting ? <Loader2 className="h-4 w-4 animate-spin"/> : <Diamond className="h-4 w-4"/>}{actionLabel}
                             </Button>
                             <Button variant="outline" onClick={comparePlans} className="h-11 rounded-lg border-white/65 bg-transparent px-5 font-semibold text-white shadow-none hover:bg-white/10 hover:text-white"><ArrowDown className="h-4 w-4"/>Compare plans</Button>
@@ -92,34 +92,34 @@ export function ProOffer({onManage, onClaim}: {onManage: () => void; onClaim: ()
             <div className="space-y-10 px-5 py-9 sm:px-8 sm:py-10">
                 <ProBenefits username={user?.username || 'Your username'}/>
 
-                <section ref={plansRef} tabIndex={-1} aria-labelledby={plansHeadingId} className="scroll-mt-6 space-y-6 rounded-2xl outline-none focus-visible:ring-2 focus-visible:ring-violet-500 focus-visible:ring-offset-4">
+                <section ref={plansRef} tabIndex={-1} aria-labelledby={plansHeadingId} className="scroll-mt-6 space-y-6 rounded-2xl outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-4">
                     <div className="text-center">
                         <h2 id={plansHeadingId} className="text-2xl font-extrabold tracking-tight">Find your kind of allchat.</h2>
                         <p className="mt-2 text-sm leading-6 text-muted-foreground">Start with Basic. Choose Pro for more space to share and connect.</p>
                     </div>
                     <ProComparison yearly={selectedInterval === 'YEARLY'}/>
 
-                    <div className="rounded-2xl border border-violet-200 bg-violet-50/60 p-5 dark:border-violet-500/30 dark:bg-violet-500/5 sm:p-6">
+                    <div className="rounded-2xl border border-blue-200 bg-blue-50/60 p-5 dark:border-blue-500/30 dark:bg-blue-500/5 sm:p-6">
                         <div className="flex flex-wrap items-start justify-between gap-4">
-                            <div><h3 className="flex items-center gap-2 text-lg font-bold"><Diamond className="h-5 w-5 text-violet-500"/>Make it Pro.</h3><p className="mt-1 text-sm text-muted-foreground">Everything in Basic, plus higher limits, username and message fonts, exclusive stickers, custom emojis and reactions, and your own Pro badge.</p></div>
+                            <div><h3 className="flex items-center gap-2 text-lg font-bold"><Diamond className="h-5 w-5 text-blue-500"/>Make it Pro.</h3><p className="mt-1 text-sm text-muted-foreground">Everything in Basic, plus higher limits, username and message fonts, exclusive stickers, custom emojis and reactions, and your own Pro badge.</p></div>
                             {!yearlyBillingEnabled && <p className="text-3xl font-extrabold">$5<span className="text-sm font-normal text-muted-foreground"> / month</span></p>}
                         </div>
                         {yearlyBillingEnabled && <fieldset className="mt-5">
                             <legend className="mb-3 text-sm font-semibold">Choose your billing</legend>
                             <div className="grid grid-cols-2 gap-3">
                                 {availableIntervals.map(option => (
-                                    <label key={option} className={cn('relative cursor-pointer rounded-xl border-2 p-4 transition-colors focus-within:ring-2 focus-within:ring-violet-500 focus-within:ring-offset-2', selectedInterval === option ? 'border-violet-500 bg-background' : 'border-border bg-card hover:border-violet-300', lockedCheckoutInterval && option !== lockedCheckoutInterval && 'cursor-not-allowed opacity-50')}>
+                                    <label key={option} className={cn('relative cursor-pointer rounded-xl border-2 p-4 transition-colors focus-within:ring-2 focus-within:ring-blue-500 focus-within:ring-offset-2', selectedInterval === option ? 'border-blue-500 bg-background' : 'border-border bg-card hover:border-blue-300', lockedCheckoutInterval && option !== lockedCheckoutInterval && 'cursor-not-allowed opacity-50')}>
                                         <input className="sr-only" type="radio" name={intervalName} value={option} checked={selectedInterval === option} disabled={redirecting || Boolean(lockedCheckoutInterval && option !== lockedCheckoutInterval)} onChange={() => {intervalSelected.current = true; setInterval(option);}}/>
                                         <span className="block text-sm font-semibold">{option === 'MONTHLY' ? 'Monthly' : 'Yearly'}</span>
                                         <span className="mt-2 block text-2xl font-bold">${option === 'MONTHLY' ? '5' : '50'}<span className="text-sm font-normal text-muted-foreground">/{option === 'MONTHLY' ? 'mo' : 'yr'}</span></span>
-                                        <span className={cn('mt-2 block text-xs font-medium', option === 'YEARLY' ? 'text-violet-700 dark:text-violet-300' : 'text-muted-foreground')}>{option === 'YEARLY' ? 'Save $10/year' : 'Billed monthly'}</span>
+                                        <span className={cn('mt-2 block text-xs font-medium', option === 'YEARLY' ? 'text-blue-700 dark:text-blue-300' : 'text-muted-foreground')}>{option === 'YEARLY' ? 'Save $10/year' : 'Billed monthly'}</span>
                                     </label>
                                 ))}
                             </div>
                         </fieldset>}
                         {lockedCheckoutInterval && <p className="mt-4 text-xs leading-5 text-muted-foreground">Continue your {lockedCheckoutInterval === 'YEARLY' ? 'yearly' : 'monthly'} checkout to try another payment method.{yearlyBillingEnabled && ' To choose a different plan, cancel this unfinished subscription in Settings first.'}</p>}
                         {unavailableYearlyCheckout && <p role="status" className="mt-4 text-sm leading-6 text-muted-foreground">{subscription?.status === 'INCOMPLETE' ? 'Your previous checkout is no longer available. Cancel your unfinished subscription in Settings before starting a new plan.' : 'Your previous checkout is still being confirmed. Please wait for it to finish or expire, then refresh your subscription.'} <button className="font-medium underline" onClick={() => void refresh(true)}>Refresh status</button></p>}
-                        <Button onClick={() => void subscribe()} disabled={actionDisabled} className="mt-5 h-12 w-full whitespace-normal rounded-xl bg-violet-600 font-bold text-white hover:bg-violet-700">
+                        <Button onClick={() => void subscribe()} disabled={actionDisabled} className="mt-5 h-12 w-full whitespace-normal rounded-xl bg-blue-600 font-bold text-white hover:bg-blue-700">
                             {redirecting ? <Loader2 className="h-4 w-4 animate-spin"/> : <Diamond className="h-4 w-4"/>}
                             {actionLabel}
                             {!redirecting && <ArrowRight className="ml-auto h-4 w-4"/>}

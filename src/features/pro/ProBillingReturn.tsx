@@ -1,0 +1,33 @@
+'use client';
+
+import {useEffect, useRef} from 'react';
+import Link from 'next/link';
+import {useSelector} from 'react-redux';
+import {Diamond} from 'lucide-react';
+import {Button} from '@/components/ui/button';
+import {selectUser} from '@/redux/user/userSelectors';
+import {ROUTES} from '@/routes';
+import {useProDialog} from './useProDialog';
+
+/** Opens the billing result after authentication, once per return visit. */
+export function ProBillingReturn() {
+    const user = useSelector(selectUser);
+    const openPro = useProDialog({initialView: 'subscriptions'});
+    const opened = useRef(false);
+
+    useEffect(() => {
+        if (!user || opened.current) return;
+        opened.current = true;
+        openPro();
+    }, [user, openPro]);
+
+    return <main className="flex min-h-screen items-center justify-center bg-background p-6 text-foreground">
+        <div className="max-w-sm space-y-5 text-center">
+            <Diamond aria-hidden="true" className="mx-auto h-10 w-10 text-blue-600 dark:text-blue-400"/>
+            <h1 className="text-2xl font-bold">allchat Pro</h1>
+            <p className="text-sm leading-6 text-muted-foreground">View your subscription status, benefits, and billing in the allchat Pro window.</p>
+            <Button disabled={!user} onClick={openPro} className="bg-blue-600 text-white hover:bg-blue-700">View subscription</Button>
+            <Link href={user?.banned ? ROUTES.BANNED : ROUTES.HOME} className="block text-sm text-muted-foreground underline underline-offset-4">{user?.banned ? 'Back to account status' : 'Back to allchat'}</Link>
+        </div>
+    </main>;
+}

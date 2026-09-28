@@ -15,7 +15,7 @@ import {ClaimUser} from "@/features/auth/components/ClaimUser";
 import {useThunk} from "@/lib/hooks/useThunk";
 import {claimAccountThunk} from "@/redux/auth/authThunk";
 import {toast} from "sonner";
-import {ROUTES} from '@/routes';
+import {isBillingRoute, ROUTES} from '@/routes';
 import Link from 'next/link';
 
 interface VerificationBlockingOverlayProps {
@@ -48,7 +48,7 @@ export const VerificationBlockingOverlay: React.FC<VerificationBlockingOverlayPr
 
         if (user.role === 'GUEST') return 'NONE';
         // Never block the ban/appeal pages with the verification dialog.
-        if (pathname.startsWith('/banned') || pathname === ROUTES.SUBSCRIPTIONS) return 'NONE';
+        if (pathname.startsWith('/banned') || isBillingRoute(pathname)) return 'NONE';
         if (!isClaimed && required !== 'NONE') return 'CLAIM';
         if (required === 'EMAIL' && !emailVerified) return 'EMAIL';
         if (required === 'PHONE') {

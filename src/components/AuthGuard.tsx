@@ -3,7 +3,7 @@
 import {usePathname, useRouter, useSearchParams} from 'next/navigation';
 import {useEffect} from 'react';
 import {useUser} from "@/lib/hooks/useUser";
-import {isAuthFlowRoute, isProtectedRoute, isStaffRoute, ROUTES, sanitizeRedirectParam} from "@/routes";
+import {isAuthFlowRoute, isBillingRoute, isProtectedRoute, isStaffRoute, ROUTES, sanitizeRedirectParam} from "@/routes";
 import {isStaff, Role} from "@/models/Role";
 import {Spinner} from './Spinner';
 import {useIpDetails} from "@/lib/hooks/useIpDetails";
@@ -13,10 +13,11 @@ export default function AuthGuard({children}: { children: React.ReactNode }) {
     const {user, error, isInitializing} = useUser();
     const {ipDetails, isLoading: isIpDetailsLoading} = useIpDetails();
     const pathname = usePathname();
-    useTimeZoneSync(pathname === ROUTES.SUBSCRIPTIONS ? null : user);
+    useTimeZoneSync(isBillingRoute(pathname) ? null : user);
     const searchParams = useSearchParams();
     const router = useRouter();
     const redirectAfterAuth = sanitizeRedirectParam(searchParams.get("redirect"));
+    const returnPath = `${pathname}${searchParams.size ? `?${searchParams.toString()}` : ''}`;
 
     const isAuthenticated = !!user;
     const hasFlaggedIp = ipDetails?.requiredVerification !== 'NONE';
@@ -34,13 +35,14 @@ export default function AuthGuard({children}: { children: React.ReactNode }) {
             isVerified,
             pathname,
             userRole: user?.role,
-            redirectAfterAuth
+            redirectAfterAuth,
+            returnPath
         });
 
         if (redirectConfig) {
             router.push(redirectConfig);
         }
-    }, [isInitializing, user, pathname, router, ipDetails, redirectAfterAuth]);
+    }, [isInitializing, user, pathname, router, ipDetails, redirectAfterAuth, returnPath]);
 
     const isLoading = isInitializing || isIpDetailsLoading || (isProtectedRoute(pathname) && !user && !error);
 
@@ -63,7 +65,8 @@ function getRedirectPath({
                              isVerified,
                              pathname,
                              userRole,
-                             redirectAfterAuth
+                             redirectAfterAuth,
+                             returnPath
                          }: {
     isAuthenticated: boolean;
     isBanned: boolean;
@@ -73,11 +76,12 @@ function getRedirectPath({
     pathname: string;
     userRole?: Role;
     redirectAfterAuth?: string | null;
+    returnPath: string;
 }): string | null {
     // Unauthenticated users
     if (!isAuthenticated) {
-        if (pathname === ROUTES.SUBSCRIPTIONS) {
-            return `${ROUTES.LOGIN}&redirect=${encodeURIComponent(ROUTES.SUBSCRIPTIONS)}`;
+        if (isBillingRoute(pathname)) {
+            return `${ROUTES.LOGIN}&redirect=${encodeURIComponent(returnPath)}`;
         }
         if (isProtectedRoute(pathname)) {
             return ROUTES.REGISTER;
@@ -91,11 +95,12 @@ function getRedirectPath({
     // Banned users are corralled to the ban info / appeal pages; the backend
     // enforces the same boundary via the AccessRestrictionFilter whitelist.
     if (isBanned) {
-        return pathname.startsWith(ROUTES.BANNED) || pathname === ROUTES.SUBSCRIPTIONS ? null : ROUTES.BANNED;
+        if (pathname === ROUTES.AUTH && redirectAfterAuth && isBillingRoute(redirectAfterAuth.split('?')[0])) return redirectAfterAuth;
+        return pathname.startsWith(ROUTES.BANNED) || isBillingRoute(pathname) ? null : ROUTES.BANNED;
     }
 
     // Existing subscribers must retain access to invoices and cancellation.
-    if (pathname === ROUTES.SUBSCRIPTIONS) return null;
+    if (isBillingRoute(pathname)) return null;
 
     // Authenticated users
     if (hasFlaggedIp && isGuest) {

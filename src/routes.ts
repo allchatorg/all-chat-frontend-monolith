@@ -16,6 +16,7 @@ export const ROUTES = {
     APPLY_MODERATOR: '/moderator-apply',
     PRIVATE_CHAT: '/private',
     SUBSCRIPTIONS: '/settings/subscriptions',
+    PRO_RETURN: '/pro/return',
 } as const;
 
 export const PUBLIC_ROUTES = [
@@ -29,6 +30,7 @@ export const PROTECTED_ROUTES = [
     ROUTES.HOME,
     ROUTES.APPLY_MODERATOR,
     ROUTES.SUBSCRIPTIONS,
+    ROUTES.PRO_RETURN,
 ] as const;
 
 export const STAFF_ROUTES = [
@@ -42,6 +44,10 @@ export const STAFF_ROUTES = [
 
 export function isPublicRoute(pathname: string) {
     return PUBLIC_ROUTES.some(route => pathname.startsWith(route));
+}
+
+export function isBillingRoute(pathname: string) {
+    return pathname === ROUTES.SUBSCRIPTIONS || pathname === ROUTES.PRO_RETURN;
 }
 
 export function isProtectedRoute(pathname: string) {
