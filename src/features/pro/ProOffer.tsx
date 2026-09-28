@@ -11,12 +11,20 @@ import {ProInterval} from './types';
 import {proErrorMessage, redirectToStripe, startProCheckout} from './api';
 import {useProSubscription} from './useProSubscription';
 import {ProBenefits, ProComparison} from './ProBenefits';
+import {isStaff} from '@/models/Role';
+import {SubscriptionsSettings} from './SubscriptionsSettings';
 
 function BannerSparkle({className}: {className: string}) {
     return <svg aria-hidden="true" viewBox="0 0 24 40" fill="currentColor" className={cn('pointer-events-none absolute text-white', className)}><path d="M12 0C10 14 8 17 0 20c8 3 10 6 12 20 2-14 4-17 12-20-8-3-10-6-12-20Z"/></svg>;
 }
 
 export function ProOffer({onManage, onClaim}: {onManage: () => void; onClaim: () => void}) {
+    const user = useSelector(selectUser);
+    if (user && isStaff(user.role)) return <SubscriptionsSettings/>;
+    return <PaidProOffer onManage={onManage} onClaim={onClaim}/>;
+}
+
+function PaidProOffer({onManage, onClaim}: {onManage: () => void; onClaim: () => void}) {
     const user = useSelector(selectUser);
     const {subscription, loading, error, refresh} = useProSubscription();
     const [interval, setInterval] = useState<ProInterval>('MONTHLY');

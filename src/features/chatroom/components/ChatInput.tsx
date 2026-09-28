@@ -675,9 +675,17 @@ const ChatInput: React.FC<ChatInputProps> = ({
     const isOverLimit = visibleLength > maxMessageLength || inputText.length > maxRawMessageLength;
     const isEditing = !!editingMessage;
     const canSendNewMessage = isConnected && !messageSendingBlocked && !isSending;
-    // Keep helper text mounted while sending so the composer height stays stable.
     const isTextInputAvailable = isConnected && (isEditing || !messageSendingBlocked);
     const canUseTextInput = isTextInputAvailable && !isSending;
+    const keyboardHint = isEditing
+        ? "Editing mode — press Enter to save, or Esc to cancel"
+        : "Press Enter to send, Shift+Enter for new line";
+    const composerHint = !isConnected ? disabledReason || "Connecting to chat..."
+        : !isEditing && messageSendingBlocked ? messageSendingDisabledReason
+        : isUploading ? "Uploading file..."
+        : isSending ? isEditing ? "Saving changes..." : "Sending message..."
+        : isListening ? "Listening…"
+        : "Start a line with > for greentext.";
     const newMessageDisabledReason = messageSendingBlocked
         ? messageSendingDisabledReason
         : disabledReason;
@@ -918,27 +926,14 @@ const ChatInput: React.FC<ChatInputProps> = ({
                 )}
             </div>
 
-            <div className="mt-2 flex items-center justify-between text-xs text-muted-foreground">
-                <div>
-                    {!isMobile && (
-                        editingMessage
-                            ? "Editing mode — press Enter to save, or Esc to cancel"
-                            : "Press Enter to send, Shift+Enter for new line"
-                    )}
-                    {isTextInputAvailable && (
-                        <span className="block">Start a line with &gt; for greentext.</span>
-                    )}
-                    {!isConnected && ` • ${disabledReason || "Connecting to chat..."}`}
-                    {!isEditing && messageSendingBlocked && ` • ${messageSendingDisabledReason}`}
-                    {isUploading && " • Uploading file..."}
-                    {isSending && (isEditing ? " • Saving changes..." : " • Sending message...")}
-                    {isListening && (
-                        <span className="text-red-500"> • Listening…</span>
-                    )}
+            <div className="mt-2 flex items-start justify-between gap-3 text-xs leading-4 text-muted-foreground">
+                <div className="min-w-0 flex-1">
+                    {!isMobile && <span className="block h-4 truncate" title={keyboardHint}>{keyboardHint}</span>}
+                    <span className={`block h-4 truncate ${isListening ? "text-red-500" : ""}`} title={composerHint}>{composerHint}</span>
                 </div>
                 <div
                     className={`${remainingChars <= maxMessageLength * 0.1 && remainingChars >= 0 ? "text-amber-700 dark:text-amber-300" : ""
-                    } ${remainingChars < 0 ? "text-red-600 dark:text-red-400" : ""} tabular-nums`}
+                    } ${remainingChars < 0 ? "text-red-600 dark:text-red-400" : ""} shrink-0 whitespace-nowrap tabular-nums`}
                 >
                     {remainingChars < 0 ? `${Math.abs(remainingChars).toLocaleString()} character${remainingChars === -1 ? '' : 's'} over limit` : isMobile
                         ? `${visibleLength} / ${maxMessageLength}`

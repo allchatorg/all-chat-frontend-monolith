@@ -1,5 +1,5 @@
 import data from '@emoji-mart/data';
-import {toCustomEmojiToken} from './customEmoji';
+import {getCustomEmojiShortcode} from './customEmoji';
 import type {EmojiSelection} from './emojiTypes';
 
 interface UnicodeEmoji {
@@ -26,7 +26,7 @@ const SHORTCODE_PATTERN = /:([a-zA-Z0-9_+-]+):(?::skin-tone-([2-6]):)?/g;
 
 /** Use the exact selected native variant, including a skin-tone suffix when needed. */
 export function getEmojiShortcode(selection: EmojiSelection): string {
-    if (selection.kind === 'custom') return toCustomEmojiToken(selection.id);
+    if (selection.kind === 'custom') return getCustomEmojiShortcode(selection.id);
     const emoji = emojisByName.get(selection.id);
     const skin = emoji?.skins.findIndex(variant => variant.native === selection.native) ?? -1;
     return `:${emoji?.id ?? selection.id}:${skin > 0 ? `:skin-tone-${skin + 1}:` : ''}`;

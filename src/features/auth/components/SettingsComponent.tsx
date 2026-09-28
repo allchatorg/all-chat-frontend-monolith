@@ -17,6 +17,7 @@ import {selectUser} from '@/redux/user/userSelectors';
 import {ProOffer} from '@/features/pro/ProOffer';
 import {SubscriptionsSettings} from '@/features/pro/SubscriptionsSettings';
 import {ROUTES} from '@/routes';
+import {isStaff} from '@/models/Role';
 
 const GROUPS = [
     {label: 'User settings', tabs: [
@@ -37,7 +38,10 @@ export const SettingsComponent = ({defaultTab}: {defaultTab?: string}) => {
     const user = useSelector(selectUser);
     const router = useRouter();
     const {close} = useDialog();
-    const [activeTab, setActiveTab] = useState(defaultTab || 'profile');
+    const staff = user ? isStaff(user.role) : false;
+    const [selectedTab, setActiveTab] = useState(defaultTab || 'profile');
+    const activeTab = staff && selectedTab === 'pro' ? 'subscriptions' : selectedTab;
+    const groups = GROUPS.map(group => ({...group, tabs: group.tabs.filter(tab => !staff || tab.id !== 'pro')}));
     const [showMobileDetail, setShowMobileDetail] = useState(Boolean(defaultTab));
 
     useEffect(() => {void runGetAllTags().catch(() => {});}, [runGetAllTags]);
@@ -52,18 +56,18 @@ export const SettingsComponent = ({defaultTab}: {defaultTab?: string}) => {
     const renderContent = () => {
         switch (activeTab) {
             case 'account': return <AccountSettings isMobile={isMobile}/>;
-            case 'appearance': return <AppearanceSettings isMobile={isMobile} onExplorePro={() => handleTabClick('pro')}/>;
+            case 'appearance': return <AppearanceSettings isMobile={isMobile} onExplorePro={staff ? undefined : () => handleTabClick('pro')}/>;
             case 'blocked': return <BlockedUsersSettings isMobile={isMobile}/>;
             case 'pro': return <ProOffer onManage={() => handleTabClick('subscriptions')} onClaim={() => {
                 if (!user || user.role === 'GUEST') {close(); router.push(`${ROUTES.REGISTER}&redirect=${encodeURIComponent(ROUTES.SUBSCRIPTIONS)}`);}
                 else handleTabClick('account');
             }}/>;
-            case 'subscriptions': return <SubscriptionsSettings onExplore={() => handleTabClick('pro')}/>;
+            case 'subscriptions': return <SubscriptionsSettings onExplore={staff ? undefined : () => handleTabClick('pro')}/>;
             default: return <ProfileSettings isMobile={isMobile}/>;
         }
     };
 
-    const navigation = <nav aria-label="Settings sections" className="space-y-6 px-3 pb-5">{GROUPS.map(group => <div key={group.label}><h2 className="mb-2 px-3 text-[11px] font-bold uppercase tracking-wider text-muted-foreground">{group.label}</h2><div className="space-y-1">{group.tabs.map(tab => <Button key={tab.id} variant={activeTab === tab.id ? 'secondary' : 'ghost'} aria-current={activeTab === tab.id ? 'page' : undefined} className={`w-full justify-start ${isMobile ? 'h-12' : ''} ${tab.id === 'pro' ? 'text-violet-600 dark:text-violet-300' : ''}`} onClick={() => handleTabClick(tab.id)}><tab.icon className="mr-2 h-4 w-4"/>{tab.label}</Button>)}</div></div>)}</nav>;
+    const navigation = <nav aria-label="Settings sections" className="space-y-6 px-3 pb-5">{groups.map(group => <div key={group.label}><h2 className="mb-2 px-3 text-[11px] font-bold uppercase tracking-wider text-muted-foreground">{group.label}</h2><div className="space-y-1">{group.tabs.map(tab => <Button key={tab.id} variant={activeTab === tab.id ? 'secondary' : 'ghost'} aria-current={activeTab === tab.id ? 'page' : undefined} className={`w-full justify-start ${isMobile ? 'h-12' : ''} ${tab.id === 'pro' ? 'text-violet-600 dark:text-violet-300' : ''}`} onClick={() => handleTabClick(tab.id)}><tab.icon className="mr-2 h-4 w-4"/>{tab.label}</Button>)}</div></div>)}</nav>;
 
     if (isMobile) return <div className="flex h-full min-h-0 w-full flex-col bg-background">
         {showMobileDetail ? <>

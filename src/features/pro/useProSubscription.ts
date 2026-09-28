@@ -22,7 +22,9 @@ export function notifyProChanged() {
 }
 
 export function useProSubscription(pollForConfirmation = false) {
-    const userId = useSelector(selectUser)?.id;
+    const user = useSelector(selectUser);
+    const userId = user?.id;
+    const role = user?.role;
     const [subscription, setSubscription] = useState<ProSubscription | null>(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
@@ -66,7 +68,7 @@ export function useProSubscription(pollForConfirmation = false) {
             window.removeEventListener('allchat:pro-changed', onFocus);
             window.clearInterval(timer);
         };
-    }, [refresh, userId, pollForConfirmation]);
+    }, [refresh, userId, role, pollForConfirmation]);
 
     useEffect(() => {
         if (!userId || subscription?.proActive || (!pollForConfirmation && !subscription?.checkoutPending)) return;

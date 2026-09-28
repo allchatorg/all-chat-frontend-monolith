@@ -15,9 +15,11 @@ import {ClaimUser} from '@/features/auth/components/ClaimUser';
 import {useThunk} from '@/lib/hooks/useThunk';
 import {claimAccountThunk} from '@/redux/auth/authThunk';
 import {toast} from 'sonner';
+import {isStaff} from '@/models/Role';
 
 function SubscriptionPageContent() {
     const user = useSelector(selectUser);
+    const staff = user ? isStaff(user.role) : false;
     const [exploring, setExploring] = useState(false);
     const [claiming, setClaiming] = useState(false);
     const [claimAccount, claimLoading] = useThunk(claimAccountThunk);
@@ -34,10 +36,10 @@ function SubscriptionPageContent() {
                 {claiming ? <div className="space-y-4 p-4"><Button variant="ghost" onClick={() => setClaiming(false)}><ArrowLeft className="mr-2 h-4 w-4"/>allchat Pro</Button><ClaimUser claimed={user?.claimed} loading={claimLoading} onClaim={async (email, password) => {
                     try {await claimAccount({email, password}); setClaiming(false);}
                     catch {toast.error('Could not claim your account. Please try again.');}
-                }}/></div> : exploring ? <><div className="p-3"><Button variant="ghost" onClick={() => setExploring(false)}><ArrowLeft className="mr-2 h-4 w-4"/>Subscriptions</Button></div><ProOffer onManage={() => setExploring(false)} onClaim={() => {
+                }}/></div> : exploring && !staff ? <><div className="p-3"><Button variant="ghost" onClick={() => setExploring(false)}><ArrowLeft className="mr-2 h-4 w-4"/>Subscriptions</Button></div><ProOffer onManage={() => setExploring(false)} onClaim={() => {
                     if (user && user.role !== 'GUEST') setClaiming(true);
                     else router.push(`${ROUTES.REGISTER}&redirect=${encodeURIComponent(ROUTES.SUBSCRIPTIONS)}`);
-                }}/></> : <SubscriptionsSettings onExplore={user?.banned ? undefined : () => setExploring(true)}/>}
+                }}/></> : <SubscriptionsSettings onExplore={user?.banned || staff ? undefined : () => setExploring(true)}/>}
             </div>
         </div>
     </main>;

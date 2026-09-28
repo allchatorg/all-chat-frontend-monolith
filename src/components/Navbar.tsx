@@ -235,7 +235,7 @@ export function Navbar() {
                 <div className="flex items-center gap-2 md:gap-4 ml-auto">
                     {user && (
                         <div className="flex items-center gap-2 md:gap-4">
-                            <Button onClick={openPro} aria-label="Explore allchat Pro" className={`${PRO_NAV_BUTTON_CLASS_NAME} hidden h-9 gap-2 px-3 md:inline-flex`}><Diamond className="h-4 w-4"/><span className="hidden xl:inline">allchat</span> Pro</Button>
+                            {!isStaffOrHigher && <Button onClick={openPro} aria-label="Explore allchat Pro" className={`${PRO_NAV_BUTTON_CLASS_NAME} hidden h-9 gap-2 px-3 md:inline-flex`}><Diamond className="h-4 w-4"/><span className="hidden xl:inline">allchat</span> Pro</Button>}
                             <div className="hidden md:flex items-center gap-2">
                                 {!isStaffOrHigher && (
                                     <Button
@@ -347,7 +347,7 @@ export function Navbar() {
                         </div>
                     )}
                 </div>
-                <div className="w-full md:hidden"><Button onClick={openPro} className={`${PRO_NAV_BUTTON_CLASS_NAME} h-8 w-full justify-between px-4 text-xs`}><span className="flex items-center gap-2"><Diamond className="h-3.5 w-3.5"/>allchat Pro</span><span className="font-normal text-inherit">{user?.proActive ? 'Your Pro perks' : 'Share more with Pro'}</span></Button></div>
+                {!isStaffOrHigher && <div className="w-full md:hidden"><Button onClick={openPro} className={`${PRO_NAV_BUTTON_CLASS_NAME} h-8 w-full justify-between px-4 text-xs`}><span className="flex items-center gap-2"><Diamond className="h-3.5 w-3.5"/>allchat Pro</span><span className="font-normal text-inherit">{user?.proActive ? 'Your Pro perks' : 'Share more with Pro'}</span></Button></div>}
             </nav>
 
         </div>);

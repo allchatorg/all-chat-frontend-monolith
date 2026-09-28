@@ -167,7 +167,7 @@ const ModView: React.FC<ModViewProps> = ({
             <div className="glass-surface flex shrink-0 flex-wrap items-center gap-x-4 gap-y-2 rounded-b-lg border-t px-4 py-3">
                 <div className="flex flex-wrap items-center gap-2">
                     <span className="text-sm text-muted-foreground">Membership:</span>
-                    <StaffMembershipBadge proActive={membershipError ? undefined : user?.proActive} loading={membershipLoading}/>
+                    <StaffMembershipBadge proActive={membershipError ? undefined : user?.proActive} role={user?.role} loading={membershipLoading}/>
                     {!membershipLoading && userId && (membershipError || typeof user?.proActive !== "boolean") && (
                         <Button variant="ghost" size="sm" onClick={() => void refreshMembership()}>Retry</Button>
                     )}

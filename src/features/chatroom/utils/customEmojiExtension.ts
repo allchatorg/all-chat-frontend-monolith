@@ -5,7 +5,7 @@ import {getSticker} from '@/features/stickers/catalog';
 import {markersToDoc} from '@/features/chatroom/utils/messageMarkers';
 import {findUnicodeEmojiShortcodes} from '@/features/stickers/emojiShortcodes';
 import {
-    CUSTOM_EMOJI_TOKEN_PATTERN,
+    findCustomEmojiShortcodes,
     getCustomEmojiLabel,
     isCustomEmojiId,
     toCustomEmojiToken,
@@ -17,10 +17,10 @@ const URL_PATTERN = /https?:\/\/[^\s]+/g;
 type InlineToken = {from: number; to: number} & ({customEmojiId: string} | {native: string});
 
 function findInlineTokens(text: string): InlineToken[] {
-    const custom = Array.from(text.matchAll(CUSTOM_EMOJI_TOKEN_PATTERN), match => ({
-        from: match.index,
-        to: match.index + match[0].length,
-        customEmojiId: match[1],
+    const custom = findCustomEmojiShortcodes(text).map(match => ({
+        from: match.from,
+        to: match.to,
+        customEmojiId: match.id,
     }));
     // A Unicode code must not reuse any part of a canonical custom token,
     // including the closing colon shared by strings such as :allchat:pepe:smile:.

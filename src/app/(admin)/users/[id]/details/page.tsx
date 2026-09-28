@@ -219,7 +219,7 @@ export default function UserDetailsPage() {
                 </CardHeader>
                 <CardContent>
                     <div className="flex flex-wrap gap-2">
-                        <StaffMembershipBadge proActive={detailsState.error ? undefined : user.proActive} loading={detailsState.loading}/>
+                        <StaffMembershipBadge proActive={detailsState.error ? undefined : user.proActive} role={user.role} loading={detailsState.loading}/>
                         <StatusBadge
                             condition={user.verified}
                             trueLabel="Verified"
