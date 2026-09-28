@@ -27,7 +27,7 @@ export function AdminPageHeader({title, description, icon: Icon, user, children}
                             {description && user && ": "}
                             {user && (
                                 <span className="font-semibold text-foreground">
-                                    <UserName userId={user.id} username={user.username} proBadgeVisible={user.proBadgeVisible} proBadgeRevision={user.proBadgeRevision}/> (ID: {user.id})
+                                    <UserName userId={user.id} username={user.username} proBadgeVisible={user.proBadgeVisible} proBadgeRevision={user.proBadgeRevision} usernameFont={user.usernameFont} messageFont={user.messageFont} fontRevision={user.fontRevision}/> (ID: {user.id})
                                 </span>
                             )}
                         </p>

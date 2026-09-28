@@ -15,6 +15,51 @@ const geistMono = localFont({
     variable: "--font-geist-mono",
     weight: "100 900",
 });
+const proInter = localFont({
+    src: [
+        {path: './fonts/InterVariable.woff2', weight: '100 900', style: 'normal'},
+        {path: './fonts/InterVariable-Italic.woff2', weight: '100 900', style: 'italic'},
+    ],
+    variable: '--font-pro-inter',
+    display: 'swap',
+    preload: false,
+});
+const proOpenSans = localFont({
+    src: [
+        {path: './fonts/OpenSansVariable.ttf', weight: '300 800', style: 'normal'},
+        {path: './fonts/OpenSansVariable-Italic.ttf', weight: '300 800', style: 'italic'},
+    ],
+    variable: '--font-pro-open-sans',
+    display: 'swap',
+    preload: false,
+});
+const proNunito = localFont({
+    src: [
+        {path: './fonts/NunitoVariable.ttf', weight: '200 1000', style: 'normal'},
+        {path: './fonts/NunitoVariable-Italic.ttf', weight: '200 1000', style: 'italic'},
+    ],
+    variable: '--font-pro-nunito',
+    display: 'swap',
+    preload: false,
+});
+const proComfortaa = localFont({
+    src: './fonts/ComfortaaVariable.ttf',
+    weight: '300 700',
+    style: 'normal',
+    variable: '--font-pro-comfortaa',
+    display: 'swap',
+    preload: false,
+});
+const proCaveat = localFont({
+    src: './fonts/CaveatVariable.ttf',
+    weight: '400 700',
+    style: 'normal',
+    // Keep handwritten letters readable at the existing chat text sizes.
+    declarations: [{prop: 'size-adjust', value: '125%'}],
+    variable: '--font-pro-caveat',
+    display: 'swap',
+    preload: false,
+});
 
 export const metadata: Metadata = {
     title: "allchat – For all conversations",
@@ -39,7 +84,7 @@ export default function RootLayout({
         {/* Extensions such as ColorZilla add body attributes before hydration.
             Suppress warnings on this element; descendants are still checked. */}
         <body
-            className={`${geistSans.variable} ${geistMono.variable} app-background flex flex-col h-full`}
+            className={`${geistSans.variable} ${geistMono.variable} ${proInter.variable} ${proOpenSans.variable} ${proNunito.variable} ${proComfortaa.variable} ${proCaveat.variable} app-background flex flex-col h-full`}
             suppressHydrationWarning
         >
         <RouteProgressBar/>

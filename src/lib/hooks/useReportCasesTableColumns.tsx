@@ -109,7 +109,7 @@ export function useReportCasesTableColumns({
                     const senderUsername = row.original.message?.senderUsername as string;
                     return (
                         <div className="font-medium">
-                            <UserName userId={row.original.message?.senderId} username={senderUsername || "Unknown"} proBadgeVisible={row.original.message?.senderProBadgeVisible} proBadgeRevision={row.original.message?.senderProBadgeRevision}/>
+                            <UserName userId={row.original.message?.senderId} username={senderUsername || "Unknown"} proBadgeVisible={row.original.message?.senderProBadgeVisible} proBadgeRevision={row.original.message?.senderProBadgeRevision} usernameFont={row.original.message?.senderUsernameFont} messageFont={row.original.message?.senderMessageFont} fontRevision={row.original.message?.senderFontRevision}/>
                         </div>
                     );
                 }

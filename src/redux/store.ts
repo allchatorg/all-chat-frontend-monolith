@@ -33,6 +33,8 @@ import {promotedMessagesApi} from "@ads/store/services/promotedMessagesApi";
 import {adminPromotedMessagesApi} from "@ads/store/services/adminPromotedMessagesApi";
 import {roomPromotionsApi} from "@ads/store/services/roomPromotionsApi";
 import {adminRoomPromotionsApi} from "@ads/store/services/adminRoomPromotionsApi";
+import {clearProBadgeStore} from '@/lib/proBadgeStore';
+import {applyFontUpdate} from '@/lib/fontStore';
 
 const adsPortalApis = [userApi, paymentApi, adFormatsApi, fileApi, adsPortalApi, adminAdsApi, adminUsersApi, promotedMessagesApi, adminPromotedMessagesApi, roomPromotionsApi, adminRoomPromotionsApi];
 
@@ -136,6 +138,19 @@ export const store = configureStore({
                 ignoredActions: ['persist/PERSIST', 'persist/REHYDRATE'],
             }
         }).concat(adsPortalApis.map((api) => api.middleware)),
+});
+
+// Reset synchronously on account changes, including routes without StompBridge.
+// Late HTTP/batch responses then fail the appearance stores' session guards.
+let appearanceUserId = store.getState().user.user?.id;
+store.subscribe(() => {
+    const user = store.getState().user.user;
+    if (user?.id !== appearanceUserId) {
+        appearanceUserId = user?.id;
+        clearProBadgeStore();
+    }
+    if (user) applyFontUpdate({userId: user.id, usernameFont: user.usernameFont,
+        messageFont: user.messageFont, fontRevision: user.fontRevision});
 });
 
 // Enable RTK Query refetchOnFocus/refetchOnReconnect for the ads portal APIs.

@@ -69,7 +69,7 @@ const ModView: React.FC<ModViewProps> = ({
     return (
         <div className="glass-panel flex h-full min-h-0 w-full flex-col rounded-xl border">
             {showHeader && <div className="flex shrink-0 items-center justify-between border-b p-4">
-                <h2 className="text-lg font-semibold text-card-foreground"><ChatUserName userId={user?.id} username={user?.username ?? ""} proBadgeVisible={user?.proBadgeVisible} proBadgeRevision={user?.proBadgeRevision}/></h2>
+                <h2 className="text-lg font-semibold text-card-foreground"><ChatUserName userId={user?.id} username={user?.username ?? ""} proBadgeVisible={user?.proBadgeVisible} proBadgeRevision={user?.proBadgeRevision} usernameFont={user?.usernameFont} messageFont={user?.messageFont} fontRevision={user?.fontRevision}/></h2>
                 <Button
                     variant="ghost"
                     size="icon"

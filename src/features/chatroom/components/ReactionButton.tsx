@@ -132,7 +132,7 @@ export const ReactionButton: React.FC<ReactionButtonProps> = ({
                                         .slice(0, 3)
                                         .map((user, index, array) => (
                                             <span key={user.id}>
-                                                <ChatUserName userId={user.id} username={user.username} proBadgeVisible={user.proBadgeVisible} proBadgeRevision={user.proBadgeRevision}/>
+                                                <ChatUserName userId={user.id} username={user.username} proBadgeVisible={user.proBadgeVisible} proBadgeRevision={user.proBadgeRevision} usernameFont={user.usernameFont} messageFont={user.messageFont} fontRevision={user.fontRevision}/>
                                                 {index < array.length - 1 ? ', ' : ''}
                                             </span>
                                         ))}

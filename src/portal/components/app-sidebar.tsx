@@ -239,6 +239,9 @@ export function AppSidebar({...props}: React.ComponentProps<typeof Sidebar>) {
                     name: user.name,
                     proBadgeVisible: user.proBadgeVisible,
                     proBadgeRevision: user.proBadgeRevision,
+                    usernameFont: user.usernameFont,
+                    messageFont: user.messageFont,
+                    fontRevision: user.fontRevision,
                     email: user.email,
                     avatar: "/avatars/shadcn.jpg",
                 }} onLogout={handleLogout}/>

@@ -1,3 +1,4 @@
+import type {FontSnapshot} from "@/lib/fontPresets";
 // Auth adapter for the merged monolith.
 //
 // The ads portal no longer keeps its own auth state. Authentication is owned by
@@ -10,7 +11,7 @@ import {Role} from '../services/userApi';
 import {getRoleLevel, RoleLevel} from '@/models/Role';
 import {getSessionToken} from '@/lib/tokenManager';
 
-export interface AuthUser {
+export interface AuthUser extends Partial<FontSnapshot> {
     id: number;
     firstName: string;
     lastName: string;
@@ -44,6 +45,9 @@ const toAuthUser = (u: any): AuthUser | null => {
         role: isAdminLevel(u.role) ? Role.ADMIN : Role.USER,
         proBadgeVisible: u.proBadgeVisible,
         proBadgeRevision: u.proBadgeRevision,
+        usernameFont: u.usernameFont,
+        messageFont: u.messageFont,
+        fontRevision: u.fontRevision,
     };
 };
 

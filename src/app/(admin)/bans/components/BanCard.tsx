@@ -1,3 +1,4 @@
+import {UserName} from "@/components/UserName";
 import {Ban} from "@/models/Ban";
 import {Card} from "@/components/ui/card";
 import {Badge} from "@/components/ui/badge";
@@ -19,7 +20,7 @@ export const BanCard: React.FC<BanCardProps> = ({ban, revokeBan}) => {
         <Card className="p-3 transition-shadow hover:shadow-md">
             <div className="flex flex-col gap-2 sm:grid sm:grid-cols-8 sm:items-center sm:gap-4">
                 <div className="flex flex-row justify-between sm:col-span-1 sm:block sm:min-w-0">
-                    <div className="truncate font-semibold">{ban.username}</div>
+                    <div className="truncate font-semibold"><UserName userId={ban.userId} username={ban.username}/></div>
                     <div className="truncate text-sm text-muted-foreground">{ban.userId}</div>
                 </div>
                 <div className="flex gap-2 sm:contents">

@@ -1,5 +1,8 @@
 "use client";
 
+import {fontPresetStyle} from "@/lib/fontPresets";
+import {useUserFonts} from "@/lib/hooks/useUserFonts";
+
 import {UserName} from "@/components/UserName";
 import React, {MouseEvent, useEffect, useRef, useState} from "react";
 import {Ban, Loader2, MessageCircleX, MoreVertical, User as UserIcon, Volume2, VolumeX, X} from "lucide-react";
@@ -72,6 +75,11 @@ function ConversationRowContent({
 }) {
     const unread = conversation.unreadMessagesCount;
     const counterpartName = conversation.counterpart?.username ?? "Deleted user";
+    const lastMessageFonts = useUserFonts(conversation.lastMessage?.senderId, {
+        usernameFont: conversation.lastMessage?.senderUsernameFont,
+        messageFont: conversation.lastMessage?.senderMessageFont,
+        fontRevision: conversation.lastMessage?.senderFontRevision,
+    });
     const lastMessagePreview = stripMarkers(conversation.lastMessage?.content?.trim() || "");
     const {soundMode} = useChatRoomSoundSettings();
     const isToggleInert = soundMode !== 'ALL';
@@ -105,7 +113,7 @@ function ConversationRowContent({
             <div className="min-w-0 flex-1">
                 <div className="flex items-center gap-2">
                     <span className="truncate font-medium text-foreground">
-                        <UserName userId={conversation.counterpart?.id} username={counterpartName} proBadgeVisible={conversation.counterpart?.proBadgeVisible} proBadgeRevision={conversation.counterpart?.proBadgeRevision}/>
+                        <UserName userId={conversation.counterpart?.id} username={counterpartName} proBadgeVisible={conversation.counterpart?.proBadgeVisible} proBadgeRevision={conversation.counterpart?.proBadgeRevision} usernameFont={conversation.counterpart?.usernameFont} messageFont={conversation.counterpart?.messageFont} fontRevision={conversation.counterpart?.fontRevision}/>
                     </span>
                     {conversation.blocked && (
                         <span title="Blocked"
@@ -115,7 +123,7 @@ function ConversationRowContent({
                     )}
                 </div>
                 {lastMessagePreview && (
-                    <p className="truncate text-xs text-muted-foreground">
+                    <p className="truncate text-xs text-muted-foreground" style={fontPresetStyle(lastMessageFonts.messageFont)}>
                         {lastMessagePreview}
                     </p>
                 )}

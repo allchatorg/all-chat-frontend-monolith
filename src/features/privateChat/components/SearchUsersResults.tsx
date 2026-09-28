@@ -45,7 +45,7 @@ const SearchUsersResults: React.FC<SearchUsersResultsProps> = ({
                                         </div>
                                         <div className="min-w-0 flex-1">
                                             <p className="truncate font-medium text-foreground">
-                                                <UserName userId={user.id} username={user.username} proBadgeVisible={user.proBadgeVisible} proBadgeRevision={user.proBadgeRevision}/>
+                                                <UserName userId={user.id} username={user.username} proBadgeVisible={user.proBadgeVisible} proBadgeRevision={user.proBadgeRevision} usernameFont={user.usernameFont} messageFont={user.messageFont} fontRevision={user.fontRevision}/>
                                             </p>
                                             {hasConversation && (
                                                 <p className="text-xs text-muted-foreground">

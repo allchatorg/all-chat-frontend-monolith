@@ -172,7 +172,7 @@ export default function UserDetailsPage() {
                             <User className="h-4 w-4 text-muted-foreground"/>
                             <div>
                                 <p className="text-sm font-medium">Username</p>
-                                <p className="text-sm text-muted-foreground"><UserName userId={user.id} username={user.username} proBadgeVisible={user.proBadgeVisible} proBadgeRevision={user.proBadgeRevision}/></p>
+                                <p className="text-sm text-muted-foreground"><UserName userId={user.id} username={user.username} proBadgeVisible={user.proBadgeVisible} proBadgeRevision={user.proBadgeRevision} usernameFont={user.usernameFont} messageFont={user.messageFont} fontRevision={user.fontRevision}/></p>
                             </div>
                         </div>
 

@@ -1,3 +1,4 @@
+import type {FontPreset} from "@/lib/fontPresets";
 import {Attachment} from "@/models/Attachment";
 import {Reaction} from "@/models/Reaction";
 import {Role} from "@/models/Role";
@@ -9,6 +10,9 @@ export interface ReplyInfo {
     senderUsername: string;
     senderProBadgeVisible?: boolean;
     senderProBadgeRevision?: number;
+    senderUsernameFont?: FontPreset;
+    senderMessageFont?: FontPreset;
+    senderFontRevision?: number;
     color?: string;
     /** null when the replied-to message was removed and the viewer may not see its content */
     content: string | null;
@@ -35,6 +39,9 @@ export interface Message {
     senderUsername: string;
     senderProBadgeVisible?: boolean;
     senderProBadgeRevision?: number;
+    senderUsernameFont?: FontPreset;
+    senderMessageFont?: FontPreset;
+    senderFontRevision?: number;
     senderRole: Role;
     senderCountryCode?: string;
     senderIdVerificationStatus?: IdVerificationStatus;

@@ -9,6 +9,7 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
+    "test:fonts": "node --test tests/fonts.test.cjs",
     "lint": "next lint"
   },
   "dependencies": {

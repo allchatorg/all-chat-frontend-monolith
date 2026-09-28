@@ -1,12 +1,13 @@
 import api from "@/lib/api";
 import {ProBadgeUpdate} from "@/models/ProBadgeUpdate";
+import {applyFontUpdate, clearFontStore} from '@/lib/fontStore';
 export type {ProBadgeUpdate} from "@/models/ProBadgeUpdate";
 
 const badges = new Map<number, ProBadgeUpdate>();
 const listeners = new Map<number, Set<() => void>>();
 const refreshedGeneration = new Map<number, number>();
 const queuedIds = new Set<number>();
-let generation = 0;
+let generation = 1;
 let sessionGeneration = 0;
 let refreshTimer: ReturnType<typeof setTimeout> | undefined;
 
@@ -15,6 +16,8 @@ export function getProBadge(userId?: number): ProBadgeUpdate | undefined {
 }
 
 export function applyProBadgeUpdate(update: ProBadgeUpdate): void {
+    // Fonts have their own revision. A duplicate badge can still carry new fonts.
+    applyFontUpdate(update);
     if (!update || !Number.isSafeInteger(update.userId) || update.userId <= 0 ||
         typeof update.proBadgeVisible !== "boolean" ||
         !Number.isSafeInteger(update.proBadgeRevision) || update.proBadgeRevision < 0) return;
@@ -82,7 +85,8 @@ export function refreshRegisteredProBadges(): void {
 
 export function clearProBadgeStore(): void {
     sessionGeneration += 1;
-    generation = 0;
+    generation = 1;
+    clearFontStore();
     badges.clear();
     refreshedGeneration.clear();
     queuedIds.clear();

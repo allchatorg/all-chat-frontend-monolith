@@ -1,3 +1,4 @@
+import type {FontSnapshot} from "@/lib/fontPresets";
 import React, {useState} from 'react';
 import {useSelector} from 'react-redux';
 import {RootState} from "@/redux/store";
@@ -11,7 +12,7 @@ import {UserName} from "@/components/UserName";
 import {useProDialog} from "@/features/pro/useProDialog";
 
 
-interface UserActionPopupProps {
+interface UserActionPopupProps extends Partial<FontSnapshot> {
     userId: number;
     username: string;
     role: Role;
@@ -26,6 +27,9 @@ export const UserActionPopup: React.FC<UserActionPopupProps> = ({
                                                                     role,
                                                                     proBadgeVisible,
                                                                     proBadgeRevision,
+                                                                    usernameFont,
+                                                                    messageFont,
+                                                                    fontRevision,
                                                                     disabled = false,
                                                                 }) => {
     const {user} = useSelector((state: RootState) => state.user);
@@ -70,6 +74,9 @@ export const UserActionPopup: React.FC<UserActionPopupProps> = ({
                 username={username}
                 proBadgeVisible={proBadgeVisible}
                 proBadgeRevision={proBadgeRevision}
+                usernameFont={usernameFont}
+                messageFont={messageFont}
+                fontRevision={fontRevision}
                 onProClick={handleOpenPro}
                 renderUsername={!isTargetStaff && !disabled ? name => (
                     <PopoverTrigger asChild>
@@ -96,7 +103,7 @@ export const UserActionPopup: React.FC<UserActionPopupProps> = ({
     }
 
     const handleBlock = () => {
-        blockUser({id: userId, username, proBadgeVisible, proBadgeRevision});
+        blockUser({id: userId, username, proBadgeVisible, proBadgeRevision, usernameFont, messageFont, fontRevision});
         setIsOpen(false); // Close popup after blocking
     };
 
@@ -116,7 +123,7 @@ export const UserActionPopup: React.FC<UserActionPopupProps> = ({
             >
                 <div className="flex flex-col gap-3">
                     <div className="font-semibold text-base pb-2 text-center truncate border-b-2 border-border">
-                        <UserName userId={userId} username={username} proBadgeVisible={proBadgeVisible} proBadgeRevision={proBadgeRevision} onProClick={handleOpenPro}/>
+                        <UserName userId={userId} username={username} proBadgeVisible={proBadgeVisible} proBadgeRevision={proBadgeRevision} usernameFont={usernameFont} messageFont={messageFont} fontRevision={fontRevision} onProClick={handleOpenPro}/>
                     </div>
                     {isBlocked ? (
                         <Button

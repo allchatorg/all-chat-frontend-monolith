@@ -4,12 +4,13 @@ import {IconLogout} from "@tabler/icons-react"
 import {Avatar, AvatarFallback, AvatarImage,} from "@ads/components/ui/avatar"
 import {SidebarMenu, SidebarMenuButton, SidebarMenuItem,} from "@ads/components/ui/sidebar"
 import {UserName} from "@/components/UserName";
+import type {FontSnapshot} from "@/lib/fontPresets";
 
 export function NavUser({
                             user,
                             onLogout,
                         }: {
-    user: {
+    user: Partial<FontSnapshot> & {
         id?: number
         name: string
         proBadgeVisible?: boolean
@@ -42,7 +43,7 @@ export function NavUser({
                         <AvatarFallback className="rounded-lg">{initials}</AvatarFallback>
                     </Avatar>
                     <div className="grid flex-1 text-left text-sm leading-tight">
-                        <UserName userId={user.id} username={user.name} proBadgeVisible={user.proBadgeVisible} proBadgeRevision={user.proBadgeRevision} className="font-medium"/>
+                        <UserName userId={user.id} username={user.name} proBadgeVisible={user.proBadgeVisible} proBadgeRevision={user.proBadgeRevision} usernameFont={user.usernameFont} messageFont={user.messageFont} fontRevision={user.fontRevision} className="font-medium"/>
                         <span className="text-muted-foreground truncate text-xs">
                             {user.email}
                         </span>

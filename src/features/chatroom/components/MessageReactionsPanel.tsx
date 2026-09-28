@@ -114,7 +114,7 @@ export default function MessageReactionsPanel() {
                                             className="glass-surface p-3 rounded-lg transition-colors"
                                         >
                                             <p className="text-sm font-medium text-foreground truncate">
-                                                <ChatUserName userId={user.id} username={user.username} proBadgeVisible={user.proBadgeVisible} proBadgeRevision={user.proBadgeRevision}/>
+                                                <ChatUserName userId={user.id} username={user.username} proBadgeVisible={user.proBadgeVisible} proBadgeRevision={user.proBadgeRevision} usernameFont={user.usernameFont} messageFont={user.messageFont} fontRevision={user.fontRevision}/>
                                             </p>
                                         </div>
                                     ))

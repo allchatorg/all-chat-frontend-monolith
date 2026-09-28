@@ -49,7 +49,7 @@ export function useUserTableColumns({
                     </Button>
                 ),
                 cell: ({row}) => (
-                    <UserName userId={row.original.id} username={row.original.username} proBadgeVisible={row.original.proBadgeVisible} proBadgeRevision={row.original.proBadgeRevision} className="font-medium"/>
+                    <UserName userId={row.original.id} username={row.original.username} proBadgeVisible={row.original.proBadgeVisible} proBadgeRevision={row.original.proBadgeRevision} usernameFont={row.original.usernameFont} messageFont={row.original.messageFont} fontRevision={row.original.fontRevision} className="font-medium"/>
                 )
             },
             {

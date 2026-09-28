@@ -1,3 +1,4 @@
+import {UserName} from "@/components/UserName";
 import {Ban} from "@/models/Ban";
 import {BanTypeEnum} from "@/models/BanTypeEnum";
 import {CardContent, CardHeader, CardTitle} from "@/components/ui/card";
@@ -91,7 +92,7 @@ export const BanDetailsCard: React.FC<BanDetailsProps> = ({ban}) => {
                                 <span className="font-medium">Username:</span>
                                 <span
                                     className="sm:ml-2 mt-1 sm:mt-0 inline-block rounded bg-gray-100 px-2 py-1 font-mono break-all dark:bg-zinc-800 dark:text-zinc-200">
-                                    {ban.username}
+                                    <UserName userId={ban.userId} username={ban.username}/>
                                 </span>
                             </div>
                             <div className="flex flex-col sm:block">

@@ -1,9 +1,10 @@
+import type {FontSnapshot} from "@/lib/fontPresets";
 import {Role} from "./Role";
 import {Tag} from "@/models/Tag";
 import {TimeFormat} from "@/models/TimeFormat";
 import {IdVerificationStatus} from "@/models/IdVerificationStatus";
 
-export interface User {
+export interface User extends Partial<FontSnapshot> {
     id: number;
     username: string;
     proActive?: boolean;
@@ -31,4 +32,4 @@ export interface User {
     appliedForModerator?: boolean;
 }
 
-export type UserMinimal = Pick<User, "id" | "username" | "proBadgeVisible" | "proBadgeRevision">;
+export type UserMinimal = Pick<User, "id" | "username" | "proBadgeVisible" | "proBadgeRevision" | "usernameFont" | "messageFont" | "fontRevision">;

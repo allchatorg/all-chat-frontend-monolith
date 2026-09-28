@@ -1,6 +1,8 @@
 "use client";
 
 import {UserName} from "@/components/UserName";
+import {fontPresetStyle} from "@/lib/fontPresets";
+import {useUserFonts} from "@/lib/hooks/useUserFonts";
 import React from "react";
 import {Input} from "@/components/ui/input";
 import {Badge} from "@/components/ui/badge";
@@ -41,6 +43,22 @@ const previewText = (conversation: AdminConversationDTO): string => {
     if (last.attachments && last.attachments.length > 0) return "Attachment";
     return "…";
 };
+
+function ConversationPreview({conversation}: {conversation: AdminConversationDTO}) {
+    const message = conversation.lastMessage;
+    const fonts = useUserFonts(message?.senderId, {
+        usernameFont: message?.senderUsernameFont,
+        messageFont: message?.senderMessageFont,
+        fontRevision: message?.senderFontRevision,
+    });
+    const hasVisibleText = !message?.deleted && !!message?.content?.trim();
+    return (
+        <span className="truncate text-xs text-muted-foreground"
+              style={hasVisibleText ? fontPresetStyle(fonts.messageFont) : undefined}>
+            {previewText(conversation)}
+        </span>
+    );
+}
 
 const AdminConversationList: React.FC<AdminConversationListProps> = ({
                                                                          conversations,
@@ -95,7 +113,7 @@ const AdminConversationList: React.FC<AdminConversationListProps> = ({
                                         )}
                                     >
                                         <div className="flex items-center gap-2">
-                                            <span className="truncate font-medium"><UserName userId={conversation.counterpart?.id} username={"@" + counterpartName} proBadgeVisible={conversation.counterpart?.proBadgeVisible} proBadgeRevision={conversation.counterpart?.proBadgeRevision}/></span>
+                                            <span className="truncate font-medium"><UserName userId={conversation.counterpart?.id} username={"@" + counterpartName} proBadgeVisible={conversation.counterpart?.proBadgeVisible} proBadgeRevision={conversation.counterpart?.proBadgeRevision} usernameFont={conversation.counterpart?.usernameFont} messageFont={conversation.counterpart?.messageFont} fontRevision={conversation.counterpart?.fontRevision}/></span>
                                             {conversation.blocked && (
                                                 <Ban className="h-3.5 w-3.5 shrink-0 text-red-500"/>
                                             )}
@@ -104,9 +122,7 @@ const AdminConversationList: React.FC<AdminConversationListProps> = ({
                                             </span>
                                         </div>
                                         <div className="flex items-center gap-2">
-                                            <span className="truncate text-xs text-muted-foreground">
-                                                {previewText(conversation)}
-                                            </span>
+                                            <ConversationPreview conversation={conversation}/>
                                             <Badge variant="secondary" className="ml-auto shrink-0 text-[10px]">
                                                 {conversation.totalMessageCount}
                                             </Badge>

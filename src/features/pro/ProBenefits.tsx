@@ -20,6 +20,7 @@ const benefits: {label: string; basic: ReactNode; pro: ReactNode}[] = [
     {label: 'Light & dark themes', basic: true, pro: true},
     {label: 'Exclusive Pro badge', basic: false, pro: true},
     {label: 'Show or hide your Pro badge', basic: false, pro: true},
+    {label: 'Username & message font presets', basic: false, pro: true},
 ];
 
 function ComparisonValue({value}: {value: ReactNode}) {
