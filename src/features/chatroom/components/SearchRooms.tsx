@@ -40,13 +40,14 @@ const SearchRooms: React.FC = () => {
         }
     }, [searchTerm, isMobile]);
 
-    const handleDesktopJoin = (roomId: number) => {
-        handleJoinRoom(roomId);
-        setOpenPopover(false);
+    const handleDesktopJoin = async (roomId: number) => {
+        if (await handleJoinRoom(roomId)) setOpenPopover(false);
     };
 
     const handleDesktopCreate = () => {
-        handleCreateChatRoom().then(() => setOpenPopover(false));
+        void handleCreateChatRoom().then(() => setOpenPopover(false)).catch(() => {
+            // The shared search hook reports the failure; keep the search open.
+        });
     };
 
     const handleRandomJoin = async () => {
@@ -116,10 +117,8 @@ const SearchRooms: React.FC = () => {
                                     }
                                     if (showCreateOption) {
                                         handleDesktopCreate();
-                                        clearSearch();
                                     } else if (rooms.length > 0) {
-                                        handleDesktopJoin(rooms[0].roomId);
-                                        clearSearch();
+                                        void handleDesktopJoin(rooms[0].roomId);
                                     }
                                 }
                             }}

@@ -75,9 +75,9 @@ export function ProOffer({onManage, onClaim}: {onManage: () => void; onClaim: ()
                     <BannerSparkle className="bottom-20 right-[12%] h-8 w-5 opacity-95"/>
                     <BannerSparkle className="bottom-9 right-[6%] h-5 w-3 opacity-90"/>
                     <div className="relative mx-auto max-w-xl">
-                        <p className="mb-5 inline-flex items-center gap-2 text-xs font-extrabold tracking-[0.2em]"><Diamond className="h-4 w-4"/>allchat PRO</p>
-                        <h1 className="text-balance text-3xl font-black leading-[1.08] tracking-tight sm:text-[2.75rem]">Your conversations.<br/>A little more you.</h1>
-                        <p className="mx-auto mt-4 max-w-sm text-sm leading-6 text-white/90">Stand out with Pro. Keep all the things you love.</p>
+                        <p className="mb-5 inline-flex items-center gap-2 text-xs font-extrabold tracking-[0.2em]"><Diamond className="h-4 w-4"/>allchat Pro</p>
+                        <h1 className="text-balance text-3xl font-black leading-[1.08] tracking-tight sm:text-[2.75rem]">More to share.<br/>More room to connect.</h1>
+                        <p className="mx-auto mt-4 max-w-sm text-sm leading-6 text-white/90">Bigger uploads, longer messages, more chatrooms, and your own Pro badge.</p>
                         <p className="mt-2 text-sm font-medium text-white sm:text-base">{selectedInterval === 'YEARLY' ? '$50/year' : 'Just $5/month'}. Cancel anytime.</p>
                         <div className="mt-7 flex flex-wrap items-center justify-center gap-3">
                             <Button onClick={() => void subscribe()} disabled={actionDisabled} className="h-11 max-w-full whitespace-normal rounded-lg bg-white px-5 font-bold text-indigo-600 shadow-none hover:bg-indigo-50">
@@ -95,13 +95,13 @@ export function ProOffer({onManage, onClaim}: {onManage: () => void; onClaim: ()
                 <section ref={plansRef} tabIndex={-1} aria-labelledby={plansHeadingId} className="scroll-mt-6 space-y-6 rounded-2xl outline-none focus-visible:ring-2 focus-visible:ring-violet-500 focus-visible:ring-offset-4">
                     <div className="text-center">
                         <h2 id={plansHeadingId} className="text-2xl font-extrabold tracking-tight">Find your kind of allchat.</h2>
-                        <p className="mt-2 text-sm leading-6 text-muted-foreground">Basic keeps you connected. Pro adds a little personality.</p>
+                        <p className="mt-2 text-sm leading-6 text-muted-foreground">Start with Basic. Choose Pro for more space to share and connect.</p>
                     </div>
                     <ProComparison yearly={selectedInterval === 'YEARLY'}/>
 
                     <div className="rounded-2xl border border-violet-200 bg-violet-50/60 p-5 dark:border-violet-500/30 dark:bg-violet-500/5 sm:p-6">
                         <div className="flex flex-wrap items-start justify-between gap-4">
-                            <div><h3 className="flex items-center gap-2 text-lg font-bold"><Diamond className="h-5 w-5 text-violet-500"/>Make it Pro.</h3><p className="mt-1 text-sm text-muted-foreground">Everything in Basic, with your own Pro badge.</p></div>
+                            <div><h3 className="flex items-center gap-2 text-lg font-bold"><Diamond className="h-5 w-5 text-violet-500"/>Make it Pro.</h3><p className="mt-1 text-sm text-muted-foreground">Everything in Basic, with higher upload, message, and chatroom limits plus your own Pro badge.</p></div>
                             {!yearlyBillingEnabled && <p className="text-3xl font-extrabold">$5<span className="text-sm font-normal text-muted-foreground"> / month</span></p>}
                         </div>
                         {yearlyBillingEnabled && <fieldset className="mt-5">
@@ -130,7 +130,7 @@ export function ProOffer({onManage, onClaim}: {onManage: () => void; onClaim: ()
                         {!error && !loading && subscription?.billingAvailable && !subscription.canPurchase && !canContinueCheckout && !managesExisting && !mustClaim && !unavailableYearlyCheckout && <p className="mt-3 text-sm text-muted-foreground">Purchasing is unavailable for your account. Complete any required account verification before subscribing.</p>}
                     </div>
                 </section>
-                <p className="text-center text-xs leading-5 text-muted-foreground">For all conversations. With a little extra you.</p>
+                <p className="text-center text-xs leading-5 text-muted-foreground">More space for your conversations, with allchat Pro.</p>
             </div>
         </div>
     );

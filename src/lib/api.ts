@@ -47,8 +47,8 @@ api.interceptors.response.use(
                 window.location.href = `/banned?ban=${encodeURIComponent(JSON.stringify(banData))}`;
             }
         }
-        // Handle HTTP 429 Too Many Requests globally
-        if (error.response && error.response.status === 429) {
+        // Upload allowance failures use the uploader’s ordinary error toast, not a rate-limit dialog.
+        if (error.response && error.response.status === 429 && error.response.data?.limit?.code !== "HOURLY_UPLOAD_BYTES") {
             try {
                 const retryAfterHeader = (error.response.headers as any)?.["retry-after"];
                 let retryAfterSeconds: number | null = null;

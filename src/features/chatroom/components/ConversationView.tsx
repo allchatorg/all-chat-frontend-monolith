@@ -42,12 +42,12 @@ export interface ConversationViewProps {
 
     editingMessage: Message | null | undefined;
     replyingToMessage?: Message | null;
-    onSendMessage: (content: string, attachment?: Attachment) => void;
+    onSendMessage: (content: string, attachment?: Attachment) => Promise<void> | void;
     onStartEditMessage?: (message: Message) => void;
     onStartReply?: (message: Message) => void;
     onCancelReply?: () => void;
     onJumpToMessage?: (messageId: number) => void;
-    onEditMessage: (newContent: string) => void;
+    onEditMessage: (newContent: string) => Promise<void> | void;
     onCancelEdit: () => void;
     onRemoveMessage: (messageId: number) => Promise<void> | void;
     onHideAd?: (adId: number) => void;
@@ -258,6 +258,7 @@ const ConversationView: React.FC<ConversationViewProps> = ({
                 </div>
             ) : (
                 <ChatInput
+                    key={chatRoom.id}
                     isConnected={isConnected}
                     onSendMessage={onSendMessage}
                     maxMessageLength={maxMessageLength}

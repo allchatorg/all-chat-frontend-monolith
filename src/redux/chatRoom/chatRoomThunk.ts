@@ -41,7 +41,6 @@ import {ReactionRequest} from "@/models/ReactionRequest";
 import {
     removeStaleChatRoomId,
     resetChatRoomUiStateOnRoomChange,
-    setEditingMessage
 } from "@/redux/chatRoom/chatRoomUiSlice";
 import {EditMessageRequest} from "@/models/EditMessageRequest";
 import {
@@ -127,7 +126,7 @@ export const joinChatRoomThunk = createAsyncThunk<UserChatRoom, number, { state:
     "chat/joinChatRoom",
     async (roomId, {getState, rejectWithValue}) => {
         try {
-            return joinChatRoom(roomId);
+            return await joinChatRoom(roomId);
         } catch (err: any) {
             return rejectWithValue(err.response?.data || err.message);
         }
@@ -138,7 +137,7 @@ export const joinRandomChatRoomThunk = createAsyncThunk<UserChatRoom, void, { st
     "chat/joinRandomChatRoom",
     async (_, {rejectWithValue}) => {
         try {
-            return joinRandomChatRoom();
+            return await joinRandomChatRoom();
         } catch (err: any) {
             return rejectWithValue(err.response?.data || err.message);
         }
@@ -373,14 +372,12 @@ export const editMessageThunk = createAsyncThunk<Message, {
     editMessageRequest: EditMessageRequest
 }>(
     "chat/editMessage",
-    async ({messageId, editMessageRequest}, {dispatch, rejectWithValue}) => {
+    async ({messageId, editMessageRequest}, {rejectWithValue}) => {
         try {
             const updatedMessage = await editMessage(
                 messageId,
                 editMessageRequest
             );
-            dispatch(setEditingMessage(null));
-
             return updatedMessage;
         } catch (err: any) {
             return rejectWithValue(err.response?.data || err.message);
@@ -474,65 +471,69 @@ export const resolveSelectedRoomThunk = createAsyncThunk<
     { state: RootState }
 >(
     "chat/resolveSelectedRoom",
-    async (params, {getState, dispatch}) => {
-        const urlRoomId = params && 'urlRoomId' in params ? params.urlRoomId : undefined;
-        const state = getState();
-        const rooms = state.chatRoom.joinedUserChatRooms;
-        const currentSelected = selectSelectedUserChatRoomState(state);
-        const currentChatRoom = selectSelectedChatRoomState(state);
+    async (params, {getState, dispatch, rejectWithValue}) => {
+        try {
+            const urlRoomId = params && 'urlRoomId' in params ? params.urlRoomId : undefined;
+            const state = getState();
+            const rooms = state.chatRoom.joinedUserChatRooms;
+            const currentSelected = selectSelectedUserChatRoomState(state);
+            const currentChatRoom = selectSelectedChatRoomState(state);
 
-        if (rooms.length === 0) return;
+            if (rooms.length === 0 && !urlRoomId) return;
 
-        // Priority 1: URL-specified room
-        if (urlRoomId) {
-            const existing = rooms.find(r => r.chatRoomId === urlRoomId);
-            if (existing) {
-                // Already a member — just select it
-                if (currentSelected?.id !== existing.id) {
-                    dispatch(setSelectedUserChatRoom(existing));
-                    await loadOrFetchChatRoom(existing.chatRoomId, dispatch, getState as () => RootState);
+            // Priority 1: URL-specified room
+            if (urlRoomId) {
+                const existing = rooms.find(r => r.chatRoomId === urlRoomId);
+                if (existing) {
+                    // Already a member — just select it
+                    if (currentSelected?.id !== existing.id) {
+                        dispatch(setSelectedUserChatRoom(existing));
+                        await loadOrFetchChatRoom(existing.chatRoomId, dispatch, getState as () => RootState);
+                        dispatch(setActiveChatRoomThunk({
+                            currentRoomId: existing.chatRoomId,
+                            previousActiveRoomId: currentChatRoom?.id
+                        }));
+                    }
+                } else {
+                    // Not a member — join first, then the fulfilled reducer selects it
+                    await dispatch(joinChatRoomThunk(urlRoomId)).unwrap();
+                    // After joining, the room is now in state; load its details
+                    const freshState = getState();
+                    const joined = freshState.chatRoom.joinedUserChatRooms.find(
+                        r => r.chatRoomId === urlRoomId
+                    );
+                    if (joined) {
+                        await loadOrFetchChatRoom(joined.chatRoomId, dispatch, getState as () => RootState);
+                        dispatch(setActiveChatRoomThunk({currentRoomId: joined.chatRoomId}));
+                    }
+                }
+                return;
+            }
+
+            // Priority 2: Keep current selection if still valid
+            if (currentSelected && rooms.some(r => r.id === currentSelected.id)) {
+                // Reload when the details aren't loaded yet OR the room went stale
+                // (e.g. a disconnect window) — loadOrFetchChatRoom handles the
+                // stale refetch itself.
+                const isSelectedStale = selectStaleChatRoomIds(state).includes(currentSelected.chatRoomId);
+                if (!currentChatRoom || currentChatRoom.id !== currentSelected.chatRoomId || isSelectedStale) {
+                    await loadOrFetchChatRoom(currentSelected.chatRoomId, dispatch, getState as () => RootState);
                     dispatch(setActiveChatRoomThunk({
-                        currentRoomId: existing.chatRoomId,
+                        currentRoomId: currentSelected.chatRoomId,
                         previousActiveRoomId: currentChatRoom?.id
                     }));
                 }
-            } else {
-                // Not a member — join first, then the fulfilled reducer selects it
-                await dispatch(joinChatRoomThunk(urlRoomId)).unwrap();
-                // After joining, the room is now in state; load its details
-                const freshState = getState();
-                const joined = freshState.chatRoom.joinedUserChatRooms.find(
-                    r => r.chatRoomId === urlRoomId
-                );
-                if (joined) {
-                    await loadOrFetchChatRoom(joined.chatRoomId, dispatch, getState as () => RootState);
-                    dispatch(setActiveChatRoomThunk({currentRoomId: joined.chatRoomId}));
-                }
+                return;
             }
-            return;
-        }
 
-        // Priority 2: Keep current selection if still valid
-        if (currentSelected && rooms.some(r => r.id === currentSelected.id)) {
-            // Reload when the details aren't loaded yet OR the room went stale
-            // (e.g. a disconnect window) — loadOrFetchChatRoom handles the
-            // stale refetch itself.
-            const isSelectedStale = selectStaleChatRoomIds(state).includes(currentSelected.chatRoomId);
-            if (!currentChatRoom || currentChatRoom.id !== currentSelected.chatRoomId || isSelectedStale) {
-                await loadOrFetchChatRoom(currentSelected.chatRoomId, dispatch, getState as () => RootState);
-                dispatch(setActiveChatRoomThunk({
-                    currentRoomId: currentSelected.chatRoomId,
-                    previousActiveRoomId: currentChatRoom?.id
-                }));
-            }
-            return;
+            // Priority 3: Select first room
+            const firstRoom = rooms[0];
+            dispatch(setSelectedUserChatRoom(firstRoom));
+            await loadOrFetchChatRoom(firstRoom.chatRoomId, dispatch, getState as () => RootState);
+            dispatch(setActiveChatRoomThunk({currentRoomId: firstRoom.chatRoomId}));
+        } catch (error) {
+            return rejectWithValue(error);
         }
-
-        // Priority 3: Select first room
-        const firstRoom = rooms[0];
-        dispatch(setSelectedUserChatRoom(firstRoom));
-        await loadOrFetchChatRoom(firstRoom.chatRoomId, dispatch, getState as () => RootState);
-        dispatch(setActiveChatRoomThunk({currentRoomId: firstRoom.chatRoomId}));
     }
 );
 
@@ -622,29 +623,33 @@ export const joinAndSelectChatRoomThunk = createAsyncThunk<
     { state: RootState }
 >(
     "chat/joinAndSelectChatRoom",
-    async (chatRoomId, {getState, dispatch}) => {
-        const state = getState();
-        const joinedRoom = state.chatRoom.joinedUserChatRooms.find(room => room.chatRoomId === chatRoomId);
+    async (chatRoomId, {getState, dispatch, rejectWithValue}) => {
+        try {
+            const state = getState();
+            const joinedRoom = state.chatRoom.joinedUserChatRooms.find(room => room.chatRoomId === chatRoomId);
 
-        if (joinedRoom) {
-            await dispatch(selectAndLoadChatRoomThunk(joinedRoom)).unwrap();
-            return;
+            if (joinedRoom) {
+                await dispatch(selectAndLoadChatRoomThunk(joinedRoom)).unwrap();
+                return;
+            }
+
+            const currentChatRoom = selectSelectedChatRoomState(state);
+
+            // Join the room (the fulfilled reducer adds it to joinedUserChatRooms
+            // and sets selectedUserChatRoom)
+            await dispatch(joinChatRoomThunk(chatRoomId)).unwrap();
+
+            // Load room details
+            await loadOrFetchChatRoom(chatRoomId, dispatch, getState as () => RootState);
+
+            // Notify backend of the room switch so active counts update
+            dispatch(setActiveChatRoomThunk({
+                currentRoomId: chatRoomId,
+                previousActiveRoomId: currentChatRoom?.id
+            }));
+        } catch (error) {
+            return rejectWithValue(error);
         }
-
-        const currentChatRoom = selectSelectedChatRoomState(state);
-
-        // Join the room (the fulfilled reducer adds it to joinedUserChatRooms
-        // and sets selectedUserChatRoom)
-        await dispatch(joinChatRoomThunk(chatRoomId)).unwrap();
-
-        // Load room details
-        await loadOrFetchChatRoom(chatRoomId, dispatch, getState as () => RootState);
-
-        // Notify backend of the room switch so active counts update
-        dispatch(setActiveChatRoomThunk({
-            currentRoomId: chatRoomId,
-            previousActiveRoomId: currentChatRoom?.id
-        }));
     }
 );
 
@@ -654,19 +659,23 @@ export const joinRandomAndSelectChatRoomThunk = createAsyncThunk<
     { state: RootState }
 >(
     "chat/joinRandomAndSelectChatRoom",
-    async (_, {getState, dispatch}) => {
-        const state = getState();
-        const currentChatRoom = selectSelectedChatRoomState(state);
+    async (_, {getState, dispatch, rejectWithValue}) => {
+        try {
+            const state = getState();
+            const currentChatRoom = selectSelectedChatRoomState(state);
 
-        const joinedRoom = await dispatch(joinRandomChatRoomThunk()).unwrap();
+            const joinedRoom = await dispatch(joinRandomChatRoomThunk()).unwrap();
 
-        await loadOrFetchChatRoom(joinedRoom.chatRoomId, dispatch, getState as () => RootState);
+            await loadOrFetchChatRoom(joinedRoom.chatRoomId, dispatch, getState as () => RootState);
 
-        dispatch(setActiveChatRoomThunk({
-            currentRoomId: joinedRoom.chatRoomId,
-            previousActiveRoomId: currentChatRoom?.id
-        }));
+            dispatch(setActiveChatRoomThunk({
+                currentRoomId: joinedRoom.chatRoomId,
+                previousActiveRoomId: currentChatRoom?.id
+            }));
 
-        return joinedRoom;
+            return joinedRoom;
+        } catch (error) {
+            return rejectWithValue(error);
+        }
     }
 );

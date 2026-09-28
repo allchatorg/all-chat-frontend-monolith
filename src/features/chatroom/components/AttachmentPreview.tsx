@@ -7,6 +7,7 @@ interface AttachmentPreviewProps {
     onRemove: () => void,
     onEdit: () => void,
     isUploading?: boolean,
+    disabled?: boolean,
     nsfw?: boolean
 }
 
@@ -15,6 +16,7 @@ const AttachmentPreview: React.FC<AttachmentPreviewProps> = ({
                                                                  onRemove,
                                                                  onEdit,
                                                                  isUploading = false,
+                                                                 disabled = false,
                                                                  nsfw
                                                              }) => {
     const [previewUrl, setPreviewUrl] = useState<string>("");
@@ -93,7 +95,7 @@ const AttachmentPreview: React.FC<AttachmentPreviewProps> = ({
                         onClick={onEdit}
                         className="glass-control h-8 w-8 p-1 dark:text-zinc-400 dark:hover:text-zinc-200"
                         title="Edit file"
-                        disabled={isUploading}
+                        disabled={isUploading || disabled}
                     >
                         <Edit className="h-4 w-4"/>
                     </Button>}
@@ -103,7 +105,7 @@ const AttachmentPreview: React.FC<AttachmentPreviewProps> = ({
                         onClick={onRemove}
                         className="glass-control h-8 w-8 p-1 text-red-500 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300"
                         title="Remove file"
-                        disabled={isUploading}
+                        disabled={isUploading || disabled}
                     >
                         <X className="h-4 w-4"/>
                     </Button>

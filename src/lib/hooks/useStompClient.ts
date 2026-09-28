@@ -73,18 +73,30 @@ const PUBLIC_TOPIC = ["/topic/public-chat"];
 const USER_TOPIC_DESTINATION = "/topic/user.";
 const PRIVATE_MESSAGES_QUEUE = "/user/queue/private-messages";
 
-async function refreshCurrentProUser(): Promise<void> {
+let pendingAccountRefresh: {userId: number; token: string; promise: Promise<void>} | null = null;
+
+function refreshCurrentProUser(): Promise<void> {
     const userId = selectUser(store.getState())?.id;
     const token = getSessionToken()?.token;
-    if (!userId || !token) return;
-    try {
-        const user = await getMe();
-        if (user.id !== userId || selectUser(store.getState())?.id !== userId ||
-            getSessionToken()?.token !== token) return;
-        store.dispatch(setUser({user}));
-    } catch {
-        // A background Pro refresh must not invalidate an otherwise usable session.
+    if (!userId || !token) return Promise.resolve();
+    if (pendingAccountRefresh?.userId === userId && pendingAccountRefresh.token === token) {
+        return pendingAccountRefresh.promise;
     }
+    const promise = (async () => {
+        try {
+            const user = await getMe();
+            if (user.id !== userId || selectUser(store.getState())?.id !== userId ||
+                getSessionToken()?.token !== token) return;
+            store.dispatch(setUser({user}));
+        } catch {
+            // A background entitlement refresh must not invalidate an otherwise usable session.
+        }
+    })();
+    pendingAccountRefresh = {userId, token, promise};
+    void promise.finally(() => {
+        if (pendingAccountRefresh?.promise === promise) pendingAccountRefresh = null;
+    });
+    return promise;
 }
 
 export function useStompWithRedux(
@@ -116,6 +128,30 @@ export function useStompWithRedux(
     useEffect(() => {
         userRef.current = user;
     }, [user]);
+
+    // One account refresh loop lives with the app-level connection, independent
+    // of badge visibility or which conversation is selected. This reads our own
+    // account snapshot, without polling the billing provider.
+    useEffect(() => {
+        if (!user?.id || user.banned) return;
+        const refresh = () => { void refreshCurrentProUser(); };
+        const refreshVisible = () => {
+            if (document.visibilityState === "visible") refresh();
+        };
+        refresh();
+        window.addEventListener("focus", refresh);
+        window.addEventListener("online", refresh);
+        window.addEventListener("allchat:pro-changed", refresh);
+        document.addEventListener("visibilitychange", refreshVisible);
+        const timer = window.setInterval(refreshVisible, 60_000);
+        return () => {
+            window.removeEventListener("focus", refresh);
+            window.removeEventListener("online", refresh);
+            window.removeEventListener("allchat:pro-changed", refresh);
+            document.removeEventListener("visibilitychange", refreshVisible);
+            window.clearInterval(timer);
+        };
+    }, [user?.id, user?.banned]);
 
     useEffect(() => {
         shownNotificationIdsRef.current.clear();

@@ -8,6 +8,7 @@ import {Card, CardContent, CardDescription, CardHeader, CardTitle} from '@/compo
 import {Label} from '@/components/ui/label'
 import {AlertCircle, User} from 'lucide-react'
 import {ConfirmationMessage} from '@/components/ConfirmationMessage'
+import {ACCOUNT_LIMITS} from '@/lib/accountLimits'
 
 interface ClaimUserFormData {
     email: string
@@ -62,7 +63,7 @@ export const ClaimUser: React.FC<ClaimUserProps> = ({
                     Claim User Account
                 </CardTitle>
                 <CardDescription>
-                    Enter your credentials to claim your user account.
+                    Add an email and password to keep your account and join up to {ACCOUNT_LIMITS.claimedRooms} chatrooms with Basic. Verify your email to raise that limit to {ACCOUNT_LIMITS.verifiedRooms}.
                 </CardDescription>
             </CardHeader>
 

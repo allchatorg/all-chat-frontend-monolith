@@ -347,7 +347,7 @@ export function Navbar() {
                         </div>
                     )}
                 </div>
-                <div className="w-full md:hidden"><Button onClick={openPro} className={`${PRO_NAV_BUTTON_CLASS_NAME} h-8 w-full justify-between px-4 text-xs`}><span className="flex items-center gap-2"><Diamond className="h-3.5 w-3.5"/>allchat Pro</span><span className="font-normal text-inherit">{user?.proActive ? 'Your Pro perks' : 'Make your mark'}</span></Button></div>
+                <div className="w-full md:hidden"><Button onClick={openPro} className={`${PRO_NAV_BUTTON_CLASS_NAME} h-8 w-full justify-between px-4 text-xs`}><span className="flex items-center gap-2"><Diamond className="h-3.5 w-3.5"/>allchat Pro</span><span className="font-normal text-inherit">{user?.proActive ? 'Your Pro perks' : 'Share more with Pro'}</span></Button></div>
             </nav>
 
         </div>);

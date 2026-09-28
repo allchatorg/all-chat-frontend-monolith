@@ -99,9 +99,9 @@ const PopularChatRoomsSection: React.FC<{showHeader?: boolean}> = ({showHeader =
 
     const handleClose = () => dispatch(setActiveRightSidebar(null));
 
-    const handleRoomClick = (roomId: number) => {
-        handleJoin(roomId);
-        if (isMobile) {
+    const handleRoomClick = async (roomId: number) => {
+        const joined = await handleJoin(roomId);
+        if (joined && isMobile) {
             handleClose();
         }
     };

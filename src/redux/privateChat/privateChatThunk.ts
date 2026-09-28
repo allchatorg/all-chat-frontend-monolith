@@ -26,7 +26,6 @@ import {
     addOpenPrivateChatTab,
     removeOpenPrivateChatTab,
     removeStalePrivateRoomId,
-    setPrivateEditingMessage,
 } from "@/redux/privateChat/privateChatUiSlice";
 import {removeLoadedPrivateChatRoom, setSelectedPrivateChat,} from "@/redux/privateChat/privateChatSlice";
 import {
@@ -163,10 +162,9 @@ export const editPrivateMessageThunk = createAsyncThunk<Message, {
     editMessageRequest: EditMessageRequest;
 }>(
     "privateChat/editMessage",
-    async ({messageId, editMessageRequest}, {dispatch, rejectWithValue}) => {
+    async ({messageId, editMessageRequest}, {rejectWithValue}) => {
         try {
             const updatedMessage = await editMessage(messageId, editMessageRequest);
-            dispatch(setPrivateEditingMessage(null));
             return updatedMessage;
         } catch (err: any) {
             return rejectWithValue(err.response?.data || err.message);

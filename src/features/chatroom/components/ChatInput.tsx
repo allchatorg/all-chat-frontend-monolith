@@ -32,14 +32,17 @@ import data from "@emoji-mart/data";
 import Picker from "@emoji-mart/react";
 import {useTheme} from "next-themes";
 import imageCompression from "browser-image-compression";
+import {useSelector} from "react-redux";
+import {selectUser} from "@/redux/user/userSelectors";
+import {getAccountLimits, getAttachmentByteLimit} from "@/lib/accountLimits";
 
 interface ChatInputProps {
     isConnected: boolean;
     disabledReason?: string;
     messageSendingBlocked?: boolean;
     messageSendingDisabledReason?: string;
-    onSendMessage: (message: string, attachment?: Attachment, editingMessageId?: number) => void;
-    onEditMessage: (content: string) => void;
+    onSendMessage: (message: string, attachment?: Attachment, editingMessageId?: number) => Promise<void> | void;
+    onEditMessage: (content: string) => Promise<void> | void;
     maxMessageLength?: number;
     attachmentTypes?: AttachmentType[];
     editingMessage?: Message | null;
@@ -48,17 +51,12 @@ interface ChatInputProps {
     onCancelReply?: () => void;
 }
 
-const MAX_FILE_SIZE = 11 * 1024 * 1024; // 11MB
-// Mirrors MessagesServiceImpl.MAX_RAW_LENGTH: the visible (stripped) length is
-// what counts against maxMessageLength; the raw marker string is hard-capped at
-// 4x that (worst-case marker overhead the editor can produce).
-const MAX_RAW_MESSAGE_LENGTH = 2000;
-
 const validateMessage = ({
                              inputText,
                              uploadedAttachment,
                              isConnected,
                              maxMessageLength,
+                             maxRawMessageLength,
                              isUploading,
                              editingMessage,
                          }: {
@@ -66,6 +64,7 @@ const validateMessage = ({
     uploadedAttachment: Attachment | null;
     isConnected: boolean;
     maxMessageLength: number;
+    maxRawMessageLength: number;
     isUploading: boolean;
     editingMessage?: Message | null;
 }): { valid: boolean; reason?: string } => {
@@ -76,8 +75,8 @@ const validateMessage = ({
     if (trimmed === "" && !uploadedAttachment)
         return {valid: false, reason: "Cannot send an empty message"};
     if (stripMarkers(inputText).length > maxMessageLength)
-        return {valid: false, reason: "Message exceeds maximum length"};
-    if (inputText.length > MAX_RAW_MESSAGE_LENGTH)
+        return {valid: false, reason: `Message exceeds the ${maxMessageLength.toLocaleString()} character limit.`};
+    if (inputText.length > maxRawMessageLength)
         return {valid: false, reason: "Message formatting is too large"};
     if (editingMessage && inputText === (editingMessage.content ?? ""))
         return {valid: false, reason: "No changes detected"};
@@ -92,6 +91,7 @@ export function ChatInputShowcase({
     className?: string;
     placeholder?: string;
 }) {
+    const user = useSelector(selectUser);
     return (
         <div aria-hidden="true" className={cn("border-t p-4 select-none", className)}>
             <div className="pointer-events-none flex items-center gap-2">
@@ -174,7 +174,7 @@ export function ChatInputShowcase({
                 <div className="hidden md:block">
                     Press Enter to send, Shift+Enter for new line
                 </div>
-                <div className="tabular-nums">500 characters remaining</div>
+                <div className="tabular-nums">{getAccountLimits(user).messageCharacters} characters remaining</div>
             </div>
         </div>
     );
@@ -187,12 +187,16 @@ const ChatInput: React.FC<ChatInputProps> = ({
                                                  messageSendingDisabledReason = "Messaging is temporarily disabled until a moderator is online.",
                                                  onSendMessage,
                                                  onEditMessage,
-                                                 maxMessageLength = 500,
+                                                 maxMessageLength: messageLengthOverride,
                                                  editingMessage = null,
                                                  onCancelEdit,
                                                  replyingToMessage = null,
                                                  onCancelReply,
                                              }) => {
+    const user = useSelector(selectUser);
+    const limits = getAccountLimits(user);
+    const maxMessageLength = messageLengthOverride ?? limits.messageCharacters;
+    const maxRawMessageLength = limits.rawMessageCharacters;
     const {open, close} = useDialog();
     const {attachmentTypes} = useAttachmentHook();
     const isMobile = useIsMobile();
@@ -213,6 +217,16 @@ const ChatInput: React.FC<ChatInputProps> = ({
     const [supportedFileTypes, setSupportedFileTypes] = useState<string[]>();
     const [isUploading, setIsUploading] = useState(false);
     const [isCooldown, setIsCooldown] = useState(false);
+    const [isSubmitting, setIsSubmitting] = useState(false);
+    const submittingRef = useRef(false);
+    const mountedRef = useRef(true);
+    const composerContextRef = useRef({editingId: editingMessage?.id, replyingId: replyingToMessage?.id});
+    composerContextRef.current = {editingId: editingMessage?.id, replyingId: replyingToMessage?.id};
+
+    useEffect(() => {
+        mountedRef.current = true;
+        return () => { mountedRef.current = false; };
+    }, []);
 
     // Length of the live, not-yet-final dictation segment currently sitting at
     // the end of the editor document. Each interim update replaces this tail so
@@ -306,6 +320,10 @@ const ChatInput: React.FC<ChatInputProps> = ({
         setSupportedFileTypes(extractAcceptedMimeTypes(attachmentTypes));
     }, [attachmentTypes]);
 
+    const uploadGuidance = attachmentTypes.length
+        ? `${attachmentTypes.map(type => `${type.fileType === AttachmentTypeEnum.VIDEO ? "video/GIF" : type.fileType.toLowerCase()}: ${getAttachmentByteLimit(type, user) / (1024 * 1024)} MB`).join(", ")}. ${Number.isFinite(limits.hourlyUploadBytes) ? `${limits.hourlyUploadBytes / (1024 * 1024)} MB total per hour` : "No hourly upload cap"}.`
+        : "Loading upload limits…";
+
     const fileAcceptString = supportedFileTypes
         ? supportedFileTypes
             .map((mime) => mimeTypeToExtension[mime])
@@ -314,8 +332,8 @@ const ChatInput: React.FC<ChatInputProps> = ({
             .join(",")
         : "";
 
-    const handleSendMessage = () => {
-        if (isCooldown) return;
+    const handleSendMessage = async () => {
+        if (isCooldown || submittingRef.current) return;
         if (messageSendingBlocked) {
             toast.error(messageSendingDisabledReason);
             return;
@@ -332,6 +350,7 @@ const ChatInput: React.FC<ChatInputProps> = ({
             uploadedAttachment,
             isConnected: isConnected && !messageSendingBlocked,
             maxMessageLength,
+            maxRawMessageLength,
             isUploading,
         });
 
@@ -344,26 +363,37 @@ const ChatInput: React.FC<ChatInputProps> = ({
             ? {...uploadedAttachment, tags: selectedTags}
             : undefined;
 
-        // Leading spaces and blank lines affect greentext. Preserve nonempty
-        // content exactly as previewed; attachment-only messages stay empty.
-        onSendMessage(inputText.trim() ? inputText : "", attachmentToSend, editingMessage?.id);
-
+        const context = composerContextRef.current;
+        submittingRef.current = true;
+        setIsSubmitting(true);
         stopDictation();
-        editor?.commands.clearContent();
-        setInputText("");
-        setSelectedFile(null);
-        setUploadedAttachment(null);
-        setSelectedTags([]);
-        setIsNsfw(false);
-
-        setIsCooldown(true);
-
-        setTimeout(() => {
-            setIsCooldown(false);
-        }, 500);
+        try {
+            // Keep the draft and uploaded attachment until the server accepts
+            // them: Pro can expire between the last refresh and this request.
+            await onSendMessage(inputText.trim() ? inputText : "", attachmentToSend, editingMessage?.id);
+            if (!mountedRef.current || context.editingId !== composerContextRef.current.editingId ||
+                context.replyingId !== composerContextRef.current.replyingId) return;
+            editor?.commands.clearContent();
+            setInputText("");
+            setSelectedFile(null);
+            setUploadedAttachment(null);
+            setSelectedTags([]);
+            setIsNsfw(false);
+            onCancelReply?.();
+            setIsCooldown(true);
+            window.setTimeout(() => {
+                if (mountedRef.current) setIsCooldown(false);
+            }, 500);
+        } catch (error: any) {
+            toast.error(error?.message || "Failed to send message.");
+        } finally {
+            submittingRef.current = false;
+            if (mountedRef.current) setIsSubmitting(false);
+        }
     };
 
-    const handleEditMessage = () => {
+    const handleEditMessage = async () => {
+        if (submittingRef.current) return;
         if (inputText.includes(".onion") || stripMarkers(inputText).includes(".onion")) {
             open(<OnionLinkWarning onClose={close}/>);
             return;
@@ -382,6 +412,7 @@ const ChatInput: React.FC<ChatInputProps> = ({
             uploadedAttachment,
             isConnected,
             maxMessageLength,
+            maxRawMessageLength,
             isUploading,
             editingMessage,
         });
@@ -391,16 +422,28 @@ const ChatInput: React.FC<ChatInputProps> = ({
             return;
         }
 
-        onEditMessage(inputText.trim() ? inputText : "");
-        onCancelEdit();
+        const editingId = editingMessage?.id;
+        submittingRef.current = true;
+        setIsSubmitting(true);
+        stopDictation();
+        try {
+            await onEditMessage(inputText.trim() ? inputText : "");
+            if (mountedRef.current && composerContextRef.current.editingId === editingId) onCancelEdit();
+        } catch (error: any) {
+            toast.error(error?.message || "Failed to save message changes.");
+        } finally {
+            submittingRef.current = false;
+            if (mountedRef.current) setIsSubmitting(false);
+        }
     };
 
     const handleComposerEnter = () => {
-        if (editingMessage) handleEditMessage();
-        else handleSendMessage();
+        if (editingMessage) void handleEditMessage();
+        else void handleSendMessage();
     };
 
     const handleComposerEscape = () => {
+        if (submittingRef.current) return true;
         if (editingMessage) {
             onCancelEdit();
             return true;
@@ -419,6 +462,7 @@ const ChatInput: React.FC<ChatInputProps> = ({
     };
 
     const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>, nsfw: boolean) => {
+        if (submittingRef.current) return;
         if (messageSendingBlocked) {
             toast.error(messageSendingDisabledReason);
             e.target.value = "";
@@ -427,6 +471,8 @@ const ChatInput: React.FC<ChatInputProps> = ({
 
         const file = e.target.files?.[0];
         if (!file) return;
+        // Allow selecting the same file again after capacity becomes available.
+        e.target.value = "";
 
         let normalizedFileMimeType = toMimeType(file.type);
         if (normalizedFileMimeType === MimeType.UNKNOWN) {
@@ -439,11 +485,8 @@ const ChatInput: React.FC<ChatInputProps> = ({
             }
         }
 
-        if (file.size > MAX_FILE_SIZE) {
-            const fileSizeMB = (file.size / (1024 * 1024)).toFixed(2);
-            toast.error(
-                `File exceeds ${MAX_FILE_SIZE / (1024 * 1024)}MB. (${fileSizeMB}MB uploaded)`
-            );
+        if (!attachmentTypes.length) {
+            toast.error("Upload limits are still loading. Please try again.");
             e.target.value = "";
             return;
         }
@@ -454,6 +497,19 @@ const ChatInput: React.FC<ChatInputProps> = ({
 
         if (!isSupportedFileType) {
             toast.error("This file type is not supported.");
+            e.target.value = "";
+            return;
+        }
+
+        const attachmentType = determineAttachmentType(normalizedFileMimeType, attachmentTypes ?? []);
+        if (!attachmentType) {
+            toast.error("Upload limits are still loading. Please try again.");
+            e.target.value = "";
+            return;
+        }
+        const maxFileSize = getAttachmentByteLimit(attachmentType, user);
+        if (file.size > maxFileSize) {
+            toast.error(`File exceeds the ${maxFileSize / (1024 * 1024)} MB per-file limit. (${(file.size / (1024 * 1024)).toFixed(2)} MB selected)`);
             e.target.value = "";
             return;
         }
@@ -491,6 +547,17 @@ const ChatInput: React.FC<ChatInputProps> = ({
                     type: MimeType.OGG,
                     lastModified: fileToUpload.lastModified,
                 });
+            }
+
+            // Compression can change a file's MIME type and byte count. Check
+            // the actual upload against its configured category too.
+            const uploadType = determineAttachmentType(toMimeType(fileToUpload.type), attachmentTypes) ?? attachmentType;
+            const uploadLimit = getAttachmentByteLimit(uploadType, user);
+            if (fileToUpload.size > uploadLimit) {
+                toast.error(`File exceeds the ${uploadLimit / (1024 * 1024)} MB limit after image processing.`);
+                setIsUploading(false);
+                e.target.value = "";
+                return;
             }
 
             setSelectedFile(fileForPreview);
@@ -554,10 +621,10 @@ const ChatInput: React.FC<ChatInputProps> = ({
 
     const visibleLength = stripMarkers(inputText).length;
     const remainingChars = maxMessageLength - visibleLength;
-    const isOverLimit = visibleLength > maxMessageLength || inputText.length > MAX_RAW_MESSAGE_LENGTH;
+    const isOverLimit = visibleLength > maxMessageLength || inputText.length > maxRawMessageLength;
     const isEditing = !!editingMessage;
-    const canSendNewMessage = isConnected && !messageSendingBlocked;
-    const canUseTextInput = isEditing ? isConnected : canSendNewMessage;
+    const canSendNewMessage = isConnected && !messageSendingBlocked && !isSubmitting;
+    const canUseTextInput = (isEditing ? isConnected : canSendNewMessage) && !isSubmitting;
     const newMessageDisabledReason = messageSendingBlocked
         ? messageSendingDisabledReason
         : disabledReason;
@@ -572,7 +639,7 @@ const ChatInput: React.FC<ChatInputProps> = ({
     const hasContent = trimmedInput.length > 0;
     const isUnchanged = isEditing && (inputText === originalContent || inputText === canonicalOriginal);
     const disableConfirmEdit =
-        (!hasContent && !hasAttachment) || !isConnected || isOverLimit || isUploading || isUnchanged;
+        (!hasContent && !hasAttachment) || !isConnected || isOverLimit || isUploading || isUnchanged || isSubmitting;
 
     return (
         <div className="composer-floating relative mt-1 bg-transparent px-2 py-3 shadow-none">
@@ -606,6 +673,7 @@ const ChatInput: React.FC<ChatInputProps> = ({
                         size="icon"
                         className="h-6 w-6 shrink-0 text-muted-foreground hover:text-foreground"
                         onClick={() => onCancelReply?.()}
+                        disabled={isSubmitting}
                         title="Cancel reply"
                     >
                         <X className="h-3.5 w-3.5"/>
@@ -619,6 +687,7 @@ const ChatInput: React.FC<ChatInputProps> = ({
                     onEdit={handleEditFile}
                     nsfw={isNsfw}
                     isUploading={isUploading}
+                    disabled={isSubmitting}
                 />
             )}
 
@@ -638,7 +707,7 @@ const ChatInput: React.FC<ChatInputProps> = ({
                                 accept={fileAcceptString}
                                 disabled={!canSendNewMessage || isUploading}
                                 nsfw={false}
-                                title="Safe for Work"
+                                title={`Safe for Work — ${uploadGuidance || "loading upload limits"}`}
                                 label={"SFW"}
                                 className="glass-control"
                             />
@@ -647,13 +716,17 @@ const ChatInput: React.FC<ChatInputProps> = ({
                                 accept={fileAcceptString}
                                 disabled={!canSendNewMessage || isUploading}
                                 nsfw={true}
-                                title="Not Safe for Work"
+                                title={`Not Safe for Work — ${uploadGuidance || "loading upload limits"}`}
                                 label={"NSFW"}
                                 className="glass-control"
                             />
                         </>
                     )}
                 </MobileActionsPanel>
+            )}
+
+            {isMobile && actionsExpanded && !editingMessage && (
+                <p className="mb-2 text-xs leading-relaxed text-muted-foreground">{uploadGuidance}</p>
             )}
 
             <div className="flex gap-2 items-center">
@@ -717,7 +790,7 @@ const ChatInput: React.FC<ChatInputProps> = ({
                             accept={fileAcceptString}
                             disabled={!canSendNewMessage || isUploading}
                             nsfw={false}
-                            title="Safe for Work"
+                            title={`Safe for Work — ${uploadGuidance || "loading upload limits"}`}
                             label={"SFW"}
                             className="glass-control"
                         />
@@ -727,7 +800,7 @@ const ChatInput: React.FC<ChatInputProps> = ({
                             accept={fileAcceptString}
                             disabled={!canSendNewMessage || isUploading}
                             nsfw={true}
-                            title="Not Safe for Work"
+                            title={`Not Safe for Work — ${uploadGuidance || "loading upload limits"}`}
                             label={"NSFW"}
                             className="glass-control"
                         />
@@ -748,6 +821,7 @@ const ChatInput: React.FC<ChatInputProps> = ({
                             className="glass-control h-10 w-10 text-foreground hover:text-foreground"
                             variant="secondary"
                             onClick={() => onCancelEdit && onCancelEdit()}
+                            disabled={isSubmitting}
                             size="icon"
                             title="Cancel edit"
                         >
@@ -794,15 +868,16 @@ const ChatInput: React.FC<ChatInputProps> = ({
                     {!isConnected && ` • ${disabledReason || "Connecting to chat..."}`}
                     {!isEditing && messageSendingBlocked && ` • ${messageSendingDisabledReason}`}
                     {isUploading && " • Uploading file..."}
+                    {isSubmitting && (isEditing ? " • Saving changes..." : " • Sending message...")}
                     {isListening && (
                         <span className="text-red-500"> • Listening…</span>
                     )}
                 </div>
                 <div
-                    className={`${remainingChars < 50 && remainingChars > 0 ? "text-yellow-600" : ""
-                    } ${remainingChars <= 0 ? "text-red-600" : ""} tabular-nums`}
+                    className={`${remainingChars <= maxMessageLength * 0.1 && remainingChars >= 0 ? "text-amber-700 dark:text-amber-300" : ""
+                    } ${remainingChars < 0 ? "text-red-600 dark:text-red-400" : ""} tabular-nums`}
                 >
-                    {isMobile
+                    {remainingChars < 0 ? `${Math.abs(remainingChars).toLocaleString()} character${remainingChars === -1 ? '' : 's'} over limit` : isMobile
                         ? `${visibleLength} / ${maxMessageLength}`
                         : `${remainingChars} characters remaining`}
                 </div>

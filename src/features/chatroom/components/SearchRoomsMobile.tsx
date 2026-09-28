@@ -24,14 +24,15 @@ const SearchRoomsMobile: React.FC<SearchRoomsMobileProps> = ({onClose}) => {
         user
     } = useRoomSearch();
 
-    const onJoin = (roomId: number) => {
-        handleJoinRoom(roomId);
-        onClose();
+    const onJoin = async (roomId: number) => {
+        if (await handleJoinRoom(roomId)) onClose();
     };
 
     const onCreate = () => {
-        handleCreateChatRoom().then(() => {
+        void handleCreateChatRoom().then(() => {
             onClose();
+        }).catch(() => {
+            // The shared search hook reports the failure; keep the search open.
         });
     };
 

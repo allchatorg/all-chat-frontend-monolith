@@ -10,6 +10,7 @@ import ObserverChatHeader from "@/features/adminConversations/components/Observe
 import {useDispatch} from "react-redux";
 import {AppDispatch} from "@/redux/store";
 import {useUser} from "@/lib/hooks/useUser";
+import {getAccountLimits} from "@/lib/accountLimits";
 import {useChatScrollAndPagination} from "@/lib/hooks/useChatScrollAndPagination";
 import {OBSERVER_CHAT_PAGING_CONFIG} from "@/lib/hooks/observerChatPagingConfig";
 import {useThunk} from "@/lib/hooks/useThunk";
@@ -23,8 +24,6 @@ interface ObserverChatSectionProps {
     isLoading: boolean;
     onOpenMobileSidebar?: () => void;
 }
-
-const MAX_MESSAGE_LENGTH = 500;
 
 const ObserverChatSection: React.FC<ObserverChatSectionProps> = ({
                                                                      conversation,
@@ -110,7 +109,7 @@ const ObserverChatSection: React.FC<ObserverChatSectionProps> = ({
                 deleteOnly={true}
                 archivedRoom={false}
                 isConnected={!!chatRoom}
-                maxMessageLength={MAX_MESSAGE_LENGTH}
+                maxMessageLength={getAccountLimits(user).messageCharacters}
                 editingMessage={null}
                 onSendMessage={noop}
                 onEditMessage={noop}
