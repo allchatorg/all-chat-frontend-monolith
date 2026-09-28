@@ -33,10 +33,11 @@ import {promotedMessagesApi} from "@ads/store/services/promotedMessagesApi";
 import {adminPromotedMessagesApi} from "@ads/store/services/adminPromotedMessagesApi";
 import {roomPromotionsApi} from "@ads/store/services/roomPromotionsApi";
 import {adminRoomPromotionsApi} from "@ads/store/services/adminRoomPromotionsApi";
+import {adminProApi} from "@ads/store/services/adminProApi";
 import {clearProBadgeStore} from '@/lib/proBadgeStore';
 import {applyFontUpdate} from '@/lib/fontStore';
 
-const adsPortalApis = [userApi, paymentApi, adFormatsApi, fileApi, adsPortalApi, adminAdsApi, adminUsersApi, promotedMessagesApi, adminPromotedMessagesApi, roomPromotionsApi, adminRoomPromotionsApi];
+const adsPortalApis = [userApi, paymentApi, adFormatsApi, fileApi, adsPortalApi, adminAdsApi, adminUsersApi, promotedMessagesApi, adminPromotedMessagesApi, roomPromotionsApi, adminRoomPromotionsApi, adminProApi];
 
 
 const settingsPersistConfig = {
@@ -114,6 +115,7 @@ const appReducer = combineReducers({
     [adminPromotedMessagesApi.reducerPath]: adminPromotedMessagesApi.reducer,
     [roomPromotionsApi.reducerPath]: roomPromotionsApi.reducer,
     [adminRoomPromotionsApi.reducerPath]: adminRoomPromotionsApi.reducer,
+    [adminProApi.reducerPath]: adminProApi.reducer,
 });
 
 export const resetApp = createAction('app/reset');

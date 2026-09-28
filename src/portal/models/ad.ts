@@ -1,3 +1,5 @@
+import type {ProReportingSynchronization} from './pro-statistics';
+
 export enum AdStatus {
     PENDING = "PENDING",
     ACTIVE = "ACTIVE",
@@ -172,10 +174,12 @@ export interface MonthlyRevenueDto {
     // Promoted-messages revenue, reported as a separate series
     promotedRevenue: number; // message promotions only
     roomPromotedRevenue: number;
+    subscriptionRevenue: number;
 }
 
 export interface MonthlyRevenueResponseDto {
     data: MonthlyRevenueDto[];
+    subscriptionSynchronization: ProReportingSynchronization;
 }
 
 export interface WeeklyRevenueDto {
@@ -185,8 +189,10 @@ export interface WeeklyRevenueDto {
     // Promoted-messages revenue, reported as a separate series
     promotedRevenue: number; // message promotions only
     roomPromotedRevenue: number;
+    subscriptionRevenue: number;
 }
 
 export interface WeeklyRevenueResponseDto {
     data: WeeklyRevenueDto[];
+    subscriptionSynchronization: ProReportingSynchronization;
 }

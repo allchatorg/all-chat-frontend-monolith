@@ -73,7 +73,10 @@ export const getUserAdminViewDetailsThunk = createAsyncThunk<UserAdminView, numb
         try {
             return await getUserAdminViewDetails(userId);
         } catch (error: any) {
-            return rejectWithValue(error.response?.data || error.message);
+            return rejectWithValue({
+                status: error.response?.status ?? 500,
+                message: error.response?.data?.message ?? error.message,
+            });
         }
     }
 );

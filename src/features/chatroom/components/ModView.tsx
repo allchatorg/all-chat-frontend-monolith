@@ -16,6 +16,7 @@ import {useRoleAccess} from "@/lib/hooks/useRoleAccess";
 import {canActOn, Role} from '@/models/Role';
 import {Button} from "@/components/ui/button";
 import {useIsMobile} from "@/lib/hooks/useIsMobile";
+import {StaffMembershipBadge} from "@/components/StaffMembershipBadge";
 
 interface ModViewProps {
     isOpen?: boolean;
@@ -31,7 +32,10 @@ const ModView: React.FC<ModViewProps> = ({
                                          }) => {
     const {open, close} = useDialog();
     const dispatch = useDispatch<AppDispatch>();
-    const {selectedUserId: userId, selectedUser: user, chatRoomMessages, loading} = useModPanelHook();
+    const {
+        selectedUserId: userId, selectedUser: user, chatRoomMessages, loading,
+        membershipLoading, membershipError, refreshMembership,
+    } = useModPanelHook(isOpen);
     const roleAccess = useRoleAccess();
     const [revokeBan, revokeBanLoading, revokeBanError] = useThunk(revokeBanThunk);
     const [warnUser, warnUserLoading, warnUserError] = useThunk(warnUserThunk);
@@ -51,7 +55,7 @@ const ModView: React.FC<ModViewProps> = ({
         }
     };
 
-    if (!isOpen) return null;
+    if (!isOpen || !roleAccess.isStaffMember()) return null;
 
     const handleWarning = (description: string) => {
         if (userId) {
@@ -83,7 +87,7 @@ const ModView: React.FC<ModViewProps> = ({
             </div>}
             <div className="shrink-0 border-b p-4">
                 <div className="flex gap-2 mb-3">
-                    {canActOn(useRoleAccess().currentRole, user ? user.role : Role.UNCLAIMED_USER) &&
+                    {canActOn(roleAccess.currentRole, user ? user.role : Role.UNCLAIMED_USER) &&
                         <div className="flex-1">
                             {user?.banned ? (
                                 <button
@@ -160,7 +164,14 @@ const ModView: React.FC<ModViewProps> = ({
                 )}
             </div>
 
-            <div className="glass-surface shrink-0 rounded-b-lg border-t p-4">
+            <div className="glass-surface flex shrink-0 flex-wrap items-center gap-x-4 gap-y-2 rounded-b-lg border-t px-4 py-3">
+                <div className="flex flex-wrap items-center gap-2">
+                    <span className="text-sm text-muted-foreground">Membership:</span>
+                    <StaffMembershipBadge proActive={membershipError ? undefined : user?.proActive} loading={membershipLoading}/>
+                    {!membershipLoading && userId && (membershipError || typeof user?.proActive !== "boolean") && (
+                        <Button variant="ghost" size="sm" onClick={() => void refreshMembership()}>Retry</Button>
+                    )}
+                </div>
                 <div className="flex items-center space-x-2">
                     <User className="h-4 w-4 text-muted-foreground"/>
                     <span className="text-sm text-muted-foreground">Role:</span>

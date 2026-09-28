@@ -4,6 +4,7 @@ import {Card, CardContent, CardDescription, CardHeader, CardTitle} from "@ads/co
 import {Badge} from "@ads/components/ui/badge";
 import {useGetUserByIdQuery} from "@ads/store/services/adminUsersApi";
 import {UserRole} from "@ads/models/user-role";
+import {formatUsd} from "@ads/lib/revenue-format";
 
 export default function UserDetailsPage() {
     const params = useParams();
@@ -66,7 +67,7 @@ export default function UserDetailsPage() {
             <Card>
                 <CardHeader>
                     <CardTitle>Activity Summary</CardTitle>
-                    <CardDescription>User&apos;s advertising activity on the platform</CardDescription>
+                    <CardDescription>Ads, message promotions, room promotions, and allchat Pro payments</CardDescription>
                 </CardHeader>
                 <CardContent>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -75,7 +76,7 @@ export default function UserDetailsPage() {
                             <p className="text-sm text-muted-foreground mt-1">Total Ads Purchased</p>
                         </div>
                         <div className="flex flex-col items-center justify-center p-6 border border-border rounded-lg bg-muted/30">
-                            <p className="text-3xl font-bold text-green-600 dark:text-green-400">${(user.totalSpent && user.totalSpent.toFixed(2))}</p>
+                            <p className="text-3xl font-bold text-green-600 dark:text-green-400">{formatUsd(user.totalSpent)}</p>
                             <p className="text-sm text-muted-foreground mt-1">Total Spent</p>
                         </div>
                     </div>

@@ -15,7 +15,10 @@ export const getUserAdminDetailsThunk = createAsyncThunk<User, number>(
         try {
             return await getUserAdminDetails(userId);
         } catch (error: any) {
-            return rejectWithValue(error.response?.data || error.message);
+            return rejectWithValue({
+                status: error.response?.status ?? 500,
+                message: error.response?.data?.message ?? error.message,
+            });
         }
     }
 );

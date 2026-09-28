@@ -9,6 +9,7 @@ import {ArrowUpDown, Eye, Search, X} from "lucide-react"
 import {useRouter} from "next/navigation"
 import {AdminUserDto} from "@ads/models/admin-user"
 import {UserRole} from "@ads/models/user-role"
+import {formatUsd} from "@ads/lib/revenue-format"
 
 interface UsersTableProps {
     users: AdminUserDto[]
@@ -95,6 +96,7 @@ export function UsersTable({
                                 <Button
                                     variant="ghost"
                                     onClick={() => toggleSort("totalSpent")}
+                                    title="Ads, message promotions, room promotions, and allchat Pro payments, after refunds"
                                     className="-ml-4 h-8 data-[state=open]:bg-accent"
                                 >
                                     Total Spent
@@ -129,7 +131,7 @@ export function UsersTable({
                                     </TableCell>
                                     <TableCell className="text-right">{user.totalPurchasedAdsCount}</TableCell>
                                     <TableCell
-                                        className="text-right font-semibold">${user.totalSpent.toFixed(2)}</TableCell>
+                                        className="text-right font-semibold">{formatUsd(user.totalSpent)}</TableCell>
                                     <TableCell className="text-muted-foreground">
                                         {new Date(user.createdAt).toLocaleDateString()}
                                     </TableCell>

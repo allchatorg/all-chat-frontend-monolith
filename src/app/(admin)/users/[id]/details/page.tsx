@@ -3,15 +3,14 @@
 import {UserName} from "@/components/UserName";
 import {Card, CardContent, CardHeader, CardTitle} from '@/components/ui/card';
 import {Activity, Calendar, Clock, Crown, Globe, HardDrive, Hash, HistoryIcon, Mail, Shield, User} from 'lucide-react';
-import React, {useEffect} from 'react';
+import React from 'react';
 import {Separator} from "@radix-ui/react-menu";
 import {Badge} from "@/components/ui/badge";
 import {useThunk} from "@/lib/hooks/useThunk";
 import {getUserAdminViewDetailsThunk} from "@/redux/admin/adminThunk";
 import {useSelector} from "react-redux";
-import {selectUserAdminView} from "@/redux/admin/adminSelector";
+import {selectUserAdminDetailsState, selectUserAdminView} from "@/redux/admin/adminSelector";
 import {useParams} from "next/navigation";
-import {UserAdminView} from "@/models/UserAdminView";
 import {getCountryName} from "@/lib/utils/countryUtils";
 import {CountryFlag} from "@/features/chatroom/components/CountryFlag";
 import {Button} from "@/components/ui/button";
@@ -20,10 +19,7 @@ import {ConfirmModal} from "@/components/ConfirmModal";
 import {IdVerificationStatusBadge} from "@/components/IdVerificationStatusBadge";
 import {clearIdVerification, requireIdVerification} from "@/api/admin/adminAPI";
 import {toast} from "sonner";
-
-interface UserAdminViewProps {
-    user: UserAdminView;
-}
+import {StaffMembershipBadge} from "@/components/StaffMembershipBadge";
 
 const formatDate = (date: Date | string) => {
     const dateObj = date instanceof Date ? date : new Date(date);
@@ -59,15 +55,11 @@ const StatusBadge = ({condition, trueLabel, falseLabel, trueVariant = "default",
 export default function UserDetailsPage() {
     const params = useParams();
     const userId = Number(params.id) || 0;
-    const [getUserDetails, userDetailsIsLoading, userDetailsError] = useThunk(getUserAdminViewDetailsThunk);
-    const user = useSelector(selectUserAdminView);
+    const [getUserDetails] = useThunk(getUserAdminViewDetailsThunk);
+    const loadedUser = useSelector(selectUserAdminView);
+    const user = loadedUser?.id === userId ? loadedUser : null;
+    const detailsState = useSelector(selectUserAdminDetailsState);
     const {open, close} = useDialog();
-
-    useEffect(() => {
-        if (userId) {
-            getUserDetails(userId);
-        }
-    }, [userId, getUserDetails]);
 
     const idVerificationStatus = user?.idVerificationStatus ?? 'NONE';
     const requireDisabled = idVerificationStatus === 'REQUIRED'
@@ -141,7 +133,7 @@ export default function UserDetailsPage() {
         );
     };
 
-    if (user === null || userDetailsIsLoading) {
+    if (user === null) {
         return (
             <div className="flex h-full items-center justify-center">
                 <p className="text-muted-foreground">Loading user details...</p>
@@ -227,6 +219,7 @@ export default function UserDetailsPage() {
                 </CardHeader>
                 <CardContent>
                     <div className="flex flex-wrap gap-2">
+                        <StaffMembershipBadge proActive={detailsState.error ? undefined : user.proActive} loading={detailsState.loading}/>
                         <StatusBadge
                             condition={user.verified}
                             trueLabel="Verified"
@@ -257,6 +250,12 @@ export default function UserDetailsPage() {
                         />
                         <IdVerificationStatusBadge status={idVerificationStatus}/>
                     </div>
+
+                    {!detailsState.loading && (detailsState.error || typeof user.proActive !== "boolean") && (
+                        <Button className="mt-3" variant="outline" size="sm" onClick={() => void refetchUserDetails()}>
+                            Retry membership
+                        </Button>
+                    )}
 
                     <div className="mt-4 flex flex-wrap gap-2">
                         <Button

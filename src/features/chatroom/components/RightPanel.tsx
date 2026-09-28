@@ -34,7 +34,7 @@ const RightPanel = () => {
             title = selectedRoom?.name ? `Search ${selectedRoom.name} messages` : "Search messages";
             break;
         case "mod-view":
-            content = <ModView showHeader={!isMobile}/>;
+            content = <ModView showHeader={!isMobile} isOpen={activePanel === "mod-view"}/>;
             title = selectedModUser?.username ?? "Moderation";
             break;
         default:

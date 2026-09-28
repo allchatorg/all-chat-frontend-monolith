@@ -8,6 +8,8 @@ import {useGetPromotedRevenueSummaryQuery} from "@ads/store/services/adminPromot
 import {useGetRoomPromotedRevenueSummaryQuery} from "@ads/store/services/adminRoomPromotionsApi";
 import {AdStatus} from "@ads/models/ad";
 import {Skeleton} from "@ads/components/ui/skeleton";
+import {dashboardRevenueQueryOptions, useGetProStatisticsQuery} from "@ads/store/services/adminProApi";
+import {computeRevenueTrend, formatUsd} from "@ads/lib/revenue-format";
 
 
 // Map status to display properties
@@ -51,28 +53,12 @@ const statusConfig: Record<AdStatus, {
 // Define the order in which to display the status cards
 const statusDisplayOrder: AdStatus[] = [AdStatus.PENDING, AdStatus.ACTIVE, AdStatus.COMPLETED, AdStatus.REJECTED];
 
-const formatUsd = (value: number) =>
-    new Intl.NumberFormat('en-US', {style: 'currency', currency: 'USD'}).format(value);
-
-function computeTrend(today: number, yesterday: number): { trend: "up" | "down"; trendValue: string } {
-    if (yesterday > 0) {
-        const percentage = ((today - yesterday) / yesterday) * 100;
-        return {
-            trend: percentage >= 0 ? "up" : "down",
-            trendValue: `${percentage > 0 ? '+' : ''}${percentage.toFixed(1)}%`,
-        };
-    }
-    if (today > 0) {
-        return {trend: "up", trendValue: "+100%"};
-    }
-    return {trend: "up", trendValue: "0%"};
-}
-
 export function AdminSectionCards() {
     const {data: statusCounts, isLoading: isStatusLoading, isError: isStatusError} = useGetAdStatusCountsQuery();
-    const {data: revenueData, isLoading: isRevenueLoading} = useGetDailyRevenueQuery();
-    const {data: promotedData, isLoading: isPromotedLoading} = useGetPromotedRevenueSummaryQuery();
-    const {data: roomPromotedData, isLoading: isRoomPromotedLoading} = useGetRoomPromotedRevenueSummaryQuery();
+    const {data: revenueData, isLoading: isRevenueLoading, isFetching: isRevenueFetching, isError: isRevenueError} = useGetDailyRevenueQuery(undefined, dashboardRevenueQueryOptions);
+    const {data: promotedData, isLoading: isPromotedLoading, isFetching: isPromotedFetching, isError: isPromotedError} = useGetPromotedRevenueSummaryQuery(undefined, dashboardRevenueQueryOptions);
+    const {data: roomPromotedData, isLoading: isRoomPromotedLoading, isFetching: isRoomPromotedFetching, isError: isRoomPromotedError} = useGetRoomPromotedRevenueSummaryQuery(undefined, dashboardRevenueQueryOptions);
+    const {data: proData, isFetching: isProFetching, isError: isProError} = useGetProStatisticsQuery(90, dashboardRevenueQueryOptions);
 
     // Get count for a specific status
     const getCountForStatus = (status: AdStatus): number => {
@@ -81,24 +67,50 @@ export function AdminSectionCards() {
         return found?.count ?? 0;
     };
 
-    const revenueTrend = computeTrend(revenueData?.todayRevenue ?? 0, revenueData?.yesterdayRevenue ?? 0);
-    const promotedTrend = computeTrend(promotedData?.todayRevenue ?? 0, promotedData?.yesterdayRevenue ?? 0);
-    const roomPromotedTrend = computeTrend(roomPromotedData?.todayRevenue ?? 0, roomPromotedData?.yesterdayRevenue ?? 0);
+    const revenueUnavailable = isRevenueError || !revenueData;
+    const promotedUnavailable = isPromotedError || !promotedData;
+    const roomPromotedUnavailable = isRoomPromotedError || !roomPromotedData;
+    const totalLoading = isRevenueFetching || isPromotedFetching || isRoomPromotedFetching || isProFetching;
+    const totalUnavailable = revenueUnavailable || promotedUnavailable || roomPromotedUnavailable || isProError || !proData
+        || proData.synchronization.status === 'UNAVAILABLE';
+    const totalPartial = proData?.synchronization.status !== 'CURRENT';
+    const totalToday = !totalUnavailable
+        ? revenueData.todayRevenue + promotedData.todayRevenue + roomPromotedData.todayRevenue + proData.revenue.today
+        : null;
+    const totalYesterday = !totalUnavailable && !totalPartial
+        ? revenueData.yesterdayRevenue + promotedData.yesterdayRevenue + roomPromotedData.yesterdayRevenue + proData.revenue.yesterday
+        : null;
+    const noTrend = {trend: 'up' as const, trendValue: ''};
+    const revenueTrend = revenueUnavailable ? noTrend : computeRevenueTrend(revenueData.todayRevenue, revenueData.yesterdayRevenue);
+    const promotedTrend = promotedUnavailable ? noTrend : computeRevenueTrend(promotedData.todayRevenue, promotedData.yesterdayRevenue);
+    const roomPromotedTrend = roomPromotedUnavailable ? noTrend : computeRevenueTrend(roomPromotedData.todayRevenue, roomPromotedData.yesterdayRevenue);
+    const totalTrend = totalToday !== null && totalYesterday !== null ? computeRevenueTrend(totalToday, totalYesterday) : noTrend;
 
     return (
         <div
             className="grid grid-cols-2 gap-3 px-4 *:data-[slot=card]:shadow-sm lg:px-6 @xl/main:gap-4 @5xl/main:grid-cols-4">
+
+            {totalLoading ? <Skeleton className="h-24 w-full rounded-xl"/> : (
+                <StatCard
+                    title={`Total revenue today${!totalUnavailable && totalPartial ? ' (partial)' : ''}`}
+                    value={totalToday === null ? 'Unavailable' : formatUsd(totalToday)}
+                    {...totalTrend}
+                    footerText={totalYesterday !== null ? 'Compared to yesterday' : ''}
+                    description={totalUnavailable ? 'One or more revenue sources could not be loaded' : 'Ads, message and room promotions, and allchat Pro'}
+                    compact
+                />
+            )}
 
             {isRevenueLoading ? (
                 <Skeleton className="h-24 w-full rounded-xl"/>
             ) : (
                 <StatCard
                     title="Ad Revenue Today"
-                    value={formatUsd(revenueData?.todayRevenue ?? 0)}
+                    value={revenueUnavailable ? 'Unavailable' : formatUsd(revenueData.todayRevenue)}
                     trend={revenueTrend.trend}
                     trendValue={revenueTrend.trendValue}
                     footerText="Compared to yesterday"
-                    description="Revenue from ad purchases only"
+                    description={revenueUnavailable ? 'Could not load ad revenue' : 'Revenue from ad purchases only'}
                     compact
                 />
             )}
@@ -113,29 +125,29 @@ export function AdminSectionCards() {
                 <>
                     <StatCard
                         title="Message Promotions Revenue Today"
-                        value={formatUsd(promotedData?.todayRevenue ?? 0)}
+                        value={promotedUnavailable ? 'Unavailable' : formatUsd(promotedData.todayRevenue)}
                         trend={promotedTrend.trend}
                         trendValue={promotedTrend.trendValue}
                         footerText="Compared to yesterday"
-                        description="Captured from message promotions"
+                        description={promotedUnavailable ? 'Could not load message promotion revenue' : 'Captured from message promotions'}
                         compact
                     />
                     <StatCard
                         title="Pending Message Promotions"
-                        value={formatUsd(promotedData?.pendingHoldTotal ?? 0)}
+                        value={promotedUnavailable ? 'Unavailable' : formatUsd(promotedData.pendingHoldTotal)}
                         trend="up"
                         trendValue=""
                         footerText=""
-                        description={`${promotedData?.pendingCount ?? 0} authorized holds awaiting review`}
+                        description={promotedUnavailable ? 'Could not load pending promotions' : `${promotedData.pendingCount} authorized holds awaiting review`}
                         compact
                     />
                     <StatCard
                         title="Total Message Promotions Revenue"
-                        value={formatUsd(promotedData?.totalRevenue ?? 0)}
+                        value={promotedUnavailable ? 'Unavailable' : formatUsd(promotedData.totalRevenue)}
                         trend="up"
                         trendValue=""
                         footerText=""
-                        description={`All-time · ${promotedData?.approvedCount ?? 0} approved promotions`}
+                        description={promotedUnavailable ? 'Could not load message promotion revenue' : `All-time · ${promotedData.approvedCount} approved promotions`}
                         compact
                     />
                 </>
@@ -151,29 +163,29 @@ export function AdminSectionCards() {
                 <>
                     <StatCard
                         title="Room Promotions Revenue Today"
-                        value={formatUsd(roomPromotedData?.todayRevenue ?? 0)}
+                        value={roomPromotedUnavailable ? 'Unavailable' : formatUsd(roomPromotedData.todayRevenue)}
                         trend={roomPromotedTrend.trend}
                         trendValue={roomPromotedTrend.trendValue}
                         footerText="Compared to yesterday"
-                        description="Captured from room promotions"
+                        description={roomPromotedUnavailable ? 'Could not load room promotion revenue' : 'Captured from room promotions'}
                         compact
                     />
                     <StatCard
                         title="Pending Room Promotions"
-                        value={formatUsd(roomPromotedData?.pendingHoldTotal ?? 0)}
+                        value={roomPromotedUnavailable ? 'Unavailable' : formatUsd(roomPromotedData.pendingHoldTotal)}
                         trend="up"
                         trendValue=""
                         footerText=""
-                        description={`${roomPromotedData?.pendingCount ?? 0} authorized holds awaiting review`}
+                        description={roomPromotedUnavailable ? 'Could not load pending promotions' : `${roomPromotedData.pendingCount} authorized holds awaiting review`}
                         compact
                     />
                     <StatCard
                         title="Total Room Promotions Revenue"
-                        value={formatUsd(roomPromotedData?.totalRevenue ?? 0)}
+                        value={roomPromotedUnavailable ? 'Unavailable' : formatUsd(roomPromotedData.totalRevenue)}
                         trend="up"
                         trendValue=""
                         footerText=""
-                        description={`All-time · ${roomPromotedData?.approvedCount ?? 0} approved promotions`}
+                        description={roomPromotedUnavailable ? 'Could not load room promotion revenue' : `All-time · ${roomPromotedData.approvedCount} approved promotions`}
                         compact
                     />
                 </>

@@ -18,6 +18,9 @@ interface ModPanelState {
         selectedUserName: string | null;
     };
     loadedUser: User | null;
+    userRequestId: string | null;
+    userLoading: boolean;
+    userError: boolean;
     chatRoomMessages: PaginatedResponse<Message>;
     auditLogs: PaginatedResponse<AuditLogUnion>;
 }
@@ -28,6 +31,9 @@ const initialState: ModPanelState = {
         selectedUserName: null
     },
     loadedUser: null,
+    userRequestId: null,
+    userLoading: false,
+    userError: false,
     chatRoomMessages: createEmptyPaginatedResponse<Message>(),
     auditLogs: createEmptyPaginatedResponse<AuditLogUnion>()
 };
@@ -45,6 +51,9 @@ const modPanelSlice = createSlice({
                 selectedUserName: action.payload.userName
             };
             state.loadedUser = null;
+            state.userRequestId = null;
+            state.userLoading = false;
+            state.userError = false;
             state.chatRoomMessages = initialState.chatRoomMessages;
         },
         clearSelectedUser: (state) => {
@@ -53,26 +62,48 @@ const modPanelSlice = createSlice({
                 selectedUserName: null
             };
             state.loadedUser = null;
+            state.userRequestId = null;
+            state.userLoading = false;
+            state.userError = false;
             state.chatRoomMessages = initialState.chatRoomMessages;
         }
     },
     extraReducers: (builder) => {
         builder
+            .addCase(getUserAdminDetailsThunk.pending, (state, action) => {
+                if (action.meta.arg !== state.selectedUserInfo.selectedUserId) return;
+                state.userRequestId = action.meta.requestId;
+                state.userLoading = true;
+                state.userError = false;
+            })
             .addCase(getUserAdminDetailsThunk.fulfilled, (state, action) => {
+                if (state.userRequestId !== action.meta.requestId ||
+                    action.meta.arg !== state.selectedUserInfo.selectedUserId ||
+                    action.payload.id !== state.selectedUserInfo.selectedUserId) return;
                 state.loadedUser = action.payload;
+                state.userRequestId = null;
+                state.userLoading = false;
+            })
+            .addCase(getUserAdminDetailsThunk.rejected, (state, action) => {
+                if (state.userRequestId !== action.meta.requestId ||
+                    action.meta.arg !== state.selectedUserInfo.selectedUserId) return;
+                state.userRequestId = null;
+                state.userLoading = false;
+                state.userError = true;
+                state.loadedUser = null;
             })
             .addCase(getUserMessagesThunk.fulfilled, (state, action) => {
                 state.chatRoomMessages = action.payload;
             })
-            .addCase(banUserThunk.fulfilled, (state) => {
-                if (!state.loadedUser) return;
+            .addCase(banUserThunk.fulfilled, (state, action) => {
+                if (!state.loadedUser || state.loadedUser.id !== Number(action.meta.arg.userId)) return;
                 state.loadedUser = {
                     ...state.loadedUser,
                     banned: true
                 };
             })
-            .addCase(revokeBanThunk.fulfilled, (state) => {
-                if (!state.loadedUser) return;
+            .addCase(revokeBanThunk.fulfilled, (state, action) => {
+                if (!state.loadedUser || state.loadedUser.id !== action.meta.arg) return;
                 state.loadedUser = {
                     ...state.loadedUser,
                     banned: false

@@ -5,35 +5,47 @@ import {useParams, usePathname, useRouter} from "next/navigation";
 import React, {ReactNode, useEffect} from "react";
 import {AdminPageHeader} from "@/components/AdminPageHeader";
 import {AdminBreadcrumb} from "@/components/AdminBreadcrumb";
-import {useSelector} from "react-redux";
-import {useThunk} from "@/lib/hooks/useThunk";
+import {useDispatch, useSelector} from "react-redux";
 import {getUserAdminViewDetailsThunk} from "@/redux/admin/adminThunk";
-import {selectUserAdminView} from "@/redux/admin/adminSelector";
+import {selectUserAdminDetailsState, selectUserAdminView} from "@/redux/admin/adminSelector";
 import {NavigationTabs} from "@/components/NavigationTabs";
 import {TabConfig} from "@/models/TabConfig";
 import {ROUTES} from "@/routes";
+import {AppDispatch} from "@/redux/store";
+import {clearSelectedUser, setSelectedUserId} from "@/redux/admin/adminSlice";
+import {Button} from "@/components/ui/button";
+import {useRoleAccess} from "@/lib/hooks/useRoleAccess";
 
 export default function MemberLayout({children}: { children: ReactNode }) {
     const params = useParams();
     const pathname = usePathname();
     const router = useRouter();
     const basePath = `/users/${params.id}`;
+    const userId = Number(params.id) || 0;
+    const dispatch = useDispatch<AppDispatch>();
+    const isStaff = useRoleAccess().isStaffMember();
 
-    const user = useSelector(selectUserAdminView);
-    const [getUserDetails, userDetailsLoading, userDetailsError] = useThunk(getUserAdminViewDetailsThunk);
-
-    useEffect(() => {
-        const userId = Number(params.id) || 0;
-        if (userId) {
-            getUserDetails(userId);
-        }
-    }, [params.id, getUserDetails]);
+    const loadedUser = useSelector(selectUserAdminView);
+    const user = loadedUser?.id === userId ? loadedUser : null;
+    const detailsState = useSelector(selectUserAdminDetailsState);
 
     useEffect(() => {
-        if (userDetailsError?.status === 403) {
+        if (!userId || !isStaff) return;
+        dispatch(setSelectedUserId(userId));
+        const refresh = () => { void dispatch(getUserAdminViewDetailsThunk(userId)); };
+        refresh();
+        window.addEventListener("focus", refresh);
+        return () => {
+            window.removeEventListener("focus", refresh);
+            dispatch(clearSelectedUser());
+        };
+    }, [userId, dispatch, isStaff]);
+
+    useEffect(() => {
+        if (detailsState.userId === userId && detailsState.errorStatus === 403) {
             router.push('/unauthorized');
         }
-    }, [userDetailsError, router]);
+    }, [detailsState.userId, detailsState.errorStatus, userId, router]);
 
     const tabs: TabConfig[] = [
         {
@@ -65,7 +77,17 @@ export default function MemberLayout({children}: { children: ReactNode }) {
     const currentTab = tabs.find(tab => pathname === tab.href) || tabs[0];
     const activeTabValue = pathname.split('/').pop() || 'details';
 
+    if (!isStaff) return null;
+
     if (!user) {
+        if (detailsState.userId === userId && detailsState.error) {
+            return (
+                <div className="space-y-3 p-6" role="status">
+                    <p>Unable to load user details. Membership unavailable.</p>
+                    <Button variant="outline" onClick={() => void dispatch(getUserAdminViewDetailsThunk(userId))}>Retry</Button>
+                </div>
+            );
+        }
         return <div className="p-6">Loading user data...</div>;
     }
 

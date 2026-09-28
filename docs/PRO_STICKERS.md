@@ -89,12 +89,12 @@ All 17 PNG assets remain in `public/stickers/pro/`. Their README preserves the
 original artwork prompts and generation workflow. The local catalog and backend
 allowlist use the same character IDs, including both Chad variants.
 
-Follow the combined migration order in the backend `docs/allchat-pro.md` guide.
-Deploy the matching backend and its sticker-message database migration before the
-frontend. Inline emojis and reactions use their existing fields and require no
-additional migration. The existing sticker migration is
-`all-chat-monolith/docs/sql/sticker-messages.sql`. No additional billing
-configuration or environment variables are required.
+Follow the deployment configuration in the backend `docs/allchat-pro.md` guide.
+Deploy the matching backend before the frontend. Hibernate creates the
+sticker-message columns from entity mappings; no manual SQL scripts are needed.
+The backend uses `create-drop` in both development and production, so application
+data is discarded on restart. No additional billing configuration or environment
+variables are required for stickers.
 
 ## Verification
 
