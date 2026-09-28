@@ -13,6 +13,7 @@ import {ACCOUNT_LIMITS} from '@/lib/accountLimits';
 import {useSelector} from 'react-redux';
 import {selectUser} from '@/redux/user/userSelectors';
 import {isStaff} from '@/models/Role';
+import {getProBillingReturn, type ProBillingReturnState} from './billingReturn';
 
 function dateLabel(value: string | null) {
     if (!value) return 'Not available';
@@ -21,15 +22,16 @@ function dateLabel(value: string | null) {
     return date.toLocaleString(undefined, {year: 'numeric', month: 'long', day: 'numeric', hour: 'numeric', minute: '2-digit', timeZoneName: 'short'});
 }
 
-export function SubscriptionsSettings({onExplore}: {onExplore?: () => void}) {
+export function SubscriptionsSettings({onExplore, billingReturn}: {onExplore?: () => void; billingReturn?: ProBillingReturnState}) {
     const user = useSelector(selectUser);
     const staff = user ? isStaff(user.role) : false;
     const roomExpiryDescription = staff
         ? 'Your staff room and hourly upload exemptions continue.'
         : 'Your joined chatrooms stay, and new joins must fit your Basic room limit.';
     const searchParams = useSearchParams();
-    const checkoutReturn = searchParams.get('checkout');
-    const {subscription, loading, error, refresh} = useProSubscription(checkoutReturn === 'success' || searchParams.get('billing') === 'updated');
+    const returnState = billingReturn ?? getProBillingReturn(searchParams);
+    const checkoutReturn = returnState?.checkout;
+    const {subscription, loading, error, refresh} = useProSubscription(checkoutReturn === 'success' || returnState?.billingUpdated === true);
     const [action, setAction] = useState<string | null>(null);
     const [confirmCancel, setConfirmCancel] = useState(false);
 

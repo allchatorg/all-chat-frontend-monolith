@@ -2,6 +2,7 @@ import axios, {AxiosError, AxiosInstance, InternalAxiosRequestConfig} from "axio
 import {getSessionToken, removeSessionToken} from "@/lib/tokenManager";
 import {Ban} from "@/models/Ban";
 import {getFontStoreGeneration, ingestFontSnapshots} from '@/lib/fontStore';
+import {isBillingRoute} from '@/routes';
 
 interface AppearanceRequestConfig extends InternalAxiosRequestConfig {
     fontStoreGeneration?: number;
@@ -52,7 +53,7 @@ api.interceptors.response.use(
             // the whitelisted ban-appeal endpoints. Skip the redirect when already on a
             // /banned page, otherwise its own API calls would loop the navigation.
             const banData: Ban = error.response.data;
-            if (!window.location.pathname.startsWith('/banned') && window.location.pathname !== '/settings/subscriptions') {
+            if (!window.location.pathname.startsWith('/banned') && !isBillingRoute(window.location.pathname, new URLSearchParams(window.location.search))) {
                 window.location.href = `/banned?ban=${encodeURIComponent(JSON.stringify(banData))}`;
             }
         }

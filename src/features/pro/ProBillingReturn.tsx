@@ -1,6 +1,7 @@
 'use client';
 
 import {useEffect, useRef} from 'react';
+import {useRouter, useSearchParams} from 'next/navigation';
 import Link from 'next/link';
 import {useSelector} from 'react-redux';
 import {Diamond} from 'lucide-react';
@@ -8,18 +9,28 @@ import {Button} from '@/components/ui/button';
 import {selectUser} from '@/redux/user/userSelectors';
 import {ROUTES} from '@/routes';
 import {useProDialog} from './useProDialog';
+import {getProBillingReturn, proChatReturnUrl} from './billingReturn';
+import {selectIpDetails} from '@/redux/auth/authSelectors';
+import {isChatRestricted} from '@/lib/accountVerification';
 
-/** Opens the billing result after authentication, once per return visit. */
+/** Bridges previously issued return URLs into chat; restricted accounts retain billing access. */
 export function ProBillingReturn() {
     const user = useSelector(selectUser);
-    const openPro = useProDialog({initialView: 'subscriptions'});
+    const ipDetails = useSelector(selectIpDetails);
+    const searchParams = useSearchParams();
+    const router = useRouter();
+    const restricted = isChatRestricted(user, ipDetails?.requiredVerification);
+    const openPro = useProDialog({initialView: 'subscriptions', billingReturn: getProBillingReturn(searchParams) ?? undefined});
     const opened = useRef(false);
 
     useEffect(() => {
         if (!user || opened.current) return;
         opened.current = true;
-        openPro();
-    }, [user, openPro]);
+        if (restricted) openPro();
+        else router.replace(proChatReturnUrl(searchParams), {scroll: false});
+    }, [user, restricted, openPro, router, searchParams]);
+
+    if (!restricted) return <div role="status" className="p-8">Returning to chat…</div>;
 
     return <main className="flex min-h-screen items-center justify-center bg-background p-6 text-foreground">
         <div className="max-w-sm space-y-5 text-center">

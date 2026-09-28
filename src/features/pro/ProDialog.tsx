@@ -11,10 +11,11 @@ import {selectUser} from '@/redux/user/userSelectors';
 import {ROUTES} from '@/routes';
 import {ProOffer} from './ProOffer';
 import {SubscriptionsSettings} from './SubscriptionsSettings';
+import type {ProBillingReturnState} from './billingReturn';
 
-export type ProDialogOptions = {initialView?: 'offer' | 'subscriptions'};
+export type ProDialogOptions = {initialView?: 'offer' | 'subscriptions'; billingReturn?: ProBillingReturnState};
 
-export function ProDialog({initialView = 'offer'}: ProDialogOptions) {
+export function ProDialog({initialView = 'offer', billingReturn}: ProDialogOptions) {
     const [view, setView] = useState<'offer' | 'subscriptions' | 'claim'>(initialView);
     const user = useSelector(selectUser);
     const {close} = useDialog();
@@ -27,7 +28,7 @@ export function ProDialog({initialView = 'offer'}: ProDialogOptions) {
                 router.push(`${ROUTES.REGISTER}&redirect=${encodeURIComponent(ROUTES.SUBSCRIPTIONS)}`);
             } else setView('claim');
         }}/>}
-        {view === 'subscriptions' && <SubscriptionsSettings onExplore={user?.banned ? undefined : () => setView('offer')}/>}
+        {view === 'subscriptions' && <SubscriptionsSettings billingReturn={billingReturn} onExplore={user?.banned ? undefined : () => setView('offer')}/>}
         {view === 'claim' && <SettingsComponent defaultTab="account"/>}
     </div>;
 }

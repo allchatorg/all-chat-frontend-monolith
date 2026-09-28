@@ -13,8 +13,8 @@ export default function AuthGuard({children}: { children: React.ReactNode }) {
     const {user, error, isInitializing} = useUser();
     const {ipDetails, isLoading: isIpDetailsLoading} = useIpDetails();
     const pathname = usePathname();
-    useTimeZoneSync(isBillingRoute(pathname) ? null : user);
     const searchParams = useSearchParams();
+    useTimeZoneSync(isBillingRoute(pathname, searchParams) ? null : user);
     const router = useRouter();
     const redirectAfterAuth = sanitizeRedirectParam(searchParams.get("redirect"));
     const returnPath = `${pathname}${searchParams.size ? `?${searchParams.toString()}` : ''}`;
@@ -44,7 +44,10 @@ export default function AuthGuard({children}: { children: React.ReactNode }) {
         }
     }, [isInitializing, user, pathname, router, ipDetails, redirectAfterAuth, returnPath]);
 
-    const isLoading = isInitializing || isIpDetailsLoading || (isProtectedRoute(pathname) && !user && !error);
+    // Do not mount Home while sending a signed-out billing return to login:
+    // its own unauthenticated redirect would otherwise discard the return URL.
+    const isLoading = isInitializing || isIpDetailsLoading ||
+        (isBillingRoute(pathname, searchParams) && !user) || (isProtectedRoute(pathname) && !user && !error);
 
     if (isLoading) {
         return (
@@ -78,9 +81,10 @@ function getRedirectPath({
     redirectAfterAuth?: string | null;
     returnPath: string;
 }): string | null {
+    const billingRoute = isBillingRoute(pathname, new URLSearchParams(returnPath.split('?')[1] ?? ''));
     // Unauthenticated users
     if (!isAuthenticated) {
-        if (isBillingRoute(pathname)) {
+        if (billingRoute) {
             return `${ROUTES.LOGIN}&redirect=${encodeURIComponent(returnPath)}`;
         }
         if (isProtectedRoute(pathname)) {
@@ -95,12 +99,12 @@ function getRedirectPath({
     // Banned users are corralled to the ban info / appeal pages; the backend
     // enforces the same boundary via the AccessRestrictionFilter whitelist.
     if (isBanned) {
-        if (pathname === ROUTES.AUTH && redirectAfterAuth && isBillingRoute(redirectAfterAuth.split('?')[0])) return redirectAfterAuth;
-        return pathname.startsWith(ROUTES.BANNED) || isBillingRoute(pathname) ? null : ROUTES.BANNED;
+        if (pathname === ROUTES.AUTH && redirectAfterAuth && isBillingRoute(redirectAfterAuth.split('?')[0], new URLSearchParams(redirectAfterAuth.split('?')[1] ?? ''))) return redirectAfterAuth;
+        return pathname.startsWith(ROUTES.BANNED) || billingRoute ? null : ROUTES.BANNED;
     }
 
     // Existing subscribers must retain access to invoices and cancellation.
-    if (isBillingRoute(pathname)) return null;
+    if (billingRoute) return null;
 
     // Authenticated users
     if (hasFlaggedIp && isGuest) {

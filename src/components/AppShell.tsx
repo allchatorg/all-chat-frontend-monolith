@@ -1,7 +1,13 @@
 "use client";
 
 import React, {useEffect} from "react";
-import {usePathname} from "next/navigation";
+import {usePathname, useSearchParams} from "next/navigation";
+import {useSelector} from 'react-redux';
+import {selectUser} from '@/redux/user/userSelectors';
+import {selectIpDetails} from '@/redux/auth/authSelectors';
+import {isChatRestricted} from '@/lib/accountVerification';
+import {ProReturnModal} from '@/features/pro/ProReturnModal';
+import {ProBillingReturn} from '@/features/pro/ProBillingReturn';
 import {Navbar} from "@/components/Navbar";
 import AuthGuard from "@/components/AuthGuard";
 import {Toaster} from "@/components/ui/sonner";
@@ -14,6 +20,9 @@ import {isBillingRoute, ROUTES} from "@/routes";
 
 export function AppShell({children}: { children: React.ReactNode }) {
     const pathname = usePathname();
+    const searchParams = useSearchParams();
+    const user = useSelector(selectUser);
+    const ipDetails = useSelector(selectIpDetails);
     const isAdPreviewRoute = pathname.startsWith(ROUTES.AD_PREVIEW);
     const isPortalRoute = pathname.startsWith("/portal");
 
@@ -69,8 +78,13 @@ export function AppShell({children}: { children: React.ReactNode }) {
         return <AuthGuard>{children}<Toaster/><RateLimitDialog/></AuthGuard>;
     }
 
+    if (isBillingRoute(pathname, searchParams) && isChatRestricted(user, ipDetails?.requiredVerification)) {
+        return <AuthGuard><ProBillingReturn/><Toaster/><RateLimitDialog/></AuthGuard>;
+    }
+
     return (
         <AuthGuard>
+            {pathname === ROUTES.HOME && <ProReturnModal/>}
             <StompBridge/>
             <AppInitializer>
                 <Navbar/>

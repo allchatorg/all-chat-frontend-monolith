@@ -1,3 +1,5 @@
+import {getProBillingReturn} from '@/features/pro/billingReturn';
+
 export const ROUTES = {
     HOME: '/',
     AUTH: '/auth',
@@ -46,8 +48,9 @@ export function isPublicRoute(pathname: string) {
     return PUBLIC_ROUTES.some(route => pathname.startsWith(route));
 }
 
-export function isBillingRoute(pathname: string) {
-    return pathname === ROUTES.SUBSCRIPTIONS || pathname === ROUTES.PRO_RETURN;
+export function isBillingRoute(pathname: string, searchParams?: {get: (key: string) => string | null}) {
+    return pathname === ROUTES.SUBSCRIPTIONS || pathname === ROUTES.PRO_RETURN ||
+        (pathname === ROUTES.HOME && !!searchParams && getProBillingReturn(searchParams) !== null);
 }
 
 export function isProtectedRoute(pathname: string) {
