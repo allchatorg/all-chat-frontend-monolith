@@ -21,6 +21,7 @@ import {EditHistoryButton} from "@/features/chatroom/components/EditHistoryButto
 import {useIsMobile} from "@/lib/hooks/useIsMobile";
 import {ReactionButton} from "@/features/chatroom/components/ReactionButton";
 import {useRoleAccess} from "@/lib/hooks/useRoleAccess";
+import {StickerMessage} from "@/features/stickers/StickerMessage";
 
 const MessageItem: React.FC<{
     message: Message,
@@ -74,6 +75,8 @@ const MessageItem: React.FC<{
     const {formatMessageDate} = useFormatMessageDate();
 
     const videoUrls = removeDuplicateStrings(message.content ? extractFormattedUrls(message.content).filter(isSupportedVideoPlatform) : []);
+    const removedEmptyMessage = !message.stickerId && (message.content === null
+        || (message.deleted && !message.content && !message.attachments?.length));
 
     const handleAttachmentClick = (attachment: Attachment) => {
         openMediaOverlay(attachment);
@@ -227,11 +230,16 @@ const MessageItem: React.FC<{
                             ))}
                         </div>
 
+                        {message.stickerId && (
+                            <StickerMessage stickerId={message.stickerId} deleted={(message.deleted && !isStaffMember()) || message.content === null}/>
+                        )}
+                        {removedEmptyMessage && <p className="text-sm italic text-muted-foreground">Message removed</p>}
+
                         {message.content && (
                             <div
                                 className="text-sm text-foreground transition-colors whitespace-pre-wrap [word-break:break-word] min-w-0 max-w-full"
                                 style={messageFontStyle}>
-                                <FormattedMessageText text={message.content} interactionsDisabled={interactionsDisabled}/>
+                                <FormattedMessageText text={message.content} customEmojis interactionsDisabled={interactionsDisabled}/>
                             </div>
                         )}
 
@@ -299,9 +307,14 @@ const MessageItem: React.FC<{
                 ))}
             </div>
 
-            {message.content && (
+            {message.stickerId && (
+                <StickerMessage stickerId={message.stickerId} deleted={(message.deleted && !isStaffMember()) || message.content === null}/>
+            )}
+            {removedEmptyMessage && <p className="px-3 py-2 text-sm italic text-muted-foreground">Message removed</p>}
+
+            {(message.content || message.stickerId) && (
                 <div className={clsx("flex flex-col max-w-full min-w-0", isOwn ? "items-end" : "items-start")}>
-                    <div
+                    {message.content && <div
                         className={clsx(
                             "shadow-sm rounded-lg px-3 py-2 wrap-break-word max-w-full min-w-0",
                             className,
@@ -315,12 +328,12 @@ const MessageItem: React.FC<{
                         }}
                     >
                         <div className="text-sm font-normal whitespace-pre-wrap [word-break:break-word] min-w-0" style={messageFontStyle}>
-                            <FormattedMessageText text={message.content} interactionsDisabled={interactionsDisabled}
+                            <FormattedMessageText text={message.content} customEmojis interactionsDisabled={interactionsDisabled}
                                                   backgroundColor={message.color}/>
                         </div>
-                    </div>
+                    </div>}
 
-                    {message.editedAt && showEditButton && !interactionsDisabled && (
+                    {message.editedAt && !message.stickerId && showEditButton && !interactionsDisabled && (
                         <div className={clsx("mt-0.5", isOwn ? "self-end" : "self-start")}>
                             <EditHistoryButton message={message}/>
                         </div>

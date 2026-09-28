@@ -1,10 +1,30 @@
 # AllChat radio integration handoff
 
-Radio service last verified: **16 September 2026**.
+Radio service last verified: **17 September 2026**.
+
+## Station rename and URL-stub compatibility — 17 September 2026
+
+The public API now returns **Frutiger Aero** (ID `1`, shortcode `allchat_radio`) and **Synthwave** (ID `2`, shortcode `synthwave`). Both metadata endpoints report online. Changing the dark station's stub from `nightwave` broke the old frontend shortcode lookup; discovery now matches the stable numeric station IDs. Metadata refreshes also update the returned `listen_url`, so a stub change during an open session can be picked up without reloading the page.
+
+AllChat display names are maintained manually in `src/features/radio/types.ts`; they are not automatically taken from AzuraCast's `name`. They now read Frutiger Aero / Synthwave, and all station options use those shared definitions. Persisted `daybreak` / `nightwave` preference keys are retained to preserve existing choices. Future display-name changes require updating those definitions; future URL-stub changes do not, provided the station IDs stay the same.
+
+The Spring backend has no radio station configuration or dependency on these stubs. No backend, database or environment changes are needed. Both current streams returned HTTP 200, `audio/mpeg` and audio bytes with browser CORS headers. Synthwave's `icy-name` is current; the light stream still advertises `Daybreak` in its Icecast header, despite the API name being Frutiger Aero. AllChat does not use that header for its label. No AzuraCast service restart was performed.
+
+Validation: `tsc --noEmit --incremental false` and `npm run build` passed, with the production build run in an isolated temporary copy. No tests were added or run. The frontend changes still need deployment.
+
+Earlier Daybreak/Nightwave names and empty-library observations below describe historical setup checks. The URL table and API identity examples reflect the current station names and stubs.
+
+## Safari/iOS audio controls — 17 September 2026
+
+The player now uses the audio element's native `volume` and `muted` controls. Safari can route live MP3 outside `MediaElementAudioSourceNode`, bypassing the previous gain-based volume and mute ([WebKit issue 180696](https://bugs.webkit.org/show_bug.cgi?id=180696)). Control changes are applied synchronously in the user's gesture, including resuming an interrupted stream when the user still intends to listen. Zero volume also applies native mute; unmuting from zero restores the default level.
+
+The UI detects `:volume-locked`, with an asynchronous volume-write/readback fallback for browsers without that selector. Locked devices show device-volume guidance instead of an ineffective slider or percentage; the mute button remains available. Avoid blanket iOS detection: [Safari 26 supports native volume on newer iPads](https://webkit.org/blog/17333/webkit-features-in-safari-26-0/). Physical iPhone/iPad audible playback and interruption checks remain unverified.
+
+Validation: `tsc --noEmit --incremental false` and `npm run build` passed. No tests were added or run, per workspace instructions.
 
 ## Production release check — 16 September 2026
 
-- **No new environment variables, API keys, backend deployment or database changes are needed.** The frontend uses the public `https://radio.allchat.org` API directly and discovers stream URLs by station shortcode.
+- **No new environment variables, API keys, backend deployment or database changes are needed.** The frontend uses the public `https://radio.allchat.org` API directly and discovers stream URLs by station ID (updated on 17 September).
 - Both Daybreak and Nightwave currently report `is_online: true` with different, non-placeholder track metadata. The empty-library descriptions below are historical provisioning observations from 10 September, not the current station state.
 - Public station discovery succeeds over trusted HTTPS with `Access-Control-Allow-Origin: *`. Both MP3 streams return HTTP 200, `Content-Type: audio/mpeg`, the correct station names and audio bytes, with `Access-Control-Allow-Origin: https://allchat.org` for the production origin.
 - The production site responds over HTTPS without a Content-Security-Policy header that would block the radio API or streams.
@@ -13,7 +33,7 @@ Radio service last verified: **16 September 2026**.
 
 ## Task for the next chat
 
-AllChat now has two separate AzuraCast stations, **Daybreak** and **Nightwave**. Their public APIs and HTTPS MP3 streams are available. Both libraries were empty at the provisioning snapshot below. Nightwave was subsequently observed broadcasting a real track during the radio-menu UI checks; consult the public APIs for current on-air status.
+AllChat now has two separate AzuraCast stations, **Frutiger Aero** and **Synthwave** (formerly Daybreak and Nightwave). Their public APIs and HTTPS MP3 streams are available. Both libraries were empty at the provisioning snapshot below; consult the public APIs for current on-air status.
 
 The frontend integration is implemented; see `src/features/radio/` and `src/components/providers/RadioProvider.tsx` for its source. Type-check, production build and browser UI checks passed. Radio controls are now under the chat header's **three-dot menu → Radio**, including empty and loading views; there is no separate radio header row. Desktop uses a nested submenu; mobile closes the menu and opens a modal bottom sheet with larger touch controls. Changes save immediately, and closing the sheet leaves playback running. Profile settings retain their Radio card. Physical-device and audible-volume validation remain pending.
 
@@ -26,8 +46,8 @@ The mobile sheet was checked in the browser with a selected public room, expande
 | VPS access | SSH works using the existing local SSH key. |
 | AzuraCast installation | Installed with the official Docker installer; v0.23.8 Stable. |
 | Administrator account | Created by the user. Use the same account at the public login URL. |
-| Light-mode station | Daybreak, station ID `1`, retained shortcode `allchat_radio`. |
-| Dark-mode station | Nightwave, station ID `2`, shortcode `nightwave`. |
+| Light-mode station | Frutiger Aero, station ID `1`, retained shortcode `allchat_radio`. |
+| Dark-mode station | Synthwave, station ID `2`, shortcode `synthwave`. |
 | Domain and HTTPS | `radio.allchat.org` is live with a trusted Let's Encrypt certificate. |
 | Public APIs | Station discovery and station now-playing endpoints return HTTP 200 without authentication. |
 | Audio services | Both stations have separate running Icecast and Liquidsoap processes; both HTTPS streams serve 192 kbps MP3 audio. |
@@ -43,32 +63,32 @@ The mobile sheet was checked in the browser with a selected public room, expande
 | --- | --- |
 | AzuraCast base URL | `https://radio.allchat.org` |
 | Administrator login | `https://radio.allchat.org/login` |
-| Daybreak dashboard after login | `https://radio.allchat.org/station/1` |
-| Nightwave dashboard after login | `https://radio.allchat.org/station/2` |
-| Daybreak listener page | `https://radio.allchat.org/public/allchat_radio` |
-| Nightwave listener page | `https://radio.allchat.org/public/nightwave` |
+| Frutiger Aero dashboard after login | `https://radio.allchat.org/station/1` |
+| Synthwave dashboard after login | `https://radio.allchat.org/station/2` |
+| Frutiger Aero listener page | `https://radio.allchat.org/public/allchat_radio` |
+| Synthwave listener page | `https://radio.allchat.org/public/synthwave` |
 | Public station discovery API | `https://radio.allchat.org/api/stations` |
-| Daybreak metadata API | `https://radio.allchat.org/api/nowplaying/1` |
-| Nightwave metadata API | `https://radio.allchat.org/api/nowplaying/2` |
-| Daybreak HTTPS audio stream | `https://radio.allchat.org/listen/allchat_radio/radio.mp3` |
-| Nightwave HTTPS audio stream | `https://radio.allchat.org/listen/nightwave/radio.mp3` |
+| Frutiger Aero metadata API | `https://radio.allchat.org/api/nowplaying/1` |
+| Synthwave metadata API | `https://radio.allchat.org/api/nowplaying/2` |
+| Frutiger Aero HTTPS audio stream | `https://radio.allchat.org/listen/allchat_radio/radio.mp3` |
+| Synthwave HTTPS audio stream | `https://radio.allchat.org/listen/synthwave/radio.mp3` |
 | M3U playlist | `https://radio.allchat.org/public/allchat_radio/playlist.m3u` |
 | PLS playlist | `https://radio.allchat.org/public/allchat_radio/playlist.pls` |
-| Daybreak ID / shortcode | `1` / `allchat_radio` |
-| Nightwave ID / shortcode | `2` / `nightwave` |
+| Frutiger Aero ID / shortcode | `1` / `allchat_radio` |
+| Synthwave ID / shortcode | `2` / `synthwave` |
 
-Two stations currently exist. Map Daybreak to `allchat_radio` and Nightwave to `nightwave`; never infer roles from discovery-list order. Use each station's returned `listen_url` instead of deriving stream URLs from display names. Daybreak retains its original shortcode and stream URL for compatibility.
+Two stations currently exist. Map light mode to station ID `1` and dark mode to station ID `2`; never infer roles from discovery-list order, display names or URL stubs. Use each station's returned `listen_url` instead of deriving stream URLs from display names. Frutiger Aero retains its original shortcode and stream URL for compatibility.
 
 The public endpoints above require no administrator password or API key. No persistent API key was created during setup. The two-station provisioning used the supported CLI's two-minute `--type login` token for the existing administrator, then the supported management API with a session cookie and `X-API-CSRF`. The login token was consumed, the session was logged out, and temporary cookie/CSRF files were removed; an authenticated endpoint returned 403 afterward. No password, 2FA, roles or authentication settings were changed. Existing AzuraCast administration can continue through its dashboard; AllChat single sign-on has not been configured.
 
 ## API details verified against the running service
 
-`GET /api/stations` returns an array containing both station objects. Daybreak includes:
+`GET /api/stations` returns an array containing both station objects. Frutiger Aero includes:
 
 ```json
 {
   "id": 1,
-  "name": "Daybreak",
+  "name": "Frutiger Aero",
   "shortcode": "allchat_radio",
   "timezone": "Europe/Rome",
   "listen_url": "https://radio.allchat.org/listen/allchat_radio/radio.mp3",
@@ -79,7 +99,7 @@ The public endpoints above require no administrator password or API key. No pers
 }
 ```
 
-This is a subset of the actual response. Nightwave has ID `2`, name `Nightwave`, shortcode `nightwave`, and its separate `/listen/nightwave/radio.mp3` URL. `mounts` describes each station's default `/radio.mp3` mount, MP3 format and 192 kbps bitrate.
+This is a subset of the actual response. Synthwave has ID `2`, name `Synthwave`, shortcode `synthwave`, and its separate `/listen/synthwave/radio.mp3` URL. `mounts` describes each station's default `/radio.mp3` mount, MP3 format and 192 kbps bitrate.
 
 `GET /api/nowplaying/{id}` returns one object with useful fields:
 
@@ -94,7 +114,7 @@ This is a subset of the actual response. Nightwave has ID `2`, name `Nightwave`,
 
 Discovery and both metadata endpoints return `Access-Control-Allow-Origin: *`. Requests with both `Origin: https://allchat.org` and `Origin: http://localhost:3000` succeeded. The now-playing response advertises `Cache-Control: public, max-age=15`; the frontend polls roughly every 15 seconds.
 
-Both MP3 endpoints return HTTP 200 and `Content-Type: audio/mpeg`, reflect the requesting origin in `Access-Control-Allow-Origin`, and delivered audio bytes for both production and localhost origins. The `icy-name` headers are respectively Daybreak and Nightwave. The frontend's radio-specific volume uses Web Audio, so the audio element must set `crossOrigin = "anonymous"` before assigning `src`; metadata CORS alone would not be sufficient.
+Both MP3 endpoints return HTTP 200 and `Content-Type: audio/mpeg`, reflect the requesting origin in `Access-Control-Allow-Origin`, and delivered audio bytes for both production and localhost origins. The `icy-name` headers are respectively Daybreak and Nightwave. The audio element sets `crossOrigin = "anonymous"` before assigning `src`, so stream CORS must remain enabled independently of metadata CORS.
 
 Handle offline stations explicitly. At verification, both have `is_online: false`, title `Station Offline`, no next song and empty history. Do not display misleading playback progress from the placeholder's timing values. Do not equate running Icecast/Liquidsoap processes or an HTTP 200 stream with normal music being on air. Actual music playback, audible gain changes and mobile interruptions still require browser/device verification after music is supplied.
 
@@ -117,7 +137,7 @@ Frontend paths below are relative to the frontend repository:
 | `src/components/providers/AppProviders.tsx` | Application provider composition. |
 | `src/components/providers/RadioProvider.tsx` | Shared station selection, metadata and listening state. |
 | `src/features/radio/RadioAudioController.ts` | One browser audio element and Web Audio gain stage. |
-| `src/features/radio/types.ts` | Daybreak/Nightwave shortcode mappings and station descriptions. |
+| `src/features/radio/types.ts` | Stable station ID mappings, manually maintained Frutiger Aero/Synthwave names and descriptions. |
 | `src/components/AppShell.tsx` | Chat navigation/shell; portal routes use different chrome. |
 | `src/app/page.tsx` | Chat homepage layout with panels, room tabs, and chat section. |
 | `src/features/chatroom/components/ChatSectionHeader.tsx` | Possible location for room-level controls if that behavior is selected. |
@@ -146,7 +166,7 @@ The original server-installation handoff preceded application integration. The s
 3. After music is available, validate audible AllChat Play/Pause, station switching, radio-only volume/mute and navigation continuity. Verify actual audible gain on physical iPhone/iPad Safari, including lock/unlock and returning from another app, as well as desktop browsers. Web Audio contexts may need a user gesture to resume after interruption. UI selection, settings persistence and the mobile empty-chat layout have already been checked.
 4. Monitor server CPU/memory after adding music and listeners; empty-station resource measurements below are not a capacity test. Frontend type-check/build passed for this implementation; future changes must continue using those checks rather than test suites, under the workspace instructions.
 
-The light/dark station association is a listening preference; no room mapping or privileged station management is needed in AllChat. Default station mode follows the resolved app theme, with manual Daybreak/Nightwave overrides. The initial volume is 35% and playback requires a user action.
+The light/dark station association is a listening preference; no room mapping or privileged station management is needed in AllChat. Default station mode follows the resolved app theme, with manual Frutiger Aero/Synthwave overrides. The initial volume is 35% and playback requires a user action.
 
 ## Server and DNS operations reference
 

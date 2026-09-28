@@ -7,7 +7,7 @@ import {UserName} from "@/components/UserName";
 import React, {MouseEvent, useEffect, useRef, useState} from "react";
 import {Ban, Loader2, MessageCircleX, MoreVertical, User as UserIcon, Volume2, VolumeX, X} from "lucide-react";
 import {PrivateChatDTO} from "@/models/PrivateChatDTO";
-import {stripMarkers} from "@/features/chatroom/utils/messageMarkers";
+import {getMessagePreview} from "@/features/chatroom/utils/messagePreview";
 import {Button} from "@/components/ui/button";
 import {ScrollArea} from "@/components/ui/scroll-area";
 import {DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger,} from "@/components/ui/dropdown-menu";
@@ -80,7 +80,8 @@ function ConversationRowContent({
         messageFont: conversation.lastMessage?.senderMessageFont,
         fontRevision: conversation.lastMessage?.senderFontRevision,
     });
-    const lastMessagePreview = stripMarkers(conversation.lastMessage?.content?.trim() || "");
+    const last = conversation.lastMessage;
+    const lastMessagePreview = getMessagePreview(last);
     const {soundMode} = useChatRoomSoundSettings();
     const isToggleInert = soundMode !== 'ALL';
     const toggleTitle = soundMode === 'MUTED'

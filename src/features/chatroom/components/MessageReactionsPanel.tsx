@@ -1,151 +1,67 @@
-import {ChatUserName} from "@/features/chatroom/components/ChatUserName";
-import {useEffect, useState} from "react";
-import {ScrollArea} from "@/components/ui/scroll-area";
-import {Badge} from "@/components/ui/badge";
-import {Skeleton} from "@/components/ui/skeleton";
-import {useSelector} from "react-redux";
-import {selectMessageReactionsState} from "@/redux/chatRoom/chatRoomSelectors";
-import {useThunk} from "@/lib/hooks/useThunk";
-import {fetchMessageReactionDetailsThunk} from "@/redux/chatRoom/chatRoomThunk";
-
+import {ChatUserName} from '@/features/chatroom/components/ChatUserName';
+import {useEffect} from 'react';
+import {ScrollArea} from '@/components/ui/scroll-area';
+import {Badge} from '@/components/ui/badge';
+import {Skeleton} from '@/components/ui/skeleton';
+import {useDispatch, useSelector} from 'react-redux';
+import {selectMessageReactionsState} from '@/redux/chatRoom/chatRoomSelectors';
+import {useThunk} from '@/lib/hooks/useThunk';
+import {fetchMessageReactionDetailsThunk} from '@/redux/chatRoom/chatRoomThunk';
+import {setSelectedReaction} from '@/redux/chatRoom/chatRoomUiSlice';
+import {ReactionGlyph} from '@/features/stickers/ReactionGlyph';
+import {getReactionLabel} from '@/features/stickers/catalog';
+import {selectUser} from '@/redux/user/userSelectors';
 
 export default function MessageReactionsPanel() {
-
-    const messageReactionsState = useSelector(selectMessageReactionsState);
-    const [fetchReactionDetails, loading] = useThunk(fetchMessageReactionDetailsThunk);
-
-    const [selectedEmoji, setSelectedEmoji] = useState<string | null>(null);
-
-    const selectedReaction = messageReactionsState?.selectedReaction;
-    const reactions = messageReactionsState?.messageReactions;
-
+    const state = useSelector(selectMessageReactionsState);
+    const dispatch = useDispatch();
+    const user = useSelector(selectUser);
+    const [fetchDetails, loading, error] = useThunk(fetchMessageReactionDetailsThunk);
+    const selected = state?.selectedReaction;
+    const messageId = selected?.messageId;
+    const emoji = selected?.emoji;
+    const reactions = state?.messageReactions ?? [];
+    const detailsRevision = state?.detailsRevision;
+    const hasMembers = (selected?.usersCount ?? 0) > 0;
+    const loadDetails = () => {
+        if (messageId !== undefined && emoji && hasMembers) void fetchDetails({messageId, emoji}).catch(() => {});
+    };
     useEffect(() => {
-        if (selectedReaction) {
-            setSelectedEmoji(selectedReaction.emoji);
-        }
-    }, [selectedReaction]);
+        if (messageId !== undefined && emoji && hasMembers) void fetchDetails({messageId, emoji}).catch(() => {});
+    }, [messageId, emoji, detailsRevision, hasMembers, fetchDetails]);
+    const ownReaction = selected?.reactedByCurrentUser || selected?.users?.some(reactor => reactor.id === user?.id);
 
-    if (!messageReactionsState || !reactions || !selectedReaction) {
-        return <div>Loading...</div>;
-    }
-
-    const onEmojiSelect = (emoji: string) => {
-        if (!messageReactionsState.selectedReaction) return;
-
-        fetchReactionDetails({messageId: messageReactionsState.selectedReaction.messageId, emoji});
-    };
-
-    const handleEmojiClick = (emoji: string) => {
-        setSelectedEmoji(emoji);
-        onEmojiSelect?.(emoji);
-    };
-
-    return (
-        <div
-            className="glass-panel flex h-[500px] w-[90vw] md:min-w-[500px] md:max-w-[500px] text-foreground rounded-lg overflow-hidden">
-            <div className="glass-surface w-20 border-r border-border flex flex-col">
-                <div className="p-3 border-b border-border">
-                    <h3 className="text-xs font-semibold text-muted-foreground text-center">
-                        Reactions
-                    </h3>
-                </div>
-                <ScrollArea className="flex-1">
-                    <div className="p-2 space-y-1">
-                        {reactions.map((reaction) => (
-                            <button
-                                key={reaction.emoji}
-                                onClick={() => handleEmojiClick(reaction.emoji)}
-                                disabled={loading}
-                                className={`w-full flex flex-col items-center gap-1 p-2 rounded-md transition-all duration-200
-                  ${selectedEmoji === reaction.emoji
-                                    ? 'glass-surface-strong text-white'
-                                    : 'glass-control'
-                                }
-                  ${loading ? 'opacity-50 cursor-not-allowed' : ''}`}
-                            >
-                                <span className="text-2xl leading-none">{reaction.emoji}</span>
-                                <span className="text-xs font-semibold text-muted-foreground">
-                                    {reaction.usersCount}
-                                </span>
-                            </button>
-                        ))}
-                    </div>
-                </ScrollArea>
-            </div>
-
-            <div className="flex-1 flex flex-col">
-                {selectedReaction ? (
-                    <>
-                        <div className="p-4 border-b border-border">
-                            <div className="flex items-center gap-2">
-                                <div className="flex flex-col items-center">
-                                    <span className="text-3xl">{selectedReaction.emoji}</span>
-                                    <span
-                                        className="hidden md:block text-sm text-muted-foreground">:{selectedReaction.emojiId}:</span>
-                                </div>
-                                <div>
-                                    <h2 className="text-lg font-semibold text-foreground">
-                                        {selectedReaction.usersCount}{' '}
-                                        {selectedReaction.usersCount === 1 ? 'reaction' : 'reactions'}
-                                    </h2>
-                                    {selectedReaction.reactedByCurrentUser && (
-                                        <Badge variant="secondary" className="text-xs">
-                                            You reacted
-                                        </Badge>
-                                    )}
-                                </div>
-                            </div>
-                        </div>
-
-                        <ScrollArea className="flex-1">
-                            <div className="p-4 space-y-2">
-                                {loading ? (
-                                    <>
-                                        {[...Array(5)].map((_, i) => (
-                                            <div key={i} className="p-3">
-                                                <Skeleton className="h-4 w-32"/>
-                                            </div>
-                                        ))}
-                                    </>
-                                ) : (selectedReaction?.users ?? []).length > 0 ? (
-                                    (selectedReaction?.users ?? []).map((user) => (
-                                        <div
-                                            key={user.id}
-                                            className="glass-surface p-3 rounded-lg transition-colors"
-                                        >
-                                            <p className="text-sm font-medium text-foreground truncate">
-                                                <ChatUserName userId={user.id} username={user.username} proBadgeVisible={user.proBadgeVisible} proBadgeRevision={user.proBadgeRevision} usernameFont={user.usernameFont} messageFont={user.messageFont} fontRevision={user.fontRevision}/>
-                                            </p>
-                                        </div>
-                                    ))
-                                ) : (
-                                    <div className="text-center py-8 text-muted-foreground text-sm">
-                                        No users found
-                                    </div>
-                                )}
-                            </div>
-                        </ScrollArea>
-                    </>
-                ) : loading ? (
-                    <div className="flex-1 flex flex-col">
-                        <div className="p-4 border-b border-border">
-                            <Skeleton className="h-5 w-32 mb-2"/>
-                            <Skeleton className="h-4 w-20"/>
-                        </div>
-                        <div className="flex-1 p-4 space-y-2">
-                            {[...Array(5)].map((_, i) => (
-                                <div key={i} className="p-3">
-                                    <Skeleton className="h-4 w-32"/>
-                                </div>
-                            ))}
-                        </div>
-                    </div>
-                ) : (
-                    <div className="flex-1 flex items-center justify-center text-muted-foreground">
-                        <p className="text-sm">Select a reaction to view details</p>
-                    </div>
-                )}
-            </div>
+    return <div className="glass-panel flex h-[min(500px,80dvh)] w-[min(500px,90vw)] overflow-hidden rounded-lg text-foreground" aria-label="Message reactions">
+        <div className="glass-surface flex w-20 shrink-0 flex-col border-r border-border">
+            <h3 className="border-b border-border p-3 text-center text-xs font-semibold text-muted-foreground">Reactions</h3>
+            <ScrollArea className="min-h-0 flex-1"><div className="space-y-1 p-2">
+                {reactions.map(reaction => <button type="button" key={reaction.emoji} onClick={() => {
+                    if (emoji !== reaction.emoji) dispatch(setSelectedReaction(reaction));
+                }}
+                    aria-label={`${getReactionLabel(reaction.emoji, reaction.emojiId)}, ${reaction.usersCount ?? 0} reactions`} aria-pressed={emoji === reaction.emoji}
+                    className={`flex w-full flex-col items-center gap-1 rounded-md p-2 focus-visible:outline-2 focus-visible:outline-violet-500 ${emoji === reaction.emoji ? 'glass-surface-strong ring-1 ring-violet-500/40' : 'glass-control'}`}>
+                    <ReactionGlyph emoji={reaction.emoji} size={26}/><span className="text-xs font-semibold text-muted-foreground">{reaction.usersCount ?? 0}</span>
+                </button>)}
+            </div></ScrollArea>
         </div>
-    );
+        <div className="flex min-w-0 flex-1 flex-col">
+            {selected ? <>
+                <div className="flex items-center gap-3 border-b border-border p-4">
+                    <ReactionGlyph emoji={selected.emoji} size={36}/>
+                    <div className="min-w-0">
+                        <h2 className="truncate text-base font-semibold">{getReactionLabel(selected.emoji, selected.emojiId)}</h2>
+                        <p className="text-sm text-muted-foreground">{selected.usersCount ?? 0} {(selected.usersCount ?? 0) === 1 ? 'reaction' : 'reactions'}</p>
+                        {ownReaction && <Badge variant="secondary" className="mt-1 text-xs">You reacted</Badge>}
+                    </div>
+                </div>
+                <ScrollArea className="min-h-0 flex-1"><div className="space-y-2 p-4" aria-live="polite">
+                    {!hasMembers ? <p className="py-8 text-center text-sm text-muted-foreground">No reactions yet</p> : loading ? <><span className="sr-only">Loading users</span>{[0, 1, 2].map(i => <Skeleton key={i} className="h-10 w-full"/>)}</>
+                        : error ? <div role="alert" className="text-sm"><p>Could not load reactions.</p><button type="button" className="mt-2 underline" onClick={loadDetails}>Try again</button></div>
+                        : selected.users?.length ? selected.users.map(reactor => <div key={reactor.id} className="glass-surface rounded-lg p-3">
+                            <p className="truncate text-sm font-medium"><ChatUserName userId={reactor.id} username={reactor.username} proBadgeVisible={reactor.proBadgeVisible} proBadgeRevision={reactor.proBadgeRevision} usernameFont={reactor.usernameFont} messageFont={reactor.messageFont} fontRevision={reactor.fontRevision}/></p>
+                        </div>) : <p className="py-8 text-center text-sm text-muted-foreground">No reactions yet</p>}
+                </div></ScrollArea>
+            </> : <p className="p-6 text-sm text-muted-foreground">Select a reaction to view details</p>}
+        </div>
+    </div>;
 }

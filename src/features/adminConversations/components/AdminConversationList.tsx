@@ -11,6 +11,7 @@ import {ScrollArea} from "@/components/ui/scroll-area";
 import {Ban, ChevronLeft, ChevronRight, Loader2, MessagesSquare, Search} from "lucide-react";
 import {cn} from "@/lib/utils";
 import {AdminConversationDTO} from "@/models/AdminConversationDTO";
+import {getMessagePreview} from "@/features/chatroom/utils/messagePreview";
 
 interface AdminConversationListProps {
     conversations: AdminConversationDTO[];
@@ -38,10 +39,7 @@ const formatTimestamp = (value: string | null): string => {
 const previewText = (conversation: AdminConversationDTO): string => {
     const last = conversation.lastMessage;
     if (!last) return "No messages";
-    if (last.deleted) return "Message deleted";
-    if (last.content && last.content.trim().length > 0) return last.content;
-    if (last.attachments && last.attachments.length > 0) return "Attachment";
-    return "…";
+    return getMessagePreview(last, "…");
 };
 
 function ConversationPreview({conversation}: {conversation: AdminConversationDTO}) {

@@ -76,7 +76,7 @@ export const getReactionsByEmoji = (
     limit?: number
 ): Promise<Reaction> =>
     api.get<Reaction>(
-        `${CHAT_ROOMS_PATH}/messages/${messageId}/reactions/${emoji}`,
+        `${CHAT_ROOMS_PATH}/messages/${messageId}/reactions/${encodeURIComponent(emoji)}`,
         {
             params: {limit},
         }

@@ -17,10 +17,11 @@ export const Greentext = Extension.create({
                     doc.descendants((node, position) => {
                         if (!node.isTextblock) return;
 
-                        // These editors contain text and hardBreak inline nodes.
-                        // Replacing each hardBreak with one newline preserves
-                        // document offsets, including newlines within text nodes.
-                        const text = node.textBetween(0, node.content.size, "", "\n");
+                        // Both breaks and inline emoji occupy one document position.
+                        // Only hard breaks start a new line; emoji remain on this one.
+                        const text = node.textBetween(0, node.content.size, "", leaf =>
+                            leaf.type.name === "hardBreak" ? "\n" : "\uFFFC"
+                        );
                         let from = position + 1;
                         for (const line of text.split("\n")) {
                             if (isGreentextLine(line)) {

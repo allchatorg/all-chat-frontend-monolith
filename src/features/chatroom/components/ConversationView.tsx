@@ -42,12 +42,12 @@ export interface ConversationViewProps {
 
     editingMessage: Message | null | undefined;
     replyingToMessage?: Message | null;
-    onSendMessage: (content: string, attachment?: Attachment) => Promise<void> | void;
+    onSendMessage: (content: string, attachment?: Attachment, editingMessageId?: number, stickerId?: string) => Promise<void>;
     onStartEditMessage?: (message: Message) => void;
     onStartReply?: (message: Message) => void;
     onCancelReply?: () => void;
     onJumpToMessage?: (messageId: number) => void;
-    onEditMessage: (newContent: string) => Promise<void> | void;
+    onEditMessage: (newContent: string) => void | Promise<void>;
     onCancelEdit: () => void;
     onRemoveMessage: (messageId: number) => Promise<void> | void;
     onHideAd?: (adId: number) => void;

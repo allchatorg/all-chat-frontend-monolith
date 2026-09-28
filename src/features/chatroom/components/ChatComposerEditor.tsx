@@ -6,6 +6,7 @@ import {Slice} from "@tiptap/pm/model";
 import {cn} from "@/lib/utils";
 import {docToMarkers} from "@/features/chatroom/utils/messageMarkers";
 import {Greentext} from "@/features/chatroom/utils/greentextExtension";
+import {CustomEmoji} from "@/features/chatroom/utils/customEmojiExtension";
 
 // Transactions dispatched by the dictation helpers carry this meta flag so
 // ChatInput can tell user edits (which commit the interim tail) apart from
@@ -67,6 +68,7 @@ export const ChatComposerEditor: React.FC<ChatComposerEditorProps> = ({
                 placeholder: () => placeholderRef.current,
             }),
             Greentext,
+            CustomEmoji,
         ],
         enableInputRules: false,
         enablePasteRules: false,
@@ -75,6 +77,12 @@ export const ChatComposerEditor: React.FC<ChatComposerEditorProps> = ({
             // Join copied paragraphs to the text at the cursor instead of
             // inserting a separate block. Internal line breaks and marks stay intact.
             transformPasted: (slice) => Slice.maxOpen(slice.content),
+            clipboardTextSerializer: slice => docToMarkers({
+                type: 'doc',
+                content: slice.content.firstChild?.isInline
+                    ? [{type: 'paragraph', content: slice.content.toJSON()}]
+                    : slice.content.toJSON(),
+            }),
             attributes: {
                 class: cn(
                     "glass-input min-h-10 max-h-[120px] w-full overflow-y-auto rounded-md border",

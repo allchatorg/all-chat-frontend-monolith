@@ -21,7 +21,7 @@ import ChatSectionSkeleton from "@/features/chatroom/components/ChatSectionSkele
 import {ChatRoomNoiseLevelEnum} from "@/models/ChatRoomNoiseLevelEnum";
 import {useDispatch, useSelector} from "react-redux";
 import {selectEditingMessage, selectReplyingToMessage} from "@/redux/chatRoom/chatRoomSelectors";
-import {AppDispatch} from "@/redux/store";
+import {AppDispatch, store} from "@/redux/store";
 import {setEditingMessage, setJumpToMessageId, setReplyingToMessage} from "@/redux/chatRoom/chatRoomUiSlice";
 import {trackAttachmentUploaded, trackMessageDeleted, trackMessageSent} from "@/lib/analytics";
 import {useAdServing} from "@/hooks/useAdServing";
@@ -221,7 +221,7 @@ const ChatSection: React.FC<ChatSectionProps> = ({
 
     const noiseLevel = selectedUserChatRoom?.roomPopulation.noiseLevel || ChatRoomNoiseLevelEnum.CONVERSATIONAL;
 
-    const handleSendMessage = async (messageContent: string, attachment?: Attachment) => {
+    const handleSendMessage = async (messageContent: string, attachment?: Attachment, _editingMessageId?: number, stickerId?: string) => {
         try {
             trackMessageSent({
                 room_id: String(chatRoom.id),
@@ -236,24 +236,29 @@ const ChatSection: React.FC<ChatSectionProps> = ({
             chatRoomId: chatRoom.id,
             attachments: attachment ? [attachment] : [],
             replyToMessageId: replyingToMessage?.id,
+            ...(stickerId ? {stickerId} : {}),
         };
 
-        await sendMessageThunk(messageToSend);
-        if (attachment) {
-            try {
-                trackAttachmentUploaded({
-                    file_type: String(attachment.mime),
-                    file_size: attachment.size,
-                    room_id: String(chatRoom.id),
-                });
-            } catch {
+        await sendMessageThunk(messageToSend).then(() => {
+            if (replyingToMessage && selectReplyingToMessage(store.getState())?.id === replyingToMessage.id) {
+                dispatch(setReplyingToMessage(null));
             }
-        }
-        if (isLastMessageInMemory()) {
-            scrollToBottom();
-        } else {
-            handleJumpToPresent();
-        }
+            if (attachment) {
+                try {
+                    trackAttachmentUploaded({
+                        file_type: String(attachment.mime),
+                        file_size: attachment.size,
+                        room_id: String(chatRoom.id),
+                    });
+                } catch {
+                }
+            }
+            if (isLastMessageInMemory()) {
+                scrollToBottom();
+            } else {
+                handleJumpToPresent();
+            }
+        })
     };
 
     const handleEditMessage = async (newContent: string) => {
@@ -263,7 +268,7 @@ const ChatSection: React.FC<ChatSectionProps> = ({
     }
 
     const handleCancelEdit = () => {
-        dispatch(setEditingMessage(null));
+        if (selectEditingMessage(store.getState())?.id === editingMessage?.id) dispatch(setEditingMessage(null));
     }
 
     const handleRemoveMessage = async (messageId: number) => {

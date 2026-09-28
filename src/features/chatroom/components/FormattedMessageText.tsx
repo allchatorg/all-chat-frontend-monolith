@@ -1,4 +1,5 @@
-import {tokenize} from "@/features/chatroom/utils/messageMarkers";
+import {tokenize, tokenizeChatMessage, type Segment} from "@/features/chatroom/utils/messageMarkers";
+import {CustomEmojiGlyph} from "@/features/stickers/CustomEmojiGlyph";
 import {useDialog} from "@/components/providers/DialogProvider";
 import {isTrustedDomain} from "@/features/chatroom/utils/externalLinks";
 import ExternalLinkWarning from "@/features/chatroom/components/ExternalLinkWarning";
@@ -12,14 +13,19 @@ export const FormattedMessageText: React.FC<{
     interactionsDisabled?: boolean,
     onLinkClick?: (url: string) => void,
     backgroundColor?: string,
-}> = ({text, interactionsDisabled = false, onLinkClick, backgroundColor}) => {
+    customEmojis?: boolean,
+}> = ({text, interactionsDisabled = false, onLinkClick, backgroundColor, customEmojis = false}) => {
     const {open, close} = useDialog();
     const greentextColor = backgroundColor ? getGreentextColor(backgroundColor) : undefined;
+    // Ads share this renderer and keep their original text/pricing semantics.
+    const segments: Array<Segment & {customEmojiId?: string}> = customEmojis ? tokenizeChatMessage(text) : tokenize(text);
 
     return (
         <>
-            {tokenize(text).map((segment, index) => {
-                let node: React.ReactNode = segment.text;
+            {segments.map((segment, index) => {
+                let node: React.ReactNode = segment.customEmojiId
+                    ? <CustomEmojiGlyph id={segment.customEmojiId}/>
+                    : segment.text;
 
                 if (segment.isUrl && !interactionsDisabled) {
                     node = (

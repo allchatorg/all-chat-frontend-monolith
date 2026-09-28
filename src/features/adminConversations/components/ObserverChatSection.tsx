@@ -111,7 +111,7 @@ const ObserverChatSection: React.FC<ObserverChatSectionProps> = ({
                 isConnected={!!chatRoom}
                 maxMessageLength={getAccountLimits(user).messageCharacters}
                 editingMessage={null}
-                onSendMessage={noop}
+                onSendMessage={async () => {}}
                 onEditMessage={noop}
                 onCancelEdit={noop}
                 onRemoveMessage={handleRemoveMessage}

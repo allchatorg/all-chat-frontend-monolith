@@ -3,6 +3,8 @@
 // string within the current account's raw formatting limit. The composer works
 // on rich text and converts through these helpers. Markers never pair across newlines.
 
+import {CUSTOM_EMOJI_TOKEN_PATTERN, getCustomEmojiLabel, toCustomEmojiToken} from '@/features/stickers/customEmoji';
+
 export interface Segment {
     text: string;
     bold: boolean;
@@ -146,6 +148,42 @@ export function stripMarkers(text: string): string {
         .join("");
 }
 
+export type ChatSegment = Segment & {customEmojiId?: string};
+
+function splitCustomEmojiSegments(segments: Segment[]): ChatSegment[] {
+    return segments.flatMap((segment): ChatSegment[] => {
+        if (segment.isUrl) return [segment];
+
+        const parts: ChatSegment[] = [];
+        let cursor = 0;
+        for (const match of segment.text.matchAll(CUSTOM_EMOJI_TOKEN_PATTERN)) {
+            if (match.index > cursor) {
+                parts.push({...segment, text: segment.text.slice(cursor, match.index)});
+            }
+            parts.push({...segment, text: match[0], customEmojiId: match[1]});
+            cursor = match.index + match[0].length;
+        }
+        if (cursor < segment.text.length) parts.push({...segment, text: segment.text.slice(cursor)});
+        return parts;
+    });
+}
+
+/** Chat-only inline tokens never cross a formatting segment or occur inside a URL. */
+export function tokenizeChatMessage(text: string): ChatSegment[] {
+    return splitCustomEmojiSegments(tokenize(text));
+}
+
+/** Each inline image occupies one visible editor position and one message character. */
+export function chatVisibleText(text: string): string {
+    return tokenizeChatMessage(text).map(segment => segment.customEmojiId ? '\uFFFC' : segment.text).join('');
+}
+
+export function chatPreviewText(text: string): string {
+    return tokenizeChatMessage(text)
+        .map(segment => segment.customEmojiId ? getCustomEmojiLabel(segment.customEmojiId) : segment.text)
+        .join('');
+}
+
 export function extractFormattedUrls(text: string): string[] {
     return tokenize(text)
         .filter((s) => s.isUrl)
@@ -161,6 +199,7 @@ interface PmMark {
 interface PmNode {
     type: string;
     text?: string;
+    attrs?: Record<string, unknown>;
     marks?: PmMark[];
     content?: PmNode[];
 }
@@ -211,9 +250,18 @@ function serializeLine(runs: StyledRun[]): string {
 
 function serializeParagraph(nodes: PmNode[]): string {
     const runs: StyledRun[] = [];
+    let precedingText = '';
     for (const node of nodes) {
-        const text = node.type === "hardBreak" ? "\n" : node.text ?? "";
+        let text = node.type === "hardBreak" ? "\n"
+            : node.type === "customEmoji" ? toCustomEmojiToken(node.attrs?.id)
+                : node.text ?? "";
         if (!text) continue;
+        // An editor atom stays an emoji after whitespace next to a URL is removed.
+        // Raw text tokens inside URLs remain untouched and continue to be literal.
+        if (node.type === 'customEmoji' && /https?:\/\/[^\s]*$/.test(precedingText)) {
+            text = ` ${text}`;
+        }
+        precedingText += text;
         // Whitespace-only nodes render identically unstyled — treat as plain.
         const styled = node.type !== "hardBreak" && /\S/.test(text);
         const bold = styled && !!node.marks?.some((m) => m.type === "bold");
@@ -240,14 +288,24 @@ export function docToMarkers(doc: PmNode): string {
         .join("\n");
 }
 
-export function markersToDoc(text: string): PmNode {
+export function markersToDoc(text: string, options: {customEmojis?: boolean} = {}): PmNode {
     const paragraphs = text.split(/\r\n?|\n/).map((line): PmNode => {
-        const content = tokenizeLine(line)
+        const segments: ChatSegment[] = options.customEmojis
+            ? splitCustomEmojiSegments(tokenizeLine(line))
+            : tokenizeLine(line);
+        const content = segments
             .filter((s) => s.text)
             .map((s): PmNode => {
                 const marks: PmMark[] = [];
                 if (s.bold) marks.push({ type: "bold" });
                 if (s.italic) marks.push({ type: "italic" });
+                if (s.customEmojiId) {
+                    return {
+                        type: "customEmoji",
+                        attrs: {id: s.customEmojiId},
+                        ...(marks.length ? {marks} : {}),
+                    };
+                }
                 return {
                     type: "text",
                     text: s.text,

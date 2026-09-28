@@ -27,7 +27,7 @@ import {
     removeMessageReaction,
     updateLastReadMessage,
 } from "@/redux/chatRoom/chatRoomSlice";
-import {markChatRoomsAsStale, setStompReconnected} from "@/redux/chatRoom/chatRoomUiSlice";
+import {markChatRoomsAsStale, setStompReconnected, updateOpenMessageReactions} from "@/redux/chatRoom/chatRoomUiSlice";
 import {
     addPrivateMessageReaction,
     handlePrivateMessageDelete,
@@ -354,9 +354,10 @@ export function useStompWithRedux(
                                 reactedByCurrentUser
                             }));
                         } else {
-                            dispatch(removeMessageReaction(reactionUpdate));
-                            dispatch(removePrivateMessageReaction(reactionUpdate));
+                            dispatch(removeMessageReaction({reactionRequest: reactionUpdate, reactedByCurrentUser}));
+                            dispatch(removePrivateMessageReaction({reactionRequest: reactionUpdate, reactedByCurrentUser}));
                         }
+                        dispatch(updateOpenMessageReactions({reactionRequest: reactionUpdate, reactedByCurrentUser}));
                         break;
 
                     case WebSocketMessageType.PRIVATE_NEW_MESSAGE: {

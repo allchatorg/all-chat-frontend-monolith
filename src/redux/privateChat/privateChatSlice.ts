@@ -187,10 +187,10 @@ const privateChatSlice = createSlice({
         },
         removePrivateMessageReaction(
             state,
-            action: PayloadAction<ReactionUpdateResponse>
+            action: PayloadAction<{ reactionRequest: ReactionUpdateResponse; reactedByCurrentUser: boolean }>
         ) {
             state.loadedRooms = state.loadedRooms.map(room =>
-                removeChatRoomReaction(room, action.payload)
+                removeChatRoomReaction(room, action.payload.reactionRequest, action.payload.reactedByCurrentUser)
             );
         },
 

@@ -172,7 +172,7 @@ export function RoomTabContent({
                 )}
             </div>
 
-            <div className="flex items-center mt-0.5 cursor-default">
+            <div className="flex min-h-5.5 items-center mt-0.5 cursor-default">
                 <div className="flex items-center gap-2 text-xs">
                     {!isArchived && (
                         <>

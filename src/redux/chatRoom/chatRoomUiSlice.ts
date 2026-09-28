@@ -1,5 +1,7 @@
 import {createSlice, PayloadAction} from "@reduxjs/toolkit";
 import {Message} from "@/models/message";
+import {ReactionUpdateResponse} from "@/models/ReactionUpdateResponse";
+import {addReactionRequestToMessage, removeReactionRequestFromMessage} from "@/redux/messages/messageReducers";
 import {Reaction} from "@/models/Reaction";
 import {
     createChatRoomThunk,
@@ -22,6 +24,8 @@ interface ChatRoomUiState {
     messageReactionsState?: {
         selectedReaction?: Reaction;
         messageReactions?: Reaction[];
+        detailsRequestId?: string;
+        detailsRevision?: number;
     } | null;
     stompReconnected: boolean;
     staleChatRoomIds: number[];
@@ -83,16 +87,37 @@ const chatRoomUiSlice = createSlice({
             state.stompReconnected = action.payload;
         },
         setMessageReactions(state, action: PayloadAction<Reaction[]>) {
+            const sameMessage = state.messageReactionsState?.selectedReaction?.messageId === action.payload[0]?.messageId;
             state.messageReactionsState = {
                 ...state.messageReactionsState,
-                messageReactions: action.payload
+                messageReactions: action.payload,
+                selectedReaction: sameMessage ? state.messageReactionsState?.selectedReaction : undefined,
+                detailsRequestId: sameMessage ? state.messageReactionsState?.detailsRequestId : undefined,
             };
         },
         setSelectedReaction(state, action: PayloadAction<Reaction | undefined>) {
             state.messageReactionsState = {
                 ...state.messageReactionsState,
-                selectedReaction: action.payload
+                selectedReaction: action.payload,
+                detailsRequestId: undefined,
             };
+        },
+        updateOpenMessageReactions(state, action: PayloadAction<{reactionRequest: ReactionUpdateResponse; reactedByCurrentUser: boolean}>) {
+            const current = state.messageReactionsState;
+            const {reactionRequest, reactedByCurrentUser} = action.payload;
+            if (!current || (current.messageReactions?.[0]?.messageId ?? current.selectedReaction?.messageId) !== reactionRequest.messageId) return;
+            const update = (reactions: Reaction[]) => reactionRequest.responseType === 'ADD'
+                ? addReactionRequestToMessage({reactions}, reactionRequest, reactedByCurrentUser).reactions
+                : removeReactionRequestFromMessage({reactions}, reactionRequest, reactedByCurrentUser).reactions;
+            current.messageReactions = update(current.messageReactions ?? []);
+            // Discard in-flight snapshots older than this live membership change.
+            current.detailsRequestId = undefined;
+            current.detailsRevision = (current.detailsRevision ?? 0) + 1;
+            if (current.selectedReaction?.emoji === reactionRequest.emoji) {
+                current.selectedReaction = update([current.selectedReaction])[0] ?? {
+                    ...current.selectedReaction, usersCount: 0, users: [], reactedByCurrentUser: false,
+                };
+            }
         },
         resetChatRoomUiStateOnRoomChange(state) {
             state.jumpToMessageId = null;
@@ -137,10 +162,19 @@ const chatRoomUiSlice = createSlice({
             delete state.chatRoomScrollPositions[leftRoomId];
             delete state.chatRoomsTopMostVisibleMessageId[leftRoomId];
         });
-        builder.addCase(fetchMessageReactionDetailsThunk.fulfilled, (state, action) => {
+        builder.addCase(fetchMessageReactionDetailsThunk.pending, (state, action) => {
             state.messageReactionsState = {
                 ...state.messageReactionsState,
-                selectedReaction: action.payload
+                detailsRequestId: action.meta.requestId,
+            };
+        });
+        builder.addCase(fetchMessageReactionDetailsThunk.fulfilled, (state, action) => {
+            if (state.messageReactionsState?.detailsRequestId !== action.meta.requestId) return;
+            const summary = state.messageReactionsState.messageReactions?.find(reaction =>
+                reaction.messageId === action.payload.messageId && reaction.emoji === action.payload.emoji);
+            state.messageReactionsState.selectedReaction = {
+                ...action.payload,
+                reactedByCurrentUser: summary?.reactedByCurrentUser ?? false,
             };
         });
     }
@@ -156,6 +190,7 @@ export const {
     setReplyingToMessage,
     setStompReconnected,
     setMessageReactions,
+    updateOpenMessageReactions,
     setSelectedReaction,
     resetChatRoomUiStateOnRoomChange,
     markChatRoomsAsStale,

@@ -10,7 +10,7 @@ import ConversationView from "@/features/chatroom/components/ConversationView";
 import PrivateChatSectionHeader from "@/features/privateChat/components/PrivateChatSectionHeader";
 import ChatSectionSkeleton from "@/features/chatroom/components/ChatSectionSkeleton";
 import {useDispatch, useSelector} from "react-redux";
-import {AppDispatch} from "@/redux/store";
+import {AppDispatch, store} from "@/redux/store";
 import {useUser} from "@/lib/hooks/useUser";
 import {getAccountLimits} from "@/lib/accountLimits";
 import {useChatScrollAndPagination} from "@/lib/hooks/useChatScrollAndPagination";
@@ -30,7 +30,6 @@ import {
     setPrivateReplyingToMessage,
 } from "@/redux/privateChat/privateChatUiSlice";
 import {trackAttachmentUploaded, trackMessageDeleted, trackMessageSent} from "@/lib/analytics";
-import {toast} from "sonner";
 
 interface PrivateChatSectionProps {
     conversation: PrivateChatDTO;
@@ -140,7 +139,7 @@ const PrivateChatSection: React.FC<PrivateChatSectionProps> = ({
         acknowledgeMessage({roomId: chatRoom.id, messageId: lastMessage.id});
     };
 
-    const handleSendMessage = async (content: string, attachment?: Attachment) => {
+    const handleSendMessage = async (content: string, attachment?: Attachment, _editingMessageId?: number, stickerId?: string) => {
         try {
             trackMessageSent({
                 room_id: String(chatRoom.id),
@@ -150,37 +149,38 @@ const PrivateChatSection: React.FC<PrivateChatSectionProps> = ({
         } catch {
         }
 
-        try {
-            await sendMessage({
-                content,
-                chatRoomId: chatRoom.id,
-                attachments: attachment ? [attachment] : [],
-                replyToMessageId: replyingToMessage?.id,
-            });
-        } catch (err: any) {
+        await sendMessage({
+            content,
+            chatRoomId: chatRoom.id,
+            attachments: attachment ? [attachment] : [],
+            replyToMessageId: replyingToMessage?.id,
+            ...(stickerId ? {stickerId} : {}),
+        }).then(() => {
+            if (replyingToMessage && selectPrivateReplyingToMessage(store.getState())?.id === replyingToMessage.id) {
+                dispatch(setPrivateReplyingToMessage(null));
+            }
+            if (attachment) {
+                try {
+                    trackAttachmentUploaded({
+                        file_type: String(attachment.mime),
+                        file_size: attachment.size,
+                        room_id: String(chatRoom.id),
+                    });
+                } catch {
+                }
+            }
+            if (isLastMessageInMemory()) {
+                scrollToBottom();
+            } else {
+                handleJumpToPresent();
+            }
+        }).catch((err) => {
             if (err?.status === 403) {
-                // Refresh the conversation's blocked flag while the composer
-                // preserves the rejected draft and reports the failure once.
+                // Refresh conversation list so the `blocked` flag updates
                 dispatch(fetchPrivateChatsThunk());
-                throw Object.assign(new Error("You can't message this user."), {status: 403});
             }
             throw err;
-        }
-        if (attachment) {
-            try {
-                trackAttachmentUploaded({
-                    file_type: String(attachment.mime),
-                    file_size: attachment.size,
-                    room_id: String(chatRoom.id),
-                });
-            } catch {
-            }
-        }
-        if (isLastMessageInMemory()) {
-            scrollToBottom();
-        } else {
-            handleJumpToPresent();
-        }
+        });
     };
 
     const handleEditMessage = async (newContent: string) => {
@@ -189,7 +189,7 @@ const PrivateChatSection: React.FC<PrivateChatSectionProps> = ({
     };
 
     const handleCancelEdit = () => {
-        dispatch(setPrivateEditingMessage(null));
+        if (selectPrivateEditingMessage(store.getState())?.id === editingMessage?.id) dispatch(setPrivateEditingMessage(null));
     };
 
     const handleRemoveMessage = async (messageId: number) => {

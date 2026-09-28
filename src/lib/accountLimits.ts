@@ -9,6 +9,7 @@ export const ACCOUNT_LIMITS = {
     claimedRooms: 25,
     verifiedRooms: 50,
     proRooms: 100,
+    proDailyFontSaves: 5,
     regularMessageCharacters: 500,
     proMessageCharacters: 2500,
     regularRawMessageCharacters: 2000,
