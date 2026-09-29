@@ -48,13 +48,13 @@ export const UserActionPopup: React.FC<UserActionPopupProps> = ({
     const getRoleStyles = (role: Role) => {
         switch (role) {
             case Role.SUPER_ADMIN:
-                return "text-red-700 font-bold";
+                return "text-red-700 dark:text-red-300 font-bold";
             case Role.ADMIN:
-                return "text-blue-700 font-bold";
+                return "text-blue-700 dark:text-blue-300 font-bold";
             case Role.MODERATOR:
-                return "text-sky-400 font-bold";
+                return "text-sky-400 dark:text-sky-300 font-bold";
             default:
-                return "text-gray-500";
+                return "text-gray-500 dark:text-slate-200";
         }
     };
 
@@ -122,7 +122,7 @@ export const UserActionPopup: React.FC<UserActionPopupProps> = ({
                 sideOffset={10}
             >
                 <div className="flex flex-col gap-3">
-                    <div className="font-semibold text-base pb-2 text-center truncate border-b-2 border-border">
+                    <div className="font-semibold text-base pb-2 text-center truncate border-b-2 border-border dark:text-slate-200">
                         <UserName userId={userId} username={username} proBadgeVisible={proBadgeVisible} proBadgeRevision={proBadgeRevision} usernameFont={usernameFont} messageFont={messageFont} fontRevision={fontRevision} onProClick={handleOpenPro}/>
                     </div>
                     {isBlocked ? (

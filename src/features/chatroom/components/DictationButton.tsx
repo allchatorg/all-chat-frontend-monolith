@@ -27,11 +27,11 @@ export function DictationButton({
     return (
         <Button
             type="button"
-            variant="outline"
+            variant="ghost"
             size="icon"
             className={cn(
-                "glass-control shrink-0 h-10 w-10",
-                isListening && "dictation-listening text-red-500 hover:text-red-500 animate-pulse",
+                "composer-action shrink-0 h-10 w-10 lg:h-8 lg:w-8",
+                isListening && "dictation-listening hover:bg-red-500/10 hover:text-red-600 dark:hover:text-red-400",
                 className
             )}
             onClick={onToggle}

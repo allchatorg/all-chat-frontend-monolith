@@ -2,7 +2,6 @@ import React from "react";
 import {Bold, Italic} from "lucide-react";
 import {useEditorState, type Editor} from "@tiptap/react";
 import {Button} from "@/components/ui/button";
-import {cn} from "@/lib/utils";
 
 // Bold/Italic toggles for the composer. With a selection they format the
 // selection; with a collapsed cursor they arm the mark so subsequent typing
@@ -43,9 +42,9 @@ export function FormatToggles({
                 <Button
                     key={label}
                     type="button"
-                    variant="outline"
+                    variant="ghost"
                     size="icon"
-                    className={cn("glass-control shrink-0 h-10 w-10 text-muted-foreground")}
+                    className="composer-action shrink-0 h-10 w-10 lg:h-8 lg:w-8"
                     disabled={disabled || !editor}
                     // Keep focus (and the current selection) in the editor.
                     onMouseDown={(e) => e.preventDefault()}

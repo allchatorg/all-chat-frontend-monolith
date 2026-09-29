@@ -84,6 +84,24 @@ const validateMessage = ({
     return {valid: true};
 };
 
+function ComposerCharacterCount({remaining, limit}: {remaining: number; limit: number}) {
+    const overLimit = remaining < 0;
+    const label = overLimit
+        ? `${Math.abs(remaining).toLocaleString()} character${remaining === -1 ? "" : "s"} over limit`
+        : `${remaining.toLocaleString()} character${remaining === 1 ? "" : "s"} remaining`;
+
+    return (
+        <span
+            className="composer-counter ml-auto shrink-0 whitespace-nowrap rounded-md px-2 py-1 text-xs tabular-nums"
+            data-state={overLimit ? "error" : remaining <= limit * 0.1 ? "warning" : undefined}
+            aria-label={label}
+            title={label}
+        >
+            {Math.abs(remaining).toLocaleString()} {overLimit ? "over limit" : "left"}
+        </span>
+    );
+}
+
 export function ChatInputShowcase({
                                       className,
                                       placeholder = "Type your message...",
@@ -92,100 +110,49 @@ export function ChatInputShowcase({
     placeholder?: string;
 }) {
     const user = useSelector(selectUser);
+    const limit = getAccountLimits(user).messageCharacters;
     return (
-        <div aria-hidden="true" className={cn("border-t p-4 select-none", className)}>
-            <div className="pointer-events-none flex items-center gap-2">
-                <Textarea
-                    readOnly
-                    tabIndex={-1}
-                    value=""
-                    placeholder={placeholder}
-                    className="flex-1 min-h-10 max-h-[120px] resize-none focus-visible:ring-0 focus-visible:ring-offset-0 focus:border-primary"
-                    rows={1}
-                />
-
-                <Button
-                    type="button"
-                    variant="outline"
-                    size="icon"
-                    tabIndex={-1}
-                    className="hidden h-10 w-10 shrink-0 md:inline-flex"
-                >
-                    <Sticker className="h-4 w-4"/>
-                </Button>
-
-                <Button
-                    type="button"
-                    variant="outline"
-                    size="icon"
-                    tabIndex={-1}
-                    className="hidden h-10 w-10 shrink-0 md:inline-flex"
-                >
-                    <Smile className="h-4 w-4"/>
-                </Button>
-
-                <Button
-                    type="button"
-                    variant="outline"
-                    size="icon"
-                    tabIndex={-1}
-                    className="hidden h-10 w-10 shrink-0 md:inline-flex"
-                >
-                    <Bold className="h-4 w-4"/>
-                </Button>
-
-                <Button
-                    type="button"
-                    variant="outline"
-                    size="icon"
-                    tabIndex={-1}
-                    className="hidden h-10 w-10 shrink-0 md:inline-flex"
-                >
-                    <Italic className="h-4 w-4"/>
-                </Button>
-
-                <Button
-                    type="button"
-                    variant="outline"
-                    size="icon"
-                    tabIndex={-1}
-                    className="h-10 w-10 shrink-0 md:hidden"
-                >
-                    <ChevronUp className="h-4 w-4"/>
-                </Button>
-
-                <div className="hidden items-center gap-2 md:flex">
-                    <Button
-                        type="button"
-                        variant="outline"
+        <div aria-hidden="true" className={cn("px-2 py-3 select-none", className)}>
+            <div className="composer-surface pointer-events-none rounded-2xl p-2">
+                <div className="flex items-center gap-1 lg:gap-2">
+                    <Textarea
+                        readOnly
                         tabIndex={-1}
-                        className="h-10 gap-2 px-3"
-                    >
-                        <Paperclip className="h-4 w-4"/>
-                        <span className="text-sm font-medium">SFW</span>
+                        value=""
+                        placeholder={placeholder}
+                        className="composer-editor min-h-10 min-w-0 flex-1 resize-none border-0 bg-transparent px-1 py-0 leading-10 shadow-none focus-visible:ring-0 md:text-base lg:px-2 lg:text-sm"
+                        rows={1}
+                    />
+                    <Button type="button" variant="ghost" size="icon" tabIndex={-1}
+                            className="composer-action h-10 w-10 shrink-0 lg:hidden">
+                        <ChevronUp className="h-4 w-4"/>
                     </Button>
-                    <Button
-                        type="button"
-                        variant="outline"
-                        tabIndex={-1}
-                        className="h-10 gap-2 px-3"
-                    >
-                        <Paperclip className="h-4 w-4"/>
-                        <span className="text-sm font-medium">NSFW</span>
+                    <Button type="button" size="icon" tabIndex={-1} className="composer-send h-10 w-10 shrink-0 rounded-xl">
+                        <Send className="h-4 w-4"/>
                     </Button>
                 </div>
-
-                <Button type="button" size="icon" tabIndex={-1} className="h-10 w-10 shrink-0">
-                    <Send className="h-4 w-4"/>
-                </Button>
-            </div>
-
-            <div className="mt-2 flex items-center justify-between text-xs text-muted-foreground">
-                <div className="hidden md:block">
-                    Press Enter to send, Shift+Enter for new line
+                <div className="composer-toolbar mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 border-t pt-1.5">
+                    <div className="hidden flex-wrap items-center gap-1 lg:flex">
+                        {[Sticker, Smile, Bold, Italic].map((Icon, index) => (
+                            <Button key={index} type="button" variant="ghost" size="icon" tabIndex={-1}
+                                    className="composer-action h-8 w-8 shrink-0">
+                                <Icon className="h-4 w-4"/>
+                            </Button>
+                        ))}
+                        {['SFW', 'NSFW'].map(label => (
+                            <Button key={label} type="button" variant="ghost" tabIndex={-1}
+                                    className="composer-action h-8 gap-1.5 px-2.5 text-xs">
+                                <Paperclip className="h-4 w-4"/>
+                                {label}
+                            </Button>
+                        ))}
+                    </div>
+                    <ComposerCharacterCount remaining={limit} limit={limit}/>
                 </div>
-                <div className="tabular-nums">{getAccountLimits(user).messageCharacters} characters remaining</div>
             </div>
+            <p className="mt-1.5 hidden px-2 text-[11px] leading-4 text-muted-foreground lg:block">
+                Enter to send · Shift+Enter for new line
+            </p>
         </div>
     );
 }
@@ -678,8 +645,8 @@ const ChatInput: React.FC<ChatInputProps> = ({
     const isTextInputAvailable = isConnected && (isEditing || !messageSendingBlocked);
     const canUseTextInput = isTextInputAvailable && !isSending;
     const keyboardHint = isEditing
-        ? "Editing mode — press Enter to save, or Esc to cancel"
-        : "Press Enter to send, Shift+Enter for new line";
+        ? "Enter to save · Esc to cancel"
+        : "Enter to send · Shift+Enter for new line";
     const composerHint = !isConnected ? disabledReason || "Connecting to chat..."
         : !isEditing && messageSendingBlocked ? messageSendingDisabledReason
         : isUploading ? "Uploading file..."
@@ -730,8 +697,43 @@ const ChatInput: React.FC<ChatInputProps> = ({
         />
     );
 
+    const composerActions = (
+        <>
+            {expressionPicker}
+            <FormatToggles editor={editor} disabled={!canUseTextInput}/>
+            {!editingMessage && (
+                <>
+                    <DictationButton
+                        isSupported={isDictationSupported}
+                        isListening={isListening}
+                        disabled={!canSendNewMessage}
+                        onToggle={toggleDictation}
+                    />
+                    <UploadDragAndDropButton
+                        onFileSelect={handleFileSelect}
+                        accept={fileAcceptString}
+                        disabled={!canSendNewMessage || isUploading}
+                        nsfw={false}
+                        title={`Safe for Work — ${uploadGuidance || "loading upload limits"}`}
+                        label={"SFW"}
+                        className="composer-action"
+                    />
+                    <UploadDragAndDropButton
+                        onFileSelect={handleFileSelect}
+                        accept={fileAcceptString}
+                        disabled={!canSendNewMessage || isUploading}
+                        nsfw={true}
+                        title={`Not Safe for Work — ${uploadGuidance || "loading upload limits"}`}
+                        label={"NSFW"}
+                        className="composer-action"
+                    />
+                </>
+            )}
+        </>
+    );
+
     return (
-        <div className="composer-floating relative mt-1 bg-transparent px-2 py-3 shadow-none">
+        <div className="relative mt-1 px-2 py-3">
             {!editingMessage && replyingToMessage && (
                 <div
                     className="glass-surface mb-2 flex items-center gap-2 rounded-md px-3 py-1.5 text-xs text-muted-foreground">
@@ -786,160 +788,108 @@ const ChatInput: React.FC<ChatInputProps> = ({
                 />
             )}
 
-            {isMobile && actionsExpanded && (
-                <MobileActionsPanel>
-                    {expressionPicker}
-                    <FormatToggles editor={editor} disabled={!canUseTextInput}/>
-                    {!editingMessage && (
-                        <>
-                            <DictationButton
-                                isSupported={isDictationSupported}
-                                isListening={isListening}
-                                disabled={!canSendNewMessage}
-                                onToggle={toggleDictation}
-                            />
-                            <UploadDragAndDropButton
-                                onFileSelect={handleFileSelect}
-                                accept={fileAcceptString}
-                                disabled={!canSendNewMessage || isUploading}
-                                nsfw={false}
-                                title={`Safe for Work — ${uploadGuidance || "loading upload limits"}`}
-                                label={"SFW"}
-                                className="glass-control"
-                            />
-                            <UploadDragAndDropButton
-                                onFileSelect={handleFileSelect}
-                                accept={fileAcceptString}
-                                disabled={!canSendNewMessage || isUploading}
-                                nsfw={true}
-                                title={`Not Safe for Work — ${uploadGuidance || "loading upload limits"}`}
-                                label={"NSFW"}
-                                className="glass-control"
-                            />
-                        </>
-                    )}
-                </MobileActionsPanel>
-            )}
-
-            {isMobile && actionsExpanded && !editingMessage && (
-                <p className="mb-2 text-xs leading-relaxed text-muted-foreground">{uploadGuidance}</p>
-            )}
-
-            <div className="flex gap-2 items-center">
-                <ChatComposerEditor
-                    style={fontPresetStyle(fonts.messageFont)}
-                    placeholder={
-                        isSending ? (isEditing ? "Saving changes..." : "Sending message...") : canUseTextInput
-                            ? editingMessage
-                                ? "Edit your message..."
-                                : "Type your message..."
-                            : newMessageDisabledReason || "Connecting..."
-                    }
-                    editable={canUseTextInput}
-                    onSerializedChange={handleSerializedChange}
-                    onEnter={handleComposerEnter}
-                    onEscape={handleComposerEscape}
-                    onReady={setEditor}
-                />
-
-                {!isMobile && expressionPicker}
-
-                {!isMobile && <FormatToggles editor={editor} disabled={!canUseTextInput}/>}
-
-                {!editingMessage && !isMobile && (
-                    <>
-                        <DictationButton
-                            isSupported={isDictationSupported}
-                            isListening={isListening}
-                            disabled={!canSendNewMessage}
-                            onToggle={toggleDictation}
-                        />
-
-                        <UploadDragAndDropButton
-                            onFileSelect={handleFileSelect}
-                            accept={fileAcceptString}
-                            disabled={!canSendNewMessage || isUploading}
-                            nsfw={false}
-                            title={`Safe for Work — ${uploadGuidance || "loading upload limits"}`}
-                            label={"SFW"}
-                            className="glass-control"
-                        />
-
-                        <UploadDragAndDropButton
-                            onFileSelect={handleFileSelect}
-                            accept={fileAcceptString}
-                            disabled={!canSendNewMessage || isUploading}
-                            nsfw={true}
-                            title={`Not Safe for Work — ${uploadGuidance || "loading upload limits"}`}
-                            label={"NSFW"}
-                            className="glass-control"
-                        />
-                    </>
-                )}
-
-                {isMobile && (
-                    <MobileActionsToggle
-                        expanded={actionsExpanded}
-                        onToggle={() => setActionsExpanded((prev) => !prev)}
-                        disabled={!canUseTextInput}
-                    />
-                )}
-
-                {isEditing ? (
-                    <div className="flex items-center gap-2">
-                        <Button
-                            className="glass-control h-10 w-10 text-foreground hover:text-foreground"
-                            variant="secondary"
-                            onClick={() => onCancelEdit && onCancelEdit()}
-                            disabled={isSending}
-                            size="icon"
-                            title="Cancel edit"
-                        >
-                            <X className="h-4 w-4"/>
-                        </Button>
-                        <Button
-                            className="glass-control h-10 w-10"
-                            onClick={handleEditMessage}
-                            disabled={disableConfirmEdit}
-                            size="icon"
-                            title={isUnchanged ? "No changes to save" : "Save changes"}
-                        >
-                            <Check className="h-4 w-4"/>
-                        </Button>
-                    </div>
-                ) : (
-                    <Button
-                        className="glass-control h-10 w-10 text-foreground hover:text-foreground"
-                        onClick={handleSendMessage}
-                        disabled={
-                            (!inputText.trim() && !uploadedAttachment) ||
-                            !canSendNewMessage ||
-                            isOverLimit ||
-                            isUploading || isCooldown || isSending
+            <div className="composer-surface rounded-2xl p-2">
+                <div className="flex items-center gap-1 lg:gap-2">
+                    <ChatComposerEditor
+                        style={fontPresetStyle(fonts.messageFont)}
+                        placeholder={
+                            isSending ? (isEditing ? "Saving changes..." : "Sending message...") : canUseTextInput
+                                ? editingMessage
+                                    ? "Edit your message..."
+                                    : "Type your message..."
+                                : newMessageDisabledReason || "Connecting..."
                         }
-                        size="icon"
-                        title="Send"
-                        aria-label={isSending ? "Sending message" : "Send message"}
-                    >
-                        {isSending ? <LoaderCircle aria-hidden="true" className="h-4 w-4 animate-spin"/> : <Send aria-hidden="true" className="h-4 w-4"/>}
-                    </Button>
+                        editable={canUseTextInput}
+                        onSerializedChange={handleSerializedChange}
+                        onEnter={handleComposerEnter}
+                        onEscape={handleComposerEscape}
+                        onReady={setEditor}
+                    />
+
+                    {isMobile && (
+                        <MobileActionsToggle
+                            expanded={actionsExpanded}
+                            onToggle={() => setActionsExpanded((prev) => !prev)}
+                            disabled={!canUseTextInput}
+                        />
+                    )}
+
+                    {isEditing ? (
+                        <div className="flex shrink-0 items-center gap-1 lg:gap-2">
+                            <Button
+                                className="composer-action h-10 w-10"
+                                variant="ghost"
+                                onClick={() => onCancelEdit && onCancelEdit()}
+                                disabled={isSending}
+                                size="icon"
+                                title="Cancel edit"
+                                aria-label="Cancel edit"
+                            >
+                                <X className="h-4 w-4"/>
+                            </Button>
+                            <Button
+                                className="composer-send h-10 w-10 rounded-xl"
+                                onClick={handleEditMessage}
+                                disabled={disableConfirmEdit}
+                                size="icon"
+                                title={isUnchanged ? "No changes to save" : "Save changes"}
+                                aria-label="Save changes"
+                            >
+                                <Check className="h-4 w-4"/>
+                            </Button>
+                        </div>
+                    ) : (
+                        <Button
+                            className="composer-send h-10 w-10 shrink-0 rounded-xl"
+                            onClick={handleSendMessage}
+                            disabled={
+                                (!inputText.trim() && !uploadedAttachment) ||
+                                !canSendNewMessage ||
+                                isOverLimit ||
+                                isUploading || isCooldown || isSending
+                            }
+                            size="icon"
+                            title="Send"
+                            aria-label={isSending ? "Sending message" : "Send message"}
+                        >
+                            {isSending ? <LoaderCircle aria-hidden="true" className="h-4 w-4 animate-spin"/> : <Send aria-hidden="true" className="h-4 w-4"/>}
+                        </Button>
+                    )}
+                </div>
+
+                {isMobile && actionsExpanded && (
+                    <div className="composer-toolbar mt-2 border-t pt-1">
+                        <MobileActionsPanel>
+                            {composerActions}
+                        </MobileActionsPanel>
+                    </div>
                 )}
+
+                <div className={cn(
+                    "flex flex-wrap items-center gap-x-3 gap-y-1",
+                    !isMobile ? "composer-toolbar mt-2 border-t pt-1.5" : "mt-1 px-1"
+                )}>
+                    {!isMobile && (
+                        <div role="group" aria-label="Message options" className="flex min-w-0 flex-wrap items-center gap-1">
+                            {composerActions}
+                        </div>
+                    )}
+                    {isMobile && (
+                        <span className={cn("min-w-0 flex-1 truncate text-[11px] leading-4", isListening ? "text-red-500" : "text-muted-foreground")} title={composerHint}>
+                            {composerHint}
+                        </span>
+                    )}
+                    <ComposerCharacterCount remaining={remainingChars} limit={maxMessageLength}/>
+                </div>
             </div>
 
-            <div className="mt-2 flex items-start justify-between gap-3 text-xs leading-4 text-muted-foreground">
-                <div className="min-w-0 flex-1">
-                    {!isMobile && <span className="block h-4 truncate" title={keyboardHint}>{keyboardHint}</span>}
-                    <span className={`block h-4 truncate ${isListening ? "text-red-500" : ""}`} title={composerHint}>{composerHint}</span>
+            {!isMobile && (
+                <div className="mt-1.5 flex min-w-0 items-center gap-2 px-2 text-[11px] leading-4 text-muted-foreground">
+                    <span className="shrink-0" title={keyboardHint}>{keyboardHint}</span>
+                    <span aria-hidden="true">·</span>
+                    <span className={cn("truncate", isListening && "text-red-500")} title={composerHint}>{composerHint}</span>
                 </div>
-                <div
-                    className={`${remainingChars <= maxMessageLength * 0.1 && remainingChars >= 0 ? "text-amber-700 dark:text-amber-300" : ""
-                    } ${remainingChars < 0 ? "text-red-600 dark:text-red-400" : ""} shrink-0 whitespace-nowrap tabular-nums`}
-                >
-                    {remainingChars < 0 ? `${Math.abs(remainingChars).toLocaleString()} character${remainingChars === -1 ? '' : 's'} over limit` : isMobile
-                        ? `${visibleLength} / ${maxMessageLength}`
-                        : `${remainingChars} characters remaining`}
-                </div>
-            </div>
+            )}
             {!isEditing && messageSendingBlocked && (
                 <div
                     className="absolute inset-0 z-20 flex items-center justify-center rounded-lg bg-background/40 px-4 backdrop-blur-lg">

@@ -84,10 +84,15 @@ export const ChatComposerEditor: React.FC<ChatComposerEditorProps> = ({
                     : slice.content.toJSON(),
             }),
             attributes: {
+                role: "textbox",
+                "aria-label": "Message",
+                "aria-multiline": "true",
                 class: cn(
-                    "glass-input min-h-10 max-h-[120px] w-full overflow-y-auto rounded-md border",
-                    "border-input bg-transparent px-3 py-2 text-base shadow-xs md:text-sm",
-                    "whitespace-pre-wrap [word-break:break-word] outline-none focus:border-primary"
+                    // One line matches the 40px action buttons for every font.
+                    // Wrapped text and hard breaks grow naturally up to five lines, then scroll.
+                    "composer-editor min-h-10 max-h-[5lh] w-full overflow-y-auto rounded-lg border-0",
+                    "bg-transparent px-1 py-0 text-base leading-10 lg:px-2 lg:text-sm",
+                    "whitespace-pre-wrap [word-break:break-word] outline-none"
                 ),
             },
             handleKeyDown: (_view, event) => {

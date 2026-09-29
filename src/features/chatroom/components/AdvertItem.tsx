@@ -17,9 +17,10 @@ import {getMessageTextColor} from "@/features/chatroom/utils/messageTextColor";
 const AdvertMessageItem: React.FC<{
     message: Message;
     className?: string;
+    inset?: boolean;
     interactionsDisabled?: boolean;
     allowAttachmentPreview?: boolean;
-}> = ({message, className, interactionsDisabled = false, allowAttachmentPreview = false}) => {
+}> = ({message, className, inset = true, interactionsDisabled = false, allowAttachmentPreview = false}) => {
     const {openMediaOverlay} = useMediaOverlay();
     const dispatch = useDispatch<AppDispatch>();
     const clickedAdIds = useSelector(selectClickedAdIds);
@@ -78,7 +79,7 @@ const AdvertMessageItem: React.FC<{
     };
 
     return (
-        <div className={clsx("flex flex-col justify-items-center items-start pl-4 max-w-full min-w-0")}>
+        <div className={clsx("flex flex-col justify-items-center items-start max-w-full min-w-0", inset && "pl-4")}>
             {message.attachments?.map((attachment: Attachment) => (
                 <div key={attachment.id} className="max-w-full min-w-0">
                     {getAttachmentComponent(attachment)}

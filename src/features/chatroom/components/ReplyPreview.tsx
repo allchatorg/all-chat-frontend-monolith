@@ -78,7 +78,7 @@ const ReplyPreview: React.FC<ReplyPreviewProps> = ({replyTo, isOwn = false, onJu
                             usernameFont={replyTo.senderUsernameFont}
                             messageFont={replyTo.senderMessageFont}
                             fontRevision={replyTo.senderFontRevision}
-                            className="max-w-[50%] font-medium"
+                            className="max-w-[50%] font-medium dark:text-slate-200"
                             onProClick={openPro}
                             renderUsername={username => (
                                 <button

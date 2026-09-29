@@ -4,7 +4,7 @@ import {Button} from "@/components/ui/button";
 import {cn} from "@/lib/utils";
 
 // Mobile composer submenu, replacing the old Plus popover. The chevron sits in
-// the input row and expands an inline row of actions above the composer — an
+// the input row and expands an inline row of actions below the editor — an
 // inline panel (not a popover) so it survives taps and stays visible while
 // typing, which the format toggles need.
 
@@ -20,9 +20,9 @@ export function MobileActionsToggle({
     return (
         <Button
             type="button"
-            variant="outline"
+            variant="ghost"
             size="icon"
-            className="glass-control shrink-0 h-10 w-10"
+            className="composer-action shrink-0 h-10 w-10"
             disabled={disabled}
             onClick={onToggle}
             aria-expanded={expanded}
@@ -36,7 +36,7 @@ export function MobileActionsToggle({
 
 export function MobileActionsPanel({children}: { children: React.ReactNode }) {
     return (
-        <div className="glass-surface mb-2 flex items-center gap-2 overflow-x-auto rounded-md px-2 py-1.5">
+        <div role="group" aria-label="Message options" className="flex min-w-0 items-center gap-1 overflow-x-auto p-1">
             {children}
         </div>
     );

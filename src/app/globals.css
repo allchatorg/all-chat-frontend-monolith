@@ -444,13 +444,10 @@ html, body {
         color: rgba(15, 23, 42, 0.92);
     }
 
-    /* The chat composer (.composer-floating) and chat section header
-       (.chat-header-floating) share the navbar's control treatment so all
-       three toolbars read identically. Bold/italic show no pressed-state
-       styling; only the listening mic (.dictation-listening) is excluded so
-       its red recording indicator stays visible. */
+    /* The chat section header shares the navbar's floating control treatment.
+       The composer has its own quieter toolbar inside a single surface. */
     .navbar-floating .glass-control,
-    :is(.composer-floating, .chat-header-floating) .glass-control:not(.dictation-listening) {
+    .chat-header-floating .glass-control {
         background: rgba(255, 255, 255, 0.34) !important;
         color: rgba(15, 23, 42, 0.9) !important;
         border: 1px solid rgba(96, 165, 250, 0.28) !important;
@@ -459,8 +456,8 @@ html, body {
 
     .navbar-floating .glass-control:hover,
     .navbar-floating .glass-control[data-state="open"],
-    :is(.composer-floating, .chat-header-floating) .glass-control:not(.dictation-listening):hover,
-    :is(.composer-floating, .chat-header-floating) .glass-control:not(.dictation-listening)[data-state="open"] {
+    .chat-header-floating .glass-control:hover,
+    .chat-header-floating .glass-control[data-state="open"] {
         background: rgba(255, 255, 255, 0.52) !important;
         color: rgba(29, 78, 216, 0.98) !important;
         border-color: rgba(59, 130, 246, 0.4) !important;
@@ -497,8 +494,8 @@ html, body {
 
     .navbar-floating .glass-control:hover :is(.text-white, .text-white\/80),
     .navbar-floating .glass-control:hover :is(svg, span),
-    :is(.composer-floating, .chat-header-floating) .glass-control:not(.dictation-listening):hover :is(.text-white, .text-white\/80),
-    :is(.composer-floating, .chat-header-floating) .glass-control:not(.dictation-listening):hover :is(svg, span) {
+    .chat-header-floating .glass-control:hover :is(.text-white, .text-white\/80),
+    .chat-header-floating .glass-control:hover :is(svg, span) {
         color: rgba(29, 78, 216, 0.98) !important;
     }
 
@@ -508,7 +505,7 @@ html, body {
     }
 
     .dark .navbar-floating .glass-control,
-    .dark :is(.composer-floating, .chat-header-floating) .glass-control:not(.dictation-listening) {
+    .dark .chat-header-floating .glass-control {
         background: rgba(255, 255, 255, 0.28) !important;
         color: white !important;
         border: 0 !important;
@@ -517,8 +514,8 @@ html, body {
 
     .dark .navbar-floating .glass-control:hover,
     .dark .navbar-floating .glass-control[data-state="open"],
-    .dark :is(.composer-floating, .chat-header-floating) .glass-control:not(.dictation-listening):hover,
-    .dark :is(.composer-floating, .chat-header-floating) .glass-control:not(.dictation-listening)[data-state="open"] {
+    .dark .chat-header-floating .glass-control:hover,
+    .dark .chat-header-floating .glass-control[data-state="open"] {
         background: rgba(255, 255, 255, 0.36) !important;
         color: white !important;
         box-shadow: 0 14px 30px rgba(15, 23, 42, 0.22), 0 1px 0 rgba(255, 255, 255, 0.28) inset !important;
@@ -550,8 +547,8 @@ html, body {
     .dark .navbar-floating :is(.text-white, .text-white\/80),
     .dark .navbar-floating .glass-control:hover :is(.text-white, .text-white\/80),
     .dark .navbar-floating .glass-control:hover :is(svg, span),
-    .dark :is(.composer-floating, .chat-header-floating) .glass-control:not(.dictation-listening):hover :is(.text-white, .text-white\/80),
-    .dark :is(.composer-floating, .chat-header-floating) .glass-control:not(.dictation-listening):hover :is(svg, span) {
+    .dark .chat-header-floating .glass-control:hover :is(.text-white, .text-white\/80),
+    .dark .chat-header-floating .glass-control:hover :is(svg, span) {
         color: white !important;
     }
 
@@ -621,7 +618,7 @@ html, body {
     }
 
     html:not(.dark) .navbar-floating .glass-control,
-    html:not(.dark) :is(.composer-floating, .chat-header-floating) .glass-control:not(.dictation-listening) {
+    html:not(.dark) .chat-header-floating .glass-control {
         background: rgba(255, 255, 255, 0.34) !important;
         color: rgba(15, 23, 42, 0.9) !important;
         box-shadow: 0 12px 28px rgba(37, 99, 235, 0.1), 0 8px 22px rgba(15, 23, 42, 0.08), 0 1px 0 rgba(255, 255, 255, 0.38) inset !important;
@@ -629,8 +626,8 @@ html, body {
 
     html:not(.dark) .navbar-floating .glass-control:hover,
     html:not(.dark) .navbar-floating .glass-control[data-state="open"],
-    html:not(.dark) :is(.composer-floating, .chat-header-floating) .glass-control:not(.dictation-listening):hover,
-    html:not(.dark) :is(.composer-floating, .chat-header-floating) .glass-control:not(.dictation-listening)[data-state="open"] {
+    html:not(.dark) .chat-header-floating .glass-control:hover,
+    html:not(.dark) .chat-header-floating .glass-control[data-state="open"] {
         background: rgba(255, 255, 255, 0.52) !important;
         color: rgba(29, 78, 216, 0.98) !important;
         box-shadow: 0 14px 30px rgba(37, 99, 235, 0.14), 0 8px 22px rgba(15, 23, 42, 0.1), 0 1px 0 rgba(255, 255, 255, 0.46) inset !important;
@@ -665,6 +662,87 @@ html, body {
     .glass-input:focus-visible {
         border-color: var(--glass-input-border-focus) !important;
         box-shadow: var(--glass-input-focus-shadow) !important;
+    }
+
+    /* One surface contains the editor and its quiet toolbar. */
+    .composer-surface {
+        background: var(--glass-input-bg);
+        border: 1px solid var(--glass-input-border);
+        box-shadow: 0 2px 8px rgb(15 23 42 / 0.06);
+        transition: border-color 150ms ease, box-shadow 150ms ease;
+    }
+
+    .composer-surface:focus-within {
+        border-color: var(--glass-input-border-focus);
+        box-shadow: 0 0 0 2px hsl(var(--ring) / 0.08);
+    }
+
+    .composer-editor {
+        color: var(--glass-input-fg);
+        caret-color: var(--glass-input-fg);
+    }
+
+    .composer-toolbar {
+        border-color: var(--glass-input-border);
+    }
+
+    .composer-action {
+        border: 0;
+        border-radius: 0.5rem;
+        background: transparent;
+        color: var(--glass-panel-muted);
+        box-shadow: none;
+        transition: background-color 150ms ease, color 150ms ease;
+    }
+
+    .composer-action:not(:disabled):hover,
+    .composer-action[aria-pressed="true"],
+    .composer-action[aria-expanded="true"],
+    .composer-action.composer-action-dragging {
+        background: hsl(var(--foreground) / 0.08);
+        color: var(--glass-input-fg);
+    }
+
+    .composer-action:focus-visible {
+        outline: 2px solid var(--glass-input-border-focus);
+        outline-offset: 2px;
+    }
+
+    .composer-action.dictation-listening {
+        background: rgb(239 68 68 / 0.12);
+        color: #dc2626;
+    }
+
+    .dark .composer-action.dictation-listening {
+        color: #f87171;
+    }
+
+    .composer-send {
+        background: hsl(var(--primary));
+        color: hsl(var(--primary-foreground));
+        box-shadow: none;
+    }
+
+    .composer-counter {
+        color: var(--glass-panel-muted);
+    }
+
+    .composer-counter[data-state="warning"] {
+        background: rgb(245 158 11 / 0.1);
+        color: #b45309;
+    }
+
+    .composer-counter[data-state="error"] {
+        background: rgb(239 68 68 / 0.1);
+        color: #dc2626;
+    }
+
+    .dark .composer-counter[data-state="warning"] {
+        color: #fcd34d;
+    }
+
+    .dark .composer-counter[data-state="error"] {
+        color: #f87171;
     }
 
     .glass-popover {
@@ -1206,4 +1284,12 @@ html, body {
     float: left;
     height: 0;
     pointer-events: none;
+}
+
+@media (width < 64rem) {
+    .chat-composer .tiptap p.is-editor-empty:first-child::before,
+    textarea.composer-editor::placeholder {
+        font-size: 0.875rem;
+        line-height: inherit;
+    }
 }

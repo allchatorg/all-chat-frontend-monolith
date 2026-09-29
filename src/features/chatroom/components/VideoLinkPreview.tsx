@@ -14,10 +14,10 @@ export const VideoLinkPreview: React.FC<VideoLinkPreviewProps> = ({url, onClick,
 
     return (
         <div
-            className={`glass-surface group relative rounded-lg transition-colors ${disabled ? "cursor-default" : "cursor-pointer"}`}
+            className={`glass-surface group relative w-64 max-w-full rounded-lg transition-colors ${disabled ? "cursor-default" : "cursor-pointer"}`}
             onClick={disabled ? undefined : onClick}
         >
-            <div className="overflow-hidden border rounded-lg min-h-36 max-h-36 aspect-video relative">
+            <div className="overflow-hidden border rounded-lg w-full aspect-video relative">
                 <img
                     src={thumbnail.url}
                     alt="Video thumbnail"

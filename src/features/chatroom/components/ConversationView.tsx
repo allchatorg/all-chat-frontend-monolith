@@ -1,6 +1,8 @@
 "use client";
 
 import React from "react";
+import * as ScrollAreaPrimitive from "@radix-ui/react-scroll-area";
+import {ScrollBar} from "@/components/ui/scroll-area";
 import {CardContent} from "@/components/ui/card";
 import {ArrowDown, ArrowUp, Loader2, Lock} from "lucide-react";
 import {Button} from "@/components/ui/button";
@@ -131,102 +133,112 @@ const ConversationView: React.FC<ConversationViewProps> = ({
     })();
 
     return (
-        <CardContent className="py-0 px-2 flex flex-1 flex-col overflow-hidden" onClick={onCardClick}>
-            <div className="relative flex-1 overflow-hidden flex flex-col">
-                <div
-                    className="flex-1 overflow-y-auto overflow-x-hidden rounded-lg"
-                    ref={scrollRef}
+        <CardContent className="py-0 px-2 flex min-h-0 flex-1 flex-col overflow-hidden" onClick={onCardClick}>
+            <div className="relative min-h-0 flex-1 overflow-hidden flex flex-col">
+                <ScrollAreaPrimitive.Root
+                    type="scroll"
+                    scrollHideDelay={600}
+                    className="relative min-h-0 flex-1 overflow-hidden rounded-lg"
                 >
-                    {/* Pull-to-refresh indicator */}
-                    {chatRoom.hasPrevious && (
-                        <div
-                            className={`pull-to-refresh-indicator w-full flex justify-center items-end overflow-hidden transition-[height] ${pullToRefreshState.isPulling ? 'duration-0' : 'duration-300 ease-out'}`}
-                            style={{height: pullToRefreshState.isRefreshing ? 60 : Math.max(60, pullToRefreshState.pullDistance)}}
-                        >
-                            <div className="pull-to-refresh-content flex flex-col items-center justify-center pb-2">
-                                {pullToRefreshState.isRefreshing ? (
-                                    <>
-                                        <Loader2 className="h-4 w-4 animate-spin text-muted-foreground"/>
-                                        <span className="text-xs text-muted-foreground">Loading…</span>
-                                    </>
-                                ) : (
-                                    <>
-                                        <ArrowUp
-                                            className={`h-4 w-4 text-muted-foreground transition-transform duration-300 ${
-                                                isPastThreshold ? 'rotate-180' : ''
-                                            }`}
-                                        />
-                                        <span className="text-xs text-muted-foreground">
-                                            {isPastThreshold ? 'Release to load' : 'Pull to load more'}
-                                        </span>
-                                    </>
-                                )}
-                            </div>
-                        </div>
-                    )}
-
-                    <div data-message-list>
-                        {messages.map((message, index) => {
-                            const isBeingEdited = editingMessage?.id === message.id;
-                            const shouldDim = editingMessage && !isBeingEdited;
-                            const isLastNonAdvert = index === lastNonAdvertIndex;
-                            const highlightTimestamp = highlightData?.id === message.id ? highlightData.ts : null;
-
-                            return (
-                                <div key={message.id} data-message-id={message.id}>
-                                    {unreadDividerMessageId === message.id && (
-                                        <div className="flex items-center my-4 px-4">
-                                            <div className="grow border-t border-red-500 opacity-60"></div>
-                                            <span
-                                                className="shrink-0 mx-4 text-[10px] font-bold text-red-500 uppercase tracking-widest">
-                                            New Messages
-                                        </span>
-                                            <div className="grow border-t border-red-500 opacity-60"></div>
-                                        </div>
-                                    )}
-                                    <div
-                                        className={`group flex w-full items-center pr-2 relative transition-all duration-200 min-w-0 ${shouldDim ? 'opacity-40' : 'opacity-100'}`}>
-                                        <div className="flex w-full items-center pr-2 min-w-0">
-                                            {message.advert && onHideAd ?
-                                                <AdvertMessage
-                                                    message={message}
-                                                    onHide={onHideAd}
-                                                    interactionsDisabled={interactionsDisabled}
-                                                /> :
-                                                <ChatMessage message={message}
-                                                             currentUserId={currentUserId}
-                                                             currentUsername={currentUsername}
-                                                             isOwn={message.senderId === currentUserId}
-                                                             showOwnSenderName={showOwnSenderName}
-                                                             onStartEditMessage={onStartEditMessage}
-                                                             onStartReply={onStartReply}
-                                                             onJumpToMessage={onJumpToMessage}
-                                                             removeMessage={onRemoveMessage}
-                                                             isBlocked={blockedUserIds.includes(message.senderId)}
-                                                             highlightTimestamp={highlightTimestamp}
-                                                             showMobileMenu={activeMobileMessageId === message.id}
-                                                             onToggleMobileMenu={(show) => setActiveMobileMessageId(show ? message.id : null)}
-                                                             interactionsDisabled={interactionsDisabled}
-                                                             archivedRoom={archivedRoom}
-                                                             allowReport={allowReport}
-                                                             allowModView={allowModView}
-                                                             allowPromote={allowPromote}
-                                                             deleteOnly={deleteOnly}
-                                                />}
-                                        </div>
-                                    </div>
-                                    {isLastNonAdvert && (
-                                        <div ref={lastMessageVisibilityRef} className="h-4"/>
+                    {/* Keep the actual viewport ref for pagination and use block sizing for long messages. */}
+                    <ScrollAreaPrimitive.Viewport
+                        className="absolute inset-0 h-full w-full touch-pan-y rounded-[inherit] [&>div]:!block"
+                        ref={scrollRef}
+                    >
+                        {/* Pull-to-refresh indicator */}
+                        {chatRoom.hasPrevious && (
+                            <div
+                                className={`pull-to-refresh-indicator w-full flex justify-center items-end overflow-hidden transition-[height] ${pullToRefreshState.isPulling ? 'duration-0' : 'duration-300 ease-out'}`}
+                                style={{height: pullToRefreshState.isRefreshing ? 60 : Math.max(60, pullToRefreshState.pullDistance)}}
+                            >
+                                <div className="pull-to-refresh-content flex flex-col items-center justify-center pb-2">
+                                    {pullToRefreshState.isRefreshing ? (
+                                        <>
+                                            <Loader2 className="h-4 w-4 animate-spin text-muted-foreground"/>
+                                            <span className="text-xs text-muted-foreground">Loading…</span>
+                                        </>
+                                    ) : (
+                                        <>
+                                            <ArrowUp
+                                                className={`h-4 w-4 text-muted-foreground transition-transform duration-300 ${
+                                                    isPastThreshold ? 'rotate-180' : ''
+                                                }`}
+                                            />
+                                            <span className="text-xs text-muted-foreground">
+                                                {isPastThreshold ? 'Release to load' : 'Pull to load more'}
+                                            </span>
+                                        </>
                                     )}
                                 </div>
-                            );
-                        })}
+                            </div>
+                        )}
 
-                        {/* Real height pulled up over the list end: a zero-height sentinel can sit a
-                            sub-pixel below the scroll clip at max scroll and never intersect. */}
-                        <div ref={nextMessageRef} className="h-2 -mt-2"/>
-                    </div>
-                </div>
+                        <div data-message-list className="mx-2">
+                            {messages.map((message, index) => {
+                                const isBeingEdited = editingMessage?.id === message.id;
+                                const shouldDim = editingMessage && !isBeingEdited;
+                                const isLastNonAdvert = index === lastNonAdvertIndex;
+                                const highlightTimestamp = highlightData?.id === message.id ? highlightData.ts : null;
+
+                                return (
+                                    <div key={message.id} data-message-id={message.id}>
+                                        {unreadDividerMessageId === message.id && (
+                                            <div className="flex items-center my-4 px-4">
+                                                <div className="grow border-t border-red-500 opacity-60"></div>
+                                                <span
+                                                    className="shrink-0 mx-4 text-[10px] font-bold text-red-500 uppercase tracking-widest">
+                                                New Messages
+                                            </span>
+                                                <div className="grow border-t border-red-500 opacity-60"></div>
+                                            </div>
+                                        )}
+                                        <div
+                                            className={`group flex w-full items-center relative transition-all duration-200 min-w-0 ${shouldDim ? 'opacity-40' : 'opacity-100'}`}>
+                                            <div className="flex w-full items-center min-w-0">
+                                                {message.advert && onHideAd ?
+                                                    <AdvertMessage
+                                                        message={message}
+                                                        onHide={onHideAd}
+                                                        interactionsDisabled={interactionsDisabled}
+                                                    /> :
+                                                    <ChatMessage message={message}
+                                                                 currentUserId={currentUserId}
+                                                                 currentUsername={currentUsername}
+                                                                 isOwn={message.senderId === currentUserId}
+                                                                 showOwnSenderName={showOwnSenderName}
+                                                                 onStartEditMessage={onStartEditMessage}
+                                                                 onStartReply={onStartReply}
+                                                                 onJumpToMessage={onJumpToMessage}
+                                                                 removeMessage={onRemoveMessage}
+                                                                 isBlocked={blockedUserIds.includes(message.senderId)}
+                                                                 highlightTimestamp={highlightTimestamp}
+                                                                 showMobileMenu={activeMobileMessageId === message.id}
+                                                                 onToggleMobileMenu={(show) => setActiveMobileMessageId(show ? message.id : null)}
+                                                                 interactionsDisabled={interactionsDisabled}
+                                                                 archivedRoom={archivedRoom}
+                                                                 allowReport={allowReport}
+                                                                 allowModView={allowModView}
+                                                                 allowPromote={allowPromote}
+                                                                 deleteOnly={deleteOnly}
+                                                    />}
+                                            </div>
+                                        </div>
+                                        {isLastNonAdvert && (
+                                            <div ref={lastMessageVisibilityRef} className="h-4"/>
+                                        )}
+                                    </div>
+                                );
+                            })}
+
+                            {/* Real height pulled up over the list end: a zero-height sentinel can sit a
+                                sub-pixel below the scroll clip at max scroll and never intersect. */}
+                            <div ref={nextMessageRef} className="h-2 -mt-2"/>
+                        </div>
+                    </ScrollAreaPrimitive.Viewport>
+                    <ScrollBar
+                        className="w-2 border-0 p-0 data-[state=hidden]:animate-out data-[state=hidden]:fade-out-0 data-[state=hidden]:duration-200 motion-reduce:animate-none [&>div]:bg-muted-foreground/50"
+                    />
+                </ScrollAreaPrimitive.Root>
 
                 {showJumpToPresentPill && (
                     <div className="absolute bottom-4 left-1/2 z-10 -translate-x-1/2 transform">

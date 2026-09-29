@@ -11,7 +11,6 @@ import {useProDialog} from '@/features/pro/useProDialog';
 import {ExpressionPicker, ExpressionPickerTab} from '@/features/stickers/ExpressionPicker';
 import {ProReaction} from '@/features/stickers/catalog';
 import type {EmojiSelection} from '@/features/stickers/emojiTypes';
-import {cn} from '@/lib/utils';
 
 interface ChatExpressionPickerProps {
     disabled?: boolean;
@@ -64,14 +63,14 @@ export function ChatExpressionPicker({disabled, pending, allowStickers = true, o
     return (
         <Popover open={visible} onOpenChange={setOpen}>
             <PopoverAnchor asChild>
-                <div ref={triggerGroupRef} className="flex shrink-0 items-center gap-2">
+                <div ref={triggerGroupRef} className="flex shrink-0 items-center gap-1">
                     {([{value: 'stickers', label: 'Stickers', Icon: Sticker}, {value: 'emoji', label: 'Emoji', Icon: Smile}] as const).filter(({value}) => allowStickers || value === 'emoji').map(({value, label, Icon}) => (
-                        <Button key={value} type="button" variant="outline" size="icon"
+                        <Button key={value} type="button" variant="ghost" size="icon"
                                 disabled={disabled || busy}
                                 aria-label={value === 'emoji' ? 'Choose an emoji' : 'Choose a sticker'} title={label}
                                 aria-haspopup="dialog" aria-expanded={visible && activeTab === value}
                                 aria-controls={visible ? contentId : undefined}
-                                className={cn('glass-control h-10 w-10 shrink-0', visible && activeTab === value && 'bg-violet-500/10 text-violet-600 dark:text-violet-300')}
+                                className="composer-action h-10 w-10 shrink-0 lg:h-8 lg:w-8"
                                 onClick={event => {
                                     lastTriggerRef.current = event.currentTarget;
                                     focusComposerOnCloseRef.current = false;

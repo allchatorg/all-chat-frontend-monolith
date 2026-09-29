@@ -26,6 +26,7 @@ import {StickerMessage} from "@/features/stickers/StickerMessage";
 const MessageItem: React.FC<{
     message: Message,
     isOwn?: boolean,
+    inset?: boolean,
     viewMode: "chat" | "search",
     handleMessageClick: (message: Message) => void,
     showChatRoomName?: boolean,
@@ -38,6 +39,7 @@ const MessageItem: React.FC<{
 }> = ({
           message,
           isOwn,
+          inset = true,
           viewMode,
           handleMessageClick,
           showChatRoomName = false,
@@ -264,7 +266,8 @@ const MessageItem: React.FC<{
     return (
         <div className={clsx(
             "flex flex-col justify-items-center max-w-full min-w-0",
-            isOwn ? "items-end" : "items-start pl-4"
+            isOwn ? "items-end" : "items-start",
+            !isOwn && inset && "pl-4"
         )}>
             {/* Header with sender name and badges */}
             {!isOwn && (showSenderName || message.bannedUser || message.deleted || showChatRoomName || showPromotedBadge || showPromotionPendingBadge) && (
@@ -290,14 +293,14 @@ const MessageItem: React.FC<{
             )}
 
             {message.attachments?.map((attachment: Attachment) => (
-                <div key={attachment.id} data-message-item-interaction="true">
+                <div key={attachment.id} className="min-w-0 max-w-full" data-message-item-interaction="true">
                     {getAttachmentComponent(attachment)}
                 </div>
             ))}
 
-            <div className="flex flex-col gap-1">
+            <div className="flex min-w-0 max-w-full flex-col gap-1">
                 {videoUrls.map((url, index) => (
-                    <div key={index} data-message-item-interaction="true">
+                    <div key={index} className="min-w-0 max-w-full" data-message-item-interaction="true">
                         <VideoLinkPreview
                             url={url}
                             onClick={interactionsDisabled ? undefined : () => handleVideoPreviewClick(url)}

@@ -5,7 +5,7 @@ import {Message} from "@/models/message";
 import {ReactionButton} from "@/features/chatroom/components/ReactionButton";
 import {useThunk} from "@/lib/hooks/useThunk";
 import {deleteReactionThunk, reactToMessageThunk} from "@/redux/chatRoom/chatRoomThunk";
-import {useFormatMessageDate} from "@/lib/hooks/useTimeFormatSetting";
+import {MessageTimestamp} from "@/features/chatroom/components/MessageTimestamp";
 import {removeAttachmentFromMessage} from "@/api/chatting/chattingAPI";
 import {CountryFlag} from "@/features/chatroom/components/CountryFlag";
 import {UserActionPopup} from "@/features/chatroom/components/UserActionPopup";
@@ -85,9 +85,6 @@ const ChatMessage: React.FC<ChatMessageProps> = ({
                                                      showOwnSenderName = false,
                                                  }) => {
 
-    const {formatMessageDate} = useFormatMessageDate();
-    const formattedTime = formatMessageDate(message.createdAt);
-
     const [reactToMessage] = useThunk(reactToMessageThunk);
     const [deleteReaction] = useThunk(deleteReactionThunk);
     const proActive = useSelector(selectUser)?.proActive === true;
@@ -103,8 +100,8 @@ const ChatMessage: React.FC<ChatMessageProps> = ({
     const isMobile = useIsMobile();
     const isMenuVisible = showMobileMenu || isReactionPopoverOpen;
     const menuVisibilityClass = isMobile
-        ? (isMenuVisible ? 'opacity-100' : 'opacity-0 pointer-events-none')
-        : (isReactionPopoverOpen ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none group-hover:opacity-100 group-hover:pointer-events-auto group-focus-within:opacity-100 group-focus-within:pointer-events-auto');
+        ? (isMenuVisible ? 'flex opacity-100' : 'hidden')
+        : (isReactionPopoverOpen ? 'flex opacity-100 pointer-events-auto' : 'flex opacity-0 pointer-events-none group-hover:opacity-100 group-hover:pointer-events-auto group-focus-within:opacity-100 group-focus-within:pointer-events-auto');
     const popoverSelectionClass = isReactionPopoverOpen ? 'select-none' : '';
 
     const handleReactionPopoverOpenChange = (open: boolean) => {
@@ -214,14 +211,14 @@ const ChatMessage: React.FC<ChatMessageProps> = ({
     if (isBlocked && !isRevealed && !isOwn) {
         return (
             <div
-                className={`flex w-full items-start group lg:hover:bg-white/20 dark:lg:hover:bg-white/10 p-1 rounded-md transition-colors ${blinkClass}`}>
-                <div className="max-w-[90%] lg:max-w-[75%] flex flex-col justify-start">
+                className={`flex w-full items-start group lg:hover:bg-white/20 dark:lg:hover:bg-white/10 py-1 rounded-md transition-colors ${blinkClass}`}>
+                <div className="max-w-[70%] min-w-0 flex flex-col justify-start">
                     <div
-                        className="pl-4 pb-1 px-1 text-xs font-medium transition-colors text-muted-foreground flex items-center gap-1">
+                        className="pb-1 px-1 text-xs font-medium transition-colors text-muted-foreground flex items-center gap-1">
                         <span>Blocked User</span>
                     </div>
                     <div
-                        className="glass-surface ml-4 mb-1 text-muted-foreground rounded-lg p-3 text-sm italic flex items-center gap-3">
+                        className="glass-surface mb-1 text-muted-foreground rounded-lg p-3 text-sm italic flex flex-wrap items-center gap-3">
                         <span>Blocked Message</span>
                         {!interactionsDisabled && (
                             <button
@@ -243,15 +240,17 @@ const ChatMessage: React.FC<ChatMessageProps> = ({
                 onClick={handleMessageClick}
                 onTouchStart={handleTouchStart}
                 onDoubleClick={handleDoubleClick}
-                className={`flex w-full items-center justify-end group lg:hover:bg-white/20 dark:lg:hover:bg-white/10 ${isMobile && isMenuVisible ? 'bg-white/20 dark:bg-white/10' : ''} ${popoverSelectionClass} p-1 rounded-md transition-colors min-w-0 max-w-full ${blinkClass}`}>
-                <div className="flex flex-col items-end max-w-[90%] lg:max-w-[75%] min-w-0">
+                className={`flex w-full items-center justify-end group lg:hover:bg-white/20 dark:lg:hover:bg-white/10 ${isMobile && isMenuVisible ? 'bg-white/20 dark:bg-white/10' : ''} ${popoverSelectionClass} py-1 rounded-md transition-colors min-w-0 max-w-full ${blinkClass}`}>
+                <div className="flex w-full min-w-0 flex-col items-end">
                     {message.replyTo && (
-                        <ReplyPreview replyTo={message.replyTo} isOwn onJump={onJumpToMessage}/>
+                        <div className="w-fit max-w-[70%] min-w-0">
+                            <ReplyPreview replyTo={message.replyTo} isOwn onJump={onJumpToMessage}/>
+                        </div>
                     )}
                     {showOwnSenderName && (
                         <div
                             data-message-reaction-block="true"
-                            className="pr-4 pb-1 px-1 text-xs font-medium transition-colors text-muted-foreground flex items-center gap-1 justify-end">
+                            className="max-w-[70%] min-w-0 pb-1 px-1 text-xs font-medium transition-colors text-muted-foreground flex flex-wrap items-center gap-1 justify-end">
                             {!message.deleted && <CountryFlag countryCode={message.senderCountryCode}/>}
                             <span className="min-w-0">
                                 <UserActionPopup userId={message.senderId} username={message.senderUsername}
@@ -265,11 +264,25 @@ const ChatMessage: React.FC<ChatMessageProps> = ({
                             </span>
                         </div>
                     )}
-                    <div className="flex items-center min-w-0 max-w-full">
+                    {/* Mobile dates sit below the bubble so actions still fit beside it. */}
+                    <div className="flex w-full min-w-0 flex-row-reverse flex-nowrap items-center gap-1 lg:gap-2">
+                        <div className="w-fit max-w-[70%] min-w-0" data-message-content>
+                            <MessageItem
+                                isOwn
+                                message={message}
+                                viewMode="chat"
+                                showSenderName={false}
+                                handleMessageClick={() => {
+                                }}
+                                onRemoveAttachment={interactionsDisabled || message.promotion ? undefined : handleRemoveAttachment}
+                                showEditButton={!interactionsDisabled}
+                                interactionsDisabled={interactionsDisabled}
+                            />
+                        </div>
                         <div
                             onClick={(e) => e.stopPropagation()}
                             data-message-reaction-block="true"
-                            className={`flex items-center transition-opacity shrink-0 ${menuVisibilityClass}`}>
+                            className={`flex-none items-center justify-end transition-opacity ${menuVisibilityClass}`}>
                             <MessageMenu
                                 setEditingMessage={handleEditMessage}
                                 onReply={onStartReply}
@@ -292,25 +305,12 @@ const ChatMessage: React.FC<ChatMessageProps> = ({
                                 emojiPopoverOpen={isReactionPopoverOpen}
                                 onEmojiPopoverOpenChange={handleReactionPopoverOpenChange}
                             />
-                            <div
-                                className="italic text-xs transition-colors text-muted-foreground px-2 mr-2">
-                                {formattedTime}
-                            </div>
+                            <MessageTimestamp createdAt={message.createdAt} isOwn placement="inline"/>
                         </div>
-                        <MessageItem
-                            isOwn
-                            message={message}
-                            viewMode="chat"
-                            showSenderName={false}
-                            handleMessageClick={() => {
-                            }}
-                            onRemoveAttachment={interactionsDisabled || message.promotion ? undefined : handleRemoveAttachment}
-                            showEditButton={!interactionsDisabled}
-                            interactionsDisabled={interactionsDisabled}
-                        />
                     </div>
+                    <MessageTimestamp createdAt={message.createdAt} isOwn/>
 
-                    <div className="flex flex-wrap gap-2 justify-end mt-1" data-message-reaction-block="true">
+                    <div className="flex max-w-[70%] flex-wrap gap-2 justify-end mt-1" data-message-reaction-block="true">
                         {message.reactions.map(reaction => (
                             <ReactionButton
                                 key={reaction.emoji}
@@ -330,14 +330,16 @@ const ChatMessage: React.FC<ChatMessageProps> = ({
             onClick={handleMessageClick}
             onTouchStart={handleTouchStart}
             onDoubleClick={handleDoubleClick}
-            className={`flex w-full items-start group lg:hover:bg-white/20 dark:lg:hover:bg-white/10 ${isMobile && isMenuVisible ? 'bg-white/20 dark:bg-white/10' : ''} ${popoverSelectionClass} p-1 rounded-md transition-colors min-w-0 max-w-full ${blinkClass}`}>
-            <div className="max-w-[90%] lg:max-w-[75%] flex flex-col justify-start min-w-0">
+            className={`flex w-full items-start group lg:hover:bg-white/20 dark:lg:hover:bg-white/10 ${isMobile && isMenuVisible ? 'bg-white/20 dark:bg-white/10' : ''} ${popoverSelectionClass} py-1 rounded-md transition-colors min-w-0 max-w-full ${blinkClass}`}>
+            <div className="flex w-full min-w-0 flex-col items-start">
                 {message.replyTo && (
-                    <ReplyPreview replyTo={message.replyTo} onJump={onJumpToMessage}/>
+                    <div className="w-fit max-w-[70%] min-w-0">
+                        <ReplyPreview replyTo={message.replyTo} onJump={onJumpToMessage}/>
+                    </div>
                 )}
                 <div
                     data-message-reaction-block="true"
-                    className="pl-4 pb-1 px-1 text-xs font-medium transition-colors text-muted-foreground flex items-center gap-1">
+                    className="max-w-[70%] min-w-0 pb-1 px-1 text-xs font-medium transition-colors text-muted-foreground flex flex-wrap items-center gap-1">
                     <span className="min-w-0">
                         <UserActionPopup userId={message.senderId} username={message.senderUsername}
                                          role={message.senderRole}
@@ -367,25 +369,26 @@ const ChatMessage: React.FC<ChatMessageProps> = ({
                         </button>
                     )}
                 </div>
-                <div className="flex items-center min-w-0 max-w-full">
-                    <MessageItem
-                        message={message}
-                        isOwn={false}
-                        viewMode="chat"
-                        showSenderName={false}
-                        handleMessageClick={() => {
-                        }}
-                        showEditButton={!interactionsDisabled}
-                        interactionsDisabled={interactionsDisabled}
-                    />
+                <div className="flex w-full min-w-0 flex-nowrap items-center gap-1 lg:gap-2">
+                    <div className="w-fit max-w-[70%] min-w-0" data-message-content>
+                        <MessageItem
+                            message={message}
+                            isOwn={false}
+                            inset={false}
+                            viewMode="chat"
+                            showSenderName={false}
+                            handleMessageClick={() => {
+                            }}
+                            showEditButton={!interactionsDisabled}
+                            interactionsDisabled={interactionsDisabled}
+                        />
+                    </div>
 
                     <div
                         onClick={(e) => e.stopPropagation()}
                         data-message-reaction-block="true"
-                        className={`flex items-center ml-2 transition-opacity shrink-0 ${menuVisibilityClass}`}>
-                        <div className="italic text-xs text-muted-foreground px-2 text-right">
-                            {formattedTime}
-                        </div>
+                        className={`flex-none items-center transition-opacity ${menuVisibilityClass}`}>
+                        <MessageTimestamp createdAt={message.createdAt} placement="inline"/>
                         <MessageMenu
                             setEditingMessage={handleEditMessage}
                             onReply={onStartReply}
@@ -407,8 +410,9 @@ const ChatMessage: React.FC<ChatMessageProps> = ({
                             onEmojiPopoverOpenChange={handleReactionPopoverOpenChange}/>
                     </div>
                 </div>
+                <MessageTimestamp createdAt={message.createdAt}/>
 
-                <div className="flex flex-wrap gap-2 ml-4 mt-1" data-message-reaction-block="true">
+                <div className="flex max-w-[70%] flex-wrap gap-2 mt-1" data-message-reaction-block="true">
                     {message.reactions.map((reaction) => (
                         <ReactionButton
                             key={reaction.emoji}
