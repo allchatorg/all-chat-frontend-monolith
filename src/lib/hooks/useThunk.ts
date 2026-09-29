@@ -3,9 +3,10 @@ import {useDispatch} from 'react-redux';
 import {AppDispatch} from "@/redux/store";
 import type {AsyncThunk} from '@reduxjs/toolkit';
 import {ApiError} from "@/models/ApiError";
+import {normalizeApiError} from '@/lib/apiError';
 
-export function useThunk<TArg = void, TResult = any>(
-    thunk: AsyncThunk<TResult, TArg, any>
+export function useThunk<TArg = void, TResult = any, TConfig extends Record<string, any> = Record<string, any>>(
+    thunk: AsyncThunk<TResult, TArg, TConfig>
 ): [
     runThunk: TArg extends void ? () => Promise<TResult> : (arg: TArg) => Promise<TResult>,
     isLoading: boolean,
@@ -27,20 +28,11 @@ export function useThunk<TArg = void, TResult = any>(
                 const details = err && typeof err === "object"
                     ? err as Partial<ApiError> & {name?: string; detail?: string}
                     : undefined;
-                const message = [details?.message, details?.detail, typeof err === "string" ? err : null, details?.error]
-                    .find((value): value is string => typeof value === "string" && value.trim().length > 0)
-                    ?? "Unknown error";
-                const apiError: ApiError = {
-                    ...details,
-                    status: typeof details?.status === "number" ? details.status : 500,
-                    message,
-                    error: typeof details?.error === "string" ? details.error : "Error",
-                    timestamp: typeof details?.timestamp === "string" ? details.timestamp : new Date().toISOString(),
-                };
+                const apiError = normalizeApiError(err);
 
                 // Keep API fields for callers, but throw an Error so Next.js can
                 // display its message and stack instead of "[object Object]".
-                const requestError = Object.assign(err instanceof Error ? err : new Error(message), apiError);
+                const requestError = Object.assign(new Error(apiError.message), apiError);
                 // A thunk condition skips duplicate work; it isn't an API failure.
                 if (details?.name !== "ConditionError") {
                     setError(requestError);

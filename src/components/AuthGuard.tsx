@@ -8,9 +8,11 @@ import {isStaff, Role} from "@/models/Role";
 import {Spinner} from './Spinner';
 import {useIpDetails} from "@/lib/hooks/useIpDetails";
 import {useTimeZoneSync} from "@/lib/hooks/useTimeZoneSync";
+import {Button} from '@/components/ui/button';
+import {apiErrorMessage} from '@/lib/apiError';
 
 export default function AuthGuard({children}: { children: React.ReactNode }) {
-    const {user, error, isInitializing} = useUser();
+    const {user, error, errorDetails, isInitializing, needsRetry, retry, isLoading: accountLoading} = useUser();
     const {ipDetails, isLoading: isIpDetailsLoading} = useIpDetails();
     const pathname = usePathname();
     const searchParams = useSearchParams();
@@ -20,12 +22,12 @@ export default function AuthGuard({children}: { children: React.ReactNode }) {
     const returnPath = `${pathname}${searchParams.size ? `?${searchParams.toString()}` : ''}`;
 
     const isAuthenticated = !!user;
-    const hasFlaggedIp = ipDetails?.requiredVerification !== 'NONE';
+    const hasFlaggedIp = !!ipDetails && ipDetails.requiredVerification !== 'NONE';
     const isGuest = user?.role === Role.GUEST;
     const isVerified = user?.verified === true;
 
     useEffect(() => {
-        if (isInitializing) return;
+        if (isInitializing || needsRetry || accountLoading) return;
 
         const redirectConfig = getRedirectPath({
             isAuthenticated,
@@ -42,12 +44,24 @@ export default function AuthGuard({children}: { children: React.ReactNode }) {
         if (redirectConfig) {
             router.push(redirectConfig);
         }
-    }, [isInitializing, user, pathname, router, ipDetails, redirectAfterAuth, returnPath]);
+    }, [isInitializing, needsRetry, accountLoading, user, pathname, router, ipDetails, redirectAfterAuth, returnPath]);
+
+    if (needsRetry) {
+        return <main className="flex min-h-screen items-center justify-center p-6">
+            <div className="max-w-md space-y-4 text-center" role="alert">
+                <h1 className="text-xl font-semibold">Unable to load your account</h1>
+                <p className="text-sm text-muted-foreground">{apiErrorMessage(errorDetails)}</p>
+                <Button onClick={() => void retry()} disabled={accountLoading || isIpDetailsLoading}>
+                    {accountLoading || isIpDetailsLoading ? 'Retrying…' : 'Try again'}
+                </Button>
+            </div>
+        </main>;
+    }
 
     // Do not mount Home while sending a signed-out billing return to login:
     // its own unauthenticated redirect would otherwise discard the return URL.
     const isLoading = isInitializing || isIpDetailsLoading ||
-        (isBillingRoute(pathname, searchParams) && !user) || (isProtectedRoute(pathname) && !user && !error);
+        (isBillingRoute(pathname, searchParams) && (!user || isGuest)) || (isProtectedRoute(pathname) && !user && !error);
 
     if (isLoading) {
         return (
@@ -83,7 +97,7 @@ function getRedirectPath({
 }): string | null {
     const billingRoute = isBillingRoute(pathname, new URLSearchParams(returnPath.split('?')[1] ?? ''));
     // Unauthenticated users
-    if (!isAuthenticated) {
+    if (!isAuthenticated || (billingRoute && isGuest)) {
         if (billingRoute) {
             return `${ROUTES.LOGIN}&redirect=${encodeURIComponent(returnPath)}`;
         }

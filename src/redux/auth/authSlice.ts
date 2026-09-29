@@ -10,12 +10,16 @@ import {
 } from "@/redux/auth/authThunk";
 import {SessionToken} from "@/models/SessionToken";
 import {IpDetails} from "@/models/IpDetails";
+import {ApiError} from '@/models/ApiError';
+import {sessionEstablished} from '@/redux/auth/sessionActions';
+import {normalizeApiError} from '@/lib/apiError';
 
 interface AuthState {
     isAuthenticated: boolean | null;
     loading: boolean;
     pingLoading: boolean;
     pingError: string | null;
+    pingErrorDetails: ApiError | null;
     ipDetails: IpDetails | null;
     error: string | null;
     sessionToken: SessionToken | null;
@@ -27,6 +31,7 @@ const initialState: AuthState = {
     loading: false,
     pingLoading: false,
     pingError: null,
+    pingErrorDetails: null,
     error: null,
     sessionToken: null,
 };
@@ -54,6 +59,10 @@ const authSlice = createSlice({
     },
     extraReducers: (builder) => {
         builder
+            .addCase(sessionEstablished, (state) => {
+                state.isAuthenticated = null;
+                state.error = null;
+            })
             .addCase(loginThunk.pending, (state) => {
                 state.loading = true;
                 state.error = null;
@@ -65,8 +74,9 @@ const authSlice = createSlice({
             })
             .addCase(loginThunk.rejected, (state, action) => {
                 state.loading = false;
-                state.isAuthenticated = false;
-                state.error = action.payload as string;
+                const failure = action.payload as ApiError | undefined;
+                if (failure?.stage !== 'profile' || failure.sessionInvalid) state.isAuthenticated = false;
+                state.error = failure?.message ?? 'Unable to sign in. Please try again.';
             })
 
             .addCase(logoutThunk.pending, (state) => {
@@ -79,7 +89,7 @@ const authSlice = createSlice({
             })
             .addCase(logoutThunk.rejected, (state, action) => {
                 state.loading = false;
-                state.error = action.payload as string;
+                state.error = normalizeApiError(action.payload).message;
             })
 
             .addCase(resetPasswordThunk.pending, (state) => {
@@ -94,7 +104,7 @@ const authSlice = createSlice({
             .addCase(resetPasswordThunk.rejected, (state, action) => {
                 state.loading = false;
                 state.isAuthenticated = false;
-                state.error = action.payload as string;
+                state.error = normalizeApiError(action.payload).message;
             })
             .addCase(registerThunk.pending, (state) => {
                 state.loading = true;
@@ -108,7 +118,7 @@ const authSlice = createSlice({
             .addCase(registerThunk.rejected, (state, action) => {
                 state.loading = false;
                 state.isAuthenticated = false;
-                state.error = action.payload as string;
+                state.error = normalizeApiError(action.payload).message;
             })
             .addCase(registerGuestThunk.fulfilled, (state, action) => {
                 state.loading = false;
@@ -122,7 +132,7 @@ const authSlice = createSlice({
             .addCase(registerGuestThunk.rejected, (state, action) => {
                 state.loading = false;
                 state.isAuthenticated = false;
-                state.error = action.payload as string;
+                state.error = normalizeApiError(action.payload).message;
             })
             .addCase(registerUnclaimedThunk.pending, (state) => {
                 state.loading = true;
@@ -136,19 +146,22 @@ const authSlice = createSlice({
             .addCase(registerUnclaimedThunk.rejected, (state, action) => {
                 state.loading = false;
                 state.isAuthenticated = false;
-                state.error = action.payload as string;
+                state.error = normalizeApiError(action.payload).message;
             })
             .addCase(pingServerThunk.pending, (state) => {
                 state.pingLoading = true;
                 state.pingError = null;
+                state.pingErrorDetails = null;
             })
             .addCase(pingServerThunk.fulfilled, (state, action) => {
                 state.pingLoading = false;
                 state.pingError = null;
+                state.pingErrorDetails = null;
                 state.ipDetails = action.payload;
             })
             .addCase(pingServerThunk.rejected, (state, action) => {
                 state.pingLoading = false;
+                state.pingErrorDetails = action.payload as ApiError ?? null;
                 state.pingError = typeof action.payload === "string"
                     ? action.payload
                     : (action.payload as { message?: string } | undefined)?.message ?? "Failed to reach server";

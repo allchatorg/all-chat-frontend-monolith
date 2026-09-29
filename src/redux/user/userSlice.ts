@@ -19,17 +19,23 @@ import {
 import {Tag} from "@/models/Tag";
 import {claimAccountThunk, logoutThunk} from "../auth/authThunk";
 import {mergeOwnerFonts} from '@/lib/fontPresets';
+import {ApiError} from '@/models/ApiError';
+import {sessionEstablished} from '@/redux/auth/sessionActions';
 
 interface UserState {
     user: User | null;
     loading: boolean;
     error: string | null;
+    errorDetails: ApiError | null;
+    activeRequestId: string | null;
 }
 
 const initialState: UserState = {
     user: null,
     loading: false,
     error: null,
+    errorDetails: null,
+    activeRequestId: null,
 };
 
 function mergeOwnerSnapshot(current: User | null, incoming: User | null): User | null {
@@ -64,21 +70,30 @@ const userSlice = createSlice({
         setUser(state, action) {
             state.user = mergeOwnerSnapshot(state.user, action.payload.user);
             state.error = null;
+            state.errorDetails = null;
         },
     },
     extraReducers: (builder) => {
         builder
-            .addCase(fetchMe.pending, (state) => {
+            .addCase(sessionEstablished, () => ({...initialState}))
+            .addCase(fetchMe.pending, (state, action) => {
                 state.loading = true;
                 state.error = null;
+                state.activeRequestId = action.meta.requestId;
             })
             .addCase(fetchMe.fulfilled, (state, action) => {
+                if (state.activeRequestId !== action.meta.requestId) return;
                 state.loading = false;
                 state.user = mergeOwnerSnapshot(state.user, action.payload);
+                state.errorDetails = null;
             })
             .addCase(fetchMe.rejected, (state, action) => {
+                if (state.activeRequestId !== action.meta.requestId) return;
                 state.loading = false;
-                state.error = action.payload as string;
+                if (action.payload?.staleSession) return;
+                state.errorDetails = action.payload ?? null;
+                state.error = action.payload?.message ?? 'Unable to load your account. Please try again.';
+                if (action.payload?.sessionInvalid) state.user = null;
             })
             .addCase(logoutThunk.pending, (state) => {
                 state.loading = true;

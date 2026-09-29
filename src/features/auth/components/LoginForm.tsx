@@ -9,12 +9,12 @@ import {AuthView} from "@/models/AuthView";
 import {LoginRequest} from "@/models/LoginRequest";
 import {useState} from "react";
 import {useRouter, useSearchParams} from "next/navigation";
-import {fetchMe} from "@/redux/user/usersThunk";
 import {loginThunk} from "@/redux/auth/authThunk";
 import {trackUserLoggedIn} from "@/lib/analytics";
 import {useThunk} from "@/lib/hooks/useThunk";
 import {emailValidationRules} from "@/features/auth/lib/validation";
 import {sanitizeRedirectParam} from "@/routes";
+import {apiErrorMessage} from '@/lib/apiError';
 
 export function LoginForm({
                               className,
@@ -30,7 +30,6 @@ export function LoginForm({
     const searchParams = useSearchParams();
 
     const [runLogin, loginLoading, loginError] = useThunk(loginThunk);
-    const [runFetchMe] = useThunk(fetchMe);
 
     const {
         register,
@@ -40,19 +39,17 @@ export function LoginForm({
 
     const onSubmit = async (data: LoginRequest) => {
         setError("");
-        const user = await runLogin(data);
-        if (!user) {
-            setError(loginError?.message || "Login failed. Please try again.");
-            return;
-        }
         try {
-            if (user && typeof user.id !== "undefined") {
+            const user = await runLogin(data);
+            try {
                 trackUserLoggedIn({user_id: String(user.id), method: "email"});
+            } catch {
+                // Analytics must never block a completed sign-in.
             }
-        } catch {
+            router.push(sanitizeRedirectParam(searchParams.get("redirect")) ?? "/");
+        } catch (failure) {
+            setError(apiErrorMessage(failure));
         }
-        await runFetchMe();
-        router.push(sanitizeRedirectParam(searchParams.get("redirect")) ?? "/");
     };
 
     const handleForgotPassword = (e: React.MouseEvent) => {

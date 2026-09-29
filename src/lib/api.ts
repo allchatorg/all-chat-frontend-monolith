@@ -1,8 +1,9 @@
 import axios, {AxiosError, AxiosInstance, InternalAxiosRequestConfig} from "axios";
-import {getSessionToken, removeSessionToken} from "@/lib/tokenManager";
+import {getSessionToken} from "@/lib/tokenManager";
+import {normalizeApiError} from '@/lib/apiError';
 import {Ban} from "@/models/Ban";
 import {getFontStoreGeneration, ingestFontSnapshots} from '@/lib/fontStore';
-import {isBillingRoute} from '@/routes';
+import {isAuthFlowRoute, isBillingRoute, sanitizeRedirectParam} from '@/routes';
 
 interface AppearanceRequestConfig extends InternalAxiosRequestConfig {
     fontStoreGeneration?: number;
@@ -48,12 +49,23 @@ api.interceptors.response.use(
         return response;
     },
     (error: AxiosError<any>) => {
-        if (error.response && isBanResponse(error.response)) {
+        if (typeof window !== 'undefined' && error.response && isBanResponse(error.response)) {
             // Keep the session token: banned users stay authenticated so they can reach
             // the whitelisted ban-appeal endpoints. Skip the redirect when already on a
             // /banned page, otherwise its own API calls would loop the navigation.
             const banData: Ban = error.response.data;
-            if (!window.location.pathname.startsWith('/banned') && !isBillingRoute(window.location.pathname, new URLSearchParams(window.location.search))) {
+            const requestToken = error.config?.headers?.get('X-Auth-Token');
+            const currentToken = getSessionToken()?.token;
+            const isCurrentSession = requestToken ? requestToken === currentToken : !currentToken;
+            const searchParams = new URLSearchParams(window.location.search);
+            const authReturn = isAuthFlowRoute(window.location.pathname)
+                ? sanitizeRedirectParam(searchParams.get('redirect')) : null;
+            const authReturnUrl = authReturn ? new URL(authReturn, window.location.origin) : null;
+            const billingContext = isBillingRoute(window.location.pathname, searchParams) ||
+                (!!authReturnUrl && isBillingRoute(authReturnUrl.pathname, authReturnUrl.searchParams));
+            // An old account's pending request must not navigate a newly signed-in
+            // account. Login also retains billing returns for restricted customers.
+            if (isCurrentSession && !window.location.pathname.startsWith('/banned') && !billingContext) {
                 window.location.href = `/banned?ban=${encodeURIComponent(JSON.stringify(banData))}`;
             }
         }
@@ -77,6 +89,9 @@ api.interceptors.response.use(
                 // no-op
             }
         }
+        // Thunks historically pass response.data through rejectWithValue. Preserve
+        // HTTP metadata there, including when a proxy returned an HTML error page.
+        if (error.response) error.response.data = normalizeApiError(error);
         return Promise.reject(error);
     }
 );

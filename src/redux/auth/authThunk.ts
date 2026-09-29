@@ -20,6 +20,8 @@ import {SessionToken} from "@/models/SessionToken";
 import {AppDispatch} from "@/redux/store";
 import {fetchMe} from "@/redux/user/usersThunk";
 import {IpDetails} from "@/models/IpDetails";
+import {normalizeApiError} from '@/lib/apiError';
+import {sessionEstablished} from '@/redux/auth/sessionActions';
 
 
 const handleAuthSuccess = async (
@@ -31,17 +33,20 @@ const handleAuthSuccess = async (
         setHasAccount(true);
     }
     setSessionToken(sessionToken);
+    dispatch(sessionEstablished());
     return await dispatch(fetchMe()).unwrap();
 };
 
 export const loginThunk = createAsyncThunk<User, LoginRequest, { dispatch: AppDispatch }>(
     'auth/login',
     async (credentials, {dispatch, rejectWithValue}) => {
+        let credentialsAccepted = false;
         try {
             const sessionToken = await login(credentials);
+            credentialsAccepted = true;
             return await handleAuthSuccess(sessionToken, dispatch);
         } catch (error: any) {
-            return rejectWithValue(error.response?.data || error.message);
+            return rejectWithValue(normalizeApiError(error, credentialsAccepted ? 'profile' : 'credentials'));
         }
     }
 );
@@ -52,7 +57,7 @@ export const resetPasswordThunk = createAsyncThunk<void, ResetPasswordRequest>(
         try {
             await resetPassword(resetPasswordRequest);
         } catch (error: any) {
-            return rejectWithValue(error.response?.data || error.message);
+            return rejectWithValue(normalizeApiError(error));
         }
     }
 );
@@ -64,7 +69,7 @@ export const registerThunk = createAsyncThunk<User, RegisterRequest, { dispatch:
             const sessionToken = await register(registerData);
             return await handleAuthSuccess(sessionToken, dispatch);
         } catch (error: any) {
-            return rejectWithValue(error.response?.data || error.message);
+            return rejectWithValue(normalizeApiError(error));
         }
     }
 );
@@ -76,7 +81,7 @@ export const registerGuestThunk = createAsyncThunk<User, void, { dispatch: AppDi
             const sessionToken = await registerGuest();
             return await handleAuthSuccess(sessionToken, dispatch, true);
         } catch (error: any) {
-            return rejectWithValue(error.response?.data || error.message);
+            return rejectWithValue(normalizeApiError(error));
         }
     }
 );
@@ -88,7 +93,7 @@ export const registerUnclaimedThunk = createAsyncThunk<User, UnclaimedRegister, 
             const sessionToken = await registerUnclaimed(data);
             return await handleAuthSuccess(sessionToken, dispatch);
         } catch (error: any) {
-            return rejectWithValue(error.response?.data || error.message);
+            return rejectWithValue(normalizeApiError(error));
         }
     }
 );
@@ -100,7 +105,7 @@ export const claimAccountThunk = createAsyncThunk<User, ClaimAccountRequest, { d
             const {sessionToken} = await claimAccount(request);
             return await handleAuthSuccess(sessionToken, dispatch);
         } catch (error: any) {
-            return rejectWithValue(error.response?.data || error.message);
+            return rejectWithValue(normalizeApiError(error));
         }
     }
 );
@@ -111,14 +116,14 @@ export const logoutThunk = createAsyncThunk<void>(
         try {
             await logout();
         } catch (error: any) {
-            return rejectWithValue(error.response?.data || error.message);
+            return rejectWithValue(normalizeApiError(error));
         } finally {
             removeSessionToken()
         }
     }
 );
 
-export const pingServerThunk = createAsyncThunk<IpDetails, void, {
+export const pingServerThunk = createAsyncThunk<IpDetails, {force?: boolean} | void, {
     state: { auth: { pingLoading: boolean; pingError: string | null; ipDetails: IpDetails | null } }
 }>(
     "auth/pingServer",
@@ -126,17 +131,17 @@ export const pingServerThunk = createAsyncThunk<IpDetails, void, {
         try {
             return await pingServer();
         } catch (error: any) {
-            return rejectWithValue(error.response?.data || error.message);
+            return rejectWithValue(normalizeApiError(error, 'bootstrap'));
         }
     },
     {
-        condition: (_, {getState}) => {
+        condition: (options, {getState}) => {
             const {auth} = getState();
             // Skip if already loading, if ipDetails already exists, or if a
             // previous attempt failed this page load (retry only on reload) —
             // otherwise every mounted useIpDetails instance re-fires the ping
             // when the server is unreachable.
-            if (auth.pingLoading || auth.ipDetails || auth.pingError) {
+            if (auth.pingLoading || (!options?.force && (auth.ipDetails || auth.pingError))) {
                 return false;
             }
         }

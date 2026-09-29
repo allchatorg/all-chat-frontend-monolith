@@ -20,7 +20,7 @@ import {
 import {User, UserMinimal} from "@/models/User";
 import {Tag} from "@/models/Tag";
 import {DeleteAccountRequest} from "@/models/DeleteAccountRequest";
-import {removeSessionToken} from "@/lib/tokenManager";
+import {getSessionToken, removeSessionToken} from "@/lib/tokenManager";
 import {setAuthenticated} from "@/redux/auth/authSlice";
 import {updateUserMessageColor} from "../chatRoom/chatRoomSlice";
 import {updatePrivateUserMessageColor} from "../privateChat/privateChatSlice";
@@ -32,16 +32,48 @@ import {ModeratorApplicationRequest} from "@/models/ModeratorApplicationRequest"
 import {RequestEmailUpdateRequest} from "@/models/RequestEmailUpdateRequest";
 import {VerifyEmailUpdateRequest} from "@/models/VerifyEmailUpdateRequest";
 import {UpdateMarketingPreferencesRequest} from "@/models/UpdateMarketingPreferencesRequest";
+import {ApiError} from '@/models/ApiError';
+import {normalizeApiError} from '@/lib/apiError';
 
-export const fetchMe = createAsyncThunk<User>(
+let accountRequest: {token: string | undefined; promise: Promise<User>} | null = null;
+
+export const fetchMe = createAsyncThunk<User, void, {rejectValue: ApiError}>(
     "user/fetchMe",
     async (_, {rejectWithValue, dispatch}) => {
+        const token = getSessionToken()?.token;
         try {
-            return await getMe();
+            // AuthGuard and AppInitializer can hydrate together. Share the HTTP
+            // request, while keeping sessions from different accounts isolated.
+            if (!accountRequest || accountRequest.token !== token) {
+                const pending = {token, promise: getMe()};
+                accountRequest = pending;
+                void pending.promise.finally(() => {
+                    if (accountRequest === pending) accountRequest = null;
+                }).catch(() => undefined);
+            }
+            const user = await accountRequest.promise;
+            if (getSessionToken()?.token !== token) {
+                return rejectWithValue({...normalizeApiError(null, 'profile'), staleSession: true});
+            }
+            dispatch(setAuthenticated(true));
+            return user;
         } catch (error: any) {
-            dispatch(setAuthenticated(false));
-            return rejectWithValue(error.response?.data || error.message);
+            const failure = normalizeApiError(error, 'profile');
+            if (getSessionToken()?.token !== token) {
+                return rejectWithValue({...failure, staleSession: true});
+            }
+            if (failure.status === 401) {
+                removeSessionToken();
+                dispatch(setAuthenticated(false));
+                failure.sessionInvalid = true;
+            }
+            return rejectWithValue(failure);
         }
+    },
+    {
+        // Do not dispatch a second pending/rejected lifecycle for the same HTTP
+        // request: a duplicate 401 must not race token invalidation and hydration.
+        condition: () => !accountRequest || accountRequest.token !== getSessionToken()?.token,
     }
 );
 
