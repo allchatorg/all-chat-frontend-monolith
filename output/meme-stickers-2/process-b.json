@@ -1,0 +1,79 @@
+{
+  "mode": "built-in image_gen",
+  "purpose": "Background extraction for transparent PNG chat stickers",
+  "records": [
+    {
+      "source": "Coomer.png",
+      "final_path": "/Users/markoangelovski/IdeaProjects/all-chat-frontend-monolith/output/meme-stickers-2/masters/coomer.png",
+      "prompt": "Use case: background-extraction\nAsset type: transparent PNG chat sticker\nInput image: edit target; remove background only.\nPrimary request: Create a clean faithful cutout of this exact provided meme image on genuinely transparent background with alpha.\nSubject: The complete existing Coomer meme head and visible neck, with the same scribbled brown hair and beard, black bloodshot eyes, and grin. Preserve white face, white neck, teeth, and all internal facial details.\nComposition: Center the complete original visible subject with small transparent margins. Keep every original visible portion and do not crop further.\nConstraints: Preserve exact face, expression, proportions, colors, linework, details, style and pose. Do not redraw, reinterpret, beautify or add content. Preserve opaque white areas inside the subject. Remove only external background including stray exterior specks or baked checkerboard. Clean soft antialiased alpha edges; no rectangular matte, no new sticker border, no shadow, no text, no objects.",
+      "tool_mode": "built-in image_gen; background-extraction; transparent_background=true",
+      "generated_path": "/Users/markoangelovski/.codex/generated_images/01a0edaa-6a12-7a82-8b73-754345cdf4e7/exec-6e680da0-db97-457c-bfce-b8678c8538fb.png",
+      "concerns": "ImageGen slightly smooths/reproduces linework; inspect bottom cut edge after sizing.",
+      "qa": {
+        "method": "Sharp flattened diagnostic preview on #664466 at up to 650px; visually inspected",
+        "result": "Opaque subject interiors retained; background transparent and clean; no material visible holes or fringe at sticker scale."
+      }
+    },
+    {
+      "source": "Doomer.jpeg",
+      "final_path": "/Users/markoangelovski/IdeaProjects/all-chat-frontend-monolith/output/meme-stickers-2/masters/doomer.png",
+      "prompt": "Use case: background-extraction\nAsset type: transparent PNG chat sticker\nInput image: edit target; remove background only.\nPrimary request: Create a clean faithful cutout of this exact provided meme image on genuinely transparent background with alpha.\nSubject: The complete existing Doomer meme bust wearing a black beanie and black hoodie with brown neckline, including his cigarette and its tiny wisp of smoke. Preserve the white face and neck, the original neutral expression, and exact black clothing silhouette.\nComposition: Center the complete original visible subject with small transparent margins. Keep every original visible portion and do not crop further.\nConstraints: Preserve exact face, expression, proportions, colors, linework, details, style and pose. Do not redraw, reinterpret, beautify or add content. Preserve opaque white areas inside the subject. Remove only external background including stray exterior specks or baked checkerboard. Clean soft antialiased alpha edges; no rectangular matte, no new sticker border, no shadow, no text, no objects.",
+      "tool_mode": "built-in image_gen; background-extraction; transparent_background=true",
+      "generated_path": "/Users/markoangelovski/.codex/generated_images/01a0edaa-6a12-7a82-8b73-754345cdf4e7/exec-116f4e84-a8fa-40b2-b4dc-cbea42c6572e.png",
+      "concerns": "Built-in lightly smooths linework; subject, clothing and cigarette retained.",
+      "qa": {
+        "method": "Sharp flattened diagnostic preview on #664466 at up to 650px; visually inspected",
+        "result": "Opaque subject interiors retained; background transparent and clean; no material visible holes or fringe at sticker scale."
+      }
+    },
+    {
+      "source": "Dumb wojak.jpg",
+      "final_path": "/Users/markoangelovski/IdeaProjects/all-chat-frontend-monolith/output/meme-stickers-2/masters/dumb-wojak.png",
+      "prompt": "Use case: background-extraction\nAsset type: transparent PNG chat sticker\nInput image: edit target; remove background only.\nPrimary request: Create a clean faithful cutout of this exact provided meme image on genuinely transparent background with alpha.\nSubject: The complete existing distorted goofy Wojak head, visible white neck and shoulder/chest region, original crescent-shaped head silhouette, eyes, black mouth, and small blue drool. Preserve all original linework and the white interior of the character; close the bottom visible bust region naturally at the original image boundary without inventing new anatomy.\nComposition: Center the complete original visible subject with small transparent margins. Keep every original visible portion and do not crop further.\nConstraints: Preserve exact face, expression, proportions, colors, linework, details, style and pose. Do not redraw, reinterpret, beautify or add content. Preserve opaque white areas inside the subject. Remove only external background including stray exterior specks or baked checkerboard. Clean soft antialiased alpha edges; no rectangular matte, no new sticker border, no shadow, no text, no objects.",
+      "repair_prompt": "Use case: background-extraction. Edit the provided transparent Dumb Wojak sticker image, keeping the entire character face and linework exactly as provided. Fix only its bottom crop edge: remove the ragged white fringe below the bust and terminate the white torso in one clean straight horizontal softly antialiased edge. Keep all visible face, neck, shoulder details, blue drool and proportions unchanged. Keep white inside the character opaque. Genuinely transparent alpha background, no outlines added, no backdrop, no new shadows or objects. Center whole visible subject with a small transparent margin all around.",
+      "tool_mode": "built-in image_gen; background-extraction; transparent_background=true",
+      "generated_path": "/Users/markoangelovski/.codex/generated_images/01a0edaa-6a12-7a82-8b73-754345cdf4e7/exec-05666a2a-3916-4605-abd5-c5b10c1d89db.png",
+      "concerns": "Initial generation had ragged bottom edge; repaired with second built-in edit. Tiny lower fringe may remain at full resolution.",
+      "qa": {
+        "method": "Sharp flattened diagnostic preview on #664466 at up to 650px; visually inspected",
+        "result": "Opaque subject interiors retained; background transparent and clean; no material visible holes or fringe at sticker scale."
+      }
+    },
+    {
+      "source": "Gigachad.jpg",
+      "final_path": "/Users/markoangelovski/IdeaProjects/all-chat-frontend-monolith/output/meme-stickers-2/masters/gigachad.png",
+      "prompt": "Use case: background-extraction\nAsset type: transparent PNG chat sticker\nInput image: edit target; remove background only.\nPrimary request: Create a clean faithful cutout of this exact provided meme image on genuinely transparent background with alpha.\nSubject: The complete existing black-and-white photographic male portrait, including all currently visible head, hair, beard, neck, shoulders and chest. Preserve his exact identity, grin, proportions, crop, realistic grayscale detail and original pose. Remove only the gray studio backdrop around his silhouette; do not change him or turn the photo into an illustration.\nComposition: Center the complete original visible subject with small transparent margins. Keep every original visible portion and do not crop further. The original lower portrait crop should be a clean straight edge.\nConstraints: Preserve exact face, expression, proportions, colors, details, style and pose. Do not redraw, reinterpret, beautify or add content. Entire subject is fully opaque, no transparency holes inside subject. Remove only external background. Clean soft antialiased alpha edges; no ragged fringe, no disconnected speckles, no rectangular matte, no new sticker border, no shadow, no text, no objects.",
+      "tool_mode": "built-in image_gen; background-extraction; transparent_background=true",
+      "generated_path": "/Users/markoangelovski/.codex/generated_images/01a0edaa-6a12-7a82-8b73-754345cdf4e7/exec-c9ab3974-4228-448a-97a9-959c2b76407b.png",
+      "concerns": "Preserved grayscale photographic subject, tiny pale edge fringe in isolated areas.",
+      "qa": {
+        "method": "Sharp flattened diagnostic preview on #664466 at up to 650px; visually inspected",
+        "result": "Opaque subject interiors retained; background transparent and clean; no material visible holes or fringe at sticker scale."
+      }
+    },
+    {
+      "source": "Gondola (needs background removed).jpeg",
+      "final_path": "/Users/markoangelovski/IdeaProjects/all-chat-frontend-monolith/output/meme-stickers-2/masters/gondola.png",
+      "prompt": "Use case: background-extraction\nAsset type: transparent PNG chat sticker\nInput image: edit target; remove background only.\nPrimary request: Create a clean faithful cutout of this exact provided meme image on genuinely transparent background with alpha.\nSubject: The complete existing brown Gondola character, including the same orange mouth, black dot eyes, long legs and both feet. Remove background outside AND the white background gap between his legs; preserve solid brown inside the complete silhouette.\nComposition: Center the complete original visible subject with small transparent margins. Keep every original visible portion and do not crop further.\nConstraints: Preserve exact face, expression, proportions, colors, linework, details, style and pose. Do not redraw, reinterpret, beautify or add content. Preserve flat solid original colors. Entire subject is fully opaque, no alpha holes inside the body or feet. Remove only external background including gap between legs. Clean soft antialiased alpha edges; no ragged fringe, no disconnected speckles, no rectangular matte, no new sticker border, no shadow, no text, no objects.",
+      "tool_mode": "built-in image_gen; background-extraction; transparent_background=true",
+      "generated_path": "/Users/markoangelovski/.codex/generated_images/01a0edaa-6a12-7a82-8b73-754345cdf4e7/exec-11636223-2b34-4a4a-975f-910bd8ad6996.png",
+      "concerns": "Built-in subtly smooths linework. Visible character all retained.",
+      "qa": {
+        "method": "Sharp flattened diagnostic preview on #664466 at up to 650px; visually inspected",
+        "result": "Opaque subject interiors retained; background transparent and clean; no material visible holes or fringe at sticker scale."
+      }
+    },
+    {
+      "source": "Grug.jpg",
+      "final_path": "/Users/markoangelovski/IdeaProjects/all-chat-frontend-monolith/output/meme-stickers-2/masters/grug.png",
+      "prompt": "Use case: background-extraction\nAsset type: transparent PNG chat sticker\nInput image: edit target; remove background only.\nPrimary request: Create a clean faithful cutout of this exact provided meme image on genuinely transparent background with alpha.\nSubject: The complete existing Grug cave-man Wojak drawing, including white face and visible white neck/torso, black hair and facial linework, orange spotted garment, and the brown club behind his shoulders with gray detail. Preserve the exact expression, line style, pose and existing crop; the club and outfit are part of the subject.\nComposition: Center the complete original visible subject with small transparent margins. Keep every original visible portion and do not crop further. Original bottom bust crop should become a clean straight lower edge, retaining all currently visible original subject.\nConstraints: Preserve exact face, expression, proportions, colors, linework, details, style and pose. Do not redraw, reinterpret, beautify or add content. Preserve flat solid original colors and opaque white areas inside the subject. Entire subject is fully opaque, no alpha holes inside face, neck, club or clothing. Remove only external background. Clean soft antialiased alpha edges; no ragged fringe, no disconnected speckles, no rectangular matte, no new sticker border, no shadow, no text, no objects.",
+      "tool_mode": "built-in image_gen; background-extraction; transparent_background=true",
+      "generated_path": "/Users/markoangelovski/.codex/generated_images/01a0edaa-6a12-7a82-8b73-754345cdf4e7/exec-749266fe-2e1f-4a9a-93f1-15dfb588630f.png",
+      "concerns": "Built-in smooths linework. Club and garment retained. Bottom original crop edge retained.",
+      "qa": {
+        "method": "Sharp flattened diagnostic preview on #664466 at up to 650px; visually inspected",
+        "result": "Opaque subject interiors retained; background transparent and clean; no material visible holes or fringe at sticker scale."
+      }
+    }
+  ]
+}

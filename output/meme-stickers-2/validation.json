@@ -1,0 +1,1729 @@
+{
+  "generatedAt": "2026-09-29T15:10:48.794Z",
+  "expectedCount": 24,
+  "exportedCount": 24,
+  "format": "PNG, lossless encoding, RGBA",
+  "canvas": {
+    "width": 512,
+    "height": 512
+  },
+  "maxSubjectDimensions": {
+    "width": 480,
+    "height": 480
+  },
+  "minimumCanvasPadding": 16,
+  "operation": "Crop outer canvas to exact nonzero-alpha bounds, except Chad 2 and Zoomer whose crop coordinates use alpha > 1 bounds expanded by two source pixels to exclude distant alpha=1 canvas noise. Source alpha statistics are unchanged. All RGBA values inside each crop are preserved until proportional Lanczos3 resizing; then transparent padding and lossless PNG encoding. No masking, alpha repairs, background removal, or pixel cleanup.",
+  "allValid": true,
+  "contactSheet": {
+    "columns": 4,
+    "rows": 6,
+    "width": 1228,
+    "height": 2208
+  },
+  "stickers": [
+    {
+      "id": "apu-apustaja",
+      "label": "Apu Apustaja",
+      "filename": "apu-apustaja.png",
+      "source": "masters/apu-apustaja.png",
+      "output": "png/apu-apustaja.png",
+      "sourceBytes": 904891,
+      "sourceSha256": "72d750b94721c67b1597feee6419a08601e3cb91f66fa384d2b7bb593af799c6",
+      "sourceImage": {
+        "width": 1254,
+        "height": 1254,
+        "channels": 4,
+        "alphaMin": 0,
+        "alphaMax": 255,
+        "transparentPixels": 597949,
+        "partialAlphaPixels": 972269,
+        "cornerAlpha": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "nonzeroAlphaBounds": {
+          "left": 0,
+          "top": 17,
+          "width": 1224,
+          "height": 1183
+        }
+      },
+      "exportCrop": {
+        "left": 0,
+        "top": 17,
+        "width": 1224,
+        "height": 1183
+      },
+      "exportCropReason": "Exact nonzero-alpha bounding box; only fully transparent outer canvas is cropped.",
+      "fittedDimensions": {
+        "width": 480,
+        "height": 464
+      },
+      "padding": {
+        "left": 16,
+        "top": 24,
+        "right": 16,
+        "bottom": 24
+      },
+      "outputBytes": 171904,
+      "outputSha256": "c563d342948f9ba291a27e9da55ec11e408a57ed4b9a266b5856bc6ea03ce442",
+      "outputImage": {
+        "width": 512,
+        "height": 512,
+        "channels": 4,
+        "alphaMin": 0,
+        "alphaMax": 255,
+        "transparentPixels": 111334,
+        "partialAlphaPixels": 149511,
+        "cornerAlpha": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "nonzeroAlphaBounds": {
+          "left": 16,
+          "top": 25,
+          "width": 461,
+          "height": 456
+        }
+      },
+      "valid": true
+    },
+    {
+      "id": "big-brain-wojak",
+      "label": "Big Brain Wojak",
+      "filename": "big-brain-wojak.png",
+      "source": "masters/big-brain-wojak.png",
+      "output": "png/big-brain-wojak.png",
+      "sourceBytes": 1079291,
+      "sourceSha256": "8121f9748411d67fda04f499223f0e5f76c2543d34d8c282be5c8a836ee37d17",
+      "sourceImage": {
+        "width": 1173,
+        "height": 1341,
+        "channels": 4,
+        "alphaMin": 0,
+        "alphaMax": 255,
+        "transparentPixels": 638712,
+        "partialAlphaPixels": 932695,
+        "cornerAlpha": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "nonzeroAlphaBounds": {
+          "left": 27,
+          "top": 14,
+          "width": 1118,
+          "height": 1312
+        }
+      },
+      "exportCrop": {
+        "left": 27,
+        "top": 14,
+        "width": 1118,
+        "height": 1312
+      },
+      "exportCropReason": "Exact nonzero-alpha bounding box; only fully transparent outer canvas is cropped.",
+      "fittedDimensions": {
+        "width": 409,
+        "height": 480
+      },
+      "padding": {
+        "left": 51,
+        "top": 16,
+        "right": 52,
+        "bottom": 16
+      },
+      "outputBytes": 167424,
+      "outputSha256": "27eaed0cdfa0d165e3a7e0e4c7a6c98160453f2841fa2bbd2ce5560af977e25c",
+      "outputImage": {
+        "width": 512,
+        "height": 512,
+        "channels": 4,
+        "alphaMin": 0,
+        "alphaMax": 255,
+        "transparentPixels": 136213,
+        "partialAlphaPixels": 124522,
+        "cornerAlpha": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "nonzeroAlphaBounds": {
+          "left": 51,
+          "top": 16,
+          "width": 409,
+          "height": 480
+        }
+      },
+      "valid": true
+    },
+    {
+      "id": "bloomer",
+      "label": "Bloomer",
+      "filename": "bloomer.png",
+      "source": "masters/bloomer.png",
+      "output": "png/bloomer.png",
+      "sourceBytes": 836140,
+      "sourceSha256": "c16478c6411a4ca3b5fd6a3cc7be9ff1c1141251894b0461174fb3c484ee9447",
+      "sourceImage": {
+        "width": 1262,
+        "height": 1246,
+        "channels": 4,
+        "alphaMin": 0,
+        "alphaMax": 255,
+        "transparentPixels": 740119,
+        "partialAlphaPixels": 830698,
+        "cornerAlpha": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "nonzeroAlphaBounds": {
+          "left": 18,
+          "top": 7,
+          "width": 1163,
+          "height": 1239
+        }
+      },
+      "exportCrop": {
+        "left": 18,
+        "top": 7,
+        "width": 1163,
+        "height": 1239
+      },
+      "exportCropReason": "Exact nonzero-alpha bounding box; only fully transparent outer canvas is cropped.",
+      "fittedDimensions": {
+        "width": 451,
+        "height": 480
+      },
+      "padding": {
+        "left": 30,
+        "top": 16,
+        "right": 31,
+        "bottom": 16
+      },
+      "outputBytes": 153558,
+      "outputSha256": "46b3989ef757d129aa2e42dacbcb2be6a6a38b06c27bf228d342f3cd3137afda",
+      "outputImage": {
+        "width": 512,
+        "height": 512,
+        "channels": 4,
+        "alphaMin": 0,
+        "alphaMax": 255,
+        "transparentPixels": 136115,
+        "partialAlphaPixels": 124754,
+        "cornerAlpha": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "nonzeroAlphaBounds": {
+          "left": 30,
+          "top": 17,
+          "width": 451,
+          "height": 467
+        }
+      },
+      "valid": true
+    },
+    {
+      "id": "chad-1",
+      "label": "Chad 1",
+      "filename": "chad-1.png",
+      "source": "masters/chad-1.png",
+      "output": "png/chad-1.png",
+      "sourceBytes": 678108,
+      "sourceSha256": "feeb0c723f8df1408b13d0dd0ed37307d96f76b08f419e91f9e11332e5b61db6",
+      "sourceImage": {
+        "width": 1113,
+        "height": 1414,
+        "channels": 4,
+        "alphaMin": 0,
+        "alphaMax": 255,
+        "transparentPixels": 1127996,
+        "partialAlphaPixels": 443292,
+        "cornerAlpha": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "nonzeroAlphaBounds": {
+          "left": 15,
+          "top": 48,
+          "width": 1084,
+          "height": 1340
+        }
+      },
+      "exportCrop": {
+        "left": 15,
+        "top": 48,
+        "width": 1084,
+        "height": 1340
+      },
+      "exportCropReason": "Exact nonzero-alpha bounding box; only fully transparent outer canvas is cropped.",
+      "fittedDimensions": {
+        "width": 388,
+        "height": 480
+      },
+      "padding": {
+        "left": 62,
+        "top": 16,
+        "right": 62,
+        "bottom": 16
+      },
+      "outputBytes": 117450,
+      "outputSha256": "adc545fdcb36cd39bbb2a5ee4d6d999aa6e0c13ad0f3328274a0839e24f8a61d",
+      "outputImage": {
+        "width": 512,
+        "height": 512,
+        "channels": 4,
+        "alphaMin": 0,
+        "alphaMax": 255,
+        "transparentPixels": 203374,
+        "partialAlphaPixels": 57053,
+        "cornerAlpha": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "nonzeroAlphaBounds": {
+          "left": 62,
+          "top": 16,
+          "width": 388,
+          "height": 474
+        }
+      },
+      "valid": true
+    },
+    {
+      "id": "chad-2",
+      "label": "Chad 2",
+      "filename": "chad-2.png",
+      "source": "masters/chad-2.png",
+      "output": "png/chad-2.png",
+      "sourceBytes": 722108,
+      "sourceSha256": "e30fe8fdb981b467a10cc7c4e3623ac231e10d97298bd22d220b81165c34a043",
+      "sourceImage": {
+        "width": 1672,
+        "height": 941,
+        "channels": 4,
+        "alphaMin": 0,
+        "alphaMax": 255,
+        "transparentPixels": 1136342,
+        "partialAlphaPixels": 436345,
+        "cornerAlpha": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "nonzeroAlphaBounds": {
+          "left": 49,
+          "top": 65,
+          "width": 1561,
+          "height": 852
+        }
+      },
+      "exportCrop": {
+        "left": 453,
+        "top": 65,
+        "width": 785,
+        "height": 827
+      },
+      "exportCropReason": "Crop coordinates use alpha > 1 bounds expanded by two source pixels on each side (clamped to image bounds), excluding distant alpha=1 canvas noise from the framing. No alpha or color values inside the crop are changed before resizing.",
+      "fittedDimensions": {
+        "width": 456,
+        "height": 480
+      },
+      "padding": {
+        "left": 28,
+        "top": 16,
+        "right": 28,
+        "bottom": 16
+      },
+      "outputBytes": 275916,
+      "outputSha256": "9d4faf4d04a0dbbb9ec2b1eb350a615ef1107b9eef85511579dcf3e7d7125e8e",
+      "outputImage": {
+        "width": 512,
+        "height": 512,
+        "channels": 4,
+        "alphaMin": 0,
+        "alphaMax": 255,
+        "transparentPixels": 114557,
+        "partialAlphaPixels": 146526,
+        "cornerAlpha": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "nonzeroAlphaBounds": {
+          "left": 28,
+          "top": 16,
+          "width": 456,
+          "height": 480
+        }
+      },
+      "valid": true
+    },
+    {
+      "id": "chudjak",
+      "label": "Chudjak",
+      "filename": "chudjak.png",
+      "source": "masters/chudjak.png",
+      "output": "png/chudjak.png",
+      "sourceBytes": 669124,
+      "sourceSha256": "64a89147cad9e26812c11509b0bd44335a63c7b4f3ff61542e81b4b67116c576",
+      "sourceImage": {
+        "width": 1254,
+        "height": 1254,
+        "channels": 4,
+        "alphaMin": 0,
+        "alphaMax": 255,
+        "transparentPixels": 824510,
+        "partialAlphaPixels": 746436,
+        "cornerAlpha": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "nonzeroAlphaBounds": {
+          "left": 97,
+          "top": 71,
+          "width": 1018,
+          "height": 1106
+        }
+      },
+      "exportCrop": {
+        "left": 97,
+        "top": 71,
+        "width": 1018,
+        "height": 1106
+      },
+      "exportCropReason": "Exact nonzero-alpha bounding box; only fully transparent outer canvas is cropped.",
+      "fittedDimensions": {
+        "width": 442,
+        "height": 480
+      },
+      "padding": {
+        "left": 35,
+        "top": 16,
+        "right": 35,
+        "bottom": 16
+      },
+      "outputBytes": 139214,
+      "outputSha256": "823f9428cf1c66309085dade1fb956d5a25d48d42794d3f98dda769c2fb8c575",
+      "outputImage": {
+        "width": 512,
+        "height": 512,
+        "channels": 4,
+        "alphaMin": 0,
+        "alphaMax": 255,
+        "transparentPixels": 120499,
+        "partialAlphaPixels": 140535,
+        "cornerAlpha": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "nonzeroAlphaBounds": {
+          "left": 35,
+          "top": 16,
+          "width": 442,
+          "height": 480
+        }
+      },
+      "valid": true
+    },
+    {
+      "id": "coomer",
+      "label": "Coomer",
+      "filename": "coomer.png",
+      "source": "masters/coomer.png",
+      "output": "png/coomer.png",
+      "sourceBytes": 960582,
+      "sourceSha256": "19a8d60fb24d774c2dc21aa631c46b1d0e901adb58bc24c753d5ddc2d322fb2e",
+      "sourceImage": {
+        "width": 1422,
+        "height": 1106,
+        "channels": 4,
+        "alphaMin": 0,
+        "alphaMax": 255,
+        "transparentPixels": 874842,
+        "partialAlphaPixels": 697408,
+        "cornerAlpha": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "nonzeroAlphaBounds": {
+          "left": 49,
+          "top": 0,
+          "width": 1317,
+          "height": 1106
+        }
+      },
+      "exportCrop": {
+        "left": 49,
+        "top": 0,
+        "width": 1317,
+        "height": 1106
+      },
+      "exportCropReason": "Exact nonzero-alpha bounding box; only fully transparent outer canvas is cropped.",
+      "fittedDimensions": {
+        "width": 480,
+        "height": 403
+      },
+      "padding": {
+        "left": 16,
+        "top": 54,
+        "right": 16,
+        "bottom": 55
+      },
+      "outputBytes": 174492,
+      "outputSha256": "ba1e474d6a939e2d6feaa74bf9326ba2508f65c8913bb657e0f509b8a8ac55fa",
+      "outputImage": {
+        "width": 512,
+        "height": 512,
+        "channels": 4,
+        "alphaMin": 0,
+        "alphaMax": 255,
+        "transparentPixels": 169123,
+        "partialAlphaPixels": 91934,
+        "cornerAlpha": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "nonzeroAlphaBounds": {
+          "left": 118,
+          "top": 54,
+          "width": 346,
+          "height": 403
+        }
+      },
+      "valid": true
+    },
+    {
+      "id": "doomer",
+      "label": "Doomer",
+      "filename": "doomer.png",
+      "source": "masters/doomer.png",
+      "output": "png/doomer.png",
+      "sourceBytes": 531344,
+      "sourceSha256": "0a47f1636a3886cb87931f3898f3b1e57965dba1c5011dc9be909ddae85f512c",
+      "sourceImage": {
+        "width": 1254,
+        "height": 1254,
+        "channels": 4,
+        "alphaMin": 0,
+        "alphaMax": 255,
+        "transparentPixels": 757658,
+        "partialAlphaPixels": 812380,
+        "cornerAlpha": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "nonzeroAlphaBounds": {
+          "left": 41,
+          "top": 72,
+          "width": 1172,
+          "height": 1108
+        }
+      },
+      "exportCrop": {
+        "left": 41,
+        "top": 72,
+        "width": 1172,
+        "height": 1108
+      },
+      "exportCropReason": "Exact nonzero-alpha bounding box; only fully transparent outer canvas is cropped.",
+      "fittedDimensions": {
+        "width": 480,
+        "height": 454
+      },
+      "padding": {
+        "left": 16,
+        "top": 29,
+        "right": 16,
+        "bottom": 29
+      },
+      "outputBytes": 85119,
+      "outputSha256": "12b794b773d3ae851f794b6ea948585f0e5c7cf667776eda0fea20aa725ff030",
+      "outputImage": {
+        "width": 512,
+        "height": 512,
+        "channels": 4,
+        "alphaMin": 0,
+        "alphaMax": 255,
+        "transparentPixels": 124834,
+        "partialAlphaPixels": 135926,
+        "cornerAlpha": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "nonzeroAlphaBounds": {
+          "left": 16,
+          "top": 29,
+          "width": 480,
+          "height": 454
+        }
+      },
+      "valid": true
+    },
+    {
+      "id": "dumb-wojak",
+      "label": "Dumb Wojak",
+      "filename": "dumb-wojak.png",
+      "source": "masters/dumb-wojak.png",
+      "output": "png/dumb-wojak.png",
+      "sourceBytes": 515060,
+      "sourceSha256": "181dba542d81eb18a148c83aab5fd086ca7bcc6b7629f697c792726b12219edc",
+      "sourceImage": {
+        "width": 1254,
+        "height": 1254,
+        "channels": 4,
+        "alphaMin": 0,
+        "alphaMax": 255,
+        "transparentPixels": 1045797,
+        "partialAlphaPixels": 525104,
+        "cornerAlpha": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "nonzeroAlphaBounds": {
+          "left": 44,
+          "top": 53,
+          "width": 1174,
+          "height": 1089
+        }
+      },
+      "exportCrop": {
+        "left": 44,
+        "top": 53,
+        "width": 1174,
+        "height": 1089
+      },
+      "exportCropReason": "Exact nonzero-alpha bounding box; only fully transparent outer canvas is cropped.",
+      "fittedDimensions": {
+        "width": 480,
+        "height": 445
+      },
+      "padding": {
+        "left": 16,
+        "top": 33,
+        "right": 16,
+        "bottom": 34
+      },
+      "outputBytes": 99738,
+      "outputSha256": "67024a8e24e77a0aa27735455c6b0f911ee73d2bc6877332a4bc53423bac0505",
+      "outputImage": {
+        "width": 512,
+        "height": 512,
+        "channels": 4,
+        "alphaMin": 0,
+        "alphaMax": 255,
+        "transparentPixels": 173504,
+        "partialAlphaPixels": 87393,
+        "cornerAlpha": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "nonzeroAlphaBounds": {
+          "left": 16,
+          "top": 159,
+          "width": 480,
+          "height": 314
+        }
+      },
+      "valid": true
+    },
+    {
+      "id": "gigachad",
+      "label": "Gigachad",
+      "filename": "gigachad.png",
+      "source": "masters/gigachad.png",
+      "output": "png/gigachad.png",
+      "sourceBytes": 1533617,
+      "sourceSha256": "25dae91e266316493f7017303974ac2a063d752b30327236713e9479336b4e24",
+      "sourceImage": {
+        "width": 1168,
+        "height": 1347,
+        "channels": 4,
+        "alphaMin": 0,
+        "alphaMax": 255,
+        "transparentPixels": 721557,
+        "partialAlphaPixels": 851689,
+        "cornerAlpha": [
+          0,
+          0,
+          252,
+          253
+        ],
+        "nonzeroAlphaBounds": {
+          "left": 0,
+          "top": 9,
+          "width": 1168,
+          "height": 1338
+        }
+      },
+      "exportCrop": {
+        "left": 0,
+        "top": 9,
+        "width": 1168,
+        "height": 1338
+      },
+      "exportCropReason": "Exact nonzero-alpha bounding box; only fully transparent outer canvas is cropped.",
+      "fittedDimensions": {
+        "width": 419,
+        "height": 480
+      },
+      "padding": {
+        "left": 46,
+        "top": 16,
+        "right": 47,
+        "bottom": 16
+      },
+      "outputBytes": 223462,
+      "outputSha256": "01bebc8760c738f926e08d208168ce3732973d2ce2a37453e35780d74357d80e",
+      "outputImage": {
+        "width": 512,
+        "height": 512,
+        "channels": 4,
+        "alphaMin": 0,
+        "alphaMax": 255,
+        "transparentPixels": 152188,
+        "partialAlphaPixels": 109323,
+        "cornerAlpha": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "nonzeroAlphaBounds": {
+          "left": 46,
+          "top": 21,
+          "width": 419,
+          "height": 475
+        }
+      },
+      "valid": true
+    },
+    {
+      "id": "gondola",
+      "label": "Gondola",
+      "filename": "gondola.png",
+      "source": "masters/gondola.png",
+      "output": "png/gondola.png",
+      "sourceBytes": 395928,
+      "sourceSha256": "0344323aef4f908db29f34155e9b69cd57b2e00d78495ba714aed32a924d2d05",
+      "sourceImage": {
+        "width": 1086,
+        "height": 1448,
+        "channels": 4,
+        "alphaMin": 0,
+        "alphaMax": 255,
+        "transparentPixels": 1223100,
+        "partialAlphaPixels": 346757,
+        "cornerAlpha": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "nonzeroAlphaBounds": {
+          "left": 0,
+          "top": 0,
+          "width": 902,
+          "height": 1448
+        }
+      },
+      "exportCrop": {
+        "left": 0,
+        "top": 0,
+        "width": 902,
+        "height": 1448
+      },
+      "exportCropReason": "Exact nonzero-alpha bounding box; only fully transparent outer canvas is cropped.",
+      "fittedDimensions": {
+        "width": 299,
+        "height": 480
+      },
+      "padding": {
+        "left": 106,
+        "top": 16,
+        "right": 107,
+        "bottom": 16
+      },
+      "outputBytes": 66519,
+      "outputSha256": "0fe0b5272180cd75d73e991f1fdfb6b76533113a152590acf571ca02a5921763",
+      "outputImage": {
+        "width": 512,
+        "height": 512,
+        "channels": 4,
+        "alphaMin": 0,
+        "alphaMax": 255,
+        "transparentPixels": 222609,
+        "partialAlphaPixels": 37943,
+        "cornerAlpha": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "nonzeroAlphaBounds": {
+          "left": 126,
+          "top": 16,
+          "width": 264,
+          "height": 480
+        }
+      },
+      "valid": true
+    },
+    {
+      "id": "grug",
+      "label": "Grug",
+      "filename": "grug.png",
+      "source": "masters/grug.png",
+      "output": "png/grug.png",
+      "sourceBytes": 1013005,
+      "sourceSha256": "305afb575a2d5e4459a45f77aa6e444211f55fbeb6c4e1eb75c4574fb3dff2aa",
+      "sourceImage": {
+        "width": 1425,
+        "height": 1104,
+        "channels": 4,
+        "alphaMin": 0,
+        "alphaMax": 255,
+        "transparentPixels": 470407,
+        "partialAlphaPixels": 1102739,
+        "cornerAlpha": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "nonzeroAlphaBounds": {
+          "left": 25,
+          "top": 0,
+          "width": 1390,
+          "height": 1104
+        }
+      },
+      "exportCrop": {
+        "left": 25,
+        "top": 0,
+        "width": 1390,
+        "height": 1104
+      },
+      "exportCropReason": "Exact nonzero-alpha bounding box; only fully transparent outer canvas is cropped.",
+      "fittedDimensions": {
+        "width": 480,
+        "height": 381
+      },
+      "padding": {
+        "left": 16,
+        "top": 65,
+        "right": 16,
+        "bottom": 66
+      },
+      "outputBytes": 152531,
+      "outputSha256": "569517e51238f25e5123c3a23dc8e71c78d9059cff5d5eb4dd07d253ba2e6d53",
+      "outputImage": {
+        "width": 512,
+        "height": 512,
+        "channels": 4,
+        "alphaMin": 0,
+        "alphaMax": 255,
+        "transparentPixels": 129975,
+        "partialAlphaPixels": 130573,
+        "cornerAlpha": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "nonzeroAlphaBounds": {
+          "left": 16,
+          "top": 65,
+          "width": 479,
+          "height": 381
+        }
+      },
+      "valid": true
+    },
+    {
+      "id": "honkler",
+      "label": "Honkler",
+      "filename": "honkler.png",
+      "source": "masters/honkler.png",
+      "output": "png/honkler.png",
+      "sourceBytes": 1195097,
+      "sourceSha256": "942a025310ac9c33342b9db3217ce0b39e253db4beb0601be82ed4accec5b861",
+      "sourceImage": {
+        "width": 1317,
+        "height": 1194,
+        "channels": 4,
+        "alphaMin": 0,
+        "alphaMax": 255,
+        "transparentPixels": 364228,
+        "partialAlphaPixels": 1207243,
+        "cornerAlpha": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "nonzeroAlphaBounds": {
+          "left": 33,
+          "top": 26,
+          "width": 1246,
+          "height": 1168
+        }
+      },
+      "exportCrop": {
+        "left": 33,
+        "top": 26,
+        "width": 1246,
+        "height": 1168
+      },
+      "exportCropReason": "Exact nonzero-alpha bounding box; only fully transparent outer canvas is cropped.",
+      "fittedDimensions": {
+        "width": 480,
+        "height": 450
+      },
+      "padding": {
+        "left": 16,
+        "top": 31,
+        "right": 16,
+        "bottom": 31
+      },
+      "outputBytes": 251089,
+      "outputSha256": "59f2156e6e557404968120410e96a9276c890b7f58236071d5cd3e374f8d1a4e",
+      "outputImage": {
+        "width": 512,
+        "height": 512,
+        "channels": 4,
+        "alphaMin": 0,
+        "alphaMax": 255,
+        "transparentPixels": 81978,
+        "partialAlphaPixels": 178864,
+        "cornerAlpha": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "nonzeroAlphaBounds": {
+          "left": 16,
+          "top": 31,
+          "width": 480,
+          "height": 444
+        }
+      },
+      "valid": true
+    },
+    {
+      "id": "npc",
+      "label": "NPC",
+      "filename": "npc.png",
+      "source": "masters/npc.png",
+      "output": "png/npc.png",
+      "sourceBytes": 809267,
+      "sourceSha256": "84f2d3746d8325318ff5ae772eeb9e273f8b6b64b6570affcc9b5817608ac7f7",
+      "sourceImage": {
+        "width": 1137,
+        "height": 1383,
+        "channels": 4,
+        "alphaMin": 0,
+        "alphaMax": 255,
+        "transparentPixels": 659109,
+        "partialAlphaPixels": 912440,
+        "cornerAlpha": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "nonzeroAlphaBounds": {
+          "left": 46,
+          "top": 57,
+          "width": 1075,
+          "height": 1286
+        }
+      },
+      "exportCrop": {
+        "left": 46,
+        "top": 57,
+        "width": 1075,
+        "height": 1286
+      },
+      "exportCropReason": "Exact nonzero-alpha bounding box; only fully transparent outer canvas is cropped.",
+      "fittedDimensions": {
+        "width": 401,
+        "height": 480
+      },
+      "padding": {
+        "left": 55,
+        "top": 16,
+        "right": 56,
+        "bottom": 16
+      },
+      "outputBytes": 127723,
+      "outputSha256": "aaaa6e2d460d0f6470cd316aac912d5a4e417091710b58c31eb66de7c205ef2a",
+      "outputImage": {
+        "width": 512,
+        "height": 512,
+        "channels": 4,
+        "alphaMin": 0,
+        "alphaMax": 255,
+        "transparentPixels": 133918,
+        "partialAlphaPixels": 127012,
+        "cornerAlpha": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "nonzeroAlphaBounds": {
+          "left": 55,
+          "top": 18,
+          "width": 399,
+          "height": 463
+        }
+      },
+      "valid": true
+    },
+    {
+      "id": "pepe",
+      "label": "Pepe",
+      "filename": "pepe.png",
+      "source": "masters/pepe.png",
+      "output": "png/pepe.png",
+      "sourceBytes": 1258736,
+      "sourceSha256": "4ccf5d8ef9c6b047993df50fae90f39911f46761eba10539ec9d35b2c4852d61",
+      "sourceImage": {
+        "width": 1345,
+        "height": 1170,
+        "channels": 4,
+        "alphaMin": 0,
+        "alphaMax": 255,
+        "transparentPixels": 278063,
+        "partialAlphaPixels": 1295551,
+        "cornerAlpha": [
+          0,
+          0,
+          253,
+          0
+        ],
+        "nonzeroAlphaBounds": {
+          "left": 0,
+          "top": 0,
+          "width": 1337,
+          "height": 1170
+        }
+      },
+      "exportCrop": {
+        "left": 0,
+        "top": 0,
+        "width": 1337,
+        "height": 1170
+      },
+      "exportCropReason": "Exact nonzero-alpha bounding box; only fully transparent outer canvas is cropped.",
+      "fittedDimensions": {
+        "width": 480,
+        "height": 420
+      },
+      "padding": {
+        "left": 16,
+        "top": 46,
+        "right": 16,
+        "bottom": 46
+      },
+      "outputBytes": 216874,
+      "outputSha256": "4a20ae98e068ba90a6ae0fa7be967fec48c264caf1f7012d12ef54afea8e6db0",
+      "outputImage": {
+        "width": 512,
+        "height": 512,
+        "channels": 4,
+        "alphaMin": 0,
+        "alphaMax": 255,
+        "transparentPixels": 94585,
+        "partialAlphaPixels": 166995,
+        "cornerAlpha": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "nonzeroAlphaBounds": {
+          "left": 16,
+          "top": 46,
+          "width": 480,
+          "height": 420
+        }
+      },
+      "valid": true
+    },
+    {
+      "id": "rage-pepe",
+      "label": "Rage Pepe",
+      "filename": "rage-pepe.png",
+      "source": "masters/rage-pepe.png",
+      "output": "png/rage-pepe.png",
+      "sourceBytes": 1343605,
+      "sourceSha256": "4cd28ebbdda7f4bc8981678044d3d6f745ae4d1d4783d767f87d6cd3054d0f72",
+      "sourceImage": {
+        "width": 1254,
+        "height": 1254,
+        "channels": 4,
+        "alphaMin": 0,
+        "alphaMax": 255,
+        "transparentPixels": 401045,
+        "partialAlphaPixels": 1171469,
+        "cornerAlpha": [
+          0,
+          0,
+          252,
+          0
+        ],
+        "nonzeroAlphaBounds": {
+          "left": 0,
+          "top": 19,
+          "width": 1254,
+          "height": 1235
+        }
+      },
+      "exportCrop": {
+        "left": 0,
+        "top": 19,
+        "width": 1254,
+        "height": 1235
+      },
+      "exportCropReason": "Exact nonzero-alpha bounding box; only fully transparent outer canvas is cropped.",
+      "fittedDimensions": {
+        "width": 480,
+        "height": 473
+      },
+      "padding": {
+        "left": 16,
+        "top": 19,
+        "right": 16,
+        "bottom": 20
+      },
+      "outputBytes": 345445,
+      "outputSha256": "1006a55f1a053f3d61e7d88cfbff3d75e3eaef6543b33ae32581a6d5fdea59c5",
+      "outputImage": {
+        "width": 512,
+        "height": 512,
+        "channels": 4,
+        "alphaMin": 0,
+        "alphaMax": 255,
+        "transparentPixels": 90406,
+        "partialAlphaPixels": 171646,
+        "cornerAlpha": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "nonzeroAlphaBounds": {
+          "left": 16,
+          "top": 26,
+          "width": 480,
+          "height": 466
+        }
+      },
+      "valid": true
+    },
+    {
+      "id": "smug-pepe",
+      "label": "Smug Pepe",
+      "filename": "smug-pepe.png",
+      "source": "masters/smug-pepe.png",
+      "output": "png/smug-pepe.png",
+      "sourceBytes": 1072961,
+      "sourceSha256": "fc213f40a6c9038f658d0e99691abcc3eb809b4717398a445b926329810c6a3f",
+      "sourceImage": {
+        "width": 1120,
+        "height": 1404,
+        "channels": 4,
+        "alphaMin": 0,
+        "alphaMax": 255,
+        "transparentPixels": 442697,
+        "partialAlphaPixels": 1128454,
+        "cornerAlpha": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "nonzeroAlphaBounds": {
+          "left": 0,
+          "top": 42,
+          "width": 1069,
+          "height": 1317
+        }
+      },
+      "exportCrop": {
+        "left": 0,
+        "top": 42,
+        "width": 1069,
+        "height": 1317
+      },
+      "exportCropReason": "Exact nonzero-alpha bounding box; only fully transparent outer canvas is cropped.",
+      "fittedDimensions": {
+        "width": 390,
+        "height": 480
+      },
+      "padding": {
+        "left": 61,
+        "top": 16,
+        "right": 61,
+        "bottom": 16
+      },
+      "outputBytes": 198796,
+      "outputSha256": "2ee4d9d4f00ec63418a03fd7a527d7218de4ab68919e2e700ae61a6fe9a93176",
+      "outputImage": {
+        "width": 512,
+        "height": 512,
+        "channels": 4,
+        "alphaMin": 0,
+        "alphaMax": 255,
+        "transparentPixels": 111033,
+        "partialAlphaPixels": 149684,
+        "cornerAlpha": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "nonzeroAlphaBounds": {
+          "left": 61,
+          "top": 16,
+          "width": 390,
+          "height": 480
+        }
+      },
+      "valid": true
+    },
+    {
+      "id": "smug-wojak",
+      "label": "Smug Wojak",
+      "filename": "smug-wojak.png",
+      "source": "masters/smug-wojak.png",
+      "output": "png/smug-wojak.png",
+      "sourceBytes": 770104,
+      "sourceSha256": "97ce798c6a966aaacb1366163364ef6a44b59cfc465095d7e5f2f3b27663fe27",
+      "sourceImage": {
+        "width": 1366,
+        "height": 1152,
+        "channels": 4,
+        "alphaMin": 0,
+        "alphaMax": 255,
+        "transparentPixels": 634386,
+        "partialAlphaPixels": 938918,
+        "cornerAlpha": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "nonzeroAlphaBounds": {
+          "left": 0,
+          "top": 13,
+          "width": 1226,
+          "height": 1139
+        }
+      },
+      "exportCrop": {
+        "left": 0,
+        "top": 13,
+        "width": 1226,
+        "height": 1139
+      },
+      "exportCropReason": "Exact nonzero-alpha bounding box; only fully transparent outer canvas is cropped.",
+      "fittedDimensions": {
+        "width": 480,
+        "height": 446
+      },
+      "padding": {
+        "left": 16,
+        "top": 33,
+        "right": 16,
+        "bottom": 33
+      },
+      "outputBytes": 138165,
+      "outputSha256": "646a5b5136f730e076b9ea6ca446e7dfae7ca1642dfbfb50387cfcbb5c6bdaf4",
+      "outputImage": {
+        "width": 512,
+        "height": 512,
+        "channels": 4,
+        "alphaMin": 0,
+        "alphaMax": 255,
+        "transparentPixels": 117556,
+        "partialAlphaPixels": 143695,
+        "cornerAlpha": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "nonzeroAlphaBounds": {
+          "left": 16,
+          "top": 33,
+          "width": 480,
+          "height": 446
+        }
+      },
+      "valid": true
+    },
+    {
+      "id": "soyjak-1",
+      "label": "Soyjak 1",
+      "filename": "soyjak-1.png",
+      "source": "masters/soyjak-1.png",
+      "output": "png/soyjak-1.png",
+      "sourceBytes": 796831,
+      "sourceSha256": "75918e893b50b3b469965574cf5821c3aaefa81de3fc1866422083111a6fe133",
+      "sourceImage": {
+        "width": 1124,
+        "height": 1399,
+        "channels": 4,
+        "alphaMin": 0,
+        "alphaMax": 255,
+        "transparentPixels": 684335,
+        "partialAlphaPixels": 886924,
+        "cornerAlpha": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "nonzeroAlphaBounds": {
+          "left": 17,
+          "top": 2,
+          "width": 1091,
+          "height": 1349
+        }
+      },
+      "exportCrop": {
+        "left": 17,
+        "top": 2,
+        "width": 1091,
+        "height": 1349
+      },
+      "exportCropReason": "Exact nonzero-alpha bounding box; only fully transparent outer canvas is cropped.",
+      "fittedDimensions": {
+        "width": 388,
+        "height": 480
+      },
+      "padding": {
+        "left": 62,
+        "top": 16,
+        "right": 62,
+        "bottom": 16
+      },
+      "outputBytes": 124937,
+      "outputSha256": "53b827e484786c918dc9cf7adbac2aae5bcef270b2dd9828863cdfee0c283d89",
+      "outputImage": {
+        "width": 512,
+        "height": 512,
+        "channels": 4,
+        "alphaMin": 0,
+        "alphaMax": 255,
+        "transparentPixels": 148923,
+        "partialAlphaPixels": 112049,
+        "cornerAlpha": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "nonzeroAlphaBounds": {
+          "left": 62,
+          "top": 56,
+          "width": 388,
+          "height": 433
+        }
+      },
+      "valid": true
+    },
+    {
+      "id": "soyjak-2",
+      "label": "Soyjak 2",
+      "filename": "soyjak-2.png",
+      "source": "masters/soyjak-2.png",
+      "output": "png/soyjak-2.png",
+      "sourceBytes": 918563,
+      "sourceSha256": "910991904e9c73b723f4063d63629293771f713095fa7c0911aa7e598e0173e7",
+      "sourceImage": {
+        "width": 1206,
+        "height": 1305,
+        "channels": 4,
+        "alphaMin": 0,
+        "alphaMax": 255,
+        "transparentPixels": 587467,
+        "partialAlphaPixels": 985433,
+        "cornerAlpha": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "nonzeroAlphaBounds": {
+          "left": 0,
+          "top": 0,
+          "width": 1206,
+          "height": 1305
+        }
+      },
+      "exportCrop": {
+        "left": 0,
+        "top": 0,
+        "width": 1206,
+        "height": 1305
+      },
+      "exportCropReason": "Exact nonzero-alpha bounding box; only fully transparent outer canvas is cropped.",
+      "fittedDimensions": {
+        "width": 444,
+        "height": 480
+      },
+      "padding": {
+        "left": 34,
+        "top": 16,
+        "right": 34,
+        "bottom": 16
+      },
+      "outputBytes": 152460,
+      "outputSha256": "57f63808380c4edc8674c2e3369a5ca98d8b389b3d56924fb0057b51eef943e3",
+      "outputImage": {
+        "width": 512,
+        "height": 512,
+        "channels": 4,
+        "alphaMin": 0,
+        "alphaMax": 255,
+        "transparentPixels": 127690,
+        "partialAlphaPixels": 133123,
+        "cornerAlpha": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "nonzeroAlphaBounds": {
+          "left": 34,
+          "top": 16,
+          "width": 444,
+          "height": 480
+        }
+      },
+      "valid": true
+    },
+    {
+      "id": "spurdo",
+      "label": "Spurdo",
+      "filename": "spurdo.png",
+      "source": "masters/spurdo.png",
+      "output": "png/spurdo.png",
+      "sourceBytes": 951059,
+      "sourceSha256": "d49e95d92a110ef77ef09fcd804b825e946b6d52152ef9754a0ee433dedcc1ab",
+      "sourceImage": {
+        "width": 1464,
+        "height": 1075,
+        "channels": 4,
+        "alphaMin": 0,
+        "alphaMax": 255,
+        "transparentPixels": 488857,
+        "partialAlphaPixels": 1083183,
+        "cornerAlpha": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "nonzeroAlphaBounds": {
+          "left": 50,
+          "top": 50,
+          "width": 1366,
+          "height": 973
+        }
+      },
+      "exportCrop": {
+        "left": 50,
+        "top": 50,
+        "width": 1366,
+        "height": 973
+      },
+      "exportCropReason": "Exact nonzero-alpha bounding box; only fully transparent outer canvas is cropped.",
+      "fittedDimensions": {
+        "width": 480,
+        "height": 342
+      },
+      "padding": {
+        "left": 16,
+        "top": 85,
+        "right": 16,
+        "bottom": 85
+      },
+      "outputBytes": 144971,
+      "outputSha256": "2512c7d597ca1be15903bb4cb8d2dde01e7756efd30f65a2e1ce8599acaafaaa",
+      "outputImage": {
+        "width": 512,
+        "height": 512,
+        "channels": 4,
+        "alphaMin": 0,
+        "alphaMax": 255,
+        "transparentPixels": 127052,
+        "partialAlphaPixels": 134109,
+        "cornerAlpha": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "nonzeroAlphaBounds": {
+          "left": 16,
+          "top": 85,
+          "width": 480,
+          "height": 342
+        }
+      },
+      "valid": true
+    },
+    {
+      "id": "virgin",
+      "label": "Virgin",
+      "filename": "virgin.png",
+      "source": "masters/virgin.png",
+      "output": "png/virgin.png",
+      "sourceBytes": 629650,
+      "sourceSha256": "ccde88b7aede21ab3de2893ddc7005cddfd7150a443a6b2cc54f5a8bbac8b567",
+      "sourceImage": {
+        "width": 938,
+        "height": 1677,
+        "channels": 4,
+        "alphaMin": 0,
+        "alphaMax": 255,
+        "transparentPixels": 1153085,
+        "partialAlphaPixels": 418674,
+        "cornerAlpha": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "nonzeroAlphaBounds": {
+          "left": 17,
+          "top": 11,
+          "width": 902,
+          "height": 1645
+        }
+      },
+      "exportCrop": {
+        "left": 17,
+        "top": 11,
+        "width": 902,
+        "height": 1645
+      },
+      "exportCropReason": "Exact nonzero-alpha bounding box; only fully transparent outer canvas is cropped.",
+      "fittedDimensions": {
+        "width": 263,
+        "height": 480
+      },
+      "padding": {
+        "left": 124,
+        "top": 16,
+        "right": 125,
+        "bottom": 16
+      },
+      "outputBytes": 78829,
+      "outputSha256": "7a266cda18020393949207713e92b94ec5b962ddca8776ef8a8186ee7c606a5f",
+      "outputImage": {
+        "width": 512,
+        "height": 512,
+        "channels": 4,
+        "alphaMin": 0,
+        "alphaMax": 255,
+        "transparentPixels": 225240,
+        "partialAlphaPixels": 35749,
+        "cornerAlpha": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "nonzeroAlphaBounds": {
+          "left": 124,
+          "top": 16,
+          "width": 263,
+          "height": 480
+        }
+      },
+      "valid": true
+    },
+    {
+      "id": "wojak",
+      "label": "Wojak",
+      "filename": "wojak.png",
+      "source": "masters/wojak.png",
+      "output": "png/wojak.png",
+      "sourceBytes": 744494,
+      "sourceSha256": "a0bcb2ccbdcf51f6079983bd7db340f4a87725469fcbd146cad65f9d5b2d6241",
+      "sourceImage": {
+        "width": 1139,
+        "height": 1381,
+        "channels": 4,
+        "alphaMin": 0,
+        "alphaMax": 255,
+        "transparentPixels": 591916,
+        "partialAlphaPixels": 979760,
+        "cornerAlpha": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "nonzeroAlphaBounds": {
+          "left": 18,
+          "top": 31,
+          "width": 1108,
+          "height": 1340
+        }
+      },
+      "exportCrop": {
+        "left": 18,
+        "top": 31,
+        "width": 1108,
+        "height": 1340
+      },
+      "exportCropReason": "Exact nonzero-alpha bounding box; only fully transparent outer canvas is cropped.",
+      "fittedDimensions": {
+        "width": 397,
+        "height": 480
+      },
+      "padding": {
+        "left": 57,
+        "top": 16,
+        "right": 58,
+        "bottom": 16
+      },
+      "outputBytes": 114696,
+      "outputSha256": "b74b8f0affe1aed98ec21db887285fea666cbb65dad1dd58b24edce7781870d5",
+      "outputImage": {
+        "width": 512,
+        "height": 512,
+        "channels": 4,
+        "alphaMin": 0,
+        "alphaMax": 255,
+        "transparentPixels": 135875,
+        "partialAlphaPixels": 125050,
+        "cornerAlpha": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "nonzeroAlphaBounds": {
+          "left": 57,
+          "top": 16,
+          "width": 397,
+          "height": 477
+        }
+      },
+      "valid": true
+    },
+    {
+      "id": "zoomer",
+      "label": "Zoomer",
+      "filename": "zoomer.png",
+      "source": "masters/zoomer.png",
+      "output": "png/zoomer.png",
+      "sourceBytes": 617279,
+      "sourceSha256": "f8e57bc764a09f26e40c2a3b2b0bf0ce5cbf8cbf82bb510ccf4761d53982f7a0",
+      "sourceImage": {
+        "width": 1672,
+        "height": 940,
+        "channels": 4,
+        "alphaMin": 0,
+        "alphaMax": 255,
+        "transparentPixels": 1036522,
+        "partialAlphaPixels": 534663,
+        "cornerAlpha": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "nonzeroAlphaBounds": {
+          "left": 0,
+          "top": 15,
+          "width": 1359,
+          "height": 925
+        }
+      },
+      "exportCrop": {
+        "left": 355,
+        "top": 14,
+        "width": 931,
+        "height": 926
+      },
+      "exportCropReason": "Crop coordinates use alpha > 1 bounds expanded by two source pixels on each side (clamped to image bounds), excluding distant alpha=1 canvas noise from the framing. No alpha or color values inside the crop are changed before resizing.",
+      "fittedDimensions": {
+        "width": 480,
+        "height": 477
+      },
+      "padding": {
+        "left": 16,
+        "top": 17,
+        "right": 16,
+        "bottom": 18
+      },
+      "outputBytes": 186604,
+      "outputSha256": "2c6e3493047a30e90a2bc758a3f386570b580478655a6ef704233ec775075e44",
+      "outputImage": {
+        "width": 512,
+        "height": 512,
+        "channels": 4,
+        "alphaMin": 0,
+        "alphaMax": 255,
+        "transparentPixels": 119696,
+        "partialAlphaPixels": 141662,
+        "cornerAlpha": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "nonzeroAlphaBounds": {
+          "left": 17,
+          "top": 17,
+          "width": 479,
+          "height": 477
+        }
+      },
+      "valid": true
+    }
+  ]
+}

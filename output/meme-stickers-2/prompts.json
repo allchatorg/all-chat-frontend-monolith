@@ -1,0 +1,238 @@
+{
+  "mode": "built-in ImageGen",
+  "export": "Transparent-canvas crop, proportional resize, transparent padding, lossless PNG encoding using Sharp",
+  "images": [
+    {
+      "id": "apu-apustaja",
+      "sourceFilename": "Apu Apustaja.jpeg",
+      "output": "png/apu-apustaja.png",
+      "mode": "built-in ImageGen",
+      "transparentBackground": true,
+      "finalPrompt": "Use case: background-extraction\nAsset type: transparent PNG chat sticker\nInput image: edit target Apu Apustaja.jpeg.\nPrimary request: Remove only all external white background around the original green frog in the blue shirt. Output the entire originally visible frog and shirt as an isolated clean cutout with genuine alpha transparency.\nConstraints: Preserve the exact original facial expression, eyes, head shape, mouth, pose, green and blue colors, black outlines and hand-drawn style. Preserve the white eyes and their highlights as solid white, never transparent. Keep every part of the originally visible subject, including its original flat cropped lower edge; do not invent missing body. Center with a small transparent margin. Retain original drawing without redrawing as far as possible. Clean antialiased alpha edges. No new white border, no sticker outline, no shadow, no background, no text, no objects.",
+      "notes": "Output preserves subject design but imagegen has cleaned and slightly refined source linework; not bit-identical source pixels."
+    },
+    {
+      "id": "big-brain-wojak",
+      "sourceFilename": "Big brain wojak.jpg",
+      "output": "png/big-brain-wojak.png",
+      "mode": "built-in ImageGen",
+      "transparentBackground": true,
+      "finalPrompt": "Use case: background-extraction\nAsset type: transparent PNG chat sticker\nInput image: edit target Big brain wojak.jpg.\nPrimary request: Remove only the external white background surrounding this seated big-brain Wojak drawing. Output the entire originally visible seated figure, enormous brain shaped chair/head, glasses, cigarette and smoke as one isolated cutout with genuine alpha transparency.\nConstraints: Preserve the exact original proportions, thin black and grey linework, face, pose, glasses, fingers, legs, feet, brain texture and expression. White areas enclosed within the subject including the entire brain-chair structure and human body must remain fully opaque white. Remove external white background from open gaps, for example around the hand and arm. Keep original crop and all subject parts. Do not redraw or stylize. Center with a small transparent margin. Clean antialiased alpha edges. No new border, no shadow, no text, no new objects. Do not turn the white subject transparent.",
+      "notes": "Output preserves subject design but imagegen has cleaned and slightly refined source linework; not bit-identical source pixels."
+    },
+    {
+      "id": "bloomer",
+      "sourceFilename": "Bloomer.jpg",
+      "output": "png/bloomer.png",
+      "mode": "built-in ImageGen",
+      "transparentBackground": true,
+      "finalPrompt": "Use case: background-extraction\nAsset type: transparent PNG chat sticker\nInput image: edit target Bloomer.jpg.\nPrimary request: Remove the entire pale mint sky and yellow wheat/grass background around the smiling Bloomer figure. Isolate only the complete originally visible head, neck and blue hoodie on genuine alpha transparency.\nConstraints: Preserve the exact original face, delighted smile, eye shape, head and shoulder proportions, pose, blue hoodie color, white skin, black linework and simple meme drawing style. Preserve opaque white face, teeth and hoodie trim. Keep all originally visible subject including original cropped lower and left edges; do not invent missing body. Retain source without redrawing wherever possible. Center with a small transparent margin. Clean antialiased alpha edges. No added white sticker border, no shadow, no background, no text, no new objects.",
+      "notes": "Output preserves subject design but imagegen has cleaned and slightly refined source linework; not bit-identical source pixels."
+    },
+    {
+      "id": "chad-1",
+      "sourceFilename": "Chad_1.png",
+      "output": "png/chad-1.png",
+      "mode": "built-in ImageGen",
+      "transparentBackground": true,
+      "finalPrompt": "Use case: background-extraction\nAsset type: transparent PNG chat sticker\nInput image: edit target Chad_1.png.\nPrimary request: Remove only all external pale grey/white background surrounding the cartoon Chad. Output the entire visible full-body figure, both outstretched hands, yellow hair, pink tank top, green trousers and yellow boots as one isolated cutout on genuine alpha transparency. Remove the background in the gaps between legs and between arms and torso too.\nConstraints: Preserve the exact original goofy pose, proportions, face, fingers, colors, black linework, original rough meme drawing style, cyan trouser squiggles and the original white handwritten tank-top text. Preserve opaque eye whites and text. Do not smooth or redraw the character. Keep all original subject extremities. Center with a small transparent margin. Clean antialiased alpha edges. No new border, no shadow, no background, no new text or objects.",
+      "notes": "Source had an alpha channel but every alpha pixel was 255. Extraction used imagegen. Output preserves design but linework is cleaner than source."
+    },
+    {
+      "id": "chad-2",
+      "sourceFilename": "Chad_2 (needs background removed).jpg",
+      "output": "png/chad-2.png",
+      "mode": "built-in ImageGen",
+      "transparentBackground": true,
+      "finalPrompt": "Use case: background-extraction\nAsset type: transparent PNG chat sticker\nInput image: edit target Chad_2 (needs background removed).jpg.\nPrimary request: Remove only the white background surrounding the side-profile blonde bearded Chad head, neck and black shirt collar. Output the complete original visible subject as an isolated clean cutout on genuine alpha transparency.\nConstraints: Preserve exact original face, profile, hairstyle, beard curls and hair lines, eye, expression, proportions, outline shape, colors and hand-drawn meme style. Preserve all opaque whites inside the subject such as eye whites. Keep entire original collar without extending body. Retain original drawing without redrawing or stylizing wherever possible. Center with a small transparent margin. Clean antialiased alpha edges. No added white border, no shadow, no text, no background, no new objects.",
+      "notes": "Output preserves subject design but imagegen has cleaned and slightly refined source linework; not bit-identical source pixels."
+    },
+    {
+      "id": "chudjak",
+      "sourceFilename": "Chudjak (needs background removed).jpg",
+      "output": "png/chudjak.png",
+      "mode": "built-in ImageGen",
+      "transparentBackground": true,
+      "finalPrompt": "Use case: background-extraction\nAsset type: transparent PNG chat sticker\nInput image: edit target Chudjak (needs background removed).jpg.\nPrimary request: Remove only the external white background outside the black outline of the Chudjak head including the ears. Output the entire originally visible head as an isolated cutout with genuine alpha transparency outside its silhouette.\nConstraints: The entire face, forehead, ears, glasses lenses, eye whites, nose and lips enclosed by the outer head silhouette must remain solid fully opaque white. Preserve exact original frowning expression, shape, proportions, black hair and brows, eyeglasses, original thin black linework and meme drawing style. Keep original flat white and black colors. Retain source pixels without redrawing wherever possible. No holes, no semitransparency anywhere inside the head. Clean closed antialiased outline, no exterior remnants. Center with a small transparent margin. No new white sticker border, no shadows, no background, no text, no new objects.",
+      "notes": "Output preserves subject design but imagegen has cleaned and slightly refined source linework; not bit-identical source pixels."
+    },
+    {
+      "id": "coomer",
+      "sourceFilename": "Coomer.png",
+      "output": "png/coomer.png",
+      "mode": "built-in ImageGen",
+      "transparentBackground": true,
+      "finalPrompt": "Use case: background-extraction\nAsset type: transparent PNG chat sticker\nInput image: edit target; remove background only.\nPrimary request: Create a clean faithful cutout of this exact provided meme image on genuinely transparent background with alpha.\nSubject: The complete existing Coomer meme head and visible neck, with the same scribbled brown hair and beard, black bloodshot eyes, and grin. Preserve white face, white neck, teeth, and all internal facial details.\nComposition: Center the complete original visible subject with small transparent margins. Keep every original visible portion and do not crop further.\nConstraints: Preserve exact face, expression, proportions, colors, linework, details, style and pose. Do not redraw, reinterpret, beautify or add content. Preserve opaque white areas inside the subject. Remove only external background including stray exterior specks or baked checkerboard. Clean soft antialiased alpha edges; no rectangular matte, no new sticker border, no shadow, no text, no objects.",
+      "notes": "ImageGen slightly smooths/reproduces linework; inspect bottom cut edge after sizing."
+    },
+    {
+      "id": "doomer",
+      "sourceFilename": "Doomer.jpeg",
+      "output": "png/doomer.png",
+      "mode": "built-in ImageGen",
+      "transparentBackground": true,
+      "finalPrompt": "Use case: background-extraction\nAsset type: transparent PNG chat sticker\nInput image: edit target; remove background only.\nPrimary request: Create a clean faithful cutout of this exact provided meme image on genuinely transparent background with alpha.\nSubject: The complete existing Doomer meme bust wearing a black beanie and black hoodie with brown neckline, including his cigarette and its tiny wisp of smoke. Preserve the white face and neck, the original neutral expression, and exact black clothing silhouette.\nComposition: Center the complete original visible subject with small transparent margins. Keep every original visible portion and do not crop further.\nConstraints: Preserve exact face, expression, proportions, colors, linework, details, style and pose. Do not redraw, reinterpret, beautify or add content. Preserve opaque white areas inside the subject. Remove only external background including stray exterior specks or baked checkerboard. Clean soft antialiased alpha edges; no rectangular matte, no new sticker border, no shadow, no text, no objects.",
+      "notes": "Built-in lightly smooths linework; subject, clothing and cigarette retained."
+    },
+    {
+      "id": "dumb-wojak",
+      "sourceFilename": "Dumb wojak.jpg",
+      "output": "png/dumb-wojak.png",
+      "mode": "built-in ImageGen",
+      "transparentBackground": true,
+      "finalPrompt": "Use case: background-extraction. Edit the provided transparent Dumb Wojak sticker image, keeping the entire character face and linework exactly as provided. Fix only its bottom crop edge: remove the ragged white fringe below the bust and terminate the white torso in one clean straight horizontal softly antialiased edge. Keep all visible face, neck, shoulder details, blue drool and proportions unchanged. Keep white inside the character opaque. Genuinely transparent alpha background, no outlines added, no backdrop, no new shadows or objects. Center whole visible subject with a small transparent margin all around.",
+      "earlierPrompts": [
+        "Use case: background-extraction\nAsset type: transparent PNG chat sticker\nInput image: edit target; remove background only.\nPrimary request: Create a clean faithful cutout of this exact provided meme image on genuinely transparent background with alpha.\nSubject: The complete existing distorted goofy Wojak head, visible white neck and shoulder/chest region, original crescent-shaped head silhouette, eyes, black mouth, and small blue drool. Preserve all original linework and the white interior of the character; close the bottom visible bust region naturally at the original image boundary without inventing new anatomy.\nComposition: Center the complete original visible subject with small transparent margins. Keep every original visible portion and do not crop further.\nConstraints: Preserve exact face, expression, proportions, colors, linework, details, style and pose. Do not redraw, reinterpret, beautify or add content. Preserve opaque white areas inside the subject. Remove only external background including stray exterior specks or baked checkerboard. Clean soft antialiased alpha edges; no rectangular matte, no new sticker border, no shadow, no text, no objects."
+      ],
+      "notes": "Initial generation had ragged bottom edge; repaired with second built-in edit. Tiny lower fringe may remain at full resolution."
+    },
+    {
+      "id": "gigachad",
+      "sourceFilename": "Gigachad.jpg",
+      "output": "png/gigachad.png",
+      "mode": "built-in ImageGen",
+      "transparentBackground": true,
+      "finalPrompt": "Use case: background-extraction\nAsset type: transparent PNG chat sticker\nInput image: edit target; remove background only.\nPrimary request: Create a clean faithful cutout of this exact provided meme image on genuinely transparent background with alpha.\nSubject: The complete existing black-and-white photographic male portrait, including all currently visible head, hair, beard, neck, shoulders and chest. Preserve his exact identity, grin, proportions, crop, realistic grayscale detail and original pose. Remove only the gray studio backdrop around his silhouette; do not change him or turn the photo into an illustration.\nComposition: Center the complete original visible subject with small transparent margins. Keep every original visible portion and do not crop further. The original lower portrait crop should be a clean straight edge.\nConstraints: Preserve exact face, expression, proportions, colors, details, style and pose. Do not redraw, reinterpret, beautify or add content. Entire subject is fully opaque, no transparency holes inside subject. Remove only external background. Clean soft antialiased alpha edges; no ragged fringe, no disconnected speckles, no rectangular matte, no new sticker border, no shadow, no text, no objects.",
+      "notes": "Preserved grayscale photographic subject, tiny pale edge fringe in isolated areas."
+    },
+    {
+      "id": "gondola",
+      "sourceFilename": "Gondola (needs background removed).jpeg",
+      "output": "png/gondola.png",
+      "mode": "built-in ImageGen",
+      "transparentBackground": true,
+      "finalPrompt": "Use case: background-extraction\nAsset type: transparent PNG chat sticker\nInput image: edit target; remove background only.\nPrimary request: Create a clean faithful cutout of this exact provided meme image on genuinely transparent background with alpha.\nSubject: The complete existing brown Gondola character, including the same orange mouth, black dot eyes, long legs and both feet. Remove background outside AND the white background gap between his legs; preserve solid brown inside the complete silhouette.\nComposition: Center the complete original visible subject with small transparent margins. Keep every original visible portion and do not crop further.\nConstraints: Preserve exact face, expression, proportions, colors, linework, details, style and pose. Do not redraw, reinterpret, beautify or add content. Preserve flat solid original colors. Entire subject is fully opaque, no alpha holes inside the body or feet. Remove only external background including gap between legs. Clean soft antialiased alpha edges; no ragged fringe, no disconnected speckles, no rectangular matte, no new sticker border, no shadow, no text, no objects.",
+      "notes": "Built-in subtly smooths linework. Visible character all retained."
+    },
+    {
+      "id": "grug",
+      "sourceFilename": "Grug.jpg",
+      "output": "png/grug.png",
+      "mode": "built-in ImageGen",
+      "transparentBackground": true,
+      "finalPrompt": "Use case: background-extraction\nAsset type: transparent PNG chat sticker\nInput image: edit target; remove background only.\nPrimary request: Create a clean faithful cutout of this exact provided meme image on genuinely transparent background with alpha.\nSubject: The complete existing Grug cave-man Wojak drawing, including white face and visible white neck/torso, black hair and facial linework, orange spotted garment, and the brown club behind his shoulders with gray detail. Preserve the exact expression, line style, pose and existing crop; the club and outfit are part of the subject.\nComposition: Center the complete original visible subject with small transparent margins. Keep every original visible portion and do not crop further. Original bottom bust crop should become a clean straight lower edge, retaining all currently visible original subject.\nConstraints: Preserve exact face, expression, proportions, colors, linework, details, style and pose. Do not redraw, reinterpret, beautify or add content. Preserve flat solid original colors and opaque white areas inside the subject. Entire subject is fully opaque, no alpha holes inside face, neck, club or clothing. Remove only external background. Clean soft antialiased alpha edges; no ragged fringe, no disconnected speckles, no rectangular matte, no new sticker border, no shadow, no text, no objects.",
+      "notes": "Built-in smooths linework. Club and garment retained. Bottom original crop edge retained."
+    },
+    {
+      "id": "honkler",
+      "sourceFilename": "Honkler (needs background removed).jpg",
+      "output": "png/honkler.png",
+      "mode": "built-in ImageGen",
+      "transparentBackground": true,
+      "finalPrompt": "Use case: background-extraction. Asset type: transparent PNG chat sticker. Input image: edit target, Honkler cartoon clown frog. Remove only the plain white external background. Preserve the exact original rainbow afro wig, black contour lines, green frog face, eye pupils and white eyes, glossy red clown nose, brown mouth, blue clothing, and light blue bow tie with white polka dots. Keep the exact expression, pose, proportions, colors, linework, and full original visible subject. Retain the straight cropped base of the original clothing. Do not redraw, restyle, invent, add objects, text, shadows, or a sticker outline. Isolate and center the original subject on genuine transparent canvas with a little transparent margin and clean antialiased alpha edges. All white within the eyes and bow tie stays fully opaque. Background must have actual alpha transparency, not white or checkerboard pixels.",
+      "notes": "Minor regeneration smoothing; original pose and expression retained."
+    },
+    {
+      "id": "npc",
+      "sourceFilename": "NPC.jpg",
+      "output": "png/npc.png",
+      "mode": "built-in ImageGen",
+      "transparentBackground": true,
+      "finalPrompt": "Use case: background-extraction. Asset type: transparent PNG chat sticker. Input image: edit target, grey NPC meme portrait on a solid black background. Remove only the black external background. Keep the exact original grey head, neck and torso, grey fill, small black eyes, angular black nose, black straight mouth and black face/body contour marks. Preserve original shape, pose, blank expression, proportions, jagged hand-drawn linework and all original visible parts without redrawing or inventing anything. The black line details on the figure are foreground and must remain opaque. Keep the original straight cropped bottom of the torso. Center subject on genuine transparent canvas with a little transparent margin and clean antialiased alpha edges. Do not add a white sticker outline, text, shadows, colors, clothing or objects. Actual alpha transparency outside the subject, not a black background, white background or checkerboard.",
+      "notes": "Minor regeneration smoothing; original pose and blank expression retained."
+    },
+    {
+      "id": "pepe",
+      "sourceFilename": "Pepe (needs background removed).jpg",
+      "output": "png/pepe.png",
+      "mode": "built-in ImageGen",
+      "transparentBackground": true,
+      "finalPrompt": "Use case: background-extraction. Asset type: transparent PNG chat sticker. Input image: edit target, Pepe frog close-up portrait with blue shirt. Remove only the pale grey lavender external background. Preserve the exact original green frog face, large glossy black pupils and white eyes, orange brown lips, blue shirt and thin black contours. Keep the exact face, expression, pose, proportions, muted color values, linework and all original visible subject. Preserve the source clipping of head top, left cheek and shirt base as originally shown; do not complete or invent unseen portions. Do not redraw, stylize, change expression or sharpen into a new style. Center the visible original cutout on genuine transparent canvas with a little transparent margin and clean soft antialiased alpha edges. Keep all white inside eyes fully opaque. Do not add a white sticker outline, shadows, text, objects or checkerboard. Actual alpha transparency outside the original subject. Critical quality correction: the green face must be solid opaque original muted green everywhere, with no holes, blotches, speckles, transparency islands, gradients or noise. Preserve a clean uniform face fill matching the source. Remove background only, never any green within the face. Source clipping of the top and left edge is intentional; retain it.",
+      "earlierPrompts": [
+        "Use case: background-extraction. Asset type: transparent PNG chat sticker. Input image: edit target, Pepe frog close-up portrait with blue shirt. Remove only the pale grey lavender external background. Preserve the exact original green frog face, large glossy black pupils and white eyes, orange brown lips, blue shirt and thin black contours. Keep the exact face, expression, pose, proportions, muted color values, linework and all original visible subject. Preserve the source clipping of head top, left cheek and shirt base as originally shown; do not complete or invent unseen portions. Do not redraw, stylize, change expression or sharpen into a new style. Center the visible original cutout on genuine transparent canvas with a little transparent margin and clean soft antialiased alpha edges. Keep all white inside eyes fully opaque. Do not add a white sticker outline, shadows, text, objects or checkerboard. Actual alpha transparency outside the original subject."
+      ],
+      "notes": "First output discarded for cheek blotch; repair clean. Minor smoothing of original lines."
+    },
+    {
+      "id": "rage-pepe",
+      "sourceFilename": "Rage pepe.jpg",
+      "output": "png/rage-pepe.png",
+      "mode": "built-in ImageGen",
+      "transparentBackground": true,
+      "finalPrompt": "Use case: background-extraction. Asset type: transparent PNG chat sticker. Input image: edit target, red-tinted screaming rage Pepe cartoon. Remove only the flat pink external background surrounding the frog. Preserve original orange-red frog head, furious wide eyes, huge open red mouth with darker interior, long tongue stretching right, raised hand at lower right, original red color cast, deliberate blur, jittered/doubled motion contours, expression, pose, all motion marks near tongue, proportions and all original visible parts. Keep exact image style and colors; do not redraw or sharpen or restyle. Pink eye whites and pink mouth opening areas that are part of the figure remain opaque, while external empty space between tongue and hand is transparent. Keep original frame crop where visible subject touches source edges. Center the entire original visible cutout on real transparent canvas with a small transparent margin and clean softly antialiased alpha edges. No white sticker outline, new shadows, text or objects. Actual alpha transparency outside the foreground, never checkerboard or pink backdrop.",
+      "notes": "Preserves intentional motion blur and red cast. Original frame crop retained."
+    },
+    {
+      "id": "smug-pepe",
+      "sourceFilename": "Smug pepe (needs background removed).jpeg",
+      "output": "png/smug-pepe.png",
+      "mode": "built-in ImageGen",
+      "transparentBackground": true,
+      "finalPrompt": "Use case: precise-object-edit. Image 1 is edit target. Image 2 is original color reference. Repair missing pixels. Paint the entire interior of the whole frog opaque solid flat green, alpha255, zero transparency holes. Restore the damaged faded circular chest region at lower left, below mouth and left of hand, so it perfectly matches solid flat original green skin color and is fully opaque. Use image 2 to restore the original plain green shape through the full lower-left chest region to original straight bottom edge. Keep black outlines, brown mouth, white eyes, hand gesture and expression untouched. Keep the surrounding exterior background transparent. No new marks, shading, gradients or changes to pose or shape. The large blank green chest below the face is part of the foreground frog, keep it entirely present.",
+      "earlierPrompts": [
+        "Use case: background-extraction. Asset type: transparent PNG chat sticker. Input image: edit target, dark green smug Pepe frog with hands together by chin. Remove only the plain white external background, including the empty white gap between the fingers. Preserve exact original face, sly expression, pose, hands and fingers, proportions, flat dark green fill, brown lips, black contours and white eyes. All white within eyes stays fully opaque. Entire subject must stay fully opaque with original uniform flat colors, no holes, blotches, gradients or noise. Keep original image crop along left and bottom edges; do not invent unseen portions. Do not redraw, restyle, smooth the cartoon into a different style, add text or objects. Center original visible subject on actual transparent canvas with a little margin and clean softly antialiased alpha edges. No white sticker border, no remaining white background, no checkerboard pixels, no shadows.",
+        "Use case: background-extraction. Asset type: transparent PNG chat sticker. Input image: edit target, dark green smug Pepe frog with hands together by chin. Remove only the plain white external background, including the empty white gap between the fingers. Preserve exact original face, sly expression, pose, hands and fingers, proportions, flat dark green fill, brown lips, black contours and white eyes. All white within eyes stays fully opaque. Entire subject must stay fully opaque with original uniform flat colors, no holes, blotches, gradients or noise. Keep original image crop along left and bottom edges; do not invent unseen portions. Do not redraw, restyle, smooth the cartoon into a different style, add text or objects. Center original visible subject on actual transparent canvas with a little margin and clean softly antialiased alpha edges. No white sticker border, no remaining white background, no checkerboard pixels, no shadows. Quality requirement: use flat solid opaque dark green fill across entire face, neck and body. No variations, smudges, patches, dark spots or transparency in the green fill at all. The lower left body area especially must be a completely clean uniform opaque green. Do a faithful background-only extraction of the supplied original.",
+        "Use case: background-extraction repair. Input image 1 is edit target, an already transparent smug Pepe sticker. Input image 2 is original reference for exact original solid fill. Make exactly one correction: completely repair the damaged lower-left chest area of image 1 below the mouth and left of the hand, replacing that blotch and partially erased area with uniform solid opaque dark green matching the adjacent frog skin and original image 2. The lower-left chest must form an unbroken opaque silhouette. Keep all other pixels, subject shape, face, sly expression, eyes, hand pose, black outlines, brown lips and transparent outside unchanged. Preserve alpha transparency outside frog and through the finger gap. Preserve full opacity everywhere inside frog. Center on transparent canvas with margin; no new objects, text, white outline, gradients or shadows.",
+        "Extract this original smug green frog as one intact opaque sticker with transparent background. Only replace white outside the frog and white between his fingers with alpha transparency. Keep the white eyes opaque. Keep the whole green frog completely solid and opaque, including the very large plain green chest at lower left. This chest is part of the frog and is not background. Do not alter any of the face, hands, black outlines, brown lips, original uniform green skin or original cropped proportions. No holes anywhere in his head, neck or body. No recoloring or added shading. Keep a little transparent border around the cutout. The entire frog must be uniformly alpha 255 except its antialiased outside edge. Original image is sole edit target."
+      ],
+      "notes": "Earlier outputs discarded due to chest transparency hole; fifth output restored opacity. Final subject slightly brighter green and smoother linework than original."
+    },
+    {
+      "id": "smug-wojak",
+      "sourceFilename": "Smug wojak.jpg",
+      "output": "png/smug-wojak.png",
+      "mode": "built-in ImageGen",
+      "transparentBackground": true,
+      "finalPrompt": "Use case: background-extraction. Asset type: transparent PNG chat sticker. Edit original supplied black and white smug Wojak portrait into a background-free sticker. Remove white background only outside his full visible silhouette of bald head, neck, shoulders and hand at chin, and the enclosed empty gap between fingers. All white fill INSIDE head, face, body and fingers must stay solid opaque white. Preserve exact original expression, eyes, smirk, eyebrow and forehead wrinkles, nose, hand gesture, head shape, proportions, thin irregular black hand-drawn lines and original frame crop of neck/hand at bottom. No restyling or redrawing. Entire interior of this person is opaque white alpha255, zero transparency holes. Center original visible subject on a true transparent canvas with some margin. Clean antialiased outside edge. No added white sticker outline beyond original subject, no shadow, extra text, objects or checkerboard.",
+      "notes": "Minor original linework smoothing. Original expression and gesture retained."
+    },
+    {
+      "id": "soyjak-1",
+      "sourceFilename": "Soyjak_1 (needs background removed).jpg",
+      "output": "png/soyjak-1.png",
+      "mode": "built-in ImageGen",
+      "transparentBackground": true,
+      "finalPrompt": "Use case: background-extraction. Asset type: transparent PNG chat sticker. Input image is the edit target. Remove only the exterior white background from the provided Soyjak drawing. Preserve the exact white face, neck, shoulders, glasses, beard stubble, black linework, open mouth, proportions, pose, expression, style and all visible subject detail from the original. White inside the subject must stay opaque. Isolate the entire original bust, including both shoulders as visible, on a genuinely transparent alpha canvas, centered with small clear padding around all sides. Clean edges with smooth anti-aliasing. No redraw, no new outline, no thick white sticker border, no shadow, no background/checkerboard baked in, no added text or objects. Preserve original subject faithfully.",
+      "notes": "Original subject preserved; linework slightly smoothed by image editing."
+    },
+    {
+      "id": "soyjak-2",
+      "sourceFilename": "Soyjak_2.jpg",
+      "output": "png/soyjak-2.png",
+      "mode": "built-in ImageGen",
+      "transparentBackground": true,
+      "finalPrompt": "Use case: background-extraction. Asset type: transparent PNG chat sticker. Input image: edit target. Remove exterior white background. Keep the entire front-facing white head, enormous black open mouth with white teeth, rectangular glasses, beard stubble and visible shoulders. All white face/neck/shoulder areas are opaque subject, not background. Keep original proportions, facial expression and black rough linework. Isolate only this same original subject on genuine fully transparent RGBA canvas, center with 4% clear padding. Keep original style and content with maximum fidelity, no redraw, no new elements, no thick white border, no outline added, no shadow, no scene, no checkerboard. Edges should follow the original silhouette cleanly, preserving anti-aliasing; no white background remnants or disconnected speckles outside subject. Close any cropped lower bust edge neatly.",
+      "notes": "Original subject preserved; linework slightly smoothed by image editing."
+    },
+    {
+      "id": "spurdo",
+      "sourceFilename": "Spurdo (needs background removed).jpg",
+      "output": "png/spurdo.png",
+      "mode": "built-in ImageGen",
+      "transparentBackground": true,
+      "finalPrompt": "Precise image repair. Image 1 is a transparent sticker edit target with WRONG transparent blotches inside the brown bear face. Image 2 is the original source, showing what the solid brown fill should look like. REPAIR the missing brown pixels/holes on both cheeks and between eyes. Paint the entire brown interior as opaque solid flat brown (#965C3C) alpha 255. No translucent patches anywhere inside the character. Keep the eyes, mouth, yellow muzzle, pink interior, black outer contour and the external transparent background. Keep exact same bear head and expression. This is flat solid-color cartoon sticker art: remove gradients/shading/lighting from the brown areas. Only area OUTSIDE the outer black silhouette is transparent. Do not treat brown fur as background. Export a clean RGBA PNG with all the original opaque interior colors preserved, transparency only on the exterior.",
+      "earlierPrompts": [
+        "Use case: background-extraction. Asset type: transparent PNG chat sticker. Input image: edit target. Remove exterior white background surrounding brown bear head. Keep exact brown bear head silhouette, yellow muzzle, pink mouth, black nose/eyes/outlines. Preserve exact colors, face, aspect ratio and style. The small watermark in external background is background rather than part of the character. Isolate only this same original subject on genuine fully transparent RGBA canvas, center with 4% clear padding. Keep original style and content with maximum fidelity, no redraw, no new elements, no thick white border, no outline added, no shadow, no scene, no checkerboard. Edges should follow the original silhouette cleanly, preserving anti-aliasing; no white background remnants or disconnected speckles outside subject. Close any cropped lower bust edge neatly.",
+        "Use case: background-extraction. Edit target: original flat-color brown bear meme head in the input image. Make a transparent PNG sticker by removing ONLY the exterior white background. The full area INSIDE the outer black head silhouette MUST be solid opaque, alpha 255 everywhere inside, including the large brown cheek on the right and the brown areas between/around the eyes. There must be ZERO TRANSPARENCY HOLES inside this cartoon head. Use the EXACT original flat uniform brown fill, pale yellow muzzle, pink mouth, black outlines and eyes. No gradients, lighting, shading, blotches, watercolor or texture whatsoever. Preserve the exact head, expression, drawing, proportions, line positions and flat colors from the source. Clean true transparent background alpha 0 outside the head, transparent padding 4% on all sides. No outlines added, no sticker border, no text, no shadows. All character fill stays entirely opaque."
+      ],
+      "notes": "Built-in edit smoothed artwork slightly; transparent interior artifacts repaired by targeted edit."
+    },
+    {
+      "id": "virgin",
+      "sourceFilename": "Virgin.jpg",
+      "output": "png/virgin.png",
+      "mode": "built-in ImageGen",
+      "transparentBackground": true,
+      "finalPrompt": "Use case: background-extraction. Asset type: transparent PNG chat sticker. Input image: edit target. Remove exterior white background around and BETWEEN the character's legs/limbs. Keep entire full-length walking male cartoon character exactly as original, including black hair, glasses, pale face and hands, dark jacket and trousers, and both white shoes; preserve exact posture, expression and line art. White shoes and skin stay opaque. Isolate only this same original subject on genuine fully transparent RGBA canvas, center with 4% clear padding. Keep original style and content with maximum fidelity, no redraw, no new elements, no thick white border, no outline added, no shadow, no scene, no checkerboard. Edges should follow the original silhouette cleanly, preserving anti-aliasing; no white background remnants or disconnected speckles outside subject. Close any cropped lower bust edge neatly.",
+      "notes": "Original subject preserved; linework slightly smoothed by image editing."
+    },
+    {
+      "id": "wojak",
+      "sourceFilename": "Wojak.jpg",
+      "output": "png/wojak.png",
+      "mode": "built-in ImageGen",
+      "transparentBackground": true,
+      "finalPrompt": "Use case: background-extraction. Asset type: transparent PNG chat sticker. Input image: edit target. Remove ONLY the solid BLACK EXTERIOR background around the white Wojak bust. Preserve the opaque white head/neck/shoulders and all the internal black facial lines/eyes, same neutral expression, proportions, original jagged line drawing style. Separate external black background from necessary black face details. Keep the entire original visible bust. Isolate only this same original subject on genuine fully transparent RGBA canvas, center with 4% clear padding. Keep original style and content with maximum fidelity, no redraw, no new elements, no thick white border, no outline added, no shadow, no scene, no checkerboard. Edges should follow the original silhouette cleanly, preserving anti-aliasing; no white background remnants or disconnected speckles outside subject. Close any cropped lower bust edge neatly.",
+      "notes": "Original subject preserved; linework slightly smoothed by image editing."
+    },
+    {
+      "id": "zoomer",
+      "sourceFilename": "Zoomer (needs background removed).png",
+      "output": "png/zoomer.png",
+      "mode": "built-in ImageGen",
+      "transparentBackground": true,
+      "finalPrompt": "Use case: background-extraction. Asset type: transparent PNG chat sticker. Input image: edit target. Remove exterior white background around the glasses-wearing Zoomer head/neck/shoulders. Keep all white skin opaque, all brown-and-black hair with exact original cropped shape, glasses, dotted shaved hair detail, eyebrows and entire visible original bust. Preserve exact expression, proportions, colors and intentionally rough pixel line art style. No added hair or expanded anatomy. Isolate only this same original subject on genuine fully transparent RGBA canvas, center with 4% clear padding. Keep original style and content with maximum fidelity, no redraw, no new elements, no thick white border, no outline added, no shadow, no scene, no checkerboard. Edges should follow the original silhouette cleanly, preserving anti-aliasing; no white background remnants or disconnected speckles outside subject. Close any cropped lower bust edge neatly.",
+      "notes": "Original subject preserved; linework slightly smoothed by image editing."
+    }
+  ]
+}

@@ -1,0 +1,180 @@
+{
+  "name": "All Chat meme stickers — pack 2",
+  "count": 24,
+  "format": "PNG",
+  "width": 512,
+  "height": 512,
+  "transparent": true,
+  "padding": 16,
+  "processing": "Built-in ImageGen background extraction; proportional resize and lossless PNG export",
+  "stickers": [
+    {
+      "id": "apu-apustaja",
+      "name": "Apu Apustaja",
+      "sourceFilename": "Apu Apustaja.jpeg",
+      "file": "png/apu-apustaja.png",
+      "existingAllChatCatalogId": "apu-apustaja"
+    },
+    {
+      "id": "big-brain-wojak",
+      "name": "Big brain Wojak",
+      "sourceFilename": "Big brain wojak.jpg",
+      "file": "png/big-brain-wojak.png",
+      "existingAllChatCatalogId": null
+    },
+    {
+      "id": "bloomer",
+      "name": "Bloomer",
+      "sourceFilename": "Bloomer.jpg",
+      "file": "png/bloomer.png",
+      "existingAllChatCatalogId": "bloomer"
+    },
+    {
+      "id": "chad-1",
+      "name": "Chad 1",
+      "sourceFilename": "Chad_1.png",
+      "file": "png/chad-1.png",
+      "existingAllChatCatalogId": "chad-1"
+    },
+    {
+      "id": "chad-2",
+      "name": "Chad 2",
+      "sourceFilename": "Chad_2 (needs background removed).jpg",
+      "file": "png/chad-2.png",
+      "existingAllChatCatalogId": "chad-2"
+    },
+    {
+      "id": "chudjak",
+      "name": "Chudjak",
+      "sourceFilename": "Chudjak (needs background removed).jpg",
+      "file": "png/chudjak.png",
+      "existingAllChatCatalogId": "chud"
+    },
+    {
+      "id": "coomer",
+      "name": "Coomer",
+      "sourceFilename": "Coomer.png",
+      "file": "png/coomer.png",
+      "existingAllChatCatalogId": "coomer"
+    },
+    {
+      "id": "doomer",
+      "name": "Doomer",
+      "sourceFilename": "Doomer.jpeg",
+      "file": "png/doomer.png",
+      "existingAllChatCatalogId": "doomer"
+    },
+    {
+      "id": "dumb-wojak",
+      "name": "Dumb Wojak",
+      "sourceFilename": "Dumb wojak.jpg",
+      "file": "png/dumb-wojak.png",
+      "existingAllChatCatalogId": null
+    },
+    {
+      "id": "gigachad",
+      "name": "Gigachad",
+      "sourceFilename": "Gigachad.jpg",
+      "file": "png/gigachad.png",
+      "existingAllChatCatalogId": null
+    },
+    {
+      "id": "gondola",
+      "name": "Gondola",
+      "sourceFilename": "Gondola (needs background removed).jpeg",
+      "file": "png/gondola.png",
+      "existingAllChatCatalogId": "gondola"
+    },
+    {
+      "id": "grug",
+      "name": "Grug",
+      "sourceFilename": "Grug.jpg",
+      "file": "png/grug.png",
+      "existingAllChatCatalogId": "grug"
+    },
+    {
+      "id": "honkler",
+      "name": "Honkler",
+      "sourceFilename": "Honkler (needs background removed).jpg",
+      "file": "png/honkler.png",
+      "existingAllChatCatalogId": "honkler"
+    },
+    {
+      "id": "npc",
+      "name": "NPC",
+      "sourceFilename": "NPC.jpg",
+      "file": "png/npc.png",
+      "existingAllChatCatalogId": "npc"
+    },
+    {
+      "id": "pepe",
+      "name": "Pepe",
+      "sourceFilename": "Pepe (needs background removed).jpg",
+      "file": "png/pepe.png",
+      "existingAllChatCatalogId": "pepe"
+    },
+    {
+      "id": "rage-pepe",
+      "name": "Rage Pepe",
+      "sourceFilename": "Rage pepe.jpg",
+      "file": "png/rage-pepe.png",
+      "existingAllChatCatalogId": null
+    },
+    {
+      "id": "smug-pepe",
+      "name": "Smug Pepe",
+      "sourceFilename": "Smug pepe (needs background removed).jpeg",
+      "file": "png/smug-pepe.png",
+      "existingAllChatCatalogId": null
+    },
+    {
+      "id": "smug-wojak",
+      "name": "Smug Wojak",
+      "sourceFilename": "Smug wojak.jpg",
+      "file": "png/smug-wojak.png",
+      "existingAllChatCatalogId": null
+    },
+    {
+      "id": "soyjak-1",
+      "name": "Soyjak 1",
+      "sourceFilename": "Soyjak_1 (needs background removed).jpg",
+      "file": "png/soyjak-1.png",
+      "existingAllChatCatalogId": "soyjak"
+    },
+    {
+      "id": "soyjak-2",
+      "name": "Soyjak 2",
+      "sourceFilename": "Soyjak_2.jpg",
+      "file": "png/soyjak-2.png",
+      "existingAllChatCatalogId": null
+    },
+    {
+      "id": "spurdo",
+      "name": "Spurdo",
+      "sourceFilename": "Spurdo (needs background removed).jpg",
+      "file": "png/spurdo.png",
+      "existingAllChatCatalogId": "spurdo"
+    },
+    {
+      "id": "virgin",
+      "name": "Virgin",
+      "sourceFilename": "Virgin.jpg",
+      "file": "png/virgin.png",
+      "existingAllChatCatalogId": "virgin"
+    },
+    {
+      "id": "wojak",
+      "name": "Wojak",
+      "sourceFilename": "Wojak.jpg",
+      "file": "png/wojak.png",
+      "existingAllChatCatalogId": "wojak"
+    },
+    {
+      "id": "zoomer",
+      "name": "Zoomer",
+      "sourceFilename": "Zoomer (needs background removed).png",
+      "file": "png/zoomer.png",
+      "existingAllChatCatalogId": "zoomer"
+    }
+  ]
+}

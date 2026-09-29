@@ -1,0 +1,68 @@
+[
+  {
+    "sourceFilename": "Apu Apustaja.jpeg",
+    "sourcePath": "/Users/markoangelovski/Downloads/Meme images 2/Apu Apustaja.jpeg",
+    "finalPath": "/Users/markoangelovski/IdeaProjects/all-chat-frontend-monolith/output/meme-stickers-2/masters/apu-apustaja.png",
+    "prompt": "Use case: background-extraction\nAsset type: transparent PNG chat sticker\nInput image: edit target Apu Apustaja.jpeg.\nPrimary request: Remove only all external white background around the original green frog in the blue shirt. Output the entire originally visible frog and shirt as an isolated clean cutout with genuine alpha transparency.\nConstraints: Preserve the exact original facial expression, eyes, head shape, mouth, pose, green and blue colors, black outlines and hand-drawn style. Preserve the white eyes and their highlights as solid white, never transparent. Keep every part of the originally visible subject, including its original flat cropped lower edge; do not invent missing body. Center with a small transparent margin. Retain original drawing without redrawing as far as possible. Clean antialiased alpha edges. No new white border, no sticker outline, no shadow, no background, no text, no objects.",
+    "toolMode": "built-in image_gen; background-extraction; transparent_background=true",
+    "generatedSourcePath": "/Users/markoangelovski/.codex/generated_images/01a0edaa-34d2-72b1-bef5-a2ee7dfa3242/exec-23df5a95-7085-4523-bf84-a3fad5ea4276.png",
+    "validation": "Visual comparison with original, alpha minimum 0 and maximum 255 verified via sharp, opaque RGB diagnostic on #745f89 inspected at 640px; no visible interior alpha holes or background remnants at sticker scale.",
+    "concerns": "Output preserves subject design but imagegen has cleaned and slightly refined source linework; not bit-identical source pixels.",
+    "diagnosticPath": "/Users/markoangelovski/IdeaProjects/all-chat-frontend-monolith/output/meme-stickers-2/qa-a/apu-apustaja.jpg"
+  },
+  {
+    "sourceFilename": "Big brain wojak.jpg",
+    "sourcePath": "/Users/markoangelovski/Downloads/Meme images 2/Big brain wojak.jpg",
+    "finalPath": "/Users/markoangelovski/IdeaProjects/all-chat-frontend-monolith/output/meme-stickers-2/masters/big-brain-wojak.png",
+    "prompt": "Use case: background-extraction\nAsset type: transparent PNG chat sticker\nInput image: edit target Big brain wojak.jpg.\nPrimary request: Remove only the external white background surrounding this seated big-brain Wojak drawing. Output the entire originally visible seated figure, enormous brain shaped chair/head, glasses, cigarette and smoke as one isolated cutout with genuine alpha transparency.\nConstraints: Preserve the exact original proportions, thin black and grey linework, face, pose, glasses, fingers, legs, feet, brain texture and expression. White areas enclosed within the subject including the entire brain-chair structure and human body must remain fully opaque white. Remove external white background from open gaps, for example around the hand and arm. Keep original crop and all subject parts. Do not redraw or stylize. Center with a small transparent margin. Clean antialiased alpha edges. No new border, no shadow, no text, no new objects. Do not turn the white subject transparent.",
+    "toolMode": "built-in image_gen; background-extraction; transparent_background=true",
+    "generatedSourcePath": "/Users/markoangelovski/.codex/generated_images/01a0edaa-34d2-72b1-bef5-a2ee7dfa3242/exec-2fc2ea5f-78b6-4c6f-a30b-042c473a738f.png",
+    "validation": "Visual comparison with original, alpha minimum 0 and maximum 255 verified via sharp, opaque RGB diagnostic on #745f89 inspected at 640px; no visible interior alpha holes or background remnants at sticker scale.",
+    "concerns": "Output preserves subject design but imagegen has cleaned and slightly refined source linework; not bit-identical source pixels.",
+    "diagnosticPath": "/Users/markoangelovski/IdeaProjects/all-chat-frontend-monolith/output/meme-stickers-2/qa-a/big-brain-wojak.jpg"
+  },
+  {
+    "sourceFilename": "Bloomer.jpg",
+    "sourcePath": "/Users/markoangelovski/Downloads/Meme images 2/Bloomer.jpg",
+    "finalPath": "/Users/markoangelovski/IdeaProjects/all-chat-frontend-monolith/output/meme-stickers-2/masters/bloomer.png",
+    "prompt": "Use case: background-extraction\nAsset type: transparent PNG chat sticker\nInput image: edit target Bloomer.jpg.\nPrimary request: Remove the entire pale mint sky and yellow wheat/grass background around the smiling Bloomer figure. Isolate only the complete originally visible head, neck and blue hoodie on genuine alpha transparency.\nConstraints: Preserve the exact original face, delighted smile, eye shape, head and shoulder proportions, pose, blue hoodie color, white skin, black linework and simple meme drawing style. Preserve opaque white face, teeth and hoodie trim. Keep all originally visible subject including original cropped lower and left edges; do not invent missing body. Retain source without redrawing wherever possible. Center with a small transparent margin. Clean antialiased alpha edges. No added white sticker border, no shadow, no background, no text, no new objects.",
+    "toolMode": "built-in image_gen; background-extraction; transparent_background=true",
+    "generatedSourcePath": "/Users/markoangelovski/.codex/generated_images/01a0edaa-34d2-72b1-bef5-a2ee7dfa3242/exec-9d1b57b1-a05d-47ff-9a24-90d109440065.png",
+    "validation": "Visual comparison with original, alpha minimum 0 and maximum 255 verified via sharp, opaque RGB diagnostic on #745f89 inspected at 640px; no visible interior alpha holes or background remnants at sticker scale.",
+    "concerns": "Output preserves subject design but imagegen has cleaned and slightly refined source linework; not bit-identical source pixels.",
+    "diagnosticPath": "/Users/markoangelovski/IdeaProjects/all-chat-frontend-monolith/output/meme-stickers-2/qa-a/bloomer.jpg"
+  },
+  {
+    "sourceFilename": "Chad_1.png",
+    "sourcePath": "/Users/markoangelovski/Downloads/Meme images 2/Chad_1.png",
+    "finalPath": "/Users/markoangelovski/IdeaProjects/all-chat-frontend-monolith/output/meme-stickers-2/masters/chad-1.png",
+    "prompt": "Use case: background-extraction\nAsset type: transparent PNG chat sticker\nInput image: edit target Chad_1.png.\nPrimary request: Remove only all external pale grey/white background surrounding the cartoon Chad. Output the entire visible full-body figure, both outstretched hands, yellow hair, pink tank top, green trousers and yellow boots as one isolated cutout on genuine alpha transparency. Remove the background in the gaps between legs and between arms and torso too.\nConstraints: Preserve the exact original goofy pose, proportions, face, fingers, colors, black linework, original rough meme drawing style, cyan trouser squiggles and the original white handwritten tank-top text. Preserve opaque eye whites and text. Do not smooth or redraw the character. Keep all original subject extremities. Center with a small transparent margin. Clean antialiased alpha edges. No new border, no shadow, no background, no new text or objects.",
+    "toolMode": "built-in image_gen; background-extraction; transparent_background=true",
+    "generatedSourcePath": "/Users/markoangelovski/.codex/generated_images/01a0edaa-34d2-72b1-bef5-a2ee7dfa3242/exec-5b5865ad-b713-4c0a-bcf0-38144cd26297.png",
+    "validation": "Visual comparison with original, alpha minimum 0 and maximum 255 verified via sharp, opaque RGB diagnostic on #745f89 inspected at 640px; no visible interior alpha holes or background remnants at sticker scale.",
+    "concerns": "Source had an alpha channel but every alpha pixel was 255. Extraction used imagegen. Output preserves design but linework is cleaner than source.",
+    "diagnosticPath": "/Users/markoangelovski/IdeaProjects/all-chat-frontend-monolith/output/meme-stickers-2/qa-a/chad-1.jpg"
+  },
+  {
+    "sourceFilename": "Chad_2 (needs background removed).jpg",
+    "sourcePath": "/Users/markoangelovski/Downloads/Meme images 2/Chad_2 (needs background removed).jpg",
+    "finalPath": "/Users/markoangelovski/IdeaProjects/all-chat-frontend-monolith/output/meme-stickers-2/masters/chad-2.png",
+    "prompt": "Use case: background-extraction\nAsset type: transparent PNG chat sticker\nInput image: edit target Chad_2 (needs background removed).jpg.\nPrimary request: Remove only the white background surrounding the side-profile blonde bearded Chad head, neck and black shirt collar. Output the complete original visible subject as an isolated clean cutout on genuine alpha transparency.\nConstraints: Preserve exact original face, profile, hairstyle, beard curls and hair lines, eye, expression, proportions, outline shape, colors and hand-drawn meme style. Preserve all opaque whites inside the subject such as eye whites. Keep entire original collar without extending body. Retain original drawing without redrawing or stylizing wherever possible. Center with a small transparent margin. Clean antialiased alpha edges. No added white border, no shadow, no text, no background, no new objects.",
+    "toolMode": "built-in image_gen; background-extraction; transparent_background=true",
+    "generatedSourcePath": "/Users/markoangelovski/.codex/generated_images/01a0edaa-34d2-72b1-bef5-a2ee7dfa3242/exec-e2bf9889-35bb-4255-b305-bb7a7a4302fe.png",
+    "validation": "Visual comparison with original, alpha minimum 0 and maximum 255 verified via sharp, opaque RGB diagnostic on #745f89 inspected at 640px; no visible interior alpha holes or background remnants at sticker scale.",
+    "concerns": "Output preserves subject design but imagegen has cleaned and slightly refined source linework; not bit-identical source pixels.",
+    "diagnosticPath": "/Users/markoangelovski/IdeaProjects/all-chat-frontend-monolith/output/meme-stickers-2/qa-a/chad-2.jpg"
+  },
+  {
+    "sourceFilename": "Chudjak (needs background removed).jpg",
+    "sourcePath": "/Users/markoangelovski/Downloads/Meme images 2/Chudjak (needs background removed).jpg",
+    "finalPath": "/Users/markoangelovski/IdeaProjects/all-chat-frontend-monolith/output/meme-stickers-2/masters/chudjak.png",
+    "prompt": "Use case: background-extraction\nAsset type: transparent PNG chat sticker\nInput image: edit target Chudjak (needs background removed).jpg.\nPrimary request: Remove only the external white background outside the black outline of the Chudjak head including the ears. Output the entire originally visible head as an isolated cutout with genuine alpha transparency outside its silhouette.\nConstraints: The entire face, forehead, ears, glasses lenses, eye whites, nose and lips enclosed by the outer head silhouette must remain solid fully opaque white. Preserve exact original frowning expression, shape, proportions, black hair and brows, eyeglasses, original thin black linework and meme drawing style. Keep original flat white and black colors. Retain source pixels without redrawing wherever possible. No holes, no semitransparency anywhere inside the head. Clean closed antialiased outline, no exterior remnants. Center with a small transparent margin. No new white sticker border, no shadows, no background, no text, no new objects.",
+    "toolMode": "built-in image_gen; background-extraction; transparent_background=true",
+    "generatedSourcePath": "/Users/markoangelovski/.codex/generated_images/01a0edaa-34d2-72b1-bef5-a2ee7dfa3242/exec-ac5b0fcf-d24d-4dfd-aedd-e8faea808f25.png",
+    "validation": "Visual comparison with original, alpha minimum 0 and maximum 255 verified via sharp, opaque RGB diagnostic on #745f89 inspected at 640px; no visible interior alpha holes or background remnants at sticker scale.",
+    "concerns": "Output preserves subject design but imagegen has cleaned and slightly refined source linework; not bit-identical source pixels.",
+    "diagnosticPath": "/Users/markoangelovski/IdeaProjects/all-chat-frontend-monolith/output/meme-stickers-2/qa-a/chudjak.jpg"
+  }
+]

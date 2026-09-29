@@ -1,0 +1,62 @@
+[
+  {
+    "id": "soyjak-1",
+    "source": "Soyjak_1 (needs background removed).jpg",
+    "prompt": "Use case: background-extraction. Asset type: transparent PNG chat sticker. Input image is the edit target. Remove only the exterior white background from the provided Soyjak drawing. Preserve the exact white face, neck, shoulders, glasses, beard stubble, black linework, open mouth, proportions, pose, expression, style and all visible subject detail from the original. White inside the subject must stay opaque. Isolate the entire original bust, including both shoulders as visible, on a genuinely transparent alpha canvas, centered with small clear padding around all sides. Clean edges with smooth anti-aliasing. No redraw, no new outline, no thick white sticker border, no shadow, no background/checkerboard baked in, no added text or objects. Preserve original subject faithfully.",
+    "generatedPath": "/Users/markoangelovski/.codex/generated_images/01a0eda8-fc35-7c33-a8d2-f88456ea147e/exec-99ea1a34-41be-4c29-bd0e-c0119a23c456.png",
+    "mode": "built-in image_gen"
+  },
+  {
+    "id": "virgin",
+    "source": "Virgin.jpg",
+    "details": "Remove exterior white background around and BETWEEN the character's legs/limbs. Keep entire full-length walking male cartoon character exactly as original, including black hair, glasses, pale face and hands, dark jacket and trousers, and both white shoes; preserve exact posture, expression and line art. White shoes and skin stay opaque.",
+    "prompt": "Use case: background-extraction. Asset type: transparent PNG chat sticker. Input image: edit target. Remove exterior white background around and BETWEEN the character's legs/limbs. Keep entire full-length walking male cartoon character exactly as original, including black hair, glasses, pale face and hands, dark jacket and trousers, and both white shoes; preserve exact posture, expression and line art. White shoes and skin stay opaque. Isolate only this same original subject on genuine fully transparent RGBA canvas, center with 4% clear padding. Keep original style and content with maximum fidelity, no redraw, no new elements, no thick white border, no outline added, no shadow, no scene, no checkerboard. Edges should follow the original silhouette cleanly, preserving anti-aliasing; no white background remnants or disconnected speckles outside subject. Close any cropped lower bust edge neatly.",
+    "generatedPath": "/Users/markoangelovski/.codex/generated_images/01a0eda8-fc35-7c33-a8d2-f88456ea147e/exec-088a4df0-57cb-4028-8943-a9801c145de5.png",
+    "mode": "built-in image_gen"
+  },
+  {
+    "id": "soyjak-2",
+    "source": "Soyjak_2.jpg",
+    "details": "Remove exterior white background. Keep the entire front-facing white head, enormous black open mouth with white teeth, rectangular glasses, beard stubble and visible shoulders. All white face/neck/shoulder areas are opaque subject, not background. Keep original proportions, facial expression and black rough linework.",
+    "prompt": "Use case: background-extraction. Asset type: transparent PNG chat sticker. Input image: edit target. Remove exterior white background. Keep the entire front-facing white head, enormous black open mouth with white teeth, rectangular glasses, beard stubble and visible shoulders. All white face/neck/shoulder areas are opaque subject, not background. Keep original proportions, facial expression and black rough linework. Isolate only this same original subject on genuine fully transparent RGBA canvas, center with 4% clear padding. Keep original style and content with maximum fidelity, no redraw, no new elements, no thick white border, no outline added, no shadow, no scene, no checkerboard. Edges should follow the original silhouette cleanly, preserving anti-aliasing; no white background remnants or disconnected speckles outside subject. Close any cropped lower bust edge neatly.",
+    "generatedPath": "/Users/markoangelovski/.codex/generated_images/01a0eda8-fc35-7c33-a8d2-f88456ea147e/exec-3b2dd249-297f-4fc7-828b-e93cf85104de.png",
+    "mode": "built-in image_gen"
+  },
+  {
+    "id": "spurdo",
+    "source": "Spurdo (needs background removed).jpg",
+    "details": "Remove exterior white background surrounding brown bear head. Keep exact brown bear head silhouette, yellow muzzle, pink mouth, black nose/eyes/outlines. Preserve exact colors, face, aspect ratio and style. The small watermark in external background is background rather than part of the character.",
+    "prompt": "Precise image repair. Image 1 is a transparent sticker edit target with WRONG transparent blotches inside the brown bear face. Image 2 is the original source, showing what the solid brown fill should look like. REPAIR the missing brown pixels/holes on both cheeks and between eyes. Paint the entire brown interior as opaque solid flat brown (#965C3C) alpha 255. No translucent patches anywhere inside the character. Keep the eyes, mouth, yellow muzzle, pink interior, black outer contour and the external transparent background. Keep exact same bear head and expression. This is flat solid-color cartoon sticker art: remove gradients/shading/lighting from the brown areas. Only area OUTSIDE the outer black silhouette is transparent. Do not treat brown fur as background. Export a clean RGBA PNG with all the original opaque interior colors preserved, transparency only on the exterior.",
+    "generatedPath": "/Users/markoangelovski/.codex/generated_images/01a0eda8-fc35-7c33-a8d2-f88456ea147e/exec-fbbff997-eb6f-4857-a68d-4ca71da9d1b4.png",
+    "mode": "built-in image_gen",
+    "attempts": [
+      {
+        "prompt": "Use case: background-extraction. Asset type: transparent PNG chat sticker. Input image: edit target. Remove exterior white background surrounding brown bear head. Keep exact brown bear head silhouette, yellow muzzle, pink mouth, black nose/eyes/outlines. Preserve exact colors, face, aspect ratio and style. The small watermark in external background is background rather than part of the character. Isolate only this same original subject on genuine fully transparent RGBA canvas, center with 4% clear padding. Keep original style and content with maximum fidelity, no redraw, no new elements, no thick white border, no outline added, no shadow, no scene, no checkerboard. Edges should follow the original silhouette cleanly, preserving anti-aliasing; no white background remnants or disconnected speckles outside subject. Close any cropped lower bust edge neatly.",
+        "path": "/Users/markoangelovski/.codex/generated_images/01a0eda8-fc35-7c33-a8d2-f88456ea147e/exec-fba94fa7-f09f-4f29-a959-00adfecac193.png",
+        "discarded": "Interior transparency holes"
+      },
+      {
+        "prompt": "Use case: background-extraction. Edit target: original flat-color brown bear meme head in the input image. Make a transparent PNG sticker by removing ONLY the exterior white background. The full area INSIDE the outer black head silhouette MUST be solid opaque, alpha 255 everywhere inside, including the large brown cheek on the right and the brown areas between/around the eyes. There must be ZERO TRANSPARENCY HOLES inside this cartoon head. Use the EXACT original flat uniform brown fill, pale yellow muzzle, pink mouth, black outlines and eyes. No gradients, lighting, shading, blotches, watercolor or texture whatsoever. Preserve the exact head, expression, drawing, proportions, line positions and flat colors from the source. Clean true transparent background alpha 0 outside the head, transparent padding 4% on all sides. No outlines added, no sticker border, no text, no shadows. All character fill stays entirely opaque.",
+        "path": "/Users/markoangelovski/.codex/generated_images/01a0eda8-fc35-7c33-a8d2-f88456ea147e/exec-3b631344-e280-4f23-abae-10d82d964d3a.png",
+        "discarded": "Interior transparency holes"
+      }
+    ],
+    "concerns": "Built-in edit smoothed artwork slightly; transparent interior artifacts repaired by targeted edit."
+  },
+  {
+    "id": "wojak",
+    "source": "Wojak.jpg",
+    "details": "Remove ONLY the solid BLACK EXTERIOR background around the white Wojak bust. Preserve the opaque white head/neck/shoulders and all the internal black facial lines/eyes, same neutral expression, proportions, original jagged line drawing style. Separate external black background from necessary black face details. Keep the entire original visible bust.",
+    "prompt": "Use case: background-extraction. Asset type: transparent PNG chat sticker. Input image: edit target. Remove ONLY the solid BLACK EXTERIOR background around the white Wojak bust. Preserve the opaque white head/neck/shoulders and all the internal black facial lines/eyes, same neutral expression, proportions, original jagged line drawing style. Separate external black background from necessary black face details. Keep the entire original visible bust. Isolate only this same original subject on genuine fully transparent RGBA canvas, center with 4% clear padding. Keep original style and content with maximum fidelity, no redraw, no new elements, no thick white border, no outline added, no shadow, no scene, no checkerboard. Edges should follow the original silhouette cleanly, preserving anti-aliasing; no white background remnants or disconnected speckles outside subject. Close any cropped lower bust edge neatly.",
+    "generatedPath": "/Users/markoangelovski/.codex/generated_images/01a0eda8-fc35-7c33-a8d2-f88456ea147e/exec-af43f1c8-dd75-41f1-9cdd-7e8ab469895e.png",
+    "mode": "built-in image_gen"
+  },
+  {
+    "id": "zoomer",
+    "source": "Zoomer (needs background removed).png",
+    "details": "Remove exterior white background around the glasses-wearing Zoomer head/neck/shoulders. Keep all white skin opaque, all brown-and-black hair with exact original cropped shape, glasses, dotted shaved hair detail, eyebrows and entire visible original bust. Preserve exact expression, proportions, colors and intentionally rough pixel line art style. No added hair or expanded anatomy.",
+    "prompt": "Use case: background-extraction. Asset type: transparent PNG chat sticker. Input image: edit target. Remove exterior white background around the glasses-wearing Zoomer head/neck/shoulders. Keep all white skin opaque, all brown-and-black hair with exact original cropped shape, glasses, dotted shaved hair detail, eyebrows and entire visible original bust. Preserve exact expression, proportions, colors and intentionally rough pixel line art style. No added hair or expanded anatomy. Isolate only this same original subject on genuine fully transparent RGBA canvas, center with 4% clear padding. Keep original style and content with maximum fidelity, no redraw, no new elements, no thick white border, no outline added, no shadow, no scene, no checkerboard. Edges should follow the original silhouette cleanly, preserving anti-aliasing; no white background remnants or disconnected speckles outside subject. Close any cropped lower bust edge neatly.",
+    "generatedPath": "/Users/markoangelovski/.codex/generated_images/01a0eda8-fc35-7c33-a8d2-f88456ea147e/exec-89ab95aa-4270-41e8-89c2-431fc1492e52.png",
+    "mode": "built-in image_gen"
+  }
+]

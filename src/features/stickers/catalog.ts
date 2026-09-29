@@ -5,21 +5,28 @@ export interface ProReaction {
     tags: readonly string[];
 }
 
-/** Canonical allchat:<id> tokens are persisted in both reaction identity fields. */
+/** Shared paid artwork for stickers, inline emoji and reactions; IDs remain stable in saved messages. */
 export const PRO_REACTIONS: readonly ProReaction[] = [
     {id: 'wojak', name: 'Wojak', tags: ['feels', 'sad', 'feeling']},
-    {id: 'soyjak', name: 'Soyjak', tags: ['surprised', 'excited', 'glasses']},
-    {id: 'chud', name: 'Chud', tags: ['angry', 'grumpy']},
+    {id: 'big-brain-wojak', name: 'Big Brain Wojak', tags: ['smart', 'thinking', 'genius', 'brain']},
+    {id: 'dumb-wojak', name: 'Dumb Wojak', tags: ['goofy', 'silly', 'drool']},
+    {id: 'smug-wojak', name: 'Smug Wojak', tags: ['smirk', 'confident', 'knowing']},
+    {id: 'soyjak', name: 'Soyjak 1', tags: ['soyjak-1', 'soyjak_1', 'surprised', 'excited', 'glasses']},
+    {id: 'soyjak-2', name: 'Soyjak 2', tags: ['soyjak_2', 'surprised', 'excited', 'glasses']},
+    {id: 'chud', name: 'Chudjak', tags: ['chudjak', 'angry', 'grumpy']},
     {id: 'chad-1', name: 'Chad (Jock)', tags: ['chad_1', 'jock', 'strong', 'confident']},
     {id: 'chad-2', name: 'Chad (Blonde beard)', tags: ['chad_2', 'blond', 'beard', 'yes']},
+    {id: 'gigachad', name: 'Gigachad', tags: ['giga chad', 'strong', 'confident', 'muscles']},
     {id: 'virgin', name: 'Virgin', tags: ['shy', 'awkward']},
     {id: 'doomer', name: 'Doomer', tags: ['tired', 'night', 'beanie']},
     {id: 'coomer', name: 'Coomer', tags: ['messy', 'frazzled']},
     {id: 'bloomer', name: 'Bloomer', tags: ['happy', 'positive', 'sunshine']},
-    {id: 'zoomer', name: 'Zoomer', tags: ['young', 'headphones']},
+    {id: 'zoomer', name: 'Zoomer', tags: ['young', 'glasses', 'hair']},
     {id: 'npc', name: 'NPC', tags: ['neutral', 'grey', 'blank']},
     {id: 'grug', name: 'Grug', tags: ['caveman', 'confused', 'hmm']},
     {id: 'pepe', name: 'Pepe', tags: ['frog', 'feels', 'green']},
+    {id: 'rage-pepe', name: 'Rage Pepe', tags: ['frog', 'angry', 'screaming', 'rage']},
+    {id: 'smug-pepe', name: 'Smug Pepe', tags: ['frog', 'smirk', 'knowing', 'green']},
     {id: 'apu-apustaja', name: 'Apu Apustaja', tags: ['apu', 'helper', 'frog', 'cute']},
     {id: 'honkler', name: 'Honkler', tags: ['clown', 'frog', 'honk']},
     {id: 'spurdo', name: 'Spurdo', tags: ['bear', 'funny']},
