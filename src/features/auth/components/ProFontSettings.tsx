@@ -142,15 +142,15 @@ function FontSettingsForm({userId, username, proActive, showProBadge, onExploreP
                 <div className="space-y-2">
                     <Label htmlFor="username-font">Username font</Label>
                     <Select value={usernameFont} onValueChange={value => {setUsernameFont(value as FontPreset); setSaveError(null);}} disabled={saving}>
-                        <SelectTrigger id="username-font"><SelectValue/></SelectTrigger>
-                        <SelectContent>{FONT_PRESETS.map(preset => <SelectItem key={preset.id} value={preset.id}><span style={fontPresetStyle(preset.id)}>{preset.label}</span></SelectItem>)}</SelectContent>
+                        <SelectTrigger id="username-font" className="h-auto min-h-9 [&>span]:[line-height:normal]"><SelectValue/></SelectTrigger>
+                        <SelectContent>{FONT_PRESETS.map(preset => <SelectItem key={preset.id} value={preset.id}><span className="inline-block" style={fontPresetStyle(preset.id)}>{preset.label}</span></SelectItem>)}</SelectContent>
                     </Select>
                 </div>
                 <div className="space-y-2">
                     <Label htmlFor="message-font">Message font</Label>
                     <Select value={messageFont} onValueChange={value => {setMessageFont(value as FontPreset); setSaveError(null);}} disabled={saving}>
-                        <SelectTrigger id="message-font"><SelectValue/></SelectTrigger>
-                        <SelectContent>{FONT_PRESETS.map(preset => <SelectItem key={preset.id} value={preset.id}><span style={fontPresetStyle(preset.id)}>{preset.label}</span></SelectItem>)}</SelectContent>
+                        <SelectTrigger id="message-font" className="h-auto min-h-9 [&>span]:[line-height:normal]"><SelectValue/></SelectTrigger>
+                        <SelectContent>{FONT_PRESETS.map(preset => <SelectItem key={preset.id} value={preset.id}><span className="inline-block" style={fontPresetStyle(preset.id)}>{preset.label}</span></SelectItem>)}</SelectContent>
                     </Select>
                 </div>
             </div>

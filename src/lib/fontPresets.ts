@@ -2,11 +2,22 @@ import type {CSSProperties} from 'react';
 
 export const FONT_PRESETS = [
     {id: 'DEFAULT', label: 'Default'},
-    {id: 'INTER', label: 'Inter'},
-    {id: 'OPEN_SANS', label: 'Open Sans'},
-    {id: 'NUNITO', label: 'Nunito'},
-    {id: 'COMFORTAA', label: 'Comfortaa'},
-    {id: 'CAVEAT', label: 'Caveat'},
+    {id: 'ROBOTO', label: 'Roboto'},
+    {id: 'PETIT_FORMAL_SCRIPT', label: 'Petit Formal Script'},
+    {id: 'ITALIANNO', label: 'Italianno'},
+    {id: 'KABLAMMO', label: 'Kablammo'},
+    {id: 'CRAFTY_GIRLS', label: 'Crafty Girls'},
+    {id: 'EMILYS_CANDY', label: "Emily's Candy"},
+    {id: 'EVELYNE', label: 'Evelyne'},
+    {id: 'MESSY_HANDWRITTEN', label: 'Messy Handwritten'},
+    {id: 'LOVE_LIGHT', label: 'Love Light'},
+    {id: 'CLICKER_SCRIPT', label: 'Clicker Script'},
+    {id: 'TANGERINE', label: 'Tangerine'},
+    {id: 'SAHIR_YESTA', label: 'Sahir Yesta'},
+    {id: 'GISTA_DANES', label: 'Gista Danes'},
+    {id: 'A_YUMMY_APOLOGY', label: 'A Yummy Apology'},
+    {id: 'PRINCESS_SOFIA', label: 'Princess Sofia'},
+    {id: 'RAIN_KISS', label: 'Rain Kiss'},
 ] as const;
 
 export type FontPreset = typeof FONT_PRESETS[number]['id'];
@@ -30,14 +41,34 @@ export function isFontSnapshot(value: Partial<FontSnapshot> | undefined | null):
         && Number.isSafeInteger(value.fontRevision) && value.fontRevision! >= 0;
 }
 
+const FONT_FAMILIES: Record<Exclude<FontPreset, 'DEFAULT'>, string> = {
+    ROBOTO: 'var(--font-pro-roboto)',
+    PETIT_FORMAL_SCRIPT: 'var(--font-pro-petit-formal-script)',
+    ITALIANNO: 'var(--font-pro-italianno)',
+    KABLAMMO: 'var(--font-pro-kablammo)',
+    CRAFTY_GIRLS: 'var(--font-pro-crafty-girls)',
+    EMILYS_CANDY: 'var(--font-pro-emilys-candy)',
+    EVELYNE: 'var(--font-pro-evelyne)',
+    MESSY_HANDWRITTEN: 'var(--font-pro-messy-handwritten)',
+    LOVE_LIGHT: 'var(--font-pro-love-light)',
+    CLICKER_SCRIPT: 'var(--font-pro-clicker-script)',
+    TANGERINE: 'var(--font-pro-tangerine)',
+    SAHIR_YESTA: 'var(--font-pro-sahir-yesta)',
+    GISTA_DANES: 'var(--font-pro-gista-danes)',
+    A_YUMMY_APOLOGY: 'var(--font-pro-a-yummy-apology)',
+    PRINCESS_SOFIA: 'var(--font-pro-princess-sofia)',
+    RAIN_KISS: 'var(--font-pro-rain-kiss)',
+};
+
 /** Only allow shipped families; never interpolate CSS received from the API. */
 export function fontPresetStyle(preset: unknown): CSSProperties {
-    if (preset === 'INTER') return {fontFamily: 'var(--font-pro-inter), ui-sans-serif, system-ui, sans-serif'};
-    if (preset === 'OPEN_SANS') return {fontFamily: 'var(--font-pro-open-sans), ui-sans-serif, system-ui, sans-serif'};
-    if (preset === 'NUNITO') return {fontFamily: 'var(--font-pro-nunito), ui-sans-serif, system-ui, sans-serif'};
-    if (preset === 'COMFORTAA') return {fontFamily: 'var(--font-pro-comfortaa), ui-sans-serif, system-ui, sans-serif'};
-    if (preset === 'CAVEAT') return {fontFamily: 'var(--font-pro-caveat), cursive'};
-    return {};
+    if (!isFontPreset(preset) || preset === 'DEFAULT') return {};
+    return {
+        fontFamily: `${FONT_FAMILIES[preset]}, ui-sans-serif, system-ui, sans-serif`,
+        // Use the adjusted face's metrics so enlarged capitals and tails have room,
+        // including inside truncated usernames and one-line message previews.
+        lineHeight: 'normal',
+    };
 }
 
 /** Expiry can resolve to default before the sweep increments the revision. */

@@ -110,14 +110,14 @@ export function ProBenefits({username}: {username: string}) {
                 <article className="overflow-hidden rounded-2xl border border-blue-200 bg-card dark:border-blue-500/30">
                     <div aria-hidden="true" className="flex h-36 items-center justify-center overflow-hidden bg-sky-50 px-5 dark:bg-sky-950/20">
                         <div className="min-w-0 -rotate-3 rounded-2xl border border-sky-200/60 bg-white px-6 py-4 text-slate-900 shadow-lg shadow-sky-900/5">
-                            <p className="max-w-48 truncate text-sm font-bold" style={fontPresetStyle('NUNITO')}>{username}</p>
-                            <p className="mt-2 text-2xl" style={fontPresetStyle('CAVEAT')}>Make yourself at home.</p>
+                            <p className="max-w-48 truncate text-sm font-bold" style={fontPresetStyle('ROBOTO')}>{username}</p>
+                            <p className="mt-2 text-2xl" style={fontPresetStyle('CRAFTY_GIRLS')}>Make yourself at home.</p>
                         </div>
                     </div>
                     <div className="p-5">
                         <p className="flex items-center gap-1 text-[10px] font-bold uppercase tracking-widest text-blue-600 dark:text-blue-300"><Type className="h-3 w-3"/>Pro exclusive</p>
                         <h3 className="mt-2 font-bold">Make your words your own.</h3>
-                        <p className="mt-2 text-sm leading-6 text-muted-foreground">Choose classic, rounded, or handwritten fonts for your username and messages in Appearance. Save your choices up to {ACCOUNT_LIMITS.proDailyFontSaves} times per day; the allowance resets at midnight UTC.</p>
+                        <p className="mt-2 text-sm leading-6 text-muted-foreground">Choose classic, playful, or handwritten fonts for your username and messages in Appearance. Save your choices up to {ACCOUNT_LIMITS.proDailyFontSaves} times per day; the allowance resets at midnight UTC.</p>
                     </div>
                 </article>
             </div>

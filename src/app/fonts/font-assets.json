@@ -1,0 +1,222 @@
+{
+  "conversion": "FontTools 4.66.1 WOFF2, full glyph coverage, original names and metadata retained; no subsetting",
+  "archives": {
+    "evelyne.zip": "31e99a78e29c091bc1a2fd19b1cba57d8c125a1c3a889c82946114e672effcaf",
+    "messy-handwritten.zip": "f1c33aa514194291fe2179086773c444a26d7da41cd257781f79b3d2c0d1443e",
+    "emilys-candy.zip": "fbda8539a47023f8d4f252326b2d46240a46aad87efa6df28c357e1765aa5d59",
+    "love-light.zip": "2c9df0bdaf2a98b098da97e7d238c53084669f8bff183423f7afc9f9ae374880",
+    "clicker-script.zip": "2a7a1df18ddae895ffbf9bedea2da172b4c4d73eab50054bb751bb0d7c8a5e24",
+    "tangerine.zip": "48a57ef064dbb785667d01ddebde2d211eae0f5e72324bf8342b42f77120161b",
+    "sahir-yesta.zip": "40d803026ba3d6c6fb55759e0e0ba345dc0cccca9fb431c12c751a9782cdfd05",
+    "gista-danes.zip": "b610b38301b6412549727154a1b8b691259673baf308c431077b18d4262ab187",
+    "a-yummy-apology.zip": "bd717bf8dc35e32d80c33d2e3749cd2ec68880afaf244598eddd245436197658",
+    "princess-sofia.zip": "fcf7683da453e9aaedad17ea40743be307b1f511e9301d4f9da86c4ce92cb64b",
+    "rain_kiss.zip": "3a43740654de2ada2bc8e86e19a7a686ddd2fbe6373386dcece1d10902caa827"
+  },
+  "files": [
+    {
+      "file": "RobotoVariable.woff2",
+      "source": "RobotoVariable.ttf",
+      "source_sha256": "d7598e12c5dbef095ff8272cfc55da0250bd07fbdecbac8a530b9b277872a134",
+      "source_bytes": 488584,
+      "woff2_sha256": "dba19b3cfa4dbe5c565040a3e5e1b57842d7656e4600c5c6c9638ee0eb9b3ed5",
+      "woff2_bytes": 221848,
+      "glyphs": 1326,
+      "characters": 927
+    },
+    {
+      "file": "RobotoVariable-Italic.woff2",
+      "source": "RobotoVariable-Italic.ttf",
+      "source_sha256": "9725a847af6b460ffca162ae66d20dad48b01876137947180b42d7dcd7887182",
+      "source_bytes": 530944,
+      "woff2_sha256": "5e3c7eb0e7d7e942cc800b097c38a580ec474cc8c825a0cd711ac569635c8b44",
+      "woff2_bytes": 255464,
+      "glyphs": 1326,
+      "characters": 927
+    },
+    {
+      "file": "PetitFormalScript-Regular.woff2",
+      "source": "PetitFormalScript-Regular.ttf",
+      "source_sha256": "9b80a05170bac7f372b7e00bc762fe14bafd4abdeb013747b189f66525cffe89",
+      "source_bytes": 175068,
+      "woff2_sha256": "58ff8205955b29a3b8021207338c2129d555f0e38061c2b9f0518f4904757879",
+      "woff2_bytes": 44152,
+      "glyphs": 432,
+      "characters": 427
+    },
+    {
+      "file": "Italianno-Regular.woff2",
+      "source": "Italianno-Regular.ttf",
+      "source_sha256": "f6ae96dea0da46c73370eb0575848ab0eda190315bdfda3f5b252bba3dc9173c",
+      "source_bytes": 223708,
+      "woff2_sha256": "9f2800a1022bd06d0f64ce335bd2a13b7f4569f4629f78718d1c425675d2b7be",
+      "woff2_bytes": 80724,
+      "glyphs": 814,
+      "characters": 498
+    },
+    {
+      "file": "KablammoVariable.woff2",
+      "source": "KablammoVariable.ttf",
+      "source_sha256": "900c8c183efc8d913da30dceb9e4e9886888bbd48847455343f12ce85a334925",
+      "source_bytes": 2209224,
+      "woff2_sha256": "ce35b6b93e3bfca3411b067d85f9888a6ebdef274a2a154c4ac1a07ec3a53de0",
+      "woff2_bytes": 840148,
+      "glyphs": 1106,
+      "characters": 985
+    },
+    {
+      "file": "CraftyGirls-Regular.woff2",
+      "source": "CraftyGirls-Regular.ttf",
+      "source_sha256": "5f92fed441fc72e75fd520ee63b4785c9b657404c53e1f269c95a6016298ef45",
+      "source_bytes": 75336,
+      "woff2_sha256": "f95d577a0f200f584dc6d9e4932fc6ca4b90a497fe0c5aa613193c16d84de7ce",
+      "woff2_bytes": 39056,
+      "glyphs": 230,
+      "characters": 229
+    },
+    {
+      "file": "EmilysCandy-Regular.woff2",
+      "source": "EmilysCandy-Regular.ttf",
+      "source_sha256": "0cf3ca9dbe71b33596e8a1eb12b40deac2e6414fe5616dda50c554580b6e0c68",
+      "source_bytes": 237216,
+      "woff2_sha256": "113ec43c6040bc68ad454c72ac0395dad0432fbfc56496c08e51182d2dc7eddd",
+      "woff2_bytes": 87648,
+      "glyphs": 231,
+      "characters": 230
+    },
+    {
+      "file": "Evelyne-Regular.woff2",
+      "source": "evelyne.zip",
+      "archive_entry": "Evelyne.otf",
+      "source_sha256": "fcc48f6eb140a1d2bc701d86b3e20c2f7946dd7b52721b21b7f052ffd0d0a410",
+      "source_bytes": 71136,
+      "woff2_sha256": "4d224ee945e89df72517da81929754e555183fd52a5a695fa23d703ab819486d",
+      "woff2_bytes": 37988,
+      "glyphs": 165,
+      "characters": 167
+    },
+    {
+      "file": "MessyHandwritten-Regular.woff2",
+      "source": "messy-handwritten.zip",
+      "archive_entry": "MessyHandwritten-Regular.ttf",
+      "source_sha256": "2482c112e0264a0852a3789851748845c1784bdce10ec9630edb42559f11e9e9",
+      "source_bytes": 16352,
+      "woff2_sha256": "4c519409af001484a3c4e2a2bdb87219cd2cc3588dfe327c84edc20cf1e19461",
+      "woff2_bytes": 9108,
+      "glyphs": 76,
+      "characters": 74
+    },
+    {
+      "file": "LoveLight-Regular.woff2",
+      "source": "love-light.zip",
+      "archive_entry": "LoveLight-Regular.ttf",
+      "source_sha256": "9426a52e7b04b2dfee40e55c39fe13b619f2951b10d7469e9af923ef9d350ddb",
+      "source_bytes": 167432,
+      "woff2_sha256": "cfca0f8f04ec1b0ea9195cf5247b973202897e94b6ff6e76f7869e1717adf37c",
+      "woff2_bytes": 66256,
+      "glyphs": 635,
+      "characters": 587
+    },
+    {
+      "file": "ClickerScript-Regular.woff2",
+      "source": "clicker-script.zip",
+      "archive_entry": "ClickerScript-Regular.ttf",
+      "source_sha256": "0221d4376fc0a25795a32d7e309798b6693b56f65c5851f92529043b230a9117",
+      "source_bytes": 64012,
+      "woff2_sha256": "19560d0484de3364a4c0792c5e353241493972e604f32dcb99442155b78494ae",
+      "woff2_bytes": 28160,
+      "glyphs": 372,
+      "characters": 368
+    },
+    {
+      "file": "Tangerine-Regular.woff2",
+      "source": "tangerine.zip",
+      "archive_entry": "Tangerine_Regular.ttf",
+      "source_sha256": "06d1a6ab6f5f109c92dd3fed128ec77dd45e56454e07d61a4a4345e9769241ba",
+      "source_bytes": 61484,
+      "woff2_sha256": "9dbc3a39faf555c083706730fd4ba0c02dc386da1e9fa49fc039e8e531d370e6",
+      "woff2_bytes": 25412,
+      "glyphs": 231,
+      "characters": 230
+    },
+    {
+      "file": "Tangerine-Bold.woff2",
+      "source": "tangerine.zip",
+      "archive_entry": "Tangerine_Bold.ttf",
+      "source_sha256": "3b42996808598b1e744e4309e546ac006bfe517dd35019cbd16a1b6758afb372",
+      "source_bytes": 66492,
+      "woff2_sha256": "3d49f8be6107dd02bac610204a84aed008978d81ed1ad9481034c306193d6bdb",
+      "woff2_bytes": 27076,
+      "glyphs": 231,
+      "characters": 230
+    },
+    {
+      "file": "SahirYesta-Regular.woff2",
+      "source": "sahir-yesta.zip",
+      "archive_entry": "Sahir Yesta.otf",
+      "source_sha256": "e3e5199e4844882b722c0c8a5d071884f0d4b7211d508006d89c02db616eba43",
+      "source_bytes": 44348,
+      "woff2_sha256": "c3e0468de479738b1d8ec0d14e51d6a2b39311dc7ec641e5444a7469ea50c5aa",
+      "woff2_bytes": 30432,
+      "glyphs": 287,
+      "characters": 286
+    },
+    {
+      "file": "GistaDanes-Regular.woff2",
+      "source": "gista-danes.zip",
+      "archive_entry": "Gista Danes.otf",
+      "source_sha256": "8985fb3a0702bd83d4c93f06a838ea968eed1d5e8e2ef4d2bfb36a694697f9b4",
+      "source_bytes": 48180,
+      "woff2_sha256": "aa434576db8bad0afeba7b23569802bd8f67a48e6a5509f469abd337071dad0e",
+      "woff2_bytes": 33064,
+      "glyphs": 285,
+      "characters": 284
+    },
+    {
+      "file": "AYummyApology-Regular.woff2",
+      "source": "a-yummy-apology.zip",
+      "archive_entry": "Ayuma2yk.ttf",
+      "source_sha256": "31074029cbb30a660fc8e4191254b45c1895b123e30e6672b3ca0e7651c58ab8",
+      "source_bytes": 47796,
+      "woff2_sha256": "ac50b56570419eecaaf2409fc4d7009d2aa3c6ac909c171a407e35362eec9036",
+      "woff2_bytes": 22396,
+      "glyphs": 245,
+      "characters": 214
+    },
+    {
+      "file": "PrincessSofia-Regular.woff2",
+      "source": "princess-sofia.zip",
+      "archive_entry": "PrincessSofia-Regular.ttf",
+      "source_sha256": "2b5df30a7b866cd764cc4ff586dc8c28e16967099d50ab582f003ffbc7228ee5",
+      "source_bytes": 272628,
+      "woff2_sha256": "8e43e7a270b1f0f2bc9e334f12af44b8eebc060d437816b1cdc85a302ebdd394",
+      "woff2_bytes": 98168,
+      "glyphs": 230,
+      "characters": 229
+    },
+    {
+      "file": "RainKiss-Regular.woff2",
+      "source": "rain_kiss.zip",
+      "archive_entry": "Rain Kiss.woff2",
+      "source_sha256": "06f7126a2f1914c0aacfc9597ad928a3d301b369992b485ebcae1181c9fc2ae1",
+      "source_bytes": 21512,
+      "woff2_sha256": "06f7126a2f1914c0aacfc9597ad928a3d301b369992b485ebcae1181c9fc2ae1",
+      "woff2_bytes": 21512,
+      "glyphs": 302,
+      "characters": 305,
+      "conversion": "none; supplied WOFF2 copied unchanged"
+    },
+    {
+      "file": "RainKiss-Italic.woff2",
+      "source": "rain_kiss.zip",
+      "archive_entry": "Rain Kiss Italic.woff2",
+      "source_sha256": "be2a53b7c7ca0be2abc96701e365010a83d4eb4194c1383b3e37fe027c1b5353",
+      "source_bytes": 23676,
+      "woff2_sha256": "be2a53b7c7ca0be2abc96701e365010a83d4eb4194c1383b3e37fe027c1b5353",
+      "woff2_bytes": 23676,
+      "glyphs": 302,
+      "characters": 305,
+      "conversion": "none; supplied WOFF2 copied unchanged"
+    }
+  ]
+}
