@@ -52,7 +52,7 @@ export function NotificationBell() {
             <Button
                 variant="ghost"
                 size="icon"
-                className="glass-control relative"
+                className="glass-control relative h-10 w-10 shrink-0 lg:h-9 lg:w-9"
                 aria-label="Notifications"
                 title="Notifications"
                 onClick={() =>
@@ -84,7 +84,7 @@ export function NotificationBell() {
                 <Button
                     variant="ghost"
                     size="icon"
-                    className="glass-control relative"
+                    className="glass-control relative h-10 w-10 shrink-0 lg:h-9 lg:w-9"
                     aria-label="Notifications"
                     title="Notifications"
                 >

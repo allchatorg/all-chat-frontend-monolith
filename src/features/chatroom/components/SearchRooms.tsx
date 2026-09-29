@@ -35,9 +35,7 @@ const SearchRooms: React.FC = () => {
     } = useRoomSearch();
 
     useEffect(() => {
-        if (!isMobile) {
-            setOpenPopover(!!searchTerm.trim());
-        }
+        setOpenPopover(!isMobile && !!searchTerm.trim());
     }, [searchTerm, isMobile]);
 
     const handleDesktopJoin = async (roomId: number) => {
@@ -60,24 +58,91 @@ const SearchRooms: React.FC = () => {
     };
 
     const handleMobileClick = () => {
-        open(<div className="w-[80vw] md:min-w-[800px] md:max-w-[800px] max-h-[300px] overflow-auto">
+        open(<div className="w-[80vw] lg:min-w-[800px] lg:max-w-[800px] max-h-[300px] overflow-auto">
             <SearchRoomsMobile onClose={close}/>
         </div>, {className: "glass-popover glass-modal-mobile"});
     };
 
-    if (isMobile) {
-        return (
-            <div className="flex items-center gap-1">
-                <Button
-                    variant="ghost"
-                    size="icon"
-                    aria-label="Search chatrooms"
-                    title="Search chatrooms"
-                    onClick={handleMobileClick}
-                    className="glass-control text-slate-900 hover:text-blue-700 dark:text-white dark:hover:text-white"
-                >
-                    <Search className="h-6 w-6"/>
-                </Button>
+    return (
+        <>
+            <Button
+                variant="ghost"
+                size="icon"
+                aria-label="Search chatrooms"
+                title="Search chatrooms"
+                onClick={handleMobileClick}
+                className="glass-control h-10 w-10 shrink-0 lg:hidden text-slate-900 hover:text-blue-700 dark:text-white dark:hover:text-white"
+            >
+                <Search className="h-6 w-6"/>
+            </Button>
+            {/* Balance the shuffle button and gap so the desktop input stays centered. */}
+            <div className="hidden min-w-0 w-full items-center gap-2 pl-11 lg:flex">
+                <Popover open={openPopover} onOpenChange={setOpenPopover}>
+                    <PopoverTrigger asChild>
+                        <div className="relative min-w-0 flex-1">
+                            <Search
+                                className="pointer-events-none absolute top-1/2 left-3 z-10 h-4 w-4 -translate-y-1/2 text-slate-700/90 dark:text-white/90"/>
+                            <input
+                                type="text"
+                                aria-label="Search or create a room"
+                                placeholder="Search or create a room…"
+                                value={searchTerm}
+                                onChange={(e) => setSearchTerm(e.target.value)}
+                                onKeyDown={(e) => {
+                                    if (e.key === "Enter" && searchTerm.trim()) {
+                                        e.preventDefault();
+                                        // Wait for results for this query, including the debounce delay.
+                                        if (searchRoomIsLoading || lastSearchedTerm !== searchTerm.trim()) {
+                                            setOpenPopover(true);
+                                            return;
+                                        }
+                                        if (showCreateOption) {
+                                            handleDesktopCreate();
+                                        } else if (rooms.length > 0) {
+                                            void handleDesktopJoin(rooms[0].roomId);
+                                        }
+                                    }
+                                }}
+                                className="glass-input box-border h-9 min-h-9 w-full rounded-md py-2 pr-10 pl-10 text-sm
+                                 text-slate-900 placeholder:text-slate-600/80 shadow-xs transition-colors
+                                 focus:border-ring focus:ring-0 focus:outline-hidden dark:text-white dark:placeholder:text-white/80"
+                            />
+                            {searchTerm && (
+                                <button
+                                    type="button"
+                                    aria-label="Clear search"
+                                    onClick={() => {
+                                        clearSearch();
+                                        setOpenPopover(false);
+                                    }}
+                                    className="absolute top-1/2 right-3 -translate-y-1/2 transform text-muted-foreground hover:text-foreground"
+                                >
+                                    <X className="h-4 w-4"/>
+                                </button>
+                            )}
+                        </div>
+                    </PopoverTrigger>
+
+                    <PopoverContent
+                        align="start"
+                        side="bottom"
+                        className="glass-popover w-(--radix-popover-trigger-width) p-0"
+                        onOpenAutoFocus={(e) => e.preventDefault()}
+                    >
+                        <SearchRoomsResults
+                            isLoading={searchRoomIsLoading}
+                            searchTerm={searchTerm}
+                            lastSearchedTerm={lastSearchedTerm}
+                            validationResult={validationResult as string | true}
+                            filteredRooms={rooms}
+                            showCreateOption={showCreateOption}
+                            joinedRoomIds={joinedRoomIds}
+                            user={user}
+                            onJoin={handleDesktopJoin}
+                            onCreate={handleDesktopCreate}
+                        />
+                    </PopoverContent>
+                </Popover>
                 <Button
                     variant="ghost"
                     size="icon"
@@ -87,95 +152,12 @@ const SearchRooms: React.FC = () => {
                     onClick={() => {
                         void handleRandomJoin();
                     }}
-                    className="glass-control text-slate-900 hover:text-blue-700 dark:text-white dark:hover:text-white"
+                    className="glass-control box-border h-9 w-9 shrink-0 text-slate-900 hover:text-blue-700 dark:text-white dark:hover:text-white"
                 >
-                    <Shuffle className="h-6 w-6"/>
+                    <Shuffle className="h-4 w-4"/>
                 </Button>
             </div>
-        );
-    }
-
-    return (
-        <div className="relative w-[400px] max-w-[calc(100vw-7rem)]">
-            <Popover open={openPopover} onOpenChange={setOpenPopover}>
-                <PopoverTrigger asChild>
-                    <div className="relative min-w-0 w-full">
-                        <Search
-                            className="pointer-events-none absolute top-1/2 left-3 z-10 h-4 w-4 -translate-y-1/2 text-slate-700/90 dark:text-white/90"/>
-                        <input
-                            type="text"
-                            placeholder="Search or create a room…"
-                            value={searchTerm}
-                            onChange={(e) => setSearchTerm(e.target.value)}
-                            onKeyDown={(e) => {
-                                if (e.key === "Enter" && searchTerm.trim()) {
-                                    e.preventDefault();
-                                    // Wait for results for this query, including the debounce delay.
-                                    if (searchRoomIsLoading || lastSearchedTerm !== searchTerm.trim()) {
-                                        setOpenPopover(true);
-                                        return;
-                                    }
-                                    if (showCreateOption) {
-                                        handleDesktopCreate();
-                                    } else if (rooms.length > 0) {
-                                        void handleDesktopJoin(rooms[0].roomId);
-                                    }
-                                }
-                            }}
-                            className="glass-input box-border h-9 min-h-9 w-full rounded-md py-2 pr-10 pl-10 text-sm
-                             text-slate-900 placeholder:text-slate-600/80 shadow-xs transition-colors
-                             focus:border-ring focus:ring-0 focus:outline-hidden dark:text-white dark:placeholder:text-white/80"
-                        />
-                        {searchTerm && (
-                            <button
-                                type="button"
-                                aria-label="Clear search"
-                                onClick={() => {
-                                    clearSearch();
-                                    setOpenPopover(false);
-                                }}
-                                className="absolute top-1/2 right-3 -translate-y-1/2 transform text-muted-foreground hover:text-foreground"
-                            >
-                                <X className="h-4 w-4"/>
-                            </button>
-                        )}
-                    </div>
-                </PopoverTrigger>
-
-                <PopoverContent
-                    align="start"
-                    side="bottom"
-                    className="glass-popover w-(--radix-popover-trigger-width) p-0"
-                    onOpenAutoFocus={(e) => e.preventDefault()}
-                >
-                    <SearchRoomsResults
-                        isLoading={searchRoomIsLoading}
-                        searchTerm={searchTerm}
-                        lastSearchedTerm={lastSearchedTerm}
-                        validationResult={validationResult as string | true}
-                        filteredRooms={rooms}
-                        showCreateOption={showCreateOption}
-                        joinedRoomIds={joinedRoomIds}
-                        user={user}
-                        onJoin={handleDesktopJoin}
-                        onCreate={handleDesktopCreate}
-                    />
-                </PopoverContent>
-            </Popover>
-            <Button
-                variant="ghost"
-                size="icon"
-                aria-label="Join a random chatroom"
-                title="Join a random chatroom"
-                disabled={joinRandomRoomIsLoading}
-                onClick={() => {
-                    void handleRandomJoin();
-                }}
-                className="glass-control absolute top-1/2 left-[calc(100%+0.5rem)] box-border h-9 w-9 -translate-y-1/2 shrink-0 text-slate-900 hover:text-blue-700 dark:text-white dark:hover:text-white"
-            >
-                <Shuffle className="h-4 w-4"/>
-            </Button>
-        </div>
+        </>
     );
 };
 

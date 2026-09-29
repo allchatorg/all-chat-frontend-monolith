@@ -34,9 +34,7 @@ const SearchUsers: React.FC = () => {
     );
 
     useEffect(() => {
-        if (!isMobile) {
-            setOpenPopover(!!searchTerm.trim());
-        }
+        setOpenPopover(!isMobile && !!searchTerm.trim());
     }, [searchTerm, isMobile]);
 
     const handlePickUser = async (user: UserMinimalDTO) => {
@@ -58,82 +56,80 @@ const SearchUsers: React.FC = () => {
 
     const handleMobileClick = () => {
         open(
-            <div className="w-[80vw] md:min-w-[800px] md:max-w-[800px] max-h-[300px] overflow-auto">
+            <div className="w-[80vw] lg:min-w-[800px] lg:max-w-[800px] max-h-[300px] overflow-auto">
                 <SearchUsersMobile onClose={close}/>
             </div>,
             {className: "glass-popover glass-modal-mobile"}
         );
     };
 
-    if (isMobile) {
-        return (
+    return (
+        <>
             <Button
                 variant="ghost"
                 size="icon"
                 aria-label="Search users"
                 title="Search users"
                 onClick={handleMobileClick}
-                className="glass-control text-slate-900 hover:text-blue-700 dark:text-white dark:hover:text-white"
+                className="glass-control h-10 w-10 shrink-0 lg:hidden text-slate-900 hover:text-blue-700 dark:text-white dark:hover:text-white"
             >
                 <Search className="h-6 w-6"/>
             </Button>
-        );
-    }
-
-    return (
-        <div className="relative w-[400px] max-w-[calc(100vw-7rem)]">
-            <Popover open={openPopover} onOpenChange={setOpenPopover}>
-                <PopoverTrigger asChild>
-                    <div className="relative min-w-0 w-full">
-                        <Search
-                            className="pointer-events-none absolute top-1/2 left-3 z-10 h-4 w-4 -translate-y-1/2 text-slate-700/90 dark:text-white/90"/>
-                        <input
-                            type="text"
-                            placeholder="Search users to message…"
-                            value={searchTerm}
-                            onChange={(e) => setSearchTerm(e.target.value)}
-                            onKeyDown={(e) => {
-                                if (e.key === "Enter" && searchTerm.trim() && users.length > 0) {
-                                    handlePickUser(users[0]);
-                                }
-                            }}
-                            className="glass-input box-border h-9 min-h-9 w-full rounded-md py-2 pr-10 pl-10 text-sm
-                                       text-slate-900 placeholder:text-slate-600/80 shadow-xs transition-colors
-                                       focus:border-ring focus:ring-0 focus:outline-hidden dark:text-white dark:placeholder:text-white/80"
-                        />
-                        {searchTerm && (
-                            <button
-                                type="button"
-                                aria-label="Clear search"
-                                onClick={() => {
-                                    clearSearch();
-                                    setOpenPopover(false);
+            <div className="relative hidden min-w-0 w-full lg:block">
+                <Popover open={openPopover} onOpenChange={setOpenPopover}>
+                    <PopoverTrigger asChild>
+                        <div className="relative min-w-0 w-full">
+                            <Search
+                                className="pointer-events-none absolute top-1/2 left-3 z-10 h-4 w-4 -translate-y-1/2 text-slate-700/90 dark:text-white/90"/>
+                            <input
+                                type="text"
+                                aria-label="Search users to message"
+                                placeholder="Search users to message…"
+                                value={searchTerm}
+                                onChange={(e) => setSearchTerm(e.target.value)}
+                                onKeyDown={(e) => {
+                                    if (e.key === "Enter" && searchTerm.trim() && users.length > 0) {
+                                        handlePickUser(users[0]);
+                                    }
                                 }}
-                                className="absolute top-1/2 right-3 -translate-y-1/2 transform text-muted-foreground hover:text-foreground"
-                            >
-                                <X className="h-4 w-4"/>
-                            </button>
-                        )}
-                    </div>
-                </PopoverTrigger>
+                                className="glass-input box-border h-9 min-h-9 w-full rounded-md py-2 pr-10 pl-10 text-sm
+                                           text-slate-900 placeholder:text-slate-600/80 shadow-xs transition-colors
+                                           focus:border-ring focus:ring-0 focus:outline-hidden dark:text-white dark:placeholder:text-white/80"
+                            />
+                            {searchTerm && (
+                                <button
+                                    type="button"
+                                    aria-label="Clear search"
+                                    onClick={() => {
+                                        clearSearch();
+                                        setOpenPopover(false);
+                                    }}
+                                    className="absolute top-1/2 right-3 -translate-y-1/2 transform text-muted-foreground hover:text-foreground"
+                                >
+                                    <X className="h-4 w-4"/>
+                                </button>
+                            )}
+                        </div>
+                    </PopoverTrigger>
 
-                <PopoverContent
-                    align="start"
-                    side="bottom"
-                    className="glass-popover w-(--radix-popover-trigger-width) p-0"
-                    onOpenAutoFocus={(e) => e.preventDefault()}
-                >
-                    <SearchUsersResults
-                        isLoading={isLoading}
-                        searchTerm={searchTerm}
-                        lastSearchedTerm={lastSearchedTerm}
-                        users={users}
-                        existingConversationCounterpartIds={existingCounterpartIds}
-                        onPickUser={handlePickUser}
-                    />
-                </PopoverContent>
-            </Popover>
-        </div>
+                    <PopoverContent
+                        align="start"
+                        side="bottom"
+                        className="glass-popover w-(--radix-popover-trigger-width) p-0"
+                        onOpenAutoFocus={(e) => e.preventDefault()}
+                    >
+                        <SearchUsersResults
+                            isLoading={isLoading}
+                            searchTerm={searchTerm}
+                            lastSearchedTerm={lastSearchedTerm}
+                            users={users}
+                            existingConversationCounterpartIds={existingCounterpartIds}
+                            onPickUser={handlePickUser}
+                        />
+                    </PopoverContent>
+                </Popover>
+            </div>
+        </>
     );
 };
 

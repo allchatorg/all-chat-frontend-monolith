@@ -48,7 +48,7 @@ const SearchRoomsMobile: React.FC<SearchRoomsMobileProps> = ({onClose}) => {
                         value={searchTerm}
                         onChange={(e) => setSearchTerm(e.target.value)}
                         autoFocus
-                        className="glass-input w-full pr-10 pl-10"
+                        className="glass-input w-full pr-10 pl-10 text-base placeholder:text-sm md:text-base lg:text-sm"
                     />
                     {searchTerm && (
                         <button

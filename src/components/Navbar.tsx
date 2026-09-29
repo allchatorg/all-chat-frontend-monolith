@@ -1,6 +1,6 @@
 "use client";
 import {Button} from "@/components/ui/button";
-import {ArrowDownAZ, Book, Bug, Diamond, LogOut, Megaphone, Menu, MoreVertical, Settings, Shield} from "lucide-react";
+import {ArrowDownAZ, Book, Bug, Diamond, LogOut, Megaphone, Menu, MoreVertical, Settings, Shield, Shuffle} from "lucide-react";
 import Image from "next/image";
 import {usePathname, useRouter} from "next/navigation";
 import {useDialog} from "./providers/DialogProvider";
@@ -9,7 +9,7 @@ import {selectUser} from "@/redux/user/userSelectors";
 import {SettingsComponent} from "@/features/auth/components/SettingsComponent";
 import {RoomTabOrderSettings} from "@/features/auth/components/RoomTabOrderSettings";
 import {AppDispatch} from "@/redux/store";
-import {useState} from "react";
+import {useRef, useState} from "react";
 import {useThemedLogo} from "@/lib/hooks/useThemedLogo";
 import SearchRooms from "@/features/chatroom/components/SearchRooms";
 import SearchUsers from "@/features/privateChat/components/SearchUsers";
@@ -18,7 +18,7 @@ import {isAuthFlowRoute, ROUTES} from "@/routes";
 import {Role} from "@/models/Role";
 import {ConfirmModal} from "@/components/ConfirmModal";
 import ClaimAccountBanner from "@/components/ClaimAccountBanner";
-import {Sheet, SheetContent, SheetTrigger} from "@/components/ui/sheet";
+import {Sheet, SheetContent, SheetTitle, SheetTrigger} from "@/components/ui/sheet";
 import {Sidebar} from "@/components/Sidebar";
 import {useRoleAccess} from "@/lib/hooks/useRoleAccess";
 import {DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger,} from "@/components/ui/dropdown-menu";
@@ -34,6 +34,8 @@ import {selectJoinedUserChatRoomsState} from "@/redux/chatRoom/chatRoomSelectors
 import {BUG_REPORTS_CHATROOM_NAME, isBugReportsChatRoomName} from "@/lib/chatRooms";
 import {toast} from "sonner";
 import {useProDialog} from '@/features/pro/useProDialog';
+import {useJoinRandomRoom} from '@/features/chatroom/hooks/useJoinRandomRoom';
+import {useIsMobile} from '@/lib/hooks/useIsMobile';
 
 // Keep the branded button independent of the navbar's generic .text-white recoloring.
 const PRO_NAV_BUTTON_CLASS_NAME = 'relative isolate overflow-hidden rounded-full border border-white/15 bg-clip-padding bg-linear-to-r from-[#4039bd] to-[#4267df] font-semibold text-[#fff] shadow-none [text-shadow:none] hover:from-[#3730a3] hover:to-[#3658c7] hover:text-[#fff] focus-visible:ring-blue-300 dark:border-blue-300/35 dark:from-[#454bc4] dark:to-[#315fd3] dark:text-[#fff] dark:hover:from-[#4b53d0] dark:hover:to-[#3868df] dark:hover:text-[#fff]';
@@ -47,9 +49,20 @@ export function Navbar() {
     const pathname = usePathname();
     const {isStaffMember} = useRoleAccess();
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+    const menuTriggerRef = useRef<HTMLButtonElement>(null);
+    const isMobile = useIsMobile();
     const logoSrc = useThemedLogo();
 
     const openPro = useProDialog();
+    const {handleJoinRandomRoom, joinRandomRoomIsLoading} = useJoinRandomRoom();
+
+    const handleOpenSettings = () => open(
+        <SettingsComponent/>,
+        {title: 'Settings', allowStripe: true, className: 'h-dvh w-screen max-w-none overflow-hidden rounded-none border-0 p-0 sm:h-[min(760px,90dvh)] sm:w-[92vw] sm:max-w-5xl sm:rounded-2xl'}
+    );
+
+    // Let the dropdown release its focus trap before opening another surface.
+    const afterMenuCloses = (action: () => void) => setTimeout(action, 100);
 
     const handleLogout = () => {
         if (user?.role !== Role.GUEST && user?.role !== Role.UNCLAIMED_USER) {
@@ -165,11 +178,12 @@ export function Navbar() {
         <div className="flex flex-col">
             <ClaimAccountBanner/>
             <nav
-                className="navbar-floating relative w-full h-auto md:h-16 py-2 flex flex-wrap md:flex-nowrap items-center px-4
-             bg-transparent border-0 shadow-none gap-y-2 md:gap-y-0 md:justify-between">
-                <div className="flex items-center gap-2">
+                className="navbar-floating relative grid w-full grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] items-center gap-2 px-3 py-2 lg:h-16 lg:px-4
+             bg-transparent border-0 shadow-none lg:gap-x-3 lg:gap-y-0
+             lg:grid-cols-[minmax(0,1fr)_minmax(0,min(30.5rem,calc(100%-40rem)))_minmax(0,1fr)] xl:gap-x-6">
+                <div className="col-start-2 row-start-1 flex min-w-0 items-center justify-center gap-2 lg:col-start-1 lg:justify-start xl:gap-3">
                     {isStaffMember() && (
-                        <div>
+                        <div className="hidden lg:block">
                             <Sheet open={isSidebarOpen} onOpenChange={setIsSidebarOpen}>
                                 <SheetTrigger asChild>
                                     <Button variant="ghost" size="icon" className="glass-control"
@@ -177,7 +191,15 @@ export function Navbar() {
                                         <Menu className="h-6 w-6"/>
                                     </Button>
                                 </SheetTrigger>
-                                <SheetContent side="left" className="p-0 w-[300px]">
+                                <SheetContent side="left" className="p-0 w-[300px]"
+                                              aria-describedby={undefined}
+                                              onCloseAutoFocus={event => {
+                                                  if (isMobile) {
+                                                      event.preventDefault();
+                                                      menuTriggerRef.current?.focus();
+                                                  }
+                                              }}>
+                                    <SheetTitle className="sr-only">Navigation</SheetTitle>
                                     <Sidebar className="h-full w-full border-none"
                                              onClose={() => setIsSidebarOpen(false)}/>
                                 </SheetContent>
@@ -190,76 +212,67 @@ export function Navbar() {
                         width={120}
                         height={36}
                         priority
-                        className="h-9 w-auto absolute left-1/2 -translate-x-1/2 md:static md:translate-x-0"
+                        className="h-8 w-auto shrink-0 lg:h-9"
                         onClick={() => {
                             router.push(ROUTES.HOME)
                         }}
                     />
+                    {isOnHomePage && shouldShowModButton && (
+                        <Button
+                            variant="outline"
+                            aria-label="Become a mod"
+                            title="Become a mod"
+                            className="glass-control hidden h-9 w-9 shrink-0 px-0 lg:inline-flex xl:w-auto xl:px-3 text-foreground hover:text-foreground"
+                            onClick={handleApplyModClick}
+                        >
+                            <Shield className="h-4 w-4"/>
+                            <span className="hidden xl:inline">Become a mod</span>
+                        </Button>
+                    )}
+                </div>
+
+                {/* Equal side columns center the mobile logo and the desktop search field. */}
+                <div className="col-start-1 row-start-1 min-w-0 lg:col-start-2">
                     {user && isOnHomePage && (
-                        <div
-                            className="md:order-0 w-auto md:w-auto md:absolute md:left-1/2 max-w-md md:mx-0 md:-translate-x-1/2">
-                            <div className="relative flex items-center gap-2">
-                                {shouldShowModButton && (
-                                    <>
-                                        <Button
-                                            className="glass-control hidden lg:inline-flex absolute right-[calc(100%+200px)] whitespace-nowrap gap-2 text-foreground hover:text-foreground"
-                                            onClick={handleApplyModClick}
-                                        >
-                                            <Shield className="h-4 w-4"/>
-                                            Become a mod
-                                        </Button>
-                                        <Button
-                                            variant="outline"
-                                            size="icon"
-                                            aria-label="Become a mod"
-                                            title="Become a mod"
-                                            className="glass-control lg:hidden text-foreground hover:text-foreground"
-                                            onClick={handleApplyModClick}
-                                        >
-                                            <Shield className="h-5 w-5"/>
-                                        </Button>
-                                    </>
-                                )}
-                                <SearchRooms/>
-                            </div>
+                        <div className="flex min-w-0 justify-start lg:mx-auto lg:w-full lg:max-w-[30.5rem] lg:justify-center">
+                            <SearchRooms/>
                         </div>
                     )}
                     {user && isOnPrivateChatPage && canUsePrivateChat && (
-                        <div
-                            className="md:order-0 w-auto md:w-auto md:absolute md:left-1/2 max-w-md md:mx-0 md:-translate-x-1/2">
+                        <div className="flex min-w-0 justify-start lg:mx-auto lg:w-full lg:max-w-[25rem] lg:justify-center">
                             <SearchUsers/>
                         </div>
                     )}
                 </div>
 
-                <div className="flex items-center gap-2 md:gap-4 ml-auto">
+                <div className="col-start-3 row-start-1 flex min-w-0 items-center justify-self-end">
                     {user && (
-                        <div className="flex items-center gap-2 md:gap-4">
-                            {!isStaffOrHigher && <Button onClick={openPro} aria-label="Explore allchat Pro" className={`${PRO_NAV_BUTTON_CLASS_NAME} hidden h-9 gap-2 px-3 md:inline-flex`}><Diamond className="h-4 w-4"/><span className="hidden xl:inline">allchat</span> Pro</Button>}
-                            <div className="hidden md:flex items-center gap-2">
+                        <div className="flex shrink-0 items-center gap-1 lg:gap-2">
+                            {!isStaffOrHigher && <Button onClick={openPro} aria-label="Explore allchat Pro" className={`${PRO_NAV_BUTTON_CLASS_NAME} hidden h-9 shrink-0 gap-2 px-3 lg:inline-flex`}><Diamond className="h-4 w-4"/><span><span className="hidden xl:inline">allchat </span>Pro</span></Button>}
+                            <div className="hidden shrink-0 lg:flex items-center gap-2">
                                 {!isStaffOrHigher && (
                                     <Button
                                         variant="outline"
                                         aria-label={advertiseTitle}
                                         title={advertiseTitle}
-                                        className="glass-control h-9 w-9 px-0 xl:w-auto xl:px-3 text-foreground hover:text-foreground"
+                                        className="glass-control h-9 w-9 px-0 min-[100rem]:w-auto min-[100rem]:px-3 text-foreground hover:text-foreground"
                                         onClick={handleAdvertiseClick}
                                     >
                                         <Megaphone className="h-4 w-4"/>
-                                        <span className="hidden xl:inline">{advertiseLabel}</span>
+                                        <span className="hidden min-[100rem]:inline">{advertiseLabel}</span>
                                     </Button>
                                 )}
                                 <Button
                                     variant="outline"
                                     aria-label="Report a bug"
                                     title="Report a bug"
-                                    className="glass-control h-9 w-9 px-0 xl:w-auto xl:px-3 text-foreground hover:text-foreground"
+                                    className="glass-control h-9 w-9 px-0 min-[100rem]:w-auto min-[100rem]:px-3 text-foreground hover:text-foreground"
                                     onClick={() => {
                                         void handleBugReportsClick();
                                     }}
                                 >
                                     <Bug className="h-4 w-4"/>
-                                    <span className="hidden xl:inline">Report bug</span>
+                                    <span className="hidden min-[100rem]:inline">Report bug</span>
                                 </Button>
                             </div>
                             {!isGuest && <NotificationBell/>}
@@ -267,27 +280,62 @@ export function Navbar() {
                                 <Button
                                     variant="ghost"
                                     size="icon"
-                                    className="glass-control"
+                                    className="glass-control hidden lg:inline-flex"
                                     aria-label="Settings"
                                     title="Settings"
-                                    onClick={() =>
-                                        open(
-                                            <SettingsComponent/>,
-                                            {title: 'Settings', allowStripe: true, className: 'h-dvh w-screen max-w-none overflow-hidden rounded-none border-0 p-0 sm:h-[min(760px,90dvh)] sm:w-[92vw] sm:max-w-5xl sm:rounded-2xl'}
-                                        )
-                                    }
+                                    onClick={handleOpenSettings}
                                 >
                                     <Settings className="h-6 w-6"/>
                                 </Button>
                             )}
                             <DropdownMenu>
                                 <DropdownMenuTrigger asChild>
-                                    <Button variant="ghost" size="icon" className="glass-control" aria-label="Menu"
+                                    <Button ref={menuTriggerRef} variant="ghost" size="icon" className="glass-control h-10 w-10 shrink-0 lg:h-9 lg:w-9" aria-label="Menu"
                                             title="Menu">
                                         <MoreVertical className="h-6 w-6"/>
                                     </Button>
                                 </DropdownMenuTrigger>
-                                <DropdownMenuContent align="end" className="glass-popover">
+                                <DropdownMenuContent align="end" className="glass-popover max-w-[calc(100vw-24px)] max-lg:[&_[role=menuitem]]:min-h-10">
+                                    {!isGuest && (
+                                        <DropdownMenuItem className="cursor-pointer gap-2 lg:hidden"
+                                                          onSelect={() => afterMenuCloses(handleOpenSettings)}>
+                                            <Settings className="h-4 w-4"/>
+                                            Settings
+                                        </DropdownMenuItem>
+                                    )}
+                                    {isOnHomePage && (
+                                        <DropdownMenuItem className="cursor-pointer gap-2 lg:hidden"
+                                                          disabled={joinRandomRoomIsLoading}
+                                                          onSelect={() => {
+                                                              void handleJoinRandomRoom().catch(() => {
+                                                                  // The shared action displays the error toast.
+                                                              });
+                                                          }}>
+                                            <Shuffle className="h-4 w-4"/>
+                                            Join a random chatroom
+                                        </DropdownMenuItem>
+                                    )}
+                                    {isOnHomePage && shouldShowModButton && (
+                                        <DropdownMenuItem className="cursor-pointer gap-2 lg:hidden"
+                                                          onSelect={() => afterMenuCloses(handleApplyModClick)}>
+                                            <Shield className="h-4 w-4"/>
+                                            Become a mod
+                                        </DropdownMenuItem>
+                                    )}
+                                    {isStaffMember() && (
+                                        <DropdownMenuItem className="cursor-pointer gap-2 lg:hidden"
+                                                          onSelect={() => afterMenuCloses(() => setIsSidebarOpen(true))}>
+                                            <Menu className="h-4 w-4"/>
+                                            Open sidebar
+                                        </DropdownMenuItem>
+                                    )}
+                                    {!isStaffOrHigher && (
+                                        <DropdownMenuItem className="cursor-pointer gap-2 lg:hidden"
+                                                          onSelect={() => afterMenuCloses(openPro)}>
+                                            <Diamond className="h-4 w-4"/>
+                                            allchat Pro
+                                        </DropdownMenuItem>
+                                    )}
                                     {isGuest && (
                                         <DropdownMenuItem className="cursor-pointer gap-2"
                                                           onSelect={() => {
@@ -302,13 +350,13 @@ export function Navbar() {
                                         </DropdownMenuItem>
                                     )}
                                     {!isStaffOrHigher && (
-                                        <DropdownMenuItem className="cursor-pointer gap-2 md:hidden"
+                                        <DropdownMenuItem className="cursor-pointer gap-2 lg:hidden"
                                                           onSelect={handleAdvertiseClick}>
                                             <Megaphone className="h-4 w-4"/>
                                             {advertiseTitle}
                                         </DropdownMenuItem>
                                     )}
-                                    <DropdownMenuItem className="cursor-pointer gap-2 md:hidden"
+                                    <DropdownMenuItem className="cursor-pointer gap-2 lg:hidden"
                                                       onSelect={() => {
                                                           void handleBugReportsClick();
                                                       }}>
@@ -347,7 +395,6 @@ export function Navbar() {
                         </div>
                     )}
                 </div>
-                {!isStaffOrHigher && <div className="w-full md:hidden"><Button onClick={openPro} className={`${PRO_NAV_BUTTON_CLASS_NAME} h-8 w-full justify-between px-4 text-xs`}><span className="flex items-center gap-2"><Diamond className="h-3.5 w-3.5"/>allchat Pro</span><span className="font-normal text-inherit">{user?.proActive ? 'Your Pro perks' : 'Share more with Pro'}</span></Button></div>}
             </nav>
 
         </div>);

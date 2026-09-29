@@ -1,21 +1,19 @@
 import {useEffect, useMemo, useState} from "react";
 import {useThunk} from "@/lib/hooks/useThunk";
-import {
-    joinRandomAndSelectChatRoomThunk,
-    searchChatRoomsByNameThunk
-} from "@/redux/chatRoom/chatRoomThunk";
+import {searchChatRoomsByNameThunk} from "@/redux/chatRoom/chatRoomThunk";
 import {useSelector} from "react-redux";
 import {selectJoinedUserChatRoomsState} from "@/redux/chatRoom/chatRoomSelectors";
 import {RoomPopulation} from "@/models/roomPopulation";
 import {useChatRooms} from "@/lib/hooks/useChatRooms";
 import {useUser} from "@/lib/hooks/useUser";
 import {toast} from "sonner";
+import {useJoinRandomRoom} from "@/features/chatroom/hooks/useJoinRandomRoom";
 
 const DEBOUNCE_DELAY = 400;
 
 export const useRoomSearch = () => {
     const [runSearchRoomThunk, searchRoomIsLoading] = useThunk(searchChatRoomsByNameThunk);
-    const [runJoinRandomChatRoom, joinRandomRoomIsLoading] = useThunk(joinRandomAndSelectChatRoomThunk);
+    const {handleJoinRandomRoom: joinRandomRoom, joinRandomRoomIsLoading} = useJoinRandomRoom();
     const userChatRooms = useSelector(selectJoinedUserChatRoomsState);
 
     const {user} = useUser();
@@ -64,15 +62,9 @@ export const useRoomSearch = () => {
     };
 
     const handleJoinRandomRoom = async () => {
-        try {
-            const joinedRoom = await runJoinRandomChatRoom();
-            toast.success(`Joined ${joinedRoom.chatRoomName}`);
-            clearSearch();
-            return joinedRoom;
-        } catch (err: any) {
-            toast.error(err?.message || "Failed to join a random chatroom.");
-            throw err;
-        }
+        const joinedRoom = await joinRandomRoom();
+        clearSearch();
+        return joinedRoom;
     };
 
     const filteredRooms = useMemo(() => {

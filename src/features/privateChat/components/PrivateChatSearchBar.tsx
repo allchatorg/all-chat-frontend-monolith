@@ -123,11 +123,11 @@ const PrivateChatSearchBar: React.FC = () => {
     };
 
     return (
-        <div className="relative text-sm w-full">
+        <div className="relative min-w-0 w-full text-sm font-normal tracking-normal">
             <div
                 ref={containerRef}
                 onClick={handleContainerClick}
-                className={`glass-input flex flex-wrap md:min-w-[260px] items-center gap-2 w-full px-3 py-2 rounded-md transition-colors ${
+                className={`glass-input flex min-w-0 flex-wrap lg:min-w-[260px] items-center gap-2 w-full px-3 py-2 rounded-md transition-colors ${
                     isFocused ? "ring-1 ring-ring border-transparent" : ""
                 }`}
             >
@@ -136,16 +136,19 @@ const PrivateChatSearchBar: React.FC = () => {
                 {filters.map((filter, index) => (
                     <span
                         key={filter.type + index}
-                        className="glass-pill inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-medium text-white animate-in fade-in zoom-in duration-200"
+                        className="glass-pill inline-flex min-w-0 max-w-full items-center gap-1 rounded-full px-2 py-0.5 text-xs font-medium text-white animate-in fade-in zoom-in duration-200"
+                        title={`${filter.type}:${filter.value}`}
                     >
-                        <span className="font-semibold">{filter.type}:</span> {filter.value}
+                        <span className="shrink-0 font-semibold">{filter.type}:</span>
+                        <span className="min-w-0 truncate">{filter.value}</span>
                         <button
                             type="button"
                             onClick={(e) => {
                                 e.stopPropagation();
                                 removeFilter(filter.type);
                             }}
-                            className="ml-1 hover:text-white"
+                            className="ml-1 shrink-0 hover:text-white"
+                            aria-label={`Remove ${filter.type} filter`}
                         >
                             <X className="h-3 w-3"/>
                         </button>
@@ -163,7 +166,7 @@ const PrivateChatSearchBar: React.FC = () => {
                     onBlur={() => {
                         setTimeout(() => setIsFocused(false), 200);
                     }}
-                    className="flex-1 min-w-[80px] bg-transparent outline-hidden placeholder:text-muted-foreground text-base sm:text-sm"
+                    className="flex-1 min-w-[80px] bg-transparent text-base font-normal tracking-normal outline-hidden placeholder:text-sm placeholder:text-muted-foreground lg:text-sm"
                 />
 
                 {(inputValue || filters.length > 0) && (
