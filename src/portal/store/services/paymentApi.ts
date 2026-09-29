@@ -1,15 +1,9 @@
 import {createApi} from '@reduxjs/toolkit/query/react';
 import {baseQuery} from './baseQuery';
+import type {CardSetupIntent, SavedPaymentCard} from '@/components/billing/types';
 
 // Payment Method DTO
-export interface PaymentMethodDto {
-    id: string;
-    brand: string;
-    last4: string;
-    expMonth: number;
-    expYear: number;
-    cardholderName: string;
-}
+export type PaymentMethodDto = SavedPaymentCard;
 
 // Add Payment Method Request
 export interface AddPaymentMethodRequest {
@@ -21,6 +15,13 @@ export const paymentApi = createApi({
     baseQuery: baseQuery,
     tagTypes: ['PaymentMethod'],
     endpoints: (builder) => ({
+        createCardSetup: builder.mutation<CardSetupIntent, void>({
+            query: () => ({url: '/payment/methods/setup-intent', method: 'POST'}),
+        }),
+        completeCardSetup: builder.mutation<PaymentMethodDto[], {setupIntentId: string}>({
+            query: body => ({url: '/payment/methods/setup-complete', method: 'POST', body}),
+            invalidatesTags: ['PaymentMethod'],
+        }),
         // Get payment methods
         getPaymentMethods: builder.query<PaymentMethodDto[], void>({
             query: () => '/payment/methods',
@@ -52,4 +53,6 @@ export const {
     useGetPaymentMethodsQuery,
     useAddPaymentMethodMutation,
     useRemovePaymentMethodMutation,
+    useCreateCardSetupMutation,
+    useCompleteCardSetupMutation,
 } = paymentApi;

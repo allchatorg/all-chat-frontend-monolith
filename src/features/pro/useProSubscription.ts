@@ -71,14 +71,14 @@ export function useProSubscription(pollForConfirmation = false) {
     }, [refresh, userId, role, pollForConfirmation]);
 
     useEffect(() => {
-        if (!userId || subscription?.proActive || (!pollForConfirmation && !subscription?.checkoutPending)) return;
+        if (!userId || (subscription?.proActive && !subscription.pendingInterval) || (!pollForConfirmation && !subscription?.checkoutPending && !subscription?.pendingInterval)) return;
         let attempts = 0;
         const timer = window.setInterval(() => {
             void refresh();
             if (++attempts >= 20) window.clearInterval(timer);
         }, 3_000);
         return () => window.clearInterval(timer);
-    }, [refresh, userId, pollForConfirmation, subscription?.proActive, subscription?.checkoutPending]);
+    }, [refresh, userId, pollForConfirmation, subscription?.proActive, subscription?.checkoutPending, subscription?.pendingInterval]);
 
     return {subscription, loading, error, refresh};
 }

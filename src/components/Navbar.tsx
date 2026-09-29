@@ -273,7 +273,7 @@ export function Navbar() {
                                     onClick={() =>
                                         open(
                                             <SettingsComponent/>,
-                                            {title: 'Settings', className: 'h-dvh w-screen max-w-none overflow-hidden rounded-none border-0 p-0 sm:h-[min(760px,90dvh)] sm:w-[92vw] sm:max-w-5xl sm:rounded-2xl'}
+                                            {title: 'Settings', allowStripe: true, className: 'h-dvh w-screen max-w-none overflow-hidden rounded-none border-0 p-0 sm:h-[min(760px,90dvh)] sm:w-[92vw] sm:max-w-5xl sm:rounded-2xl'}
                                         )
                                     }
                                 >

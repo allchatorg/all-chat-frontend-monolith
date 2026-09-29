@@ -28,7 +28,7 @@ export function ClaimAccountGate() {
         openChatDialog(
             <div className="w-[80vw] md:min-w-[800px] md:max-w-[800px] h-[500px] overflow-hidden">
                 <SettingsComponent defaultTab="account"/>
-            </div>
+            </div>, {allowStripe: true}
         );
 
     return (

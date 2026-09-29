@@ -1,13 +1,13 @@
 import api from '@/lib/api';
-import {ProAppearance, ProInterval, ProSubscription} from './types';
+import {ProAppearance, ProInterval, ProSubscription, ProInvoices, ProPaymentResult, ProPlanPreview} from './types';
 import {isAxiosError} from 'axios';
+import type {CardSetupIntent, SavedPaymentCard} from '@/components/billing/types';
+import {apiErrorMessage} from '@/lib/apiError';
 
 export const getProSubscription = async (refresh = false) =>
     (await api.get<ProSubscription>('/pro/subscription', {params: {refresh}})).data;
 export const startProCheckout = async (interval: ProInterval) =>
-    (await api.post<{url: string}>('/pro/checkout', {interval})).data;
-export const openProPortal = async (flow: 'billing' | 'switch_plan') =>
-    (await api.post<{url: string}>('/pro/portal', {flow})).data;
+    (await api.post<{clientSecret: string}>('/pro/checkout/embedded', {interval})).data;
 export const cancelProSubscription = async () =>
     (await api.post<ProSubscription>('/pro/cancel')).data;
 export const resumeProSubscription = async () =>
@@ -17,19 +17,25 @@ export const removeScheduledProChange = async () =>
 export const updateProAppearance = async (showProBadge: boolean) =>
     (await api.patch<ProAppearance>('/settings/appearance', {showProBadge})).data;
 
+export const getProPaymentMethods = async () => (await api.get<SavedPaymentCard[]>('/pro/payment-methods')).data;
+export const createProCardSetup = async (paymentMethodId?: string) =>
+    (await api.post<CardSetupIntent>('/pro/payment-methods/setup-intent', paymentMethodId ? {paymentMethodId} : undefined)).data;
+export const completeProCardSetup = async (setupIntentId: string, makeDefault = false) =>
+    (await api.post<SavedPaymentCard[]>('/pro/payment-methods/setup-complete', {setupIntentId, makeDefault})).data;
+export const removeProPaymentMethod = async (id: string) => {await api.delete(`/pro/payment-methods/${encodeURIComponent(id)}`);};
+export const getProInvoices = async (startingAfter?: string) =>
+    (await api.get<ProInvoices>('/pro/invoices', {params: {startingAfter}})).data;
+export const payProInvoice = async (id: string, paymentMethodId?: string) =>
+    (await api.post<ProPaymentResult>(`/pro/invoices/${encodeURIComponent(id)}/pay`, paymentMethodId ? {paymentMethodId} : undefined)).data;
+export const previewProPlan = async (interval: ProInterval) =>
+    (await api.post<ProPlanPreview>('/pro/plan-change/preview', {interval})).data;
+export const confirmProPlan = async (previewToken: string) =>
+    (await api.post<ProPaymentResult>('/pro/plan-change/confirm', {previewToken})).data;
+
 export function proErrorMessage(error: unknown): string {
     if (isAxiosError(error)) {
-        const message = error.response?.data?.message || error.response?.data?.detail;
-        if (typeof message === 'string') return message;
+        return apiErrorMessage(error);
     }
+    if (error instanceof Error) return error.message;
     return 'We could not update your subscription. Please try again.';
-}
-
-/** Only follow a Stripe-hosted URL returned by our authenticated backend. */
-export function redirectToStripe(url: string) {
-    const destination = new URL(url);
-    if (destination.protocol !== 'https:' || !['checkout.stripe.com', 'billing.stripe.com'].includes(destination.hostname)) {
-        throw new Error('The billing link is unavailable. Please try again.');
-    }
-    window.location.assign(destination.toString());
 }

@@ -8,7 +8,9 @@ import {Button} from '@/components/ui/button';
 import {selectUser} from '@/redux/user/userSelectors';
 import {cn} from '@/lib/utils';
 import {ProInterval} from './types';
-import {proErrorMessage, redirectToStripe, startProCheckout} from './api';
+import {proErrorMessage, startProCheckout} from './api';
+import {ProCheckout} from './ProCheckout';
+import {getStripe} from '@/components/billing/stripe';
 import {useProSubscription} from './useProSubscription';
 import {ProBenefits, ProComparison} from './ProBenefits';
 import {isStaff} from '@/models/Role';
@@ -33,6 +35,8 @@ function PaidProOffer({onManage, onClaim}: {onManage: () => void; onClaim: () =>
     const plansHeadingId = useId();
     const intervalName = useId();
     const [redirecting, setRedirecting] = useState(false);
+    const [checkoutSecret, setCheckoutSecret] = useState<string | null>(null);
+    const [checkoutComplete, setCheckoutComplete] = useState(false);
     // The server owns the flag. Missing configuration (or an older API) stays monthly-only.
     const yearlyBillingEnabled = subscription?.yearlyBillingEnabled === true;
     const mustClaim = !user?.claimed || user.role === 'GUEST';
@@ -41,10 +45,10 @@ function PaidProOffer({onManage, onClaim}: {onManage: () => void; onClaim: () =>
     const lockedCheckoutInterval = subscription?.checkoutPending && subscription.status === 'INCOMPLETE' && !unavailableYearlyCheckout
         ? subscription.checkoutInterval : null;
     const selectedInterval = lockedCheckoutInterval ?? (yearlyBillingEnabled ? interval : 'MONTHLY');
-    const managesExisting = Boolean(subscription && !canContinueCheckout && !subscription.canPurchase && subscription.canManageBilling && subscription.status !== 'NONE');
+    const managesExisting = Boolean(subscription && subscription.canManageBilling && (subscription.status === 'INCOMPLETE' || (!canContinueCheckout && !subscription.canPurchase && subscription.status !== 'NONE')));
     const availableIntervals: ProInterval[] = yearlyBillingEnabled ? ['MONTHLY', 'YEARLY'] : ['MONTHLY'];
     const actionDisabled = redirecting || (!mustClaim && !managesExisting && (loading || !!error || unavailableYearlyCheckout || (!subscription?.canPurchase && !canContinueCheckout)));
-    const actionLabel = mustClaim ? 'Claim your account to get Pro' : managesExisting ? 'Manage your subscription' : unavailableYearlyCheckout ? 'Checkout being confirmed' : canContinueCheckout ? 'Continue checkout' : 'Get allchat Pro';
+    const actionLabel = mustClaim ? 'Claim your account to get Pro' : managesExisting ? subscription?.status === 'INCOMPLETE' ? 'Complete subscription payment' : 'Manage your subscription' : unavailableYearlyCheckout ? 'Checkout being confirmed' : canContinueCheckout ? 'Continue checkout' : 'Get allchat Pro';
 
     useEffect(() => {
         if (intervalSelected.current || !subscription?.checkoutPending || !subscription.checkoutInterval) return;
@@ -59,12 +63,14 @@ function PaidProOffer({onManage, onClaim}: {onManage: () => void; onClaim: () =>
         if (actionDisabled) return;
         setRedirecting(true);
         try {
-            const {url} = await startProCheckout(selectedInterval);
-            redirectToStripe(url);
+            if (!getStripe()) throw new Error('Payments are temporarily unavailable.');
+            const {clientSecret} = await startProCheckout(selectedInterval);
+            setCheckoutSecret(clientSecret);
         } catch (failure) {
             toast.error(proErrorMessage(failure));
-            setRedirecting(false);
             void refresh();
+        } finally {
+            setRedirecting(false);
         }
     };
 
@@ -72,6 +78,9 @@ function PaidProOffer({onManage, onClaim}: {onManage: () => void; onClaim: () =>
         plansRef.current?.scrollIntoView({behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'instant' : 'smooth', block: 'start'});
         plansRef.current?.focus({preventScroll: true});
     };
+
+    if (checkoutComplete) return <SubscriptionsSettings billingReturn={{checkout: 'success', billingUpdated: false}}/>;
+    if (checkoutSecret) return <ProCheckout clientSecret={checkoutSecret} onComplete={() => setCheckoutComplete(true)} onBack={() => {setCheckoutSecret(null); void refresh(true);}}/>;
 
     return (
         <div className="bg-background text-foreground">
@@ -125,7 +134,7 @@ function PaidProOffer({onManage, onClaim}: {onManage: () => void; onClaim: () =>
                                 ))}
                             </div>
                         </fieldset>}
-                        {lockedCheckoutInterval && <p className="mt-4 text-xs leading-5 text-muted-foreground">Continue your {lockedCheckoutInterval === 'YEARLY' ? 'yearly' : 'monthly'} checkout to try another payment method.{yearlyBillingEnabled && ' To choose a different plan, cancel this unfinished subscription in Settings first.'}</p>}
+                        {lockedCheckoutInterval && <p className="mt-4 text-xs leading-5 text-muted-foreground">Complete your unpaid {lockedCheckoutInterval === 'YEARLY' ? 'yearly' : 'monthly'} invoice in Subscriptions to try another payment method.{yearlyBillingEnabled && ' To choose a different plan, cancel this unfinished subscription in Settings first.'}</p>}
                         {unavailableYearlyCheckout && <p role="status" className="mt-4 text-sm leading-6 text-muted-foreground">{subscription?.status === 'INCOMPLETE' ? 'Your previous checkout is no longer available. Cancel your unfinished subscription in Settings before starting a new plan.' : 'Your previous checkout is still being confirmed. Please wait for it to finish or expire, then refresh your subscription.'} <button className="font-medium underline" onClick={() => void refresh(true)}>Refresh status</button></p>}
                         <Button onClick={() => void subscribe()} disabled={actionDisabled} className="mt-5 h-12 w-full whitespace-normal rounded-xl bg-blue-600 font-bold text-white hover:bg-blue-700">
                             {redirecting ? <Loader2 className="h-4 w-4 animate-spin"/> : <Diamond className="h-4 w-4"/>}

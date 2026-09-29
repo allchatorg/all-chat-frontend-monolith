@@ -3,44 +3,28 @@ import {SiteHeader} from "@ads/components/site-header";
 import {SavedCard} from "@ads/components/saved-card";
 import {AddCardForm} from "@ads/components/add-card-form";
 import {Button} from "@ads/components/ui/button";
-import {
-    Dialog,
-    DialogContent,
-    DialogDescription,
-    DialogHeader,
-    DialogTitle,
-    DialogTrigger,
-} from "@ads/components/ui/dialog";
+import {CardDialog} from '@/components/billing/CardDialog';
 import {IconPlus, IconShieldCheck} from "@tabler/icons-react";
-import {loadStripe} from "@stripe/stripe-js";
-import {Elements} from "@stripe/react-stripe-js";
 import {useGetPaymentMethodsQuery, useRemovePaymentMethodMutation} from "@ads/store/services/paymentApi";
 import {toast} from "sonner";
 import {useState} from "react";
-
-const publishableKey = process.env.NEXT_PUBLIC_STRIPE_KEY || '';
-const isStripeKeyValid = publishableKey.startsWith('pk_');
-if (!isStripeKeyValid) {
-    console.error(
-        "Invalid Stripe Key"
-    );
-}
-const stripePromise = isStripeKeyValid ? loadStripe(publishableKey) : null;
-
 
 export default function Page() {
     const {data: cards, isLoading, error} = useGetPaymentMethodsQuery();
     const [removePaymentMethod] = useRemovePaymentMethodMutation();
     const [isAddCardDialogOpen, setIsAddCardDialogOpen] = useState(false);
+    const [addingCard, setAddingCard] = useState(false);
+    const [removingCard, setRemovingCard] = useState(false);
 
     const handleRemoveCard = async (cardId: string) => {
+        setRemovingCard(true);
         try {
             await removePaymentMethod(cardId).unwrap();
             toast.success("Payment method removed successfully");
         } catch (err) {
             console.error('Failed to remove payment method:', err);
-            toast.error("Failed to remove payment method");
-        }
+            toast.error("Could not remove this card. Check whether it is required for Pro or a pending payment.");
+        } finally {setRemovingCard(false);}
     };
 
     return (
@@ -58,7 +42,7 @@ export default function Page() {
                         <h4 className="text-sm font-semibold text-blue-900 dark:text-blue-100">Secure Payment Processing</h4>
                         <p className="text-sm text-blue-700 dark:text-blue-300 mt-1">
                             allchat does not store your payment details. Your cards are securely saved by our payment
-                            provider, Stripe. You can remove them at any time.
+                            provider, Stripe. Cards required for active billing must be replaced before removal.
                         </p>
                     </div>
                 </div>
@@ -66,34 +50,10 @@ export default function Page() {
                 <div className="space-y-6">
                     <div className="flex items-center justify-between max-w-3xl">
                         <h3 className="text-lg font-medium">Saved Cards ({cards?.length || 0})</h3>
-                        <Dialog open={isAddCardDialogOpen} onOpenChange={setIsAddCardDialogOpen}>
-                            <DialogTrigger asChild>
-                                <Button variant="outline" size="sm">
-                                    <IconPlus className="mr-2 h-4 w-4"/>
-                                    Add Card
-                                </Button>
-                            </DialogTrigger>
-                            <DialogContent className="sm:max-w-[425px]">
-                                <DialogHeader>
-                                    <DialogTitle>Add Payment Method</DialogTitle>
-                                    <DialogDescription>
-                                        Add a new credit or debit card to your account.
-                                    </DialogDescription>
-                                </DialogHeader>
-                                {stripePromise ? (
-                                    <Elements stripe={stripePromise}>
-                                        <AddCardForm onSuccess={() => setIsAddCardDialogOpen(false)}/>
-                                    </Elements>
-                                ) : (
-                                    <div className="text-sm text-red-600">
-                                        Stripe is not configured correctly. Please set
-                                        NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY
-                                        to your Stripe publishable key (starts with &quot;pk_&quot;) and reload the
-                                        page.
-                                    </div>
-                                )}
-                            </DialogContent>
-                        </Dialog>
+                        <CardDialog open={isAddCardDialogOpen} onOpenChange={setIsAddCardDialogOpen} busy={addingCard}
+                            trigger={<Button variant="outline" size="sm"><IconPlus className="mr-2 h-4 w-4"/>Add Card</Button>}>
+                            <AddCardForm onBusyChange={setAddingCard} onSuccess={() => setIsAddCardDialogOpen(false)}/>
+                        </CardDialog>
                     </div>
 
                     {isLoading ? (
@@ -106,6 +66,7 @@ export default function Page() {
                                 <SavedCard
                                     key={card.id}
                                     card={card}
+                                    busy={removingCard}
                                     onRemove={handleRemoveCard}
                                 />
                             ))}

@@ -32,14 +32,15 @@ DialogOverlay.displayName = DialogPrimitive.Overlay.displayName
 interface DialogContentProps {
     showCloseButton?: boolean
     overlayClassName?: string
+    nonModalBackdrop?: boolean
 }
 
 const DialogContent = React.forwardRef<
     React.ElementRef<typeof DialogPrimitive.Content>,
     React.ComponentPropsWithoutRef<typeof DialogPrimitive.Content> & DialogContentProps
->(({className, children, showCloseButton = true, overlayClassName, ...props}, ref) => (
+>(({className, children, showCloseButton = true, overlayClassName, nonModalBackdrop = false, ...props}, ref) => (
     <DialogPortal>
-        <DialogOverlay className={overlayClassName}/>
+        {nonModalBackdrop ? <div aria-hidden="true" className={cn('fixed inset-0 z-50 bg-black/80', overlayClassName)} onPointerDown={event => event.preventDefault()}/> : <DialogOverlay className={overlayClassName}/>}
         <DialogPrimitive.Content
             ref={ref}
             className={cn(

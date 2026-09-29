@@ -154,7 +154,7 @@ export function AppSidebar({...props}: React.ComponentProps<typeof Sidebar>) {
         openChatDialog(
             <div className="w-[80vw] md:min-w-[800px] md:max-w-[800px] max-h-[500px]">
                 <SettingsComponent/>
-            </div>
+            </div>, {allowStripe: true}
         )
 
     const handleLogout = async () => {
