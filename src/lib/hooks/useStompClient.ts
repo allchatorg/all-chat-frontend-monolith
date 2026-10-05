@@ -68,6 +68,7 @@ import {applyProBadgeUpdate, ProBadgeUpdate, refreshRegisteredProBadges} from "@
 import {applyFontUpdate, ingestFontSnapshots} from '@/lib/fontStore';
 import {getMe} from "@/api/user/userAPI";
 import {setUser} from "@/redux/user/userSlice";
+import {connectTypingTransport} from "@/lib/typingStore";
 
 const WS_URL = process.env.NEXT_PUBLIC_WS_URL || "http://localhost:8080/ws";
 const PUBLIC_TOPIC = ["/topic/public-chat"];
@@ -116,6 +117,11 @@ export function useStompWithRedux(
         state.privateChat.loadedRooms
     );
     const clientRef = useRef<Client | null>(null);
+    const typingCleanupRef = useRef<(() => void) | null>(null);
+    const clearTypingConnection = useCallback(() => {
+        typingCleanupRef.current?.();
+        typingCleanupRef.current = null;
+    }, []);
     const subscriptionsRef = useRef<Record<string, StompSubscription>>({});
     const [isConnected, setIsConnected] = useState(false);
     const reconnectTimeoutRef = useRef<NodeJS.Timeout | null>(null);
@@ -462,6 +468,7 @@ export function useStompWithRedux(
     );
 
     const disconnect = useCallback(() => {
+        clearTypingConnection();
         if (clientRef.current) {
             console.log("[STOMP] Manually disconnecting");
 
@@ -524,6 +531,13 @@ export function useStompWithRedux(
             return;
         }
 
+        let disposed = false;
+        let releaseTyping: (() => void) | null = null;
+        const clearOwnTypingConnection = () => {
+            releaseTyping?.();
+            if (typingCleanupRef.current === releaseTyping) typingCleanupRef.current = null;
+            releaseTyping = null;
+        };
         const client = new Client({
             webSocketFactory: () => {
                 const latestToken = getSessionToken();
@@ -538,7 +552,25 @@ export function useStompWithRedux(
             heartbeatOutgoing: 10000,
 
             onConnect: () => {
+                if (disposed) { void client.deactivate(); return; }
                 console.log("[STOMP] Connected");
+                clearTypingConnection();
+                releaseTyping = connectTypingTransport({
+                    publish: (chatRoomId, typing) => {
+                        if (!client.connected) throw new Error('Socket disconnected');
+                        client.publish({destination: '/app/chat.typing', body: JSON.stringify({chatRoomId, typing})});
+                    },
+                    subscribe: (roomId, receive) => {
+                        const subscription = client.subscribe(`/topic/chat-typing.${roomId}`, message => {
+                            try {
+                                const event = JSON.parse(message.body);
+                                if (event.type === WebSocketMessageType.TYPING_UPDATE) receive(event.data);
+                            } catch { /* Typing is best-effort; malformed activity is ignored. */ }
+                        });
+                        return () => { if (client.connected) subscription.unsubscribe(); };
+                    },
+                });
+                typingCleanupRef.current = releaseTyping;
                 subscriptionsRef.current = {};
                 // Subscribe before refreshing persisted notifications so new
                 // deliveries cannot slip between the fetch and subscription.
@@ -559,6 +591,8 @@ export function useStompWithRedux(
                 dispatch(fetchMessagingAvailabilityThunk());
             },
             onDisconnect: () => {
+                clearOwnTypingConnection();
+                if (disposed) return;
                 console.log("[STOMP] Disconnected");
                 setIsConnected(false);
                 dispatch(markChatRoomsAsStale(loadedChatRoomsRef.current.map(r => r.id)));
@@ -566,6 +600,8 @@ export function useStompWithRedux(
                 subscriptionsRef.current = {};
             },
             onStompError: (frame) => {
+                clearOwnTypingConnection();
+                if (disposed) return;
                 console.error("[STOMP] Error:", frame);
                 setIsConnected(false);
                 dispatch(markChatRoomsAsStale(loadedChatRoomsRef.current.map(r => r.id)));
@@ -573,6 +609,8 @@ export function useStompWithRedux(
                 subscriptionsRef.current = {};
             },
             onWebSocketClose: (event) => {
+                clearOwnTypingConnection();
+                if (disposed) return;
                 console.log("[WS] WebSocket closed:", event);
                 setIsConnected(false);
                 dispatch(markChatRoomsAsStale(loadedChatRoomsRef.current.map(r => r.id)));
@@ -580,6 +618,8 @@ export function useStompWithRedux(
                 subscriptionsRef.current = {};
             },
             onWebSocketError: (event) => {
+                clearOwnTypingConnection();
+                if (disposed) return;
                 console.error("[WS] WebSocket error:", event);
                 setIsConnected(false);
                 dispatch(markChatRoomsAsStale(loadedChatRoomsRef.current.map(r => r.id)));
@@ -592,6 +632,8 @@ export function useStompWithRedux(
         clientRef.current = client;
 
         const forceReconnect = async () => {
+            if (disposed) return;
+            clearOwnTypingConnection();
             if (clientRef.current) {
                 console.log("[STOMP] Forcing reconnect...");
                 dispatch(markChatRoomsAsStale(loadedChatRoomsRef.current.map(r => r.id)));
@@ -602,6 +644,7 @@ export function useStompWithRedux(
                 } catch (error) {
                     // Ignore potential deactivate error
                 }
+                if (disposed) return;
 
                 // CRITICAL FIX: deactivate() deletes all active subscriptions from the Stomp client. 
                 // We must wipe our local track record so that manageSubscriptions() restores them.
@@ -642,6 +685,7 @@ export function useStompWithRedux(
         };
 
         const handleOffline = () => {
+            clearOwnTypingConnection();
             console.log("[STOMP] Network offline");
             setIsConnected(false);
             dispatch(markChatRoomsAsStale(loadedChatRoomsRef.current.map(r => r.id)));
@@ -661,6 +705,8 @@ export function useStompWithRedux(
 
         return () => {
             console.log("[STOMP] Cleaning up connection");
+            disposed = true;
+            clearOwnTypingConnection();
             if (typeof document !== 'undefined') {
                 document.removeEventListener('visibilitychange', handleVisibilityChange);
             }

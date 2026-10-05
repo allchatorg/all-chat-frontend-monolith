@@ -1,5 +1,6 @@
 import {fontPresetStyle} from "@/lib/fontPresets";
 import {useUserFonts} from "@/lib/hooks/useUserFonts";
+import {useComposerTyping} from "@/lib/hooks/useComposerTyping";
 import {useSelector} from "react-redux";
 import {selectUser} from "@/redux/user/userSelectors";
 import {ChatUserName} from "@/features/chatroom/components/ChatUserName";
@@ -37,6 +38,7 @@ import imageCompression from "browser-image-compression";
 import {getAccountLimits, getAttachmentByteLimit} from "@/lib/accountLimits";
 
 interface ChatInputProps {
+    typingRoomId?: number;
     isConnected: boolean;
     disabledReason?: string;
     messageSendingBlocked?: boolean;
@@ -158,6 +160,7 @@ export function ChatInputShowcase({
 }
 
 const ChatInput: React.FC<ChatInputProps> = ({
+                                                 typingRoomId,
                                                  isConnected,
                                                  disabledReason,
                                                  messageSendingBlocked = false,
@@ -198,6 +201,7 @@ const ChatInput: React.FC<ChatInputProps> = ({
     const [isUploading, setIsUploading] = useState(false);
     const [isCooldown, setIsCooldown] = useState(false);
     const [isSending, setIsSending] = useState(false);
+    const typing = useComposerTyping(typingRoomId, isConnected && !messageSendingBlocked && !editingMessage && !isSending);
     const sendingRef = useRef(false);
     const mountedRef = useRef(true);
     const composerContextRef = useRef({editingId: editingMessage?.id, replyingId: replyingToMessage?.id});
@@ -275,11 +279,12 @@ const ChatInput: React.FC<ChatInputProps> = ({
             stopDictation();
             // Prefill the editor from the stored marker string — the user edits
             // rich text, never raw markers.
-            editor.commands.setContent(markersToDoc(editingMessage.content ?? "", {customEmojis: true}));
+            typing.stop();
+            editor.commands.setContent(markersToDoc(editingMessage.content ?? "", {customEmojis: true}), {emitUpdate: false});
             setInputText(docToMarkers(editor.getJSON()));
             editor.commands.focus("end");
         } else {
-            editor.commands.clearContent();
+            editor.commands.clearContent(false);
             setInputText("");
         }
     }, [editingMessage, stopDictation, editor, isSending]);
@@ -350,6 +355,7 @@ const ChatInput: React.FC<ChatInputProps> = ({
             : undefined;
 
         const context = composerContextRef.current;
+        typing.stop();
         sendingRef.current = true;
         setIsSending(true);
         stopDictation();
@@ -359,7 +365,7 @@ const ChatInput: React.FC<ChatInputProps> = ({
             await onSendMessage(inputText.trim() ? inputText : "", attachmentToSend, editingMessage?.id);
             if (!mountedRef.current || context.editingId !== composerContextRef.current.editingId ||
                 (composerContextRef.current.replyingId !== undefined && context.replyingId !== composerContextRef.current.replyingId)) return;
-            editor?.commands.clearContent();
+            editor?.commands.clearContent(false);
             setInputText("");
             setSelectedFile(null);
             setUploadedAttachment(null);
@@ -390,6 +396,7 @@ const ChatInput: React.FC<ChatInputProps> = ({
         if (messageSendingBlocked) throw new Error(messageSendingDisabledReason);
         if (editingMessage || isUploading) throw new Error('Finish your current edit or upload before sending a sticker.');
 
+        typing.stop();
         sendingRef.current = true;
         setIsSending(true);
         stopDictation();
@@ -733,7 +740,9 @@ const ChatInput: React.FC<ChatInputProps> = ({
     );
 
     return (
-        <div className="relative mt-1 px-2 py-3">
+        <div className="relative mt-1 px-2 py-3" onBlur={event => {
+            if (!event.currentTarget.contains(event.relatedTarget as Node | null)) typing.stop();
+        }}>
             {!editingMessage && replyingToMessage && (
                 <div
                     className="glass-surface mb-2 flex items-center gap-2 rounded-md px-3 py-1.5 text-xs text-muted-foreground">
@@ -801,6 +810,7 @@ const ChatInput: React.FC<ChatInputProps> = ({
                         }
                         editable={canUseTextInput}
                         onSerializedChange={handleSerializedChange}
+                        onTextActivity={typing.activity}
                         onEnter={handleComposerEnter}
                         onEscape={handleComposerEscape}
                         onReady={setEditor}

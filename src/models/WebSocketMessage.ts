@@ -1,4 +1,5 @@
 import {RoomPopulation} from "@/models/roomPopulation";
+import {TypingUpdate} from "@/models/TypingUpdate";
 import {Message} from "@/models/message";
 import {WebSocketMessageType} from "@/models/WebSocketMessageType";
 import {BanUserNotification} from "@/models/BanUserNotification";
@@ -14,6 +15,7 @@ import {AppNotification} from "@/models/AppNotification";
 import {ProBadgeUpdate} from "@/models/ProBadgeUpdate";
 
 export type WebSocketMessage =
+    | {type: WebSocketMessageType.TYPING_UPDATE; data: TypingUpdate}
     | {
     type: WebSocketMessageType.NEW_MESSAGE;
     chatRoomName: string;

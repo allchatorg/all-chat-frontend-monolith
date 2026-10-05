@@ -18,7 +18,7 @@ export const AdvertMessage: React.FC<AdvertMessageProps> = ({
                                                                 allowAttachmentPreview = false,
                                                             }) => {
     return (
-        <div className="flex w-full items-start mt-2 group min-w-0" data-advert-id={message.id}>
+        <div className="flex w-full items-start py-1 group min-w-0" data-advert-id={message.id}>
             <div className="w-full min-w-0 flex flex-col justify-start">
                 <div
                     className="max-w-[70%] min-w-0 pb-1 px-1 text-xs font-medium transition-colors text-muted-foreground flex flex-wrap items-center gap-x-2 gap-y-1">

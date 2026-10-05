@@ -3,6 +3,7 @@ import {EditorContent, useEditor, type Editor} from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
 import {Placeholder} from "@tiptap/extensions";
 import {Slice} from "@tiptap/pm/model";
+import type {Node as ProseMirrorNode} from "@tiptap/pm/model";
 import {cn} from "@/lib/utils";
 import {docToMarkers} from "@/features/chatroom/utils/messageMarkers";
 import {Greentext} from "@/features/chatroom/utils/greentextExtension";
@@ -18,6 +19,7 @@ interface ChatComposerEditorProps {
     style?: React.CSSProperties;
     editable: boolean;
     onSerializedChange: (serialized: string, isDictation: boolean) => void;
+    onTextActivity?: (hasContent: boolean) => void;
     onEnter: () => void;
     onEscape: () => boolean;
     onReady: (editor: Editor) => void;
@@ -32,6 +34,7 @@ export const ChatComposerEditor: React.FC<ChatComposerEditorProps> = ({
                                                                           style,
                                                                           editable,
                                                                           onSerializedChange,
+                                                                          onTextActivity,
                                                                           onEnter,
                                                                           onEscape,
                                                                           onReady,
@@ -44,6 +47,8 @@ export const ChatComposerEditor: React.FC<ChatComposerEditorProps> = ({
     onEscapeRef.current = onEscape;
     const onSerializedChangeRef = useRef(onSerializedChange);
     onSerializedChangeRef.current = onSerializedChange;
+    const onTextActivityRef = useRef(onTextActivity);
+    onTextActivityRef.current = onTextActivity;
 
     const editor = useEditor({
         extensions: [
@@ -95,7 +100,9 @@ export const ChatComposerEditor: React.FC<ChatComposerEditorProps> = ({
                     "whitespace-pre-wrap [word-break:break-word] outline-none"
                 ),
             },
-            handleKeyDown: (_view, event) => {
+            handleKeyDown: (view, event) => {
+                // Enter commits an IME composition before it can submit a message.
+                if (view.composing || event.isComposing || event.keyCode === 229) return false;
                 if (event.key === "Enter" && !event.shiftKey) {
                     onEnterRef.current();
                     return true;
@@ -111,6 +118,11 @@ export const ChatComposerEditor: React.FC<ChatComposerEditorProps> = ({
                 docToMarkers(editor.getJSON()),
                 transaction.getMeta(DICTATION_META) === true
             );
+            // Compare content, ignoring marks/selection. Emoji identity still counts as text activity.
+            const activityText = (doc: ProseMirrorNode) => doc.textBetween(0, doc.content.size, '\n', node =>
+                node.type.name === 'customEmoji' ? `:allchat:${node.attrs.id}:` : '\n');
+            const current = activityText(editor.state.doc);
+            if (current !== activityText(transaction.before)) onTextActivityRef.current?.(Boolean(current.trim()));
         },
     });
 

@@ -7,6 +7,7 @@ import {CardContent} from "@/components/ui/card";
 import {ArrowDown, ArrowUp, Loader2, Lock} from "lucide-react";
 import {Button} from "@/components/ui/button";
 import ChatInput from "@/features/chatroom/components/ChatInput";
+import {TypingIndicator} from "@/features/chatroom/components/TypingIndicator";
 import ChatMessage from "@/features/chatroom/components/ChatMessage";
 import {AdvertMessage} from "@/features/chatroom/components/AdvertMessage";
 import GuestBanner from "@/models/GuestBanner";
@@ -121,6 +122,11 @@ const ConversationView: React.FC<ConversationViewProps> = ({
                                                                showOwnSenderName = false,
                                                            }) => {
     const [activeMobileMessageId, setActiveMobileMessageId] = React.useState<number | null>(null);
+    const viewportRef = React.useRef<HTMLDivElement | null>(null);
+    const setViewportRef = React.useCallback((node: HTMLDivElement | null) => {
+        viewportRef.current = node;
+        scrollRef(node);
+    }, [scrollRef]);
     const isPastThreshold = pullToRefreshState.pullDistance >= pullThreshold;
 
     const lastNonAdvertIndex = (() => {
@@ -143,7 +149,7 @@ const ConversationView: React.FC<ConversationViewProps> = ({
                     {/* Keep the actual viewport ref for pagination and use block sizing for long messages. */}
                     <ScrollAreaPrimitive.Viewport
                         className="absolute inset-0 h-full w-full touch-pan-y rounded-[inherit] [&>div]:!block"
-                        ref={scrollRef}
+                        ref={setViewportRef}
                     >
                         {/* Pull-to-refresh indicator */}
                         {chatRoom.hasPrevious && (
@@ -224,11 +230,19 @@ const ConversationView: React.FC<ConversationViewProps> = ({
                                             </div>
                                         </div>
                                         {isLastNonAdvert && (
-                                            <div ref={lastMessageVisibilityRef} className="h-4"/>
+                                            // Keep a measurable marker inside the row's existing height,
+                                            // without adding a gap before a trailing ad or typing bubble.
+                                            <div ref={lastMessageVisibilityRef} className="h-px -mt-px" aria-hidden="true"/>
                                         )}
                                     </div>
                                 );
                             })}
+
+                            {!deleteOnly && (
+                                <TypingIndicator roomId={chatRoom.id} currentUserId={currentUserId} blockedUserIds={blockedUserIds}
+                                                 enabled={!isGuest && !composerDisabled && !archivedRoom && !interactionsDisabled}
+                                                 showBubble={!chatRoom.hasNext} viewportRef={viewportRef}/>
+                            )}
 
                             {/* Real height pulled up over the list end: a zero-height sentinel can sit a
                                 sub-pixel below the scroll clip at max scroll and never intersect. */}
@@ -271,6 +285,7 @@ const ConversationView: React.FC<ConversationViewProps> = ({
             ) : (
                 <ChatInput
                     key={chatRoom.id}
+                    typingRoomId={!deleteOnly && !interactionsDisabled ? chatRoom.id : undefined}
                     isConnected={isConnected}
                     onSendMessage={onSendMessage}
                     maxMessageLength={maxMessageLength}
