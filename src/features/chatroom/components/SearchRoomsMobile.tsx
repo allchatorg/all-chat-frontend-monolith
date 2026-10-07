@@ -27,7 +27,7 @@ const SearchRoomsMobile: React.FC<SearchRoomsMobileProps> = ({onClose, initialSe
         handleCreateChatRoom,
         clearSearch,
         showCreateOption,
-        proOnly, setProOnly, canCreate, selectedModeExists, isCreating, creationError,
+        proOnly, setProOnly, canCreate, proModeLocked, isCreating, creationError,
         validationResult,
         lastSearchedTerm,
         joinedRoomIds,
@@ -46,6 +46,10 @@ const SearchRoomsMobile: React.FC<SearchRoomsMobileProps> = ({onClose, initialSe
     };
 
     const onCreate = async () => {
+        if (proOnly && !user?.proActive) {
+            openPro();
+            return;
+        }
         if (await handleCreateChatRoom()) onClose();
     };
 
@@ -92,7 +96,7 @@ const SearchRoomsMobile: React.FC<SearchRoomsMobileProps> = ({onClose, initialSe
                     onJoin={onJoin}
                     onCreate={() => void onCreate()}
                     proOnly={proOnly} onProOnlyChange={handleProOnlyChange} canCreate={canCreate}
-                    selectedModeExists={selectedModeExists} isCreating={isCreating} creationError={creationError}
+                    proModeLocked={proModeLocked} isCreating={isCreating} creationError={creationError}
                 />
             </div>
         </div>

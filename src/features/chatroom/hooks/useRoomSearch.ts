@@ -95,7 +95,9 @@ export const useRoomSearch = (initialSearchTerm = "") => {
     ), [rooms, searchTerm]);
     const standardExists = exactRooms.some(room => !room.proOnly);
     const proExists = exactRooms.some(room => room.proOnly);
-    const selectedModeExists = proOnly ? proExists : standardExists;
+    // When one variant of the name already exists, only the other one can be created.
+    const proModeLocked = standardExists || proExists;
+    const effectiveProOnly = standardExists || (!proExists && proOnly);
 
     const validateName = (value: string) => {
         if (!value.trim()) return "Name cannot be empty.";
@@ -112,15 +114,15 @@ export const useRoomSearch = (initialSearchTerm = "") => {
         lastSearchedTerm === searchTerm.trim() &&
         validationResult === true;
 
-    const canCreate = showCreateOption && !selectedModeExists && !isCreating;
+    const canCreate = showCreateOption && !isCreating;
     const handleCreateChatRoom = async (): Promise<boolean> => {
         if (!canCreate || creatingRef.current || !user || user.role === Role.GUEST) return false;
-        if (proOnly && !user.proActive) return false;
+        if (effectiveProOnly && !user.proActive) return false;
         creatingRef.current = true;
         setIsCreating(true);
         setCreationError(null);
         try {
-            await handleCreateRoom({name: searchTerm.trim(), proOnly});
+            await handleCreateRoom({name: searchTerm.trim(), proOnly: effectiveProOnly});
             clearSearch();
             return true;
         } catch (error) {
@@ -143,12 +145,12 @@ export const useRoomSearch = (initialSearchTerm = "") => {
         handleCreateChatRoom,
         clearSearch,
         showCreateOption,
-        proOnly,
+        proOnly: effectiveProOnly,
         setProOnly,
+        proModeLocked,
         isCreating,
         creationError,
         canCreate,
-        selectedModeExists,
         validationResult,
         lastSearchedTerm,
         joinedRoomIds,

@@ -20,7 +20,7 @@ interface SearchRoomsResultsProps {
     proOnly: boolean;
     onProOnlyChange: (checked: boolean) => void;
     canCreate: boolean;
-    selectedModeExists: boolean;
+    proModeLocked: boolean;
     isCreating: boolean;
     creationError: string | null;
 }
@@ -35,7 +35,7 @@ const SearchRoomsResults: React.FC<SearchRoomsResultsProps> = ({
                                                                    joinedRoomIds,
                                                                    user,
                                                                    onJoin,
-                                                                   onCreate, proOnly, onProOnlyChange, canCreate, selectedModeExists, isCreating, creationError
+                                                                   onCreate, proOnly, onProOnlyChange, canCreate, proModeLocked, isCreating, creationError
                                                                }) => {
     return (
         <div className="p-3">
@@ -48,11 +48,10 @@ const SearchRoomsResults: React.FC<SearchRoomsResultsProps> = ({
                 // (e.g. "tes" → "Test Room Alpha") must still offer creating "tes".
                 <div className="space-y-3">
                     {showCreateOption && (
-                        <CreateChatRoomForm name={searchTerm.trim()} hasMatches={filteredRooms.length > 0}
-                            proOnly={proOnly} onProOnlyChange={onProOnlyChange} canCreate={canCreate}
-                            selectedModeExists={selectedModeExists} isCreating={isCreating} error={creationError}
+                        <CreateChatRoomForm name={searchTerm.trim()} proOnly={proOnly} onProOnlyChange={onProOnlyChange}
+                            proModeLocked={proModeLocked} isPro={user?.proActive === true} canCreate={canCreate}
+                            isCreating={isCreating} error={creationError}
                             isGuest={user?.role === Role.GUEST} onCreate={onCreate}/>
-
                     )}
                     {filteredRooms.length > 0 && (
                         <div className="max-h-[300px] overflow-y-auto rounded-md border-border">

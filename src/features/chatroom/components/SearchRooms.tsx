@@ -30,7 +30,7 @@ const SearchRooms: React.FC = () => {
         handleCreateChatRoom,
         clearSearch,
         showCreateOption,
-        proOnly, setProOnly, canCreate, selectedModeExists, isCreating, creationError,
+        proOnly, setProOnly, canCreate, proModeLocked, isCreating, creationError,
         validationResult,
         lastSearchedTerm,
         joinedRoomIds,
@@ -38,12 +38,14 @@ const SearchRooms: React.FC = () => {
     } = useRoomSearch();
 
     const openPro = useProDialog({onBack: () => {close(); setOpenPopover(true);}});
+    const openUpgrade = () => {
+        upgradingRef.current = true;
+        setOpenPopover(false);
+        openPro();
+    };
     const handleProOnlyChange = (checked: boolean) => {
-        if (checked && !user?.proActive) {
-            upgradingRef.current = true;
-            setOpenPopover(false);
-            openPro();
-        } else setProOnly(checked);
+        if (checked && !user?.proActive) openUpgrade();
+        else setProOnly(checked);
     };
 
     useEffect(() => {
@@ -55,6 +57,10 @@ const SearchRooms: React.FC = () => {
     };
 
     const handleDesktopCreate = async () => {
+        if (proOnly && !user?.proActive) {
+            openUpgrade();
+            return;
+        }
         if (await handleCreateChatRoom()) setOpenPopover(false);
     };
 
@@ -106,13 +112,14 @@ const SearchRooms: React.FC = () => {
                                             return;
                                         }
                                         const exactRooms = rooms.filter(room => room.roomName.trim().toLowerCase() === searchTerm.trim().toLowerCase());
-                                        if (canCreate) {
-                                            void handleDesktopCreate();
-                                        } else if (exactRooms.length > 1) {
+                                        if (exactRooms.length > 1) {
                                             // Same-name variants must be chosen explicitly from the badged results.
                                             setOpenPopover(true);
                                         } else if (exactRooms.length === 1) {
+                                            // Join the existing room; its other variant is created via the card.
                                             void handleDesktopJoin(exactRooms[0].roomId);
+                                        } else if (canCreate) {
+                                            void handleDesktopCreate();
                                         } else if (rooms.length > 0) {
                                             void handleDesktopJoin(rooms[0].roomId);
                                         }
@@ -161,7 +168,7 @@ const SearchRooms: React.FC = () => {
                             onJoin={handleDesktopJoin}
                             onCreate={() => void handleDesktopCreate()}
                             proOnly={proOnly} onProOnlyChange={handleProOnlyChange} canCreate={canCreate}
-                            selectedModeExists={selectedModeExists} isCreating={isCreating} creationError={creationError}
+                            proModeLocked={proModeLocked} isCreating={isCreating} creationError={creationError}
                         />
                     </PopoverContent>
                 </Popover>
