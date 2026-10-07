@@ -41,7 +41,7 @@ export function ProBenefits({username}: {username: string}) {
             <div className="mb-6 text-center">
                 <p className="text-xs font-bold uppercase tracking-[0.18em] text-blue-600 dark:text-blue-300">More space for every conversation</p>
                 <h2 id="pro-benefits-heading" className="mt-2 text-2xl font-extrabold tracking-tight">Share more with allchat Pro.</h2>
-                <p className="mx-auto mt-2 max-w-md text-sm leading-6 text-muted-foreground">Basic includes public chatrooms, media sharing, reactions, and themes. Pro adds higher limits, custom fonts, exclusive stickers and emojis, and your own badge.</p>
+                <p className="mx-auto mt-2 max-w-md text-sm leading-6 text-muted-foreground">Basic includes public chatrooms, media sharing, reactions, and themes. Pro adds higher limits, PRO-only chatrooms, custom fonts, exclusive stickers and emojis, and your own badge.</p>
             </div>
             <div className="grid gap-4 sm:grid-cols-2">
                 <article className="overflow-hidden rounded-2xl border bg-card">
