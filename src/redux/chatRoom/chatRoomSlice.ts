@@ -212,7 +212,7 @@ const chatSlice = createSlice({
             const {message} = action.payload;
 
             const userChatRoom = state.joinedUserChatRooms.find(
-                room => room.chatRoomName === message.chatRoomName
+                room => room.chatRoomId === message.chatRoomId
             );
 
             if (!userChatRoom) {
@@ -228,12 +228,12 @@ const chatSlice = createSlice({
             }
             userChatRoom.roomPopulation.totalMessagesCount = (userChatRoom.roomPopulation.totalMessagesCount || 0) + 1;
 
-            if (state.selectedUserChatRoom?.chatRoomName === message.chatRoomName) {
+            if (state.selectedUserChatRoom?.chatRoomId === message.chatRoomId) {
                 state.selectedUserChatRoom = userChatRoom;
             }
 
             const chatRoomIndex = state.loadedChatRooms.findIndex(
-                room => room.name === message.chatRoomName
+                room => room.id === message.chatRoomId
             );
 
             if (chatRoomIndex === -1) {
@@ -261,7 +261,7 @@ const chatSlice = createSlice({
 
             const populationUpdate = action.payload;
             const userChatRoom = state.joinedUserChatRooms.find(
-                room => room.chatRoomName === populationUpdate.roomName
+                room => room.chatRoomId === populationUpdate.roomId
             );
 
             if (userChatRoom) {
@@ -281,10 +281,10 @@ const chatSlice = createSlice({
             const updatedMessage = action.payload.updatedMessage;
 
             const roomToUpdate = state.joinedUserChatRooms.find(
-                (room) => room.chatRoomName === updatedMessage.chatRoomName
+                (room) => room.chatRoomId === updatedMessage.chatRoomId
             );
 
-            if (!(state.selectedUserChatRoom && state.selectedUserChatRoom.chatRoomName === updatedMessage.chatRoomName)) {
+            if (!(state.selectedUserChatRoom && state.selectedUserChatRoom.chatRoomId === updatedMessage.chatRoomId)) {
                 return;
             }
 
@@ -304,18 +304,18 @@ const chatSlice = createSlice({
         ) {
             const banNotification = action.payload;
             const {
-                roomName: chatRoomName,
+                roomId: chatRoomId,
                 userId: bannedUserId,
                 deleteMessagesAfter,
                 deleteMessages,
             } = banNotification;
 
             const targetUserChatRoom = state.joinedUserChatRooms.find(
-                room => room.chatRoomName === chatRoomName
+                room => room.chatRoomId === chatRoomId
             );
 
             const targetLoadedChatRoom = state.loadedChatRooms.find(
-                room => room.name === chatRoomName
+                room => room.id === chatRoomId
             );
 
             const targetSelectedChatRoom = state.selectedChatRoom;
@@ -370,21 +370,21 @@ const chatSlice = createSlice({
             }
 
             state.joinedUserChatRooms = state.joinedUserChatRooms.map(room =>
-                room.chatRoomName === chatRoomName ? updatedUserChatRoom : room
+                room.chatRoomId === chatRoomId ? updatedUserChatRoom : room
             );
 
-            state.selectedUserChatRoom = state.selectedUserChatRoom && state.selectedUserChatRoom.chatRoomName === chatRoomName
+            state.selectedUserChatRoom = state.selectedUserChatRoom && state.selectedUserChatRoom.chatRoomId === chatRoomId
                 ? updatedUserChatRoom : state.selectedUserChatRoom;
 
             state.loadedChatRooms = state.loadedChatRooms.map(room =>
-                room.name === chatRoomName ? {
+                room.id === chatRoomId ? {
                     ...room,
                     messages: filteredOutDeletedMessages,
                     totalMessages: updatedTotalMessages
                 } : room
             );
 
-            state.selectedChatRoom = targetSelectedChatRoom && targetSelectedChatRoom.name === chatRoomName
+            state.selectedChatRoom = targetSelectedChatRoom && targetSelectedChatRoom.id === chatRoomId
                 ? {
                     ...targetSelectedChatRoom,
                     messages: filteredOutDeletedMessages,
@@ -397,18 +397,18 @@ const chatSlice = createSlice({
         ) {
             const banNotification = action.payload;
             const {
-                roomName: chatRoomName,
+                roomId: chatRoomId,
                 userId: bannedUserId,
                 deleteMessagesAfter,
                 deleteMessages,
             } = banNotification;
 
             const targetUserChatRoom = state.joinedUserChatRooms.find(
-                room => room.chatRoomName === chatRoomName
+                room => room.chatRoomId === chatRoomId
             );
 
             const targetLoadedChatRoom = state.loadedChatRooms.find(
-                room => room.name === chatRoomName
+                room => room.id === chatRoomId
             );
 
             const targetSelectedChatRoom = state.selectedChatRoom;
@@ -425,7 +425,7 @@ const chatSlice = createSlice({
                 deleteMessagesAfterDate
             )
 
-            state.selectedChatRoom = targetSelectedChatRoom && targetSelectedChatRoom.name === chatRoomName
+            state.selectedChatRoom = targetSelectedChatRoom && targetSelectedChatRoom.id === chatRoomId
                 ? {
                     ...targetSelectedChatRoom,
                     messages: markedMessages,
@@ -433,7 +433,7 @@ const chatSlice = createSlice({
                 : targetSelectedChatRoom;
 
             state.loadedChatRooms = state.loadedChatRooms.map(room =>
-                room.name === chatRoomName
+                room.id === chatRoomId
                     ? {
                         ...room,
                         messages: markedMessages,
@@ -446,7 +446,7 @@ const chatSlice = createSlice({
             action: PayloadAction<Message>
         ) {
             const deletedMessage = action.payload;
-            const chatRoomName = deletedMessage.chatRoomName;
+            const chatRoomId = deletedMessage.chatRoomId;
 
             const markDeleted = (messages: Message[]) =>
                 patchReplyPreviewsForDeletedMessage(
@@ -459,7 +459,7 @@ const chatSlice = createSlice({
                     true
                 );
 
-            if (state.selectedChatRoom?.name === chatRoomName) {
+            if (state.selectedChatRoom?.id === chatRoomId) {
                 state.selectedChatRoom = {
                     ...state.selectedChatRoom,
                     messages: markDeleted(state.selectedChatRoom.messages),
@@ -468,7 +468,7 @@ const chatSlice = createSlice({
             }
 
             state.loadedChatRooms = state.loadedChatRooms.map(room =>
-                room.name === chatRoomName
+                room.id === chatRoomId
                     ? {
                         ...room,
                         messages: markDeleted(room.messages),
@@ -478,7 +478,7 @@ const chatSlice = createSlice({
             );
 
             const targetUserChatRoom = state.joinedUserChatRooms.find(
-                room => room.chatRoomName === chatRoomName
+                room => room.chatRoomId === chatRoomId
             );
 
             if (targetUserChatRoom) {
@@ -497,16 +497,16 @@ const chatSlice = createSlice({
             action: PayloadAction<Message>
         ) {
             const deletedMessage = action.payload;
-            const chatRoomName = deletedMessage.chatRoomName;
+            const chatRoomId = deletedMessage.chatRoomId;
 
             // Find the target user chat room
             const targetUserChatRoom = state.joinedUserChatRooms.find(
-                room => room.chatRoomName === chatRoomName
+                room => room.chatRoomId === chatRoomId
             );
 
             // Find the target loaded chat room
             const targetLoadedChatRoom = state.loadedChatRooms.find(
-                room => room.name === chatRoomName
+                room => room.id === chatRoomId
             );
 
             if (!targetUserChatRoom || !targetLoadedChatRoom) {
@@ -571,18 +571,18 @@ const chatSlice = createSlice({
 
             // Update joinedUserChatRooms
             state.joinedUserChatRooms = state.joinedUserChatRooms.map(room =>
-                room.chatRoomName === chatRoomName ? updatedUserChatRoom : room
+                room.chatRoomId === chatRoomId ? updatedUserChatRoom : room
             );
 
 
             // Update selectedUserChatRoom if it matches
-            if (state.selectedUserChatRoom?.chatRoomName === chatRoomName) {
+            if (state.selectedUserChatRoom?.chatRoomId === chatRoomId) {
                 state.selectedUserChatRoom = updatedUserChatRoom;
                 state.selectedUserChatRoom.roomPopulation.totalMessagesCount = updatedTotalMessages;
             }
             // Update loadedChatRooms
             state.loadedChatRooms = state.loadedChatRooms.map(room =>
-                room.name === chatRoomName ? {
+                room.id === chatRoomId ? {
                     ...room,
                     messages: filteredMessages,
                     totalMessages: updatedTotalMessages
@@ -590,7 +590,7 @@ const chatSlice = createSlice({
             );
 
             // Update selectedChatRoom if it matches
-            if (state.selectedChatRoom?.name === chatRoomName) {
+            if (state.selectedChatRoom?.id === chatRoomId) {
                 state.selectedChatRoom = {
                     ...state.selectedChatRoom,
                     messages: filteredMessages,
@@ -620,7 +620,7 @@ const chatSlice = createSlice({
             }));
         }, handleEditMessage(state, action: PayloadAction<Message>) {
             const message = action.payload;
-            const chatRoomName = message.chatRoomName;
+            const chatRoomId = message.chatRoomId;
 
             const applyEdit = (messages: Message[]) =>
                 patchReplyPreviewsForEditedMessage(
@@ -628,7 +628,7 @@ const chatSlice = createSlice({
                     message
                 );
 
-            if (state.selectedChatRoom?.name === chatRoomName) {
+            if (state.selectedChatRoom?.id === chatRoomId) {
                 state.selectedChatRoom = {
                     ...state.selectedChatRoom,
                     messages: applyEdit(state.selectedChatRoom.messages),
@@ -636,7 +636,7 @@ const chatSlice = createSlice({
             }
 
             state.loadedChatRooms = state.loadedChatRooms.map(room =>
-                room.name === chatRoomName ? {
+                room.id === chatRoomId ? {
                     ...room,
                     messages: applyEdit(room.messages)
                 } : room
@@ -969,7 +969,7 @@ const chatSlice = createSlice({
             builder.addCase(updateLastReadMessageThunk.fulfilled, (state, action) => {
                 const updatedMessage = action.payload;
 
-                if (state.selectedUserChatRoom && state.selectedUserChatRoom.chatRoomName === updatedMessage.chatRoomName) {
+                if (state.selectedUserChatRoom && state.selectedUserChatRoom.chatRoomId === updatedMessage.chatRoomId) {
                     state.selectedUserChatRoom = {
                         ...state.selectedUserChatRoom,
                         lastReadMessage: updatedMessage,
@@ -978,7 +978,7 @@ const chatSlice = createSlice({
                 }
 
                 const index = state.joinedUserChatRooms.findIndex(
-                    room => room.chatRoomName === updatedMessage.chatRoomName
+                    room => room.chatRoomId === updatedMessage.chatRoomId
                 );
 
                 if (index === -1) {

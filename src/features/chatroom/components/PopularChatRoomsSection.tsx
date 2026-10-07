@@ -53,7 +53,7 @@ const PopularChatRoomsSection: React.FC<{showHeader?: boolean}> = ({showHeader =
     // Bumped by ROOM_PROMOTION_UPDATE broadcasts so the open Promoted tab refetches live.
     const roomPromotionUpdateCounter = useSelector(selectRoomPromotionUpdateCounter);
     const {userChatRooms: joinedRooms, handleJoinRoom: handleJoin} = useChatRooms(user);
-    const joinedRoomNames = new Set(joinedRooms?.map(r => r.chatRoomName));
+    const joinedRoomIds = new Set(joinedRooms?.map(r => r.chatRoomId));
     const currentPage = pageIndex + 1;
     const promotedCurrentPage = promotedPageIndex + 1;
     const isActiveTab = tab === "active";
@@ -212,10 +212,10 @@ const PopularChatRoomsSection: React.FC<{showHeader?: boolean}> = ({showHeader =
                             ) : (
                                 content.map((room) => (
                                     <PopularityRoomCard
-                                        key={room.roomName}
+                                        key={room.roomId}
                                         room={room}
                                         onClick={() => handleRoomClick(room.roomId)}
-                                        isJoined={joinedRoomNames.has(room.roomName)}
+                                        isJoined={joinedRoomIds.has(room.roomId)}
                                     />
                                 ))
                             )
@@ -234,7 +234,7 @@ const PopularChatRoomsSection: React.FC<{showHeader?: boolean}> = ({showHeader =
                                         key={room.roomId}
                                         room={room}
                                         onClick={() => handleRoomClick(room.roomId)}
-                                        isJoined={joinedRoomNames.has(room.roomName)}
+                                        isJoined={joinedRoomIds.has(room.roomId)}
                                     />
                                 ))
                             )

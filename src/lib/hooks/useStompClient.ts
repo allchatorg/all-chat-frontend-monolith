@@ -495,7 +495,7 @@ export function useStompWithRedux(
         const targetTopics = [
             USER_TOPIC_DESTINATION + `${userRef.current?.id}`,
             ...PUBLIC_TOPIC,
-            ...userChatRooms.map(room => `/topic/chat-room.${room.chatRoomName}`),
+            ...userChatRooms.map(room => `/topic/chat-room-id.${room.chatRoomId}`),
             ...(userRef.current?.claimed ? [PRIVATE_MESSAGES_QUEUE] : []),
         ];
 
@@ -743,9 +743,9 @@ export function useStompWithRedux(
         }
     }, []);
 
-    const sendMessageToChatRoom = useCallback((chatRoomName: string, body: any) => {
+    const sendMessageToChatRoom = useCallback((chatRoomId: number, body: any) => {
         const destination = `/app/chat.sendMessage`;
-        sendMessage(destination, {...body, chatRoomName});
+        sendMessage(destination, {...body, chatRoomId});
     }, [sendMessage]);
 
     return {
