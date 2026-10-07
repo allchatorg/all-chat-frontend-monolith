@@ -21,6 +21,7 @@ const benefits: {label: string; basic: ReactNode; pro: ReactNode}[] = [
     {label: 'Media & file sharing', basic: true, pro: true},
     {label: 'Emoji reactions & replies', basic: true, pro: true},
     {label: 'Light & dark themes', basic: true, pro: true},
+    {label: 'PRO-only chatrooms', basic: 'Read and report', pro: 'Create and participate'},
     {label: 'Exclusive Pro badge', basic: false, pro: true},
     {label: 'Show or hide your Pro badge', basic: false, pro: true},
     {label: 'Username & message font presets', basic: false, pro: `${ACCOUNT_LIMITS.proDailyFontSaves} saves per day`},

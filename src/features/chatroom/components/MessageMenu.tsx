@@ -1,3 +1,4 @@
+import {useRoomParticipation} from "@/lib/hooks/useRoomParticipation";
 import React, {useRef, useState} from "react";
 import {Button} from "@/components/ui/button";
 import {DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger,} from "@/components/ui/dropdown-menu";
@@ -72,6 +73,7 @@ export const MessageMenu: React.FC<MessageMenuProps> = ({
                                                             emojiPopoverOpen,
                                                             onEmojiPopoverOpenChange,
                                                         }) => {
+    const participationDisabled = useRoomParticipation(message.chatRoomId, message.chatRoomProOnly);
     const dispatch = useDispatch<AppDispatch>();
     const {open} = useDialog();
     const {isPrincipal, isStaffMember, currentRole} = useRoleAccess();
@@ -88,17 +90,25 @@ export const MessageMenu: React.FC<MessageMenuProps> = ({
         ? message.promotion.status
         : null;
     const canViewReactions = Boolean(message.reactions && message.reactions.length > 0 && !deleted);
-    const canReply = Boolean(onReply && !deleted && !archivedRoom);
-    const canEditMessage = Boolean(isPrincipal(userId) && !deleted && !archivedRoom && !activePromotionStatus && !message.stickerId);
-    const canRemoveMessage = Boolean((isPrincipal(userId) || canActOn(currentRole, role)) && !deleted && !archivedRoom);
+    const canReply = Boolean(!participationDisabled && onReply && !deleted && !archivedRoom);
+    const canEditMessage = Boolean(!participationDisabled && isPrincipal(userId) && !deleted && !archivedRoom && !activePromotionStatus && !message.stickerId);
+    const canRemoveMessage = Boolean(!participationDisabled && (isPrincipal(userId) || canActOn(currentRole, role)) && !deleted && !archivedRoom);
     const canOpenModView = Boolean(allowModView && isStaffMember() && !isPrincipal(userId));
     const canReport = Boolean(!isPrincipal(userId) && allowReport);
     // Staff are excluded from the paid funnel (backend returns 403 as well)
-    const canPromote = Boolean(allowPromote && isPrincipal(userId) && !isStaffMember() && !deleted && !archivedRoom && !message.promotion && !message.stickerId);
+    const canPromote = Boolean(!participationDisabled && allowPromote && isPrincipal(userId) && !isStaffMember() && !deleted && !archivedRoom && !message.promotion && !message.stickerId);
     const canOpenActionsMenu = canViewReactions || canReply || canEditMessage || canRemoveMessage || canOpenModView || canReport || canPromote;
-    const canAddReaction = Boolean(!deleted && !archivedRoom);
+    const canAddReaction = Boolean(!participationDisabled && !deleted && !archivedRoom);
     const isEmojiPopoverControlled = emojiPopoverOpen !== undefined;
     const isOpenEmojiPopover = isEmojiPopoverControlled ? emojiPopoverOpen : internalEmojiPopoverOpen;
+
+    React.useEffect(() => {
+        if (participationDisabled) {
+            setInternalEmojiPopoverOpen(false);
+            setIsRemovePromotedDialogOpen(false);
+            onEmojiPopoverOpenChange?.(false);
+        }
+    }, [participationDisabled]);
 
     const handleEmojiPopoverOpenChange = (open: boolean) => {
         if (!isEmojiPopoverControlled) {
@@ -115,6 +125,7 @@ export const MessageMenu: React.FC<MessageMenuProps> = ({
     const ownerPendingPromotion = activePromotionStatus === "PENDING" && isPrincipal(userId);
 
     const handleRemoveMessage = () => {
+        if (participationDisabled) return;
         if (activePromotionStatus) {
             setIsRemovePromotedDialogOpen(true);
         } else {

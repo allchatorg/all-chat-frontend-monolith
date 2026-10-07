@@ -20,6 +20,7 @@ export interface PromotedMessage {
     messageContent: string;
     chatRoomId: number;
     chatRoomName: string;
+    chatRoomProOnly?: boolean;
     status: PromotedMessageStatus;
     amount: number;
     currency: string;

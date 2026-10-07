@@ -1,3 +1,4 @@
+import {RoomProBadge} from "@/components/RoomProBadge";
 import {Card, CardContent, CardDescription, CardHeader, CardTitle} from "@ads/components/ui/card";
 import {Badge} from "@ads/components/ui/badge";
 import {clsx} from "clsx";
@@ -91,6 +92,7 @@ export default function RoomPromotionDetails({data, className, isAdmin = false}:
                     <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
                         <div className="flex flex-wrap items-center gap-2">
                             <p className="text-base font-semibold break-words">{data.chatRoomName}</p>
+                            <RoomProBadge proOnly={data.chatRoomProOnly}/>
                             {data.chatRoomArchived && (
                                 <Badge
                                     className="bg-gray-400 hover:bg-gray-500 text-white dark:bg-gray-600 dark:hover:bg-gray-700">

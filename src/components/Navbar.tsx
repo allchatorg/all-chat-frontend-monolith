@@ -91,7 +91,7 @@ export function Navbar() {
     const handleBugReportsClick = async () => {
         try {
             const joinedBugReportsRoom = userChatRooms.find(room =>
-                isBugReportsChatRoomName(room.chatRoomName)
+                !room.proOnly && isBugReportsChatRoomName(room.chatRoomName)
             );
 
             if (joinedBugReportsRoom) {
@@ -101,7 +101,7 @@ export function Navbar() {
             }
 
             const rooms = await dispatch(searchChatRoomsByNameThunk(BUG_REPORTS_CHATROOM_NAME)).unwrap();
-            const bugReportsRoom = rooms.find(room => isBugReportsChatRoomName(room.roomName));
+            const bugReportsRoom = rooms.find(room => !room.proOnly && isBugReportsChatRoomName(room.roomName));
 
             if (!bugReportsRoom) {
                 toast.error("Bug Reports room is not available yet.");

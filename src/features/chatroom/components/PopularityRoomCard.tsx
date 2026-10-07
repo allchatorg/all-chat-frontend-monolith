@@ -1,3 +1,4 @@
+import {RoomProBadge} from "@/components/RoomProBadge";
 import React from "react";
 import {RoomPopulation} from "@/models/roomPopulation";
 import {Archive, MessageSquare, UserCheck} from "lucide-react";
@@ -49,10 +50,11 @@ const PopularityRoomCard: React.FC<RoomCardProps> = ({
                     : "glass-surface"}`}
         >
             <div
-                className="max-w-full shrink-0 text-lg font-semibold truncate text-foreground"
+                className="flex min-w-0 max-w-full items-center gap-2 text-lg font-semibold text-foreground"
                 title={room.roomName}
             >
-                {room.roomName}
+                <span className="min-w-0 truncate">{room.roomName}</span>
+                <RoomProBadge proOnly={room.proOnly}/>
             </div>
 
             {room.archived && (

@@ -51,6 +51,7 @@ export interface Message {
     senderIdVerificationStatus?: IdVerificationStatus;
     chatRoomId: number;
     chatRoomName: string;
+    chatRoomProOnly?: boolean;
     bannedUser: boolean;
     editedAt?: string;
     color: string;

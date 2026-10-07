@@ -1,4 +1,4 @@
-import {useEffect, useMemo, useState} from "react";
+import {useEffect, useMemo, useRef, useState} from "react";
 import {useThunk} from "@/lib/hooks/useThunk";
 import {searchChatRoomsByNameThunk} from "@/redux/chatRoom/chatRoomThunk";
 import {useSelector} from "react-redux";
@@ -6,20 +6,25 @@ import {selectJoinedUserChatRoomsState} from "@/redux/chatRoom/chatRoomSelectors
 import {RoomPopulation} from "@/models/roomPopulation";
 import {useChatRooms} from "@/lib/hooks/useChatRooms";
 import {useUser} from "@/lib/hooks/useUser";
-import {toast} from "sonner";
+import {apiErrorMessage} from "@/lib/apiError";
+import {Role} from "@/models/Role";
 import {useJoinRandomRoom} from "@/features/chatroom/hooks/useJoinRandomRoom";
 
 const DEBOUNCE_DELAY = 400;
 
-export const useRoomSearch = () => {
+export const useRoomSearch = (initialSearchTerm = "") => {
     const [runSearchRoomThunk, searchRoomIsLoading] = useThunk(searchChatRoomsByNameThunk);
     const {handleJoinRandomRoom: joinRandomRoom, joinRandomRoomIsLoading} = useJoinRandomRoom();
     const userChatRooms = useSelector(selectJoinedUserChatRoomsState);
 
     const {user} = useUser();
-    const {handleCreateRoom: createAndJoinChatRoom, handleJoinRoom} = useChatRooms(user);
+    const {handleJoinRoom, handleCreateRoom} = useChatRooms(user);
 
-    const [searchTerm, setSearchTerm] = useState("");
+    const [searchTerm, setSearchTerm] = useState(initialSearchTerm);
+    const [proOnly, setProOnly] = useState(false);
+    const [isCreating, setIsCreating] = useState(false);
+    const [creationError, setCreationError] = useState<string | null>(null);
+    const creatingRef = useRef(false);
     const [debouncedSearchTerm, setDebouncedSearchTerm] = useState("");
     const [rooms, setRooms] = useState<RoomPopulation[]>([]);
     const [lastSearchedTerm, setLastSearchedTerm] = useState("");
@@ -55,7 +60,17 @@ export const useRoomSearch = () => {
         };
     }, [debouncedSearchTerm, runSearchRoomThunk]);
 
+    useEffect(() => {
+        setCreationError(null);
+    }, [searchTerm, proOnly]);
+
+    useEffect(() => {
+        if (!user?.proActive) setProOnly(false);
+    }, [user?.proActive]);
+
     const clearSearch = () => {
+        setProOnly(false);
+        setCreationError(null);
         setSearchTerm("");
         setRooms([]);
         setLastSearchedTerm("");
@@ -75,12 +90,12 @@ export const useRoomSearch = () => {
         );
     }, [searchTerm, rooms]);
 
-    // This handles local filtering to see if we have an exact match in the *currently searching* result or existing list
-    const hasExactMatch = useMemo(() => {
-        if (!searchTerm.trim()) return true;
-        const normalizedQuery = searchTerm.trim().toLowerCase();
-        return rooms.some((room) => room.roomName.trim().toLowerCase() === normalizedQuery);
-    }, [searchTerm, rooms]);
+    const exactRooms = useMemo(() => rooms.filter(room =>
+        room.roomName.trim().toLowerCase() === searchTerm.trim().toLowerCase()
+    ), [rooms, searchTerm]);
+    const standardExists = exactRooms.some(room => !room.proOnly);
+    const proExists = exactRooms.some(room => room.proOnly);
+    const selectedModeExists = proOnly ? proExists : standardExists;
 
     const validateName = (value: string) => {
         if (!value.trim()) return "Name cannot be empty.";
@@ -92,26 +107,29 @@ export const useRoomSearch = () => {
     const validationResult: string | true = validateName(searchTerm);
     const showCreateOption =
         searchTerm.trim().length >= 1 &&
-        !hasExactMatch &&
+        !(standardExists && proExists) &&
         !searchRoomIsLoading &&
         lastSearchedTerm === searchTerm.trim() &&
         validationResult === true;
 
-    const handleCreateChatRoom = async () => {
-        const validationError = validateName(searchTerm);
-        if (validationError !== true) {
-            toast.error(validationError);
-            return Promise.reject(validationError);
+    const canCreate = showCreateOption && !selectedModeExists && !isCreating;
+    const handleCreateChatRoom = async (): Promise<boolean> => {
+        if (!canCreate || creatingRef.current || !user || user.role === Role.GUEST) return false;
+        if (proOnly && !user.proActive) return false;
+        creatingRef.current = true;
+        setIsCreating(true);
+        setCreationError(null);
+        try {
+            await handleCreateRoom({name: searchTerm.trim(), proOnly});
+            clearSearch();
+            return true;
+        } catch (error) {
+            setCreationError(apiErrorMessage(error));
+            return false;
+        } finally {
+            creatingRef.current = false;
+            setIsCreating(false);
         }
-        return createAndJoinChatRoom({name: searchTerm.trim()})
-            .then(() => {
-                toast.success("Chat room created and joined!");
-                clearSearch();
-            })
-            .catch((err) => {
-                toast.error(err.message || "Failed to create chat room.");
-                throw err;
-            });
     };
 
     return {
@@ -125,6 +143,12 @@ export const useRoomSearch = () => {
         handleCreateChatRoom,
         clearSearch,
         showCreateOption,
+        proOnly,
+        setProOnly,
+        isCreating,
+        creationError,
+        canCreate,
+        selectedModeExists,
         validationResult,
         lastSearchedTerm,
         joinedRoomIds,

@@ -28,7 +28,6 @@ interface RoomTabsProps {
     selectedUserChatRoom: UserChatRoom | null | undefined,
     onSelectUserChatRoom: (userChatRoom: UserChatRoom) => void,
     onCloseUserChatRoomTab: (userChatRoom: UserChatRoom) => void,
-    onOpenCreateRoom?: () => void,
     onReorderRooms?: (rooms: UserChatRoom[]) => void,
     sortMode: ChatRoomTabSortMode
 }
@@ -38,7 +37,6 @@ export default function RoomTabs({
                                      selectedUserChatRoom,
                                      onSelectUserChatRoom,
                                      onCloseUserChatRoomTab,
-                                     onOpenCreateRoom,
                                      onReorderRooms,
                                      sortMode
                                  }: RoomTabsProps) {

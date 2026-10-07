@@ -1,13 +1,14 @@
 "use client";
 
-import React, {useEffect, useState} from "react";
+import React, {useEffect, useRef, useState} from "react";
 import {Search, Shuffle, X} from "lucide-react";
 import {Popover, PopoverContent, PopoverTrigger} from "@/components/ui/popover";
 import {useRoomSearch} from "@/features/chatroom/hooks/useRoomSearch";
 import SearchRoomsResults from "@/features/chatroom/components/SearchRoomsResults";
 import {useIsMobile} from "@/lib/hooks/useIsMobile";
 import {useDialog} from "@/components/providers/DialogProvider";
-import SearchRoomsMobile from "@/features/chatroom/components/SearchRoomsMobile";
+import {useProDialog} from "@/features/pro/useProDialog";
+import SearchRoomsMobile, {roomSearchDialogOptions} from "@/features/chatroom/components/SearchRoomsMobile";
 import {Button} from "@/components/ui/button";
 
 const SearchRooms: React.FC = () => {
@@ -16,6 +17,7 @@ const SearchRooms: React.FC = () => {
 
     // Desktop specific state
     const [openPopover, setOpenPopover] = useState(false);
+    const upgradingRef = useRef(false);
 
     const {
         searchTerm,
@@ -28,11 +30,21 @@ const SearchRooms: React.FC = () => {
         handleCreateChatRoom,
         clearSearch,
         showCreateOption,
+        proOnly, setProOnly, canCreate, selectedModeExists, isCreating, creationError,
         validationResult,
         lastSearchedTerm,
         joinedRoomIds,
         user
     } = useRoomSearch();
+
+    const openPro = useProDialog({onBack: () => {close(); setOpenPopover(true);}});
+    const handleProOnlyChange = (checked: boolean) => {
+        if (checked && !user?.proActive) {
+            upgradingRef.current = true;
+            setOpenPopover(false);
+            openPro();
+        } else setProOnly(checked);
+    };
 
     useEffect(() => {
         setOpenPopover(!isMobile && !!searchTerm.trim());
@@ -42,10 +54,8 @@ const SearchRooms: React.FC = () => {
         if (await handleJoinRoom(roomId)) setOpenPopover(false);
     };
 
-    const handleDesktopCreate = () => {
-        void handleCreateChatRoom().then(() => setOpenPopover(false)).catch(() => {
-            // The shared search hook reports the failure; keep the search open.
-        });
+    const handleDesktopCreate = async () => {
+        if (await handleCreateChatRoom()) setOpenPopover(false);
     };
 
     const handleRandomJoin = async () => {
@@ -58,9 +68,7 @@ const SearchRooms: React.FC = () => {
     };
 
     const handleMobileClick = () => {
-        open(<div className="w-[80vw] lg:min-w-[800px] lg:max-w-[800px] max-h-[300px] overflow-auto">
-            <SearchRoomsMobile onClose={close}/>
-        </div>, {className: "glass-popover glass-modal-mobile"});
+        open(<SearchRoomsMobile onClose={close}/>, roomSearchDialogOptions);
     };
 
     return (
@@ -87,6 +95,7 @@ const SearchRooms: React.FC = () => {
                                 aria-label="Search or create a room"
                                 placeholder="Search or create a room…"
                                 value={searchTerm}
+                                disabled={isCreating}
                                 onChange={(e) => setSearchTerm(e.target.value)}
                                 onKeyDown={(e) => {
                                     if (e.key === "Enter" && searchTerm.trim()) {
@@ -96,8 +105,14 @@ const SearchRooms: React.FC = () => {
                                             setOpenPopover(true);
                                             return;
                                         }
-                                        if (showCreateOption) {
-                                            handleDesktopCreate();
+                                        const exactRooms = rooms.filter(room => room.roomName.trim().toLowerCase() === searchTerm.trim().toLowerCase());
+                                        if (canCreate) {
+                                            void handleDesktopCreate();
+                                        } else if (exactRooms.length > 1) {
+                                            // Same-name variants must be chosen explicitly from the badged results.
+                                            setOpenPopover(true);
+                                        } else if (exactRooms.length === 1) {
+                                            void handleDesktopJoin(exactRooms[0].roomId);
                                         } else if (rooms.length > 0) {
                                             void handleDesktopJoin(rooms[0].roomId);
                                         }
@@ -111,6 +126,7 @@ const SearchRooms: React.FC = () => {
                                 <button
                                     type="button"
                                     aria-label="Clear search"
+                                    disabled={isCreating}
                                     onClick={() => {
                                         clearSearch();
                                         setOpenPopover(false);
@@ -128,6 +144,10 @@ const SearchRooms: React.FC = () => {
                         side="bottom"
                         className="glass-popover w-(--radix-popover-trigger-width) p-0"
                         onOpenAutoFocus={(e) => e.preventDefault()}
+                        onCloseAutoFocus={(e) => {
+                            if (upgradingRef.current) e.preventDefault();
+                            upgradingRef.current = false;
+                        }}
                     >
                         <SearchRoomsResults
                             isLoading={searchRoomIsLoading}
@@ -139,7 +159,9 @@ const SearchRooms: React.FC = () => {
                             joinedRoomIds={joinedRoomIds}
                             user={user}
                             onJoin={handleDesktopJoin}
-                            onCreate={handleDesktopCreate}
+                            onCreate={() => void handleDesktopCreate()}
+                            proOnly={proOnly} onProOnlyChange={handleProOnlyChange} canCreate={canCreate}
+                            selectedModeExists={selectedModeExists} isCreating={isCreating} creationError={creationError}
                         />
                     </PopoverContent>
                 </Popover>

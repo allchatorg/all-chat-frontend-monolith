@@ -1,7 +1,7 @@
 import React from "react";
 import PopularityRoomCard from "@/features/chatroom/components/PopularityRoomCard";
-import {GuestModalWrapper} from "@/components/GuestModalWrapper";
-import {MessageCircle, MessageSquarePlus} from "lucide-react";
+import {CreateChatRoomForm} from "@/features/chatroom/components/CreateChatRoomForm";
+import {MessageCircle} from "lucide-react";
 import {Role} from "@/models/Role";
 import {RoomPopulation} from "@/models/roomPopulation";
 import {User} from "@/models/User";
@@ -17,6 +17,12 @@ interface SearchRoomsResultsProps {
     user: User | null;
     onJoin: (roomId: number) => void;
     onCreate: () => void;
+    proOnly: boolean;
+    onProOnlyChange: (checked: boolean) => void;
+    canCreate: boolean;
+    selectedModeExists: boolean;
+    isCreating: boolean;
+    creationError: string | null;
 }
 
 const SearchRoomsResults: React.FC<SearchRoomsResultsProps> = ({
@@ -29,7 +35,7 @@ const SearchRoomsResults: React.FC<SearchRoomsResultsProps> = ({
                                                                    joinedRoomIds,
                                                                    user,
                                                                    onJoin,
-                                                                   onCreate
+                                                                   onCreate, proOnly, onProOnlyChange, canCreate, selectedModeExists, isCreating, creationError
                                                                }) => {
     return (
         <div className="p-3">
@@ -42,30 +48,11 @@ const SearchRoomsResults: React.FC<SearchRoomsResultsProps> = ({
                 // (e.g. "tes" → "Test Room Alpha") must still offer creating "tes".
                 <div className="space-y-3">
                     {showCreateOption && (
-                        <GuestModalWrapper
-                            isGuest={user?.role === Role.GUEST}
-                            onProceed={() => {
-                            }}
-                        >
-                            <div
-                                onClick={onCreate}
-                                className="glass-surface cursor-pointer rounded-lg border-dashed p-4 transition-colors"
-                            >
-                                <div className="flex items-center gap-2">
-                                    <MessageSquarePlus className="min-h-4 w-4"/>
-                                    <div className="min-w-0">
-                                        <p className="text-foreground truncate max-w-full">
-                                            {filteredRooms.length > 0
-                                                ? `Create chatroom "${searchTerm.trim()}"`
-                                                : `No matching chatroom "${searchTerm.trim()}"`}
-                                        </p>
-                                        <p className="mt-1 text-sm text-muted-foreground">
-                                            Click here to create it
-                                        </p>
-                                    </div>
-                                </div>
-                            </div>
-                        </GuestModalWrapper>
+                        <CreateChatRoomForm name={searchTerm.trim()} hasMatches={filteredRooms.length > 0}
+                            proOnly={proOnly} onProOnlyChange={onProOnlyChange} canCreate={canCreate}
+                            selectedModeExists={selectedModeExists} isCreating={isCreating} error={creationError}
+                            isGuest={user?.role === Role.GUEST} onCreate={onCreate}/>
+
                     )}
                     {filteredRooms.length > 0 && (
                         <div className="max-h-[300px] overflow-y-auto rounded-md border-border">

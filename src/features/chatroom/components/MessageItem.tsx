@@ -1,3 +1,5 @@
+import {RoomProBadge} from "@/components/RoomProBadge";
+import {useRoomParticipation} from "@/lib/hooks/useRoomParticipation";
 import {fontPresetStyle} from "@/lib/fontPresets";
 import {useUserFonts} from "@/lib/hooks/useUserFonts";
 import {ChatUserName} from "@/features/chatroom/components/ChatUserName";
@@ -50,6 +52,7 @@ const MessageItem: React.FC<{
           onRemoveAttachment,
           interactionsDisabled = false,
       }) => {
+    const participationDisabled = useRoomParticipation(message.chatRoomId, message.chatRoomProOnly);
     const fonts = useUserFonts(message.advert ? undefined : message.senderId, {
         usernameFont: message.senderUsernameFont,
         messageFont: message.senderMessageFont,
@@ -136,7 +139,7 @@ const MessageItem: React.FC<{
                 attachment={attachment}
                 tags={attachment.tags.map(tag => tag.name)}
                 onClick={interactionsDisabled ? undefined : () => handleAttachmentClick(attachment)}
-                onDelete={interactionsDisabled ? undefined : (!message.deleted && message.content ? onRemoveAttachment : undefined)}
+                onDelete={participationDisabled || interactionsDisabled ? undefined : (!message.deleted && message.content ? onRemoveAttachment : undefined)}
             />
         );
     };
@@ -154,9 +157,10 @@ const MessageItem: React.FC<{
     );
 
     const ChatRoomBadge = () => (
-        <span className="rounded bg-blue-100 font-medium text-blue-700 text-[10px] px-1.5 py-0.5">
-                {message.chatRoomName}
-            </span>
+        <span className="inline-flex min-w-0 max-w-full items-center gap-1.5">
+            <span className="truncate rounded bg-blue-100 px-1.5 py-0.5 text-[10px] font-medium text-blue-700">{message.chatRoomName}</span>
+            <RoomProBadge proOnly={message.chatRoomProOnly}/>
+        </span>
     );
 
     const PromotedBadge = () => (

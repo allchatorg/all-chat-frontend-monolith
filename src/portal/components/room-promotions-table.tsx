@@ -1,5 +1,6 @@
 "use client"
 
+import {RoomProBadge} from "@/components/RoomProBadge";
 import * as React from "react"
 import {Badge} from "@ads/components/ui/badge"
 import {Tabs, TabsList, TabsTrigger} from "@ads/components/ui/tabs"
@@ -185,8 +186,9 @@ export function RoomPromotionsTable({
                                 promotions.map((promotion) => (
                                     <TableRow key={promotion.id}>
                                         <TableCell className="max-w-[280px]">
-                                            <span className="line-clamp-2 break-words text-sm font-medium">
-                                                {promotion.chatRoomName}
+                                            <span className="flex items-center gap-2">
+                                                <span className="min-w-0 truncate text-sm font-medium">{promotion.chatRoomName}</span>
+                                                <RoomProBadge proOnly={promotion.chatRoomProOnly}/>
                                             </span>
                                         </TableCell>
                                         <TableCell className="text-right">${promotion.amount.toFixed(2)}</TableCell>

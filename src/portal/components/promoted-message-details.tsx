@@ -79,6 +79,7 @@ export default function PromotedMessageDetails({data, className, isAdmin = false
         senderRole: Role.USER,
         chatRoomId: data.chatRoomId,
         chatRoomName: data.chatRoomName,
+        chatRoomProOnly: data.chatRoomProOnly,
         bannedUser: false,
         color: "",
         deleted: data.messageDeleted,

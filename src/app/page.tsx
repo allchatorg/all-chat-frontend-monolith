@@ -10,8 +10,6 @@ import {useUser} from "@/lib/hooks/useUser";
 import {useChatRooms} from "@/lib/hooks/useChatRooms";
 import {useRouter, useSearchParams} from "next/navigation";
 import {Spinner} from "@/components/Spinner";
-import {useDialog} from "@/components/providers/DialogProvider";
-import {CreateChatRoomForm} from "@/features/chatroom/components/CreateChatRoomForm";
 import {useDispatch, useSelector} from "react-redux";
 import {AppDispatch} from "@/redux/store";
 import {UserChatRoom} from "@/models/UserChatRoom";
@@ -20,7 +18,6 @@ import {selectChatRoomTabSortMode} from "@/redux/chatRoom/chatRoomSelectors";
 import ChatSectionSkeleton from "@/features/chatroom/components/ChatSectionSkeleton";
 
 export default function Home() {
-    const {open} = useDialog();
     const dispatch = useDispatch<AppDispatch>();
     const roomTabSortMode = useSelector(selectChatRoomTabSortMode);
     const router = useRouter();
@@ -52,10 +49,6 @@ export default function Home() {
         );
     }
 
-    const handleOpenCreateRoomDialog = () => {
-        open(<CreateChatRoomForm/>);
-    };
-
     const handleReorder = (userChatRooms: UserChatRoom[]) => {
         dispatch(setChatroomOrder(userChatRooms.map(room => room.chatRoomId)));
     }
@@ -70,7 +63,6 @@ export default function Home() {
                         selectedUserChatRoom={selectedUserChatRoom}
                         onSelectUserChatRoom={handleSelectRoom}
                         onCloseUserChatRoomTab={handleLeaveRoom}
-                        onOpenCreateRoom={handleOpenCreateRoomDialog}
                         onReorderRooms={handleReorder}
                         sortMode={roomTabSortMode}
                     />

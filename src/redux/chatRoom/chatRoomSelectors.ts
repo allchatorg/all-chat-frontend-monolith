@@ -17,7 +17,7 @@ export const selectJoinedUserChatRoomsState = createSelector(
                 firstRoom.chatRoomName.localeCompare(secondRoom.chatRoomName, undefined, {
                     sensitivity: 'base',
                     numeric: true,
-                })
+                }) || Number(Boolean(firstRoom.proOnly)) - Number(Boolean(secondRoom.proOnly)) || firstRoom.chatRoomId - secondRoom.chatRoomId
             );
         }
 

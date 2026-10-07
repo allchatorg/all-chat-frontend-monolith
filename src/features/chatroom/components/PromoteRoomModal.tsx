@@ -1,5 +1,7 @@
 "use client";
 
+import {useRoomParticipation} from "@/lib/hooks/useRoomParticipation";
+import {RoomProBadge} from "@/components/RoomProBadge";
 import React, {useState} from "react";
 import {useRouter} from "next/navigation";
 import {Button} from "@/components/ui/button";
@@ -24,13 +26,15 @@ const getApiErrorMessage = (error: unknown): string => {
 interface PromoteRoomModalProps {
     chatRoomId: number;
     chatRoomName: string;
+    proOnly?: boolean;
 }
 
 // Stepper modal opened from the chat room header: (1) select/add a card,
 // (2) $2.50-hold explanation + Purchase, then a success screen linking to
 // the portal. PaymentMethodSelector brings its own Stripe <Elements> for the
 // nested AddCardForm dialog, so no outer Stripe provider is needed here.
-export const PromoteRoomModal: React.FC<PromoteRoomModalProps> = ({chatRoomId, chatRoomName}) => {
+export const PromoteRoomModal: React.FC<PromoteRoomModalProps> = ({chatRoomId, chatRoomName, proOnly}) => {
+    const participationDisabled = useRoomParticipation(chatRoomId, proOnly);
     const {close} = useDialog();
     const router = useRouter();
     const [currentStep, setCurrentStep] = useState(0);
@@ -41,7 +45,7 @@ export const PromoteRoomModal: React.FC<PromoteRoomModalProps> = ({chatRoomId, c
     const [promoteRoom, {isLoading}] = usePromoteRoomMutation();
 
     const handlePurchase = async () => {
-        if (!selectedPaymentMethodId || isLoading) return;
+        if (participationDisabled || !selectedPaymentMethodId || isLoading) return;
         setErrorMessage(null);
 
         try {
@@ -59,6 +63,13 @@ export const PromoteRoomModal: React.FC<PromoteRoomModalProps> = ({chatRoomId, c
         close();
         router.push("/portal/room-promotions");
     };
+
+    if (participationDisabled && !isSuccess) {
+        return <div className="space-y-4 py-4"><RoomProBadge proOnly/>
+            <p className="text-sm text-muted-foreground">PRO is required to promote content in this room. You can still read and report.</p>
+            <Button className="min-h-11" onClick={close}>Back to chat</Button>
+        </div>;
+    }
 
     if (isSuccess) {
         return (
@@ -100,7 +111,7 @@ export const PromoteRoomModal: React.FC<PromoteRoomModalProps> = ({chatRoomId, c
                             <p className="font-semibold text-foreground">Listed in the Promoted tab of Active Rooms</p>
                             <p className="text-muted-foreground">
                                 Any public room can be promoted by anyone. Once approved,{" "}
-                                <span className="font-medium text-foreground">{chatRoomName}</span> appears in the
+                                <span className="inline-flex max-w-full items-center gap-1.5 align-middle"><span className="min-w-0 truncate font-medium text-foreground">{chatRoomName}</span><RoomProBadge proOnly={proOnly}/></span> appears in the
                                 Promoted tab of the Active Rooms panel, visible to every user.
                             </p>
                         </div>
@@ -179,7 +190,7 @@ export const PromoteRoomModal: React.FC<PromoteRoomModalProps> = ({chatRoomId, c
                             <div className="space-y-2 text-sm">
                                 <div className="flex justify-between">
                                     <span className="text-muted-foreground">Room</span>
-                                    <span className="font-medium text-foreground">{chatRoomName}</span>
+                                    <span className="inline-flex max-w-full items-center gap-1.5 align-middle"><span className="min-w-0 truncate font-medium text-foreground">{chatRoomName}</span><RoomProBadge proOnly={proOnly}/></span>
                                 </div>
                                 <div className="pt-2 border-t border-border flex justify-between items-center">
                                     <span className="font-bold text-foreground">Total</span>

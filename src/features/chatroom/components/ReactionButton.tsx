@@ -1,3 +1,4 @@
+import {useRoomParticipation} from "@/lib/hooks/useRoomParticipation";
 import {ChatUserName} from '@/features/chatroom/components/ChatUserName';
 import React, {useEffect, useRef, useState} from 'react';
 import {Reaction} from '@/models/Reaction';
@@ -25,6 +26,7 @@ interface ReactionButtonProps {
 }
 
 export const ReactionButton: React.FC<ReactionButtonProps> = ({reaction, message, isDisplayOnly = false, disabled = false}) => {
+    const participationDisabled = useRoomParticipation(message.chatRoomId, message.chatRoomProOnly);
     const dispatch = useDispatch<AppDispatch>();
     const {open} = useDialog();
     const openPro = useProDialog();
@@ -63,6 +65,7 @@ export const ReactionButton: React.FC<ReactionButtonProps> = ({reaction, message
         open(<MessageReactionsPanel/>, {className: 'p-0 border-0'});
     };
     const handleReactionClick = async () => {
+        if (participationDisabled) {showDetails(); return;}
         if (pendingRef.current) return;
         if (!reactedByCurrentUser && isCustomReactionToken(reaction.emoji) && !user?.proActive) {
             handleHoverEnd();
@@ -91,7 +94,7 @@ export const ReactionButton: React.FC<ReactionButtonProps> = ({reaction, message
         <TooltipTrigger asChild>
             <button type="button" onClick={() => void handleReactionClick()} onMouseEnter={handleHoverStart} onMouseLeave={handleHoverEnd}
                     onFocus={handleHoverStart} onBlur={handleHoverEnd} disabled={pending} aria-busy={pending} aria-pressed={reactedByCurrentUser}
-                    aria-label={`${reactedByCurrentUser ? 'Remove' : 'Add'} ${label} reaction, ${reaction.usersCount ?? 0} reactions`}
+                    aria-label={participationDisabled ? `View ${label} reactions, ${reaction.usersCount ?? 0} reactions` : `${reactedByCurrentUser ? 'Remove' : 'Add'} ${label} reaction, ${reaction.usersCount ?? 0} reactions`}
                     className={`${chipClass} transition-all hover:shadow-xs active:scale-95 focus-visible:outline-2 focus-visible:outline-blue-500 disabled:cursor-wait disabled:opacity-60`}>
                 {content}
             </button>

@@ -1,3 +1,4 @@
+import {useRoomParticipation} from "@/lib/hooks/useRoomParticipation";
 import React from "react";
 import MessageItem from "@/features/chatroom/components/MessageItem";
 import {MessageMenu} from "@/features/chatroom/components/MessageMenu";
@@ -86,6 +87,7 @@ const ChatMessage: React.FC<ChatMessageProps> = ({
                                                  }) => {
 
     const [reactToMessage] = useThunk(reactToMessageThunk);
+    const participationDisabled = useRoomParticipation(message.chatRoomId, message.chatRoomProOnly);
     const [deleteReaction] = useThunk(deleteReactionThunk);
     const proActive = useSelector(selectUser)?.proActive === true;
     const openPro = useProDialog();
@@ -103,6 +105,10 @@ const ChatMessage: React.FC<ChatMessageProps> = ({
         ? (isMenuVisible ? 'flex opacity-100' : 'hidden')
         : (isReactionPopoverOpen ? 'flex opacity-100 pointer-events-auto' : 'flex opacity-0 pointer-events-none group-hover:opacity-100 group-hover:pointer-events-auto group-focus-within:opacity-100 group-focus-within:pointer-events-auto');
     const popoverSelectionClass = isReactionPopoverOpen ? 'select-none' : '';
+
+    React.useEffect(() => {
+        if (participationDisabled) setIsReactionPopoverOpen(false);
+    }, [participationDisabled]);
 
     const handleReactionPopoverOpenChange = (open: boolean) => {
         setIsReactionPopoverOpen(open);
@@ -125,7 +131,7 @@ const ChatMessage: React.FC<ChatMessageProps> = ({
     };
 
     const handleTouchStart = (e: React.TouchEvent<HTMLDivElement>) => {
-        if (interactionsDisabled || isReactionGestureBlockedTarget(e.target)) {
+        if (participationDisabled || interactionsDisabled || isReactionGestureBlockedTarget(e.target)) {
             return;
         }
 
@@ -145,7 +151,7 @@ const ChatMessage: React.FC<ChatMessageProps> = ({
     };
 
     const handleDoubleClick = (e: React.MouseEvent<HTMLDivElement>) => {
-        if (interactionsDisabled || isReactionGestureBlockedTarget(e.target)) {
+        if (participationDisabled || interactionsDisabled || isReactionGestureBlockedTarget(e.target)) {
             return;
         }
 
@@ -173,7 +179,7 @@ const ChatMessage: React.FC<ChatMessageProps> = ({
     };
 
     const updateMessageReaction = async (messageId: number, emoji: string, emojiId: string): Promise<void> => {
-        if (reactionPendingRef.current || interactionsDisabled || archivedRoom || message.deleted) return;
+        if (reactionPendingRef.current || participationDisabled || interactionsDisabled || archivedRoom || message.deleted) return;
         const existingReaction = message.reactions.find(reaction => reaction.emoji === emoji);
         const removing = existingReaction?.reactedByCurrentUser === true;
         if (isCustomReactionToken(emoji) || isCustomReactionToken(emojiId)) {
@@ -197,10 +203,12 @@ const ChatMessage: React.FC<ChatMessageProps> = ({
     };
 
     const handleEditMessage = (message: Message) => {
+        if (participationDisabled) return;
         onStartEditMessage?.(message);
     };
 
     const handleRemoveAttachment = async (attachmentId: number) => {
+        if (participationDisabled) return;
         try {
             await removeAttachmentFromMessage(message.id, {attachmentId});
         } catch (error) {
@@ -274,7 +282,7 @@ const ChatMessage: React.FC<ChatMessageProps> = ({
                                 showSenderName={false}
                                 handleMessageClick={() => {
                                 }}
-                                onRemoveAttachment={interactionsDisabled || message.promotion ? undefined : handleRemoveAttachment}
+                                onRemoveAttachment={participationDisabled || interactionsDisabled || message.promotion ? undefined : handleRemoveAttachment}
                                 showEditButton={!interactionsDisabled}
                                 interactionsDisabled={interactionsDisabled}
                             />

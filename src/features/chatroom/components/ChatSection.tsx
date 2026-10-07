@@ -82,7 +82,14 @@ const ChatSection: React.FC<ChatSectionProps> = ({
     const replyingToMessage = useSelector(selectReplyingToMessage);
     const messagingAvailability = useSelector(selectMessagingAvailability);
     const messagingDisabledReason = messagingAvailability.disabledReason ?? "Messaging is temporarily disabled until a moderator is online.";
-    const composerDisabled = Boolean(chatRoom?.isArchived || messagingAvailability.messagingBlocked);
+    const participationDisabled = Boolean(chatRoom?.proOnly && !user?.proActive);
+    React.useEffect(() => {
+        if (participationDisabled) {
+            dispatch(setEditingMessage(null));
+            dispatch(setReplyingToMessage(null));
+        }
+    }, [participationDisabled, dispatch]);
+    const composerDisabled = Boolean(participationDisabled || chatRoom?.isArchived || messagingAvailability.messagingBlocked);
     const composerDisabledReason = chatRoom?.isArchived
         ? "This room is archived. Messaging is disabled."
         : messagingDisabledReason;
@@ -307,6 +314,7 @@ const ChatSection: React.FC<ChatSectionProps> = ({
                     chatRoomId={chatRoom.id}
                     chatRoomName={chatRoom.name}
                     isArchived={chatRoom.isArchived}
+                    proOnly={chatRoom.proOnly}
                     totalMessages={chatRoom.totalMessages}
                     noiseLevel={noiseLevel}
                     popularitySidebarActive={popularitySidebarActive}
@@ -323,6 +331,7 @@ const ChatSection: React.FC<ChatSectionProps> = ({
                 messages={renderedMessages}
                 unreadDividerMessageId={unreadDividerMessageId}
                 composerDisabled={composerDisabled}
+                participationDisabled={participationDisabled}
                 composerDisabledReason={composerDisabledReason}
                 isGuest={user.role === Role.GUEST}
                 onGuestRegister={() => router.push(ROUTES.REGISTER_ANONYMOUS)}

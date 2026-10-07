@@ -1,6 +1,7 @@
 import {Message} from "@/models/message";
 
 export interface ChatRoom {
+    proOnly?: boolean;
     id: number;
     name: string;
     messages: Message[];
