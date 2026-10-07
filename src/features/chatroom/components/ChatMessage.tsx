@@ -131,7 +131,9 @@ const ChatMessage: React.FC<ChatMessageProps> = ({
     };
 
     const handleTouchStart = (e: React.TouchEvent<HTMLDivElement>) => {
-        if (participationDisabled || interactionsDisabled || isReactionGestureBlockedTarget(e.target)) {
+        // Touches inside the portaled action sheet bubble here through React; they aren't message taps.
+        if (participationDisabled || interactionsDisabled || !(e.target instanceof Node) || !e.currentTarget.contains(e.target)
+            || isReactionGestureBlockedTarget(e.target)) {
             return;
         }
 
@@ -312,6 +314,7 @@ const ChatMessage: React.FC<ChatMessageProps> = ({
                                 deleteOnly={deleteOnly}
                                 emojiPopoverOpen={isReactionPopoverOpen}
                                 onEmojiPopoverOpenChange={handleReactionPopoverOpenChange}
+                                mobileSheet={isMobile}
                             />
                             <MessageTimestamp createdAt={message.createdAt} isOwn placement="inline"/>
                         </div>
@@ -415,7 +418,8 @@ const ChatMessage: React.FC<ChatMessageProps> = ({
                             allowPromote={allowPromote}
                             deleteOnly={deleteOnly}
                             emojiPopoverOpen={isReactionPopoverOpen}
-                            onEmojiPopoverOpenChange={handleReactionPopoverOpenChange}/>
+                            onEmojiPopoverOpenChange={handleReactionPopoverOpenChange}
+                            mobileSheet={isMobile}/>
                     </div>
                 </div>
                 <MessageTimestamp createdAt={message.createdAt}/>

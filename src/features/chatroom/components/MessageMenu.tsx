@@ -23,6 +23,8 @@ import {Message} from "@/models/message";
 import {ReactionPicker} from "@/features/stickers/ReactionPicker";
 import {selectUser} from "@/redux/user/userSelectors";
 import {useProDialog} from "@/features/pro/useProDialog";
+import {MessageAction, MessageActionSheet, MessageActionSheetView} from "@/features/chatroom/components/MessageActionSheet";
+import {chatPreviewText} from "@/features/chatroom/utils/messageMarkers";
 
 interface MessageMenuProps {
     message: Message,
@@ -49,6 +51,8 @@ interface MessageMenuProps {
     deleteOnly?: boolean;
     emojiPopoverOpen?: boolean;
     onEmojiPopoverOpenChange?: (open: boolean) => void;
+    // Mobile: the actions and reaction buttons open a bottom sheet instead of the dropdown/popover.
+    mobileSheet?: boolean;
 }
 
 export const MessageMenu: React.FC<MessageMenuProps> = ({
@@ -72,6 +76,7 @@ export const MessageMenu: React.FC<MessageMenuProps> = ({
                                                             deleteOnly = false,
                                                             emojiPopoverOpen,
                                                             onEmojiPopoverOpenChange,
+                                                            mobileSheet = false,
                                                         }) => {
     const participationDisabled = useRoomParticipation(message.chatRoomId, message.chatRoomProOnly);
     const dispatch = useDispatch<AppDispatch>();
@@ -79,6 +84,7 @@ export const MessageMenu: React.FC<MessageMenuProps> = ({
     const {isPrincipal, isStaffMember, currentRole} = useRoleAccess();
     const [internalEmojiPopoverOpen, setInternalEmojiPopoverOpen] = useState(false);
     const [isRemovePromotedDialogOpen, setIsRemovePromotedDialogOpen] = useState(false);
+    const [sheetView, setSheetView] = useState<MessageActionSheetView | null>(null);
     const proActive = useSelector(selectUser)?.proActive === true;
     const openPro = useProDialog();
     const upgradingRef = useRef(false);
@@ -147,6 +153,94 @@ export const MessageMenu: React.FC<MessageMenuProps> = ({
         />
     ) : null;
 
+    const removeAction: MessageAction = {key: "remove", label: "Remove Message", Icon: Trash2, onSelect: handleRemoveMessage, destructive: true};
+    const actions: MessageAction[] = deleteOnly ? (canRemoveMessage ? [removeAction] : []) : [
+        canViewReactions && {
+            key: "view-reactions", label: "View Reactions", Icon: Smile, onSelect: () => {
+                dispatch(setMessageReactions(message.reactions));
+                dispatch(setSelectedReaction(message.reactions[0]));
+                open(<MessageReactionsPanel/>, {className: 'p-0 border-0'});
+            },
+        },
+        canReply && {key: "reply", label: "Reply", Icon: Reply, onSelect: () => onReply?.(message)},
+        canEditMessage && {key: "edit", label: "Edit Message", Icon: Pencil, onSelect: () => setEditingMessage?.(message)},
+        canRemoveMessage && removeAction,
+        canPromote && {
+            key: "promote", label: "Promote Message", Icon: Megaphone, onSelect: () => {
+                // Promoting requires a claimed account (backend rejects
+                // unclaimed with 403), so prompt the claim flow instead.
+                if (currentRole === Role.UNCLAIMED_USER) {
+                    open(
+                        <ClaimAccountPrompt
+                            description="You're using a throwaway account. To promote a message you need to claim your account by adding an email and password."/>
+                    );
+                    return;
+                }
+                open(<PromoteMessageModal message={message}/>, {className: 'w-[95vw] max-w-lg'});
+            },
+        },
+        canOpenModView && {
+            key: "mod-view", label: "Open Mod View", Icon: Shield, onSelect: () => {
+                dispatch(
+                    setSelectedUserInfo({
+                        userId: userId,
+                        userName: userName ?? "Unknown User",
+                    })
+                );
+                dispatch(setActiveRightSidebar("mod-view"));
+            },
+        },
+        canReport && {
+            key: "report", label: "Report", Icon: Flag, destructive: true, onSelect: () => open(<ReportForm messageId={messageId}/>, {
+                // Glass styling lives on the dialog itself so the form
+                // doesn't draw a second border inside DialogContent's.
+                className: "glass-popover glass-modal-mobile p-0 overflow-hidden",
+                // Light scrim: the default bg-black/80 overlay greys out
+                // the surface in light mode (same as notification dialog).
+                overlayClassName: "bg-slate-950/30 backdrop-blur-[2px] dark:bg-black/45",
+            }),
+        },
+    ].filter((action): action is MessageAction => Boolean(action));
+    const actionItems = actions.map(action => (
+        <DropdownMenuItem key={action.key} className="justify-between" onClick={action.onSelect}>
+            {action.label}
+            <action.Icon className="h-4 w-4"/>
+        </DropdownMenuItem>
+    ));
+    const openSheet = (view: MessageActionSheetView) => {
+        if (currentRole !== Role.GUEST) setSheetView(view);
+    };
+    const actionsButton = (
+        <Button variant="outline" size="icon" className="glass-control" aria-label="Message actions"
+                onClick={mobileSheet ? () => openSheet("actions") : undefined}>
+            <MoreHorizontal className="h-4 w-4"/>
+        </Button>
+    );
+    const actionsMenu = mobileSheet ? actionsButton : (
+        <DropdownMenu dir={direction} modal={false}>
+            <DropdownMenuTrigger asChild>{actionsButton}</DropdownMenuTrigger>
+            <DropdownMenuContent align="start" className="glass-popover w-48">
+                {actionItems}
+            </DropdownMenuContent>
+        </DropdownMenu>
+    );
+    const actionSheet = mobileSheet && (
+        <MessageActionSheet
+            openView={sheetView}
+            onClose={() => setSheetView(null)}
+            title={message.senderUsername || "Message"}
+            preview={message.content ? chatPreviewText(message.content)
+                : message.stickerId ? "Sticker" : message.attachments?.length ? "Attachment" : undefined}
+            actions={actions}
+            canReact={canAddReaction && !deleteOnly}
+            reactions={message.reactions}
+            proActive={proActive}
+            isGuest={currentRole === Role.GUEST}
+            onReact={(emoji, emojiId) => updateMessageReaction(messageId, emoji, emojiId)}
+            onUpgrade={openPro}
+        />
+    );
+
     const buttonGroup = (
         <div className={cn("flex items-center gap-1", className)}>
             {canOpenActionsMenu && (
@@ -172,22 +266,8 @@ export const MessageMenu: React.FC<MessageMenuProps> = ({
         }
         return (
             <div className={cn("flex items-center gap-1", className)}>
-                <DropdownMenu dir={direction} modal={false}>
-                    <DropdownMenuTrigger asChild>
-                        <Button variant="outline" size="icon" className="glass-control" aria-label="Message actions">
-                            <MoreHorizontal className="h-4 w-4"/>
-                        </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="start" className="glass-popover w-48">
-                        <DropdownMenuItem
-                            className="justify-between"
-                            onClick={handleRemoveMessage}
-                        >
-                            Remove Message
-                            <Trash2 className="h-4 w-4"/>
-                        </DropdownMenuItem>
-                    </DropdownMenuContent>
-                </DropdownMenu>
+                {actionsMenu}
+                {actionSheet}
                 {removePromotedDialog}
             </div>
         );
@@ -200,112 +280,14 @@ export const MessageMenu: React.FC<MessageMenuProps> = ({
     return (
         <GuestModalWrapper isGuest={currentRole === Role.GUEST}>
             <div className={cn("flex items-center gap-1", className)}>
-                {canOpenActionsMenu && (
-                    <DropdownMenu dir={direction} modal={false}>
-                        <DropdownMenuTrigger asChild>
-                            <Button variant="outline" size="icon" className="glass-control" aria-label="Message actions">
-                                <MoreHorizontal className="h-4 w-4"/>
-                            </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="start" className="glass-popover w-48">
-                            {canViewReactions && (
-                                <DropdownMenuItem
-                                    className="justify-between"
-                                    onClick={() => {
-                                        dispatch(setMessageReactions(message.reactions));
-                                        dispatch(setSelectedReaction(message.reactions[0]));
-                                        open(<MessageReactionsPanel/>, {className: 'p-0 border-0'});
-                                    }}
-                                >
-                                    View Reactions
-                                    <Smile className="h-4 w-4"/>
-                                </DropdownMenuItem>
-                            )}
-                            {canReply && (
-                                <DropdownMenuItem
-                                    className="justify-between"
-                                    onClick={() => onReply?.(message)}
-                                >
-                                    Reply
-                                    <Reply className="h-4 w-4"/>
-                                </DropdownMenuItem>
-                            )}
-                            {canEditMessage && (
-                                <DropdownMenuItem
-                                    className="justify-between"
-                                    onClick={() => setEditingMessage?.(message)}
-                                >
-                                    Edit Message
-                                    <Pencil className="h-4 w-4"/>
-                                </DropdownMenuItem>
-                            )}
-                            {canRemoveMessage && (
-                                <DropdownMenuItem
-                                    className="justify-between"
-                                    onClick={handleRemoveMessage}
-                                >
-                                    Remove Message
-                                    <Trash2 className="h-4 w-4"/>
-                                </DropdownMenuItem>
-                            )}
-                            {canPromote && (
-                                <DropdownMenuItem
-                                    className="justify-between"
-                                    onClick={() => {
-                                        // Promoting requires a claimed account (backend rejects
-                                        // unclaimed with 403), so prompt the claim flow instead.
-                                        if (currentRole === Role.UNCLAIMED_USER) {
-                                            open(
-                                                <ClaimAccountPrompt
-                                                    description="You're using a throwaway account. To promote a message you need to claim your account by adding an email and password."/>
-                                            );
-                                            return;
-                                        }
-                                        open(<PromoteMessageModal message={message}/>, {className: 'w-[95vw] max-w-lg'});
-                                    }}
-                                >
-                                    Promote Message
-                                    <Megaphone className="h-4 w-4"/>
-                                </DropdownMenuItem>
-                            )}
-                            {canOpenModView && (
-                                <DropdownMenuItem
-                                    className="justify-between"
-                                    onClick={() => {
-                                        dispatch(
-                                            setSelectedUserInfo({
-                                                userId: userId,
-                                                userName: userName ?? "Unknown User",
-                                            })
-                                        );
-                                        dispatch(setActiveRightSidebar("mod-view"));
-                                    }}
-                                >
-                                    Open Mod View
-                                    <Shield className="h-4 w-4"/>
-                                </DropdownMenuItem>
-                            )}
-                            {canReport && (
-                                <DropdownMenuItem
-                                    className="justify-between"
-                                    onClick={() => open(<ReportForm messageId={messageId}/>, {
-                                        // Glass styling lives on the dialog itself so the form
-                                        // doesn't draw a second border inside DialogContent's.
-                                        className: "glass-popover glass-modal-mobile p-0 overflow-hidden",
-                                        // Light scrim: the default bg-black/80 overlay greys out
-                                        // the surface in light mode (same as notification dialog).
-                                        overlayClassName: "bg-slate-950/30 backdrop-blur-[2px] dark:bg-black/45",
-                                    })}
-                                >
-                                    Report
-                                    <Flag className="h-4 w-4"/>
-                                </DropdownMenuItem>
-                            )}
-                        </DropdownMenuContent>
-                    </DropdownMenu>
-                )}
+                {canOpenActionsMenu && actionsMenu}
 
-                {canAddReaction && (
+                {canAddReaction && (mobileSheet ? (
+                    <Button variant="outline" size="icon" className="glass-control" aria-label="Add reaction"
+                            onClick={() => openSheet("emoji")}>
+                        <Smile className="h-4 w-4"/>
+                    </Button>
+                ) : (
                     <Popover open={isOpenEmojiPopover} onOpenChange={handleEmojiPopoverOpenChange}>
                         <PopoverTrigger asChild>
                             <Button variant="outline" size="icon" className="glass-control" aria-label="Add reaction">
@@ -337,7 +319,8 @@ export const MessageMenu: React.FC<MessageMenuProps> = ({
                             />
                         </PopoverContent>
                     </Popover>
-                )}
+                ))}
+                {actionSheet}
                 {removePromotedDialog}
             </div>
         </GuestModalWrapper>
