@@ -10,6 +10,7 @@ import {ShieldBan, ShieldCheck} from "lucide-react";
 import {isStaff, Role} from "@/models/Role";
 import {UserName} from "@/components/UserName";
 import {useProDialog} from "@/features/pro/useProDialog";
+import {getRoleNameStyles} from "@/lib/roleStyles";
 
 
 interface UserActionPopupProps extends Partial<FontSnapshot> {
@@ -45,20 +46,7 @@ export const UserActionPopup: React.FC<UserActionPopupProps> = ({
     const isBlocked = user?.blockedUsers?.some(u => u.id === userId);
     const isTargetStaff = isStaff(role);
 
-    const getRoleStyles = (role: Role) => {
-        switch (role) {
-            case Role.SUPER_ADMIN:
-                return "text-red-700 dark:text-red-300 font-bold";
-            case Role.ADMIN:
-                return "text-blue-700 dark:text-blue-300 font-bold";
-            case Role.MODERATOR:
-                return "text-sky-400 dark:text-sky-300 font-bold";
-            default:
-                return "text-gray-500 dark:text-slate-200";
-        }
-    };
-
-    const roleStyles = getRoleStyles(role);
+    const roleStyles = getRoleNameStyles(role);
     const showShield = isStaff(role);
 
     const formatRoleName = (role: string) => {

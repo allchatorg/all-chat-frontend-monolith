@@ -120,6 +120,7 @@ export const TopReactedMessagesSection: React.FC<{showHeader?: boolean}> = ({sho
                                     showChatRoomName={false}
                                     showSenderName={true}
                                     showReactions={true}
+                                    showSenderRoleColor={true}
                                 />
                             ))
                         )}

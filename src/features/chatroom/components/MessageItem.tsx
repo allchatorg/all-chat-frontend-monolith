@@ -24,6 +24,8 @@ import {useIsMobile} from "@/lib/hooks/useIsMobile";
 import {ReactionButton} from "@/features/chatroom/components/ReactionButton";
 import {useRoleAccess} from "@/lib/hooks/useRoleAccess";
 import {StickerMessage} from "@/features/stickers/StickerMessage";
+import {isStaff} from "@/models/Role";
+import {getRoleNameStyles} from "@/lib/roleStyles";
 
 const MessageItem: React.FC<{
     message: Message,
@@ -36,6 +38,7 @@ const MessageItem: React.FC<{
     className?: string,
     showEditButton?: boolean,
     showReactions?: boolean,
+    showSenderRoleColor?: boolean,
     onRemoveAttachment?: (attachmentId: number) => Promise<void>,
     interactionsDisabled?: boolean,
 }> = ({
@@ -49,6 +52,7 @@ const MessageItem: React.FC<{
           className,
           showEditButton = true,
           showReactions = false,
+          showSenderRoleColor = false,
           onRemoveAttachment,
           interactionsDisabled = false,
       }) => {
@@ -204,7 +208,8 @@ const MessageItem: React.FC<{
                     <div className="min-w-0 flex-1">
                         <div className="mb-1 flex items-center gap-2">
                                 <span className="min-w-0 text-sm font-medium transition-colors text-foreground">
-                                    <ChatUserName userId={message.senderId} username={message.senderUsername} proBadgeVisible={message.senderProBadgeVisible} proBadgeRevision={message.senderProBadgeRevision} usernameFont={message.senderUsernameFont} messageFont={message.senderMessageFont} fontRevision={message.senderFontRevision}/>
+                                    <ChatUserName userId={message.senderId} username={message.senderUsername} proBadgeVisible={message.senderProBadgeVisible} proBadgeRevision={message.senderProBadgeRevision} usernameFont={message.senderUsernameFont} messageFont={message.senderMessageFont} fontRevision={message.senderFontRevision}
+                                                  className={showSenderRoleColor && isStaff(message.senderRole) ? getRoleNameStyles(message.senderRole) : undefined}/>
                                 </span>
                             {message.bannedUser && <BannedUserBadge/>}
                             {message.deleted && <DeletedBadge/>}
