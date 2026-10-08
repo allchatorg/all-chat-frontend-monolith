@@ -12,6 +12,8 @@ import {useJoinRandomRoom} from "@/features/chatroom/hooks/useJoinRandomRoom";
 
 const DEBOUNCE_DELAY = 400;
 
+export type RoomProFilter = "all" | "pro" | "standard";
+
 export const useRoomSearch = (initialSearchTerm = "") => {
     const [runSearchRoomThunk, searchRoomIsLoading] = useThunk(searchChatRoomsByNameThunk);
     const {handleJoinRandomRoom: joinRandomRoom, joinRandomRoomIsLoading} = useJoinRandomRoom();
@@ -22,6 +24,7 @@ export const useRoomSearch = (initialSearchTerm = "") => {
 
     const [searchTerm, setSearchTerm] = useState(initialSearchTerm);
     const [proOnly, setProOnly] = useState(false);
+    const [proFilter, setProFilter] = useState<RoomProFilter>("all");
     const [isCreating, setIsCreating] = useState(false);
     const [creationError, setCreationError] = useState<string | null>(null);
     const creatingRef = useRef(false);
@@ -84,11 +87,11 @@ export const useRoomSearch = (initialSearchTerm = "") => {
 
     const filteredRooms = useMemo(() => {
         const normalizedQuery = searchTerm.trim().toLowerCase();
-        if (!normalizedQuery) return rooms;
         return rooms.filter((room) =>
-            room.roomName.toLowerCase().includes(normalizedQuery)
+            (!normalizedQuery || room.roomName.toLowerCase().includes(normalizedQuery)) &&
+            (proFilter === "all" || (proFilter === "pro") === (room.proOnly === true))
         );
-    }, [searchTerm, rooms]);
+    }, [searchTerm, rooms, proFilter]);
 
     const exactRooms = useMemo(() => rooms.filter(room =>
         room.roomName.trim().toLowerCase() === searchTerm.trim().toLowerCase()
@@ -147,6 +150,8 @@ export const useRoomSearch = (initialSearchTerm = "") => {
         showCreateOption,
         proOnly: effectiveProOnly,
         setProOnly,
+        proFilter,
+        setProFilter,
         proModeLocked,
         isCreating,
         creationError,

@@ -28,6 +28,7 @@ const SearchRoomsMobile: React.FC<SearchRoomsMobileProps> = ({onClose, initialSe
         clearSearch,
         showCreateOption,
         proOnly, setProOnly, canCreate, proModeLocked, isCreating, creationError,
+        proFilter, setProFilter,
         validationResult,
         lastSearchedTerm,
         joinedRoomIds,
@@ -97,6 +98,7 @@ const SearchRoomsMobile: React.FC<SearchRoomsMobileProps> = ({onClose, initialSe
                     onCreate={() => void onCreate()}
                     proOnly={proOnly} onProOnlyChange={handleProOnlyChange} canCreate={canCreate}
                     proModeLocked={proModeLocked} isCreating={isCreating} creationError={creationError}
+                    proFilter={proFilter} onProFilterChange={setProFilter}
                 />
             </div>
         </div>

@@ -5,6 +5,8 @@ import {MessageCircle} from "lucide-react";
 import {Role} from "@/models/Role";
 import {RoomPopulation} from "@/models/roomPopulation";
 import {User} from "@/models/User";
+import {Tabs, TabsList, TabsTrigger} from "@/components/ui/tabs";
+import {RoomProFilter} from "@/features/chatroom/hooks/useRoomSearch";
 
 interface SearchRoomsResultsProps {
     isLoading: boolean;
@@ -23,7 +25,15 @@ interface SearchRoomsResultsProps {
     proModeLocked: boolean;
     isCreating: boolean;
     creationError: string | null;
+    proFilter: RoomProFilter;
+    onProFilterChange: (filter: RoomProFilter) => void;
 }
+
+const PRO_FILTER_EMPTY_LABEL: Record<RoomProFilter, string> = {
+    all: "rooms",
+    pro: "PRO-only rooms",
+    standard: "standard rooms",
+};
 
 const SearchRoomsResults: React.FC<SearchRoomsResultsProps> = ({
                                                                    isLoading,
@@ -35,10 +45,19 @@ const SearchRoomsResults: React.FC<SearchRoomsResultsProps> = ({
                                                                    joinedRoomIds,
                                                                    user,
                                                                    onJoin,
-                                                                   onCreate, proOnly, onProOnlyChange, canCreate, proModeLocked, isCreating, creationError
+                                                                   onCreate, proOnly, onProOnlyChange, canCreate, proModeLocked, isCreating, creationError,
+                                                                   proFilter, onProFilterChange
                                                                }) => {
     return (
         <div className="p-3">
+            <Tabs value={proFilter} onValueChange={(value) => onProFilterChange(value as RoomProFilter)}
+                  className="mb-3">
+                <TabsList aria-label="Filter rooms by type" className="glass-surface grid w-full grid-cols-3">
+                    <TabsTrigger value="all">All</TabsTrigger>
+                    <TabsTrigger value="pro">PRO only</TabsTrigger>
+                    <TabsTrigger value="standard">Standard</TabsTrigger>
+                </TabsList>
+            </Tabs>
             {isLoading || (searchTerm.trim() && searchTerm.trim() !== lastSearchedTerm && validationResult === true) ? (
                 <div className="flex items-center justify-center h-[200px] text-muted-foreground">
                     Searching...
@@ -79,8 +98,10 @@ const SearchRoomsResults: React.FC<SearchRoomsResultsProps> = ({
                     <MessageCircle className="mb-2 h-6 w-6 opacity-50"/>
                     {searchTerm.trim() ? (
                         <>
-                            <p>No rooms found matching "{searchTerm}"</p>
-                            <p className="mt-1 text-sm">Try adjusting your search terms</p>
+                            <p>No {PRO_FILTER_EMPTY_LABEL[proFilter]} found matching "{searchTerm}"</p>
+                            <p className="mt-1 text-sm">
+                                {proFilter === "all" ? "Try adjusting your search terms" : "Try another filter or search term"}
+                            </p>
                         </>
                     ) : (
                         <>

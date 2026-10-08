@@ -31,6 +31,7 @@ const SearchRooms: React.FC = () => {
         clearSearch,
         showCreateOption,
         proOnly, setProOnly, canCreate, proModeLocked, isCreating, creationError,
+        proFilter, setProFilter,
         validationResult,
         lastSearchedTerm,
         joinedRoomIds,
@@ -169,6 +170,7 @@ const SearchRooms: React.FC = () => {
                             onCreate={() => void handleDesktopCreate()}
                             proOnly={proOnly} onProOnlyChange={handleProOnlyChange} canCreate={canCreate}
                             proModeLocked={proModeLocked} isCreating={isCreating} creationError={creationError}
+                            proFilter={proFilter} onProFilterChange={setProFilter}
                         />
                     </PopoverContent>
                 </Popover>
