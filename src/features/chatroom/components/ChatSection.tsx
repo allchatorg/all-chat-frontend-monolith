@@ -82,7 +82,7 @@ const ChatSection: React.FC<ChatSectionProps> = ({
     const replyingToMessage = useSelector(selectReplyingToMessage);
     const messagingAvailability = useSelector(selectMessagingAvailability);
     const messagingDisabledReason = messagingAvailability.disabledReason ?? "Messaging is temporarily disabled until a moderator is online.";
-    const participationDisabled = Boolean(chatRoom?.proOnly && !user?.proActive);
+    const participationDisabled = Boolean(chatRoom?.vipOnly && !user?.vipActive);
     React.useEffect(() => {
         if (participationDisabled) {
             dispatch(setEditingMessage(null));
@@ -314,7 +314,7 @@ const ChatSection: React.FC<ChatSectionProps> = ({
                     chatRoomId={chatRoom.id}
                     chatRoomName={chatRoom.name}
                     isArchived={chatRoom.isArchived}
-                    proOnly={chatRoom.proOnly}
+                    vipOnly={chatRoom.vipOnly}
                     totalMessages={chatRoom.totalMessages}
                     noiseLevel={noiseLevel}
                     popularitySidebarActive={popularitySidebarActive}

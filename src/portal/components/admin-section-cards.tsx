@@ -8,7 +8,7 @@ import {useGetPromotedRevenueSummaryQuery} from "@ads/store/services/adminPromot
 import {useGetRoomPromotedRevenueSummaryQuery} from "@ads/store/services/adminRoomPromotionsApi";
 import {AdStatus} from "@ads/models/ad";
 import {Skeleton} from "@ads/components/ui/skeleton";
-import {dashboardRevenueQueryOptions, useGetProStatisticsQuery} from "@ads/store/services/adminProApi";
+import {dashboardRevenueQueryOptions, useGetVipStatisticsQuery} from "@ads/store/services/adminVipApi";
 import {computeRevenueTrend, formatUsd} from "@ads/lib/revenue-format";
 
 
@@ -58,7 +58,7 @@ export function AdminSectionCards() {
     const {data: revenueData, isLoading: isRevenueLoading, isFetching: isRevenueFetching, isError: isRevenueError} = useGetDailyRevenueQuery(undefined, dashboardRevenueQueryOptions);
     const {data: promotedData, isLoading: isPromotedLoading, isFetching: isPromotedFetching, isError: isPromotedError} = useGetPromotedRevenueSummaryQuery(undefined, dashboardRevenueQueryOptions);
     const {data: roomPromotedData, isLoading: isRoomPromotedLoading, isFetching: isRoomPromotedFetching, isError: isRoomPromotedError} = useGetRoomPromotedRevenueSummaryQuery(undefined, dashboardRevenueQueryOptions);
-    const {data: proData, isFetching: isProFetching, isError: isProError} = useGetProStatisticsQuery(90, dashboardRevenueQueryOptions);
+    const {data: vipData, isFetching: isVipFetching, isError: isVipError} = useGetVipStatisticsQuery(90, dashboardRevenueQueryOptions);
 
     // Get count for a specific status
     const getCountForStatus = (status: AdStatus): number => {
@@ -70,15 +70,15 @@ export function AdminSectionCards() {
     const revenueUnavailable = isRevenueError || !revenueData;
     const promotedUnavailable = isPromotedError || !promotedData;
     const roomPromotedUnavailable = isRoomPromotedError || !roomPromotedData;
-    const totalLoading = isRevenueFetching || isPromotedFetching || isRoomPromotedFetching || isProFetching;
-    const totalUnavailable = revenueUnavailable || promotedUnavailable || roomPromotedUnavailable || isProError || !proData
-        || proData.synchronization.status === 'UNAVAILABLE';
-    const totalPartial = proData?.synchronization.status !== 'CURRENT';
+    const totalLoading = isRevenueFetching || isPromotedFetching || isRoomPromotedFetching || isVipFetching;
+    const totalUnavailable = revenueUnavailable || promotedUnavailable || roomPromotedUnavailable || isVipError || !vipData
+        || vipData.synchronization.status === 'UNAVAILABLE';
+    const totalPartial = vipData?.synchronization.status !== 'CURRENT';
     const totalToday = !totalUnavailable
-        ? revenueData.todayRevenue + promotedData.todayRevenue + roomPromotedData.todayRevenue + proData.revenue.today
+        ? revenueData.todayRevenue + promotedData.todayRevenue + roomPromotedData.todayRevenue + vipData.revenue.today
         : null;
     const totalYesterday = !totalUnavailable && !totalPartial
-        ? revenueData.yesterdayRevenue + promotedData.yesterdayRevenue + roomPromotedData.yesterdayRevenue + proData.revenue.yesterday
+        ? revenueData.yesterdayRevenue + promotedData.yesterdayRevenue + roomPromotedData.yesterdayRevenue + vipData.revenue.yesterday
         : null;
     const noTrend = {trend: 'up' as const, trendValue: ''};
     const revenueTrend = revenueUnavailable ? noTrend : computeRevenueTrend(revenueData.todayRevenue, revenueData.yesterdayRevenue);

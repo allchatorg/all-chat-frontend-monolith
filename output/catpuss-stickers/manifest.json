@@ -9,7 +9,7 @@
       "happy",
       "excited"
     ],
-    "file": "public/stickers/pro/catpuss-cheer.png"
+    "file": "public/stickers/vip/catpuss-cheer.png"
   },
   {
     "id": "catpuss-typing",
@@ -21,7 +21,7 @@
       "busy",
       "computer"
     ],
-    "file": "public/stickers/pro/catpuss-typing.png"
+    "file": "public/stickers/vip/catpuss-typing.png"
   },
   {
     "id": "catpuss-love",
@@ -33,7 +33,7 @@
       "cute",
       "thanks"
     ],
-    "file": "public/stickers/pro/catpuss-love.png"
+    "file": "public/stickers/vip/catpuss-love.png"
   },
   {
     "id": "catpuss-heart-eyes",
@@ -44,7 +44,7 @@
       "adore",
       "heart eyes"
     ],
-    "file": "public/stickers/pro/catpuss-heart-eyes.png"
+    "file": "public/stickers/vip/catpuss-heart-eyes.png"
   },
   {
     "id": "catpuss-laugh",
@@ -56,7 +56,7 @@
       "joy",
       "haha"
     ],
-    "file": "public/stickers/pro/catpuss-laugh.png"
+    "file": "public/stickers/vip/catpuss-laugh.png"
   },
   {
     "id": "catpuss-cry",
@@ -67,7 +67,7 @@
       "sad",
       "feels"
     ],
-    "file": "public/stickers/pro/catpuss-cry.png"
+    "file": "public/stickers/vip/catpuss-cry.png"
   },
   {
     "id": "catpuss-sad",
@@ -79,7 +79,7 @@
       "feels",
       "rain"
     ],
-    "file": "public/stickers/pro/catpuss-sad.png"
+    "file": "public/stickers/vip/catpuss-sad.png"
   },
   {
     "id": "catpuss-angry",
@@ -90,7 +90,7 @@
       "annoyed",
       "hmph"
     ],
-    "file": "public/stickers/pro/catpuss-angry.png"
+    "file": "public/stickers/vip/catpuss-angry.png"
   },
   {
     "id": "catpuss-rage",
@@ -101,7 +101,7 @@
       "rage",
       "fire"
     ],
-    "file": "public/stickers/pro/catpuss-rage.png"
+    "file": "public/stickers/vip/catpuss-rage.png"
   },
   {
     "id": "catpuss-shock",
@@ -112,7 +112,7 @@
       "wow",
       "gasp"
     ],
-    "file": "public/stickers/pro/catpuss-shock.png"
+    "file": "public/stickers/vip/catpuss-shock.png"
   },
   {
     "id": "catpuss-think",
@@ -123,7 +123,7 @@
       "wonder",
       "pondering"
     ],
-    "file": "public/stickers/pro/catpuss-think.png"
+    "file": "public/stickers/vip/catpuss-think.png"
   },
   {
     "id": "catpuss-smart",
@@ -135,7 +135,7 @@
       "nerd",
       "glasses"
     ],
-    "file": "public/stickers/pro/catpuss-smart.png"
+    "file": "public/stickers/vip/catpuss-smart.png"
   },
   {
     "id": "catpuss-smug",
@@ -145,7 +145,7 @@
       "knowing",
       "sly"
     ],
-    "file": "public/stickers/pro/catpuss-smug.png"
+    "file": "public/stickers/vip/catpuss-smug.png"
   },
   {
     "id": "catpuss-cool",
@@ -156,7 +156,7 @@
       "swag",
       "confident"
     ],
-    "file": "public/stickers/pro/catpuss-cool.png"
+    "file": "public/stickers/vip/catpuss-cool.png"
   },
   {
     "id": "catpuss-strong",
@@ -168,7 +168,7 @@
       "workout",
       "lift"
     ],
-    "file": "public/stickers/pro/catpuss-strong.png"
+    "file": "public/stickers/vip/catpuss-strong.png"
   },
   {
     "id": "catpuss-shy",
@@ -179,7 +179,7 @@
       "embarrassed",
       "nervous"
     ],
-    "file": "public/stickers/pro/catpuss-shy.png"
+    "file": "public/stickers/vip/catpuss-shy.png"
   },
   {
     "id": "catpuss-sleepy",
@@ -191,7 +191,7 @@
       "night",
       "bored"
     ],
-    "file": "public/stickers/pro/catpuss-sleepy.png"
+    "file": "public/stickers/vip/catpuss-sleepy.png"
   },
   {
     "id": "catpuss-party",
@@ -202,7 +202,7 @@
       "confetti",
       "celebrate"
     ],
-    "file": "public/stickers/pro/catpuss-party.png"
+    "file": "public/stickers/vip/catpuss-party.png"
   },
   {
     "id": "catpuss-confused",
@@ -213,7 +213,7 @@
       "question",
       "dizzy"
     ],
-    "file": "public/stickers/pro/catpuss-confused.png"
+    "file": "public/stickers/vip/catpuss-confused.png"
   },
   {
     "id": "catpuss-blank",
@@ -224,7 +224,7 @@
       "blank",
       "unimpressed"
     ],
-    "file": "public/stickers/pro/catpuss-blank.png"
+    "file": "public/stickers/vip/catpuss-blank.png"
   },
   {
     "id": "catpuss-silly",
@@ -235,7 +235,7 @@
       "playful",
       "goofy"
     ],
-    "file": "public/stickers/pro/catpuss-silly.png"
+    "file": "public/stickers/vip/catpuss-silly.png"
   },
   {
     "id": "catpuss-thumbs-up",
@@ -247,7 +247,7 @@
       "like",
       "approve"
     ],
-    "file": "public/stickers/pro/catpuss-thumbs-up.png"
+    "file": "public/stickers/vip/catpuss-thumbs-up.png"
   },
   {
     "id": "catpuss-wave",
@@ -258,7 +258,7 @@
       "bye",
       "wave"
     ],
-    "file": "public/stickers/pro/catpuss-wave.png"
+    "file": "public/stickers/vip/catpuss-wave.png"
   },
   {
     "id": "catpuss-please",
@@ -269,7 +269,7 @@
       "puppy eyes",
       "pretty please"
     ],
-    "file": "public/stickers/pro/catpuss-please.png"
+    "file": "public/stickers/vip/catpuss-please.png"
   },
   {
     "id": "catpuss-peek",
@@ -281,6 +281,6 @@
       "observer",
       "quiet"
     ],
-    "file": "public/stickers/pro/catpuss-peek.png"
+    "file": "public/stickers/vip/catpuss-peek.png"
   }
 ]

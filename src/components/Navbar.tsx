@@ -33,12 +33,12 @@ import {
 import {selectJoinedUserChatRoomsState} from "@/redux/chatRoom/chatRoomSelectors";
 import {BUG_REPORTS_CHATROOM_NAME, isBugReportsChatRoomName} from "@/lib/chatRooms";
 import {toast} from "sonner";
-import {useProDialog} from '@/features/pro/useProDialog';
+import {useVipDialog} from '@/features/vip/useVipDialog';
 import {useJoinRandomRoom} from '@/features/chatroom/hooks/useJoinRandomRoom';
 import {useIsMobile} from '@/lib/hooks/useIsMobile';
 
 // Keep the branded button independent of the navbar's generic .text-white recoloring.
-const PRO_NAV_BUTTON_CLASS_NAME = 'relative isolate overflow-hidden rounded-full border border-white/15 bg-clip-padding bg-linear-to-r from-[#4039bd] to-[#4267df] font-semibold text-[#fff] shadow-none [text-shadow:none] hover:from-[#3730a3] hover:to-[#3658c7] hover:text-[#fff] focus-visible:ring-blue-300 dark:border-blue-300/35 dark:from-[#454bc4] dark:to-[#315fd3] dark:text-[#fff] dark:hover:from-[#4b53d0] dark:hover:to-[#3868df] dark:hover:text-[#fff]';
+const VIP_NAV_BUTTON_CLASS_NAME = 'relative isolate overflow-hidden rounded-full border border-white/15 bg-clip-padding bg-linear-to-r from-[#4039bd] to-[#4267df] font-semibold text-[#fff] shadow-none [text-shadow:none] hover:from-[#3730a3] hover:to-[#3658c7] hover:text-[#fff] focus-visible:ring-blue-300 dark:border-blue-300/35 dark:from-[#454bc4] dark:to-[#315fd3] dark:text-[#fff] dark:hover:from-[#4b53d0] dark:hover:to-[#3868df] dark:hover:text-[#fff]';
 
 export function Navbar() {
     const {open, close} = useDialog();
@@ -53,7 +53,7 @@ export function Navbar() {
     const isMobile = useIsMobile();
     const logoSrc = useThemedLogo();
 
-    const openPro = useProDialog();
+    const openVip = useVipDialog();
     const {handleJoinRandomRoom, joinRandomRoomIsLoading} = useJoinRandomRoom();
 
     const handleOpenSettings = () => open(
@@ -91,7 +91,7 @@ export function Navbar() {
     const handleBugReportsClick = async () => {
         try {
             const joinedBugReportsRoom = userChatRooms.find(room =>
-                !room.proOnly && isBugReportsChatRoomName(room.chatRoomName)
+                !room.vipOnly && isBugReportsChatRoomName(room.chatRoomName)
             );
 
             if (joinedBugReportsRoom) {
@@ -101,7 +101,7 @@ export function Navbar() {
             }
 
             const rooms = await dispatch(searchChatRoomsByNameThunk(BUG_REPORTS_CHATROOM_NAME)).unwrap();
-            const bugReportsRoom = rooms.find(room => !room.proOnly && isBugReportsChatRoomName(room.roomName));
+            const bugReportsRoom = rooms.find(room => !room.vipOnly && isBugReportsChatRoomName(room.roomName));
 
             if (!bugReportsRoom) {
                 toast.error("Bug Reports room is not available yet.");
@@ -248,7 +248,7 @@ export function Navbar() {
                 <div className="col-start-3 row-start-1 flex min-w-0 items-center justify-self-end">
                     {user && (
                         <div className="flex shrink-0 items-center gap-1 lg:gap-2">
-                            {!isStaffOrHigher && <Button onClick={openPro} aria-label="Explore allchat VIP" className={`${PRO_NAV_BUTTON_CLASS_NAME} hidden h-9 shrink-0 gap-2 px-3 lg:inline-flex`}><Diamond className="h-4 w-4"/><span><span className="hidden xl:inline">allchat </span>VIP</span></Button>}
+                            {!isStaffOrHigher && <Button onClick={openVip} aria-label="Explore allchat VIP" className={`${VIP_NAV_BUTTON_CLASS_NAME} hidden h-9 shrink-0 gap-2 px-3 lg:inline-flex`}><Diamond className="h-4 w-4"/><span><span className="hidden xl:inline">allchat </span>VIP</span></Button>}
                             <div className="hidden shrink-0 lg:flex items-center gap-2">
                                 {!isStaffOrHigher && (
                                     <Button
@@ -331,7 +331,7 @@ export function Navbar() {
                                     )}
                                     {!isStaffOrHigher && (
                                         <DropdownMenuItem className="cursor-pointer gap-2 lg:hidden"
-                                                          onSelect={() => afterMenuCloses(openPro)}>
+                                                          onSelect={() => afterMenuCloses(openVip)}>
                                             <Diamond className="h-4 w-4"/>
                                             allchat VIP
                                         </DropdownMenuItem>

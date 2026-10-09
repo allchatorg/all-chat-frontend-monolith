@@ -7,7 +7,7 @@ import {useRoomSearch} from "@/features/chatroom/hooks/useRoomSearch";
 import SearchRoomsResults from "@/features/chatroom/components/SearchRoomsResults";
 import {useIsMobile} from "@/lib/hooks/useIsMobile";
 import {useDialog} from "@/components/providers/DialogProvider";
-import {useProDialog} from "@/features/pro/useProDialog";
+import {useVipDialog} from "@/features/vip/useVipDialog";
 import SearchRoomsMobile, {roomSearchDialogOptions} from "@/features/chatroom/components/SearchRoomsMobile";
 import {Button} from "@/components/ui/button";
 
@@ -30,23 +30,23 @@ const SearchRooms: React.FC = () => {
         handleCreateChatRoom,
         clearSearch,
         showCreateOption,
-        proOnly, setProOnly, canCreate, proModeLocked, isCreating, creationError,
-        proFilter, setProFilter,
+        vipOnly, setVipOnly, canCreate, vipModeLocked, isCreating, creationError,
+        vipFilter, setVipFilter,
         validationResult,
         lastSearchedTerm,
         joinedRoomIds,
         user
     } = useRoomSearch();
 
-    const openPro = useProDialog({onBack: () => {close(); setOpenPopover(true);}});
+    const openVip = useVipDialog({onBack: () => {close(); setOpenPopover(true);}});
     const openUpgrade = () => {
         upgradingRef.current = true;
         setOpenPopover(false);
-        openPro();
+        openVip();
     };
-    const handleProOnlyChange = (checked: boolean) => {
-        if (checked && !user?.proActive) openUpgrade();
-        else setProOnly(checked);
+    const handleVipOnlyChange = (checked: boolean) => {
+        if (checked && !user?.vipActive) openUpgrade();
+        else setVipOnly(checked);
     };
 
     useEffect(() => {
@@ -58,7 +58,7 @@ const SearchRooms: React.FC = () => {
     };
 
     const handleDesktopCreate = async () => {
-        if (proOnly && !user?.proActive) {
+        if (vipOnly && !user?.vipActive) {
             openUpgrade();
             return;
         }
@@ -168,9 +168,9 @@ const SearchRooms: React.FC = () => {
                             user={user}
                             onJoin={handleDesktopJoin}
                             onCreate={() => void handleDesktopCreate()}
-                            proOnly={proOnly} onProOnlyChange={handleProOnlyChange} canCreate={canCreate}
-                            proModeLocked={proModeLocked} isCreating={isCreating} creationError={creationError}
-                            proFilter={proFilter} onProFilterChange={setProFilter}
+                            vipOnly={vipOnly} onVipOnlyChange={handleVipOnlyChange} canCreate={canCreate}
+                            vipModeLocked={vipModeLocked} isCreating={isCreating} creationError={creationError}
+                            vipFilter={vipFilter} onVipFilterChange={setVipFilter}
                         />
                     </PopoverContent>
                 </Popover>

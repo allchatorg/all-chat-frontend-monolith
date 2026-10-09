@@ -313,7 +313,7 @@ export default function Page() {
                                     userId={reportedMessage.senderId} username={reportedMessage.senderUsername}
                                     usernameFont={reportedMessage.senderUsernameFont} messageFont={reportedMessage.senderMessageFont}
                                     fontRevision={reportedMessage.senderFontRevision}
-                                    proBadgeVisible={reportedMessage.senderProBadgeVisible} proBadgeRevision={reportedMessage.senderProBadgeRevision}/></>}
+                                    vipBadgeVisible={reportedMessage.senderVipBadgeVisible} vipBadgeRevision={reportedMessage.senderVipBadgeRevision}/></>}
                             </span>
                             <IdVerificationStatusBadge status={reportedUserIdStatus}/>
                         </div>

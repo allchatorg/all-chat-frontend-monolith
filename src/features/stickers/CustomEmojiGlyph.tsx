@@ -1,7 +1,7 @@
 import Image from 'next/image';
 import {getSticker} from './catalog';
 
-/** Display access is public; only sending an allowlisted custom emoji requires Pro. */
+/** Display access is public; only sending an allowlisted custom emoji requires VIP. */
 export function CustomEmojiGlyph({id}: {id: string}) {
     const emoji = getSticker(id);
     return (

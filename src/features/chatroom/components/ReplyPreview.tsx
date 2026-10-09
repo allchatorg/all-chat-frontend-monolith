@@ -6,7 +6,7 @@ import {ReplyInfo} from "@/models/message";
 import {Paperclip, Sticker} from "lucide-react";
 import {cn} from "@/lib/utils";
 import {chatPreviewText} from "@/features/chatroom/utils/messageMarkers";
-import {useProDialog} from "@/features/pro/useProDialog";
+import {useVipDialog} from "@/features/vip/useVipDialog";
 import {getStickerLabel} from "@/features/stickers/catalog";
 import {useRoleAccess} from "@/lib/hooks/useRoleAccess";
 
@@ -19,7 +19,7 @@ interface ReplyPreviewProps {
 /**
  * Discord-style compact preview of the message being replied to, rendered above
  * the reply bubble with a curved connector line. The username and message
- * preview jump to the original, while the Pro badge opens Pro information.
+ * preview jump to the original, while the VIP badge opens VIP information.
  * When the original message was removed and the viewer may not see its content
  * (content === null), a
  * "Message removed" placeholder is shown and the jump action is disabled.
@@ -34,7 +34,7 @@ const ReplyPreview: React.FC<ReplyPreviewProps> = ({replyTo, isOwn = false, onJu
         messageFont: replyTo.senderMessageFont,
         fontRevision: replyTo.senderFontRevision,
     });
-    const openPro = useProDialog();
+    const openVip = useVipDialog();
     const {isStaffMember} = useRoleAccess();
     const removed = replyTo.content === null || Boolean(replyTo.deleted && replyTo.stickerId && !isStaffMember());
     const clickable = !removed && !!onJump;
@@ -73,13 +73,13 @@ const ReplyPreview: React.FC<ReplyPreviewProps> = ({replyTo, isOwn = false, onJu
                         <UserName
                             userId={replyTo.senderId}
                             username={replyTo.senderUsername}
-                            proBadgeVisible={replyTo.senderProBadgeVisible}
-                            proBadgeRevision={replyTo.senderProBadgeRevision}
+                            vipBadgeVisible={replyTo.senderVipBadgeVisible}
+                            vipBadgeRevision={replyTo.senderVipBadgeRevision}
                             usernameFont={replyTo.senderUsernameFont}
                             messageFont={replyTo.senderMessageFont}
                             fontRevision={replyTo.senderFontRevision}
                             className="max-w-[50%] font-medium dark:text-slate-200"
-                            onProClick={openPro}
+                            onVipClick={openVip}
                             renderUsername={username => (
                                 <button
                                     type="button"

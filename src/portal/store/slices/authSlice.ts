@@ -17,8 +17,8 @@ export interface AuthUser extends Partial<FontSnapshot> {
     lastName: string;
     email: string;
     role: Role;
-    proBadgeVisible?: boolean;
-    proBadgeRevision?: number;
+    vipBadgeVisible?: boolean;
+    vipBadgeRevision?: number;
 }
 
 const chatUser = (state: RootState) => (state as any)?.user?.user ?? null;
@@ -43,8 +43,8 @@ const toAuthUser = (u: any): AuthUser | null => {
         lastName: '',
         email: u.email ?? '',
         role: isAdminLevel(u.role) ? Role.ADMIN : Role.USER,
-        proBadgeVisible: u.proBadgeVisible,
-        proBadgeRevision: u.proBadgeRevision,
+        vipBadgeVisible: u.vipBadgeVisible,
+        vipBadgeRevision: u.vipBadgeRevision,
         usernameFont: u.usernameFont,
         messageFont: u.messageFont,
         fontRevision: u.fontRevision,

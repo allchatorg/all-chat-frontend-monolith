@@ -1,4 +1,4 @@
-import {ProReportingSynchronization} from '@ads/models/pro-statistics';
+import {VipReportingSynchronization} from '@ads/models/vip-statistics';
 
 export const formatUsd = (value: number | null | undefined) =>
     typeof value === 'number' && Number.isFinite(value)
@@ -15,7 +15,7 @@ export const formatSynchronizationTime = (value: string) =>
 export const formatReportingDay = (value: string) =>
     new Date(`${value}T12:00:00`).toLocaleDateString('en-US', {month: 'short', day: 'numeric'});
 
-export function reportingStatusMessage(synchronization?: ProReportingSynchronization): string | null {
+export function reportingStatusMessage(synchronization?: VipReportingSynchronization): string | null {
     switch (synchronization?.status) {
         case 'CURRENT': return null;
         case 'CATCHING_UP': return 'Subscription payments are syncing. Revenue and payment counts may be incomplete.';

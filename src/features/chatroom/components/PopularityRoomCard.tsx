@@ -1,4 +1,4 @@
-import {RoomProBadge} from "@/components/RoomProBadge";
+import {RoomVipBadge} from "@/components/RoomVipBadge";
 import React from "react";
 import {RoomPopulation} from "@/models/roomPopulation";
 import {Archive, MessageSquare, UserCheck} from "lucide-react";
@@ -54,7 +54,7 @@ const PopularityRoomCard: React.FC<RoomCardProps> = ({
                 title={room.roomName}
             >
                 <span className="min-w-0 truncate">{room.roomName}</span>
-                <RoomProBadge proOnly={room.proOnly}/>
+                <RoomVipBadge vipOnly={room.vipOnly}/>
             </div>
 
             {room.archived && (

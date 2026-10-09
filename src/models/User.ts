@@ -7,10 +7,10 @@ import {IdVerificationStatus} from "@/models/IdVerificationStatus";
 export interface User extends Partial<FontSnapshot> {
     id: number;
     username: string;
-    proActive?: boolean;
-    showProBadge?: boolean;
-    proBadgeVisible?: boolean;
-    proBadgeRevision?: number;
+    vipActive?: boolean;
+    showVipBadge?: boolean;
+    vipBadgeVisible?: boolean;
+    vipBadgeRevision?: number;
     email?: string | null;
     phoneNumber?: string | null;
     phoneNumberVerificationDate?: string;
@@ -32,4 +32,4 @@ export interface User extends Partial<FontSnapshot> {
     appliedForModerator?: boolean;
 }
 
-export type UserMinimal = Pick<User, "id" | "username" | "proBadgeVisible" | "proBadgeRevision" | "usernameFont" | "messageFont" | "fontRevision">;
+export type UserMinimal = Pick<User, "id" | "username" | "vipBadgeVisible" | "vipBadgeRevision" | "usernameFont" | "messageFont" | "fontRevision">;

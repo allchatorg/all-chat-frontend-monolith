@@ -15,7 +15,7 @@ import {selectUser} from '@/redux/user/userSelectors';
 import MessageReactionsPanel from '@/features/chatroom/components/MessageReactionsPanel';
 import {ReactionGlyph} from '@/features/stickers/ReactionGlyph';
 import {getReactionLabel, isCustomReactionToken} from '@/features/stickers/catalog';
-import {useProDialog} from '@/features/pro/useProDialog';
+import {useVipDialog} from '@/features/vip/useVipDialog';
 import {toast} from 'sonner';
 
 interface ReactionButtonProps {
@@ -26,10 +26,10 @@ interface ReactionButtonProps {
 }
 
 export const ReactionButton: React.FC<ReactionButtonProps> = ({reaction, message, isDisplayOnly = false, disabled = false}) => {
-    const participationDisabled = useRoomParticipation(message.chatRoomId, message.chatRoomProOnly);
+    const participationDisabled = useRoomParticipation(message.chatRoomId, message.chatRoomVipOnly);
     const dispatch = useDispatch<AppDispatch>();
     const {open} = useDialog();
-    const openPro = useProDialog();
+    const openVip = useVipDialog();
     const user = useSelector(selectUser);
     const messageReactionsState = useSelector(selectMessageReactionsState);
     const [fetchReactionDetails, reactionDetailsLoading] = useThunk(fetchMessageReactionDetailsThunk);
@@ -67,9 +67,9 @@ export const ReactionButton: React.FC<ReactionButtonProps> = ({reaction, message
     const handleReactionClick = async () => {
         if (participationDisabled) {showDetails(); return;}
         if (pendingRef.current) return;
-        if (!reactedByCurrentUser && isCustomReactionToken(reaction.emoji) && !user?.proActive) {
+        if (!reactedByCurrentUser && isCustomReactionToken(reaction.emoji) && !user?.vipActive) {
             handleHoverEnd();
-            openPro();
+            openVip();
             return;
         }
         pendingRef.current = true;
@@ -104,7 +104,7 @@ export const ReactionButton: React.FC<ReactionButtonProps> = ({reaction, message
                 <p className="flex items-center gap-1.5"><ReactionGlyph emoji={reaction.emoji}/><span className="font-semibold">{label}</span></p>
                 {hasReactionDetails && !reactionDetailsLoading && selectedReaction?.users?.length ? <div className="text-sm">
                     Reacted by: {selectedReaction.users.slice(0, 3).map((reactor, index) => <span key={reactor.id}>
-                        {index > 0 && ', '}<ChatUserName userId={reactor.id} username={reactor.username} proBadgeVisible={reactor.proBadgeVisible} proBadgeRevision={reactor.proBadgeRevision} usernameFont={reactor.usernameFont} messageFont={reactor.messageFont} fontRevision={reactor.fontRevision}/>
+                        {index > 0 && ', '}<ChatUserName userId={reactor.id} username={reactor.username} vipBadgeVisible={reactor.vipBadgeVisible} vipBadgeRevision={reactor.vipBadgeRevision} usernameFont={reactor.usernameFont} messageFont={reactor.messageFont} fontRevision={reactor.fontRevision}/>
                     </span>)}{(reaction.usersCount ?? 0) > 3 && ` and ${(reaction.usersCount ?? 0) - 3} more`}
                 </div> : <span className="text-xs text-muted-foreground">{reactionDetailsLoading ? 'Loading reactions…' : `${reaction.usersCount ?? 0} reactions`}</span>}
                 <button type="button" onClick={showDetails} className="self-start text-xs underline underline-offset-2">View everyone who reacted</button>

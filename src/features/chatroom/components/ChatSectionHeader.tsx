@@ -1,7 +1,7 @@
 "use client";
 
 import {useRoomParticipation} from "@/lib/hooks/useRoomParticipation";
-import {RoomProBadge} from "@/components/RoomProBadge";
+import {RoomVipBadge} from "@/components/RoomVipBadge";
 import React, {useState} from "react";
 import {Button} from "@/components/ui/button";
 import {CardTitle} from "@/components/ui/card";
@@ -63,7 +63,7 @@ interface ChatSectionHeaderProps {
     chatRoomId?: number;
     chatRoomName: string;
     isArchived?: boolean;
-    proOnly?: boolean;
+    vipOnly?: boolean;
     totalMessages: number;
     noiseLevel: ChatRoomNoiseLevelEnum;
     popularitySidebarActive: boolean;
@@ -90,7 +90,7 @@ const ChatSectionHeader: React.FC<ChatSectionHeaderProps> = ({
                                                                  chatRoomId,
                                                                  chatRoomName,
                                                                  isArchived = false,
-                                                                 proOnly = false,
+                                                                 vipOnly = false,
                                                                  totalMessages,
                                                                  noiseLevel,
                                                                  popularitySidebarActive,
@@ -120,19 +120,19 @@ const ChatSectionHeader: React.FC<ChatSectionHeaderProps> = ({
         setIsExpanded(!isExpanded);
     };
 
-    const participationDisabled = useRoomParticipation(chatRoomId, proOnly);
+    const participationDisabled = useRoomParticipation(chatRoomId, vipOnly);
     const actionLoading = archiveChatRoomLoading || unarchiveChatRoomLoading;
     const normalizedChatRoomName = chatRoomName.trim().toLowerCase();
     const canManageArchive = isAdmin()
         && typeof chatRoomId === "number"
-        && (proOnly || !ARCHIVE_HIDDEN_ROOM_NAMES.has(normalizedChatRoomName));
+        && (vipOnly || !ARCHIVE_HIDDEN_ROOM_NAMES.has(normalizedChatRoomName));
     // Any signed-in account may promote a public, non-archived, non-special
     // room; the backend also rejects private/staff rooms and unclaimed users.
     // Staff are excluded from the paid funnel (backend returns 403 as well)
     const canPromoteRoom = !participationDisabled && !isStaffMember()
         && !isArchived
         && typeof chatRoomId === "number"
-        && (proOnly || !ARCHIVE_HIDDEN_ROOM_NAMES.has(normalizedChatRoomName))
+        && (vipOnly || !ARCHIVE_HIDDEN_ROOM_NAMES.has(normalizedChatRoomName))
         && currentRole !== Role.GUEST;
     const promoteRoomButtonLabel = "Promote Room";
     const topReactedButtonLabel = `${topReactedSidebarActive ? "Hide" : "Show"} Top Reacted`;
@@ -194,7 +194,7 @@ const ChatSectionHeader: React.FC<ChatSectionHeaderProps> = ({
         }
 
         open(
-            <PromoteRoomModal chatRoomId={chatRoomId} chatRoomName={chatRoomName} proOnly={proOnly}/>,
+            <PromoteRoomModal chatRoomId={chatRoomId} chatRoomName={chatRoomName} vipOnly={vipOnly}/>,
             {className: 'w-[95vw] max-w-lg'}
         );
     };
@@ -331,7 +331,7 @@ const ChatSectionHeader: React.FC<ChatSectionHeaderProps> = ({
                 <div className={`w-3 h-3 shrink-0 rounded-full ${noiseIndicator.color}`}
                      title={noiseIndicator.title}></div>
                 <span className="min-w-0 truncate" title={chatRoomName}>{chatRoomName}</span>
-                <RoomProBadge proOnly={proOnly}/>
+                <RoomVipBadge vipOnly={vipOnly}/>
                 <div className="flex shrink-0 items-center gap-1.5 ml-2">
                     <MessageSquare className="h-4 w-4 text-muted-foreground"/>
                     <span className="text-sm font-normal text-muted-foreground">
@@ -402,7 +402,7 @@ const ChatSectionHeader: React.FC<ChatSectionHeaderProps> = ({
                         <div className={`w-3 h-3 shrink-0 rounded-full ${noiseIndicator.color}`}
                              title={noiseIndicator.title}></div>
                         <span className="min-w-0 flex-1 truncate" title={chatRoomName}>{chatRoomName}</span>
-                        <RoomProBadge proOnly={proOnly}/>
+                        <RoomVipBadge vipOnly={vipOnly}/>
                         <div className="flex shrink-0 items-center gap-1">
                             <MessageSquare className="h-3.5 w-3.5 text-muted-foreground"/>
                             <span className="text-sm font-normal text-muted-foreground whitespace-nowrap">

@@ -73,7 +73,7 @@ const ModView: React.FC<ModViewProps> = ({
     return (
         <div className="glass-panel flex h-full min-h-0 w-full flex-col rounded-xl border">
             {showHeader && <div className="flex shrink-0 items-center justify-between border-b p-4">
-                <h2 className="text-lg font-semibold text-card-foreground"><ChatUserName userId={user?.id} username={user?.username ?? ""} proBadgeVisible={user?.proBadgeVisible} proBadgeRevision={user?.proBadgeRevision} usernameFont={user?.usernameFont} messageFont={user?.messageFont} fontRevision={user?.fontRevision}/></h2>
+                <h2 className="text-lg font-semibold text-card-foreground"><ChatUserName userId={user?.id} username={user?.username ?? ""} vipBadgeVisible={user?.vipBadgeVisible} vipBadgeRevision={user?.vipBadgeRevision} usernameFont={user?.usernameFont} messageFont={user?.messageFont} fontRevision={user?.fontRevision}/></h2>
                 <Button
                     variant="ghost"
                     size="icon"
@@ -167,8 +167,8 @@ const ModView: React.FC<ModViewProps> = ({
             <div className="glass-surface flex shrink-0 flex-wrap items-center gap-x-4 gap-y-2 rounded-b-lg border-t px-4 py-3">
                 <div className="flex flex-wrap items-center gap-2">
                     <span className="text-sm text-muted-foreground">Membership:</span>
-                    <StaffMembershipBadge proActive={membershipError ? undefined : user?.proActive} role={user?.role} loading={membershipLoading}/>
-                    {!membershipLoading && userId && (membershipError || typeof user?.proActive !== "boolean") && (
+                    <StaffMembershipBadge vipActive={membershipError ? undefined : user?.vipActive} role={user?.role} loading={membershipLoading}/>
+                    {!membershipLoading && userId && (membershipError || typeof user?.vipActive !== "boolean") && (
                         <Button variant="ghost" size="sm" onClick={() => void refreshMembership()}>Retry</Button>
                     )}
                 </div>

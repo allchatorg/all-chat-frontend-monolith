@@ -237,8 +237,8 @@ export function AppSidebar({...props}: React.ComponentProps<typeof Sidebar>) {
                 <NavUser user={{
                     id: Number(user.id) || undefined,
                     name: user.name,
-                    proBadgeVisible: user.proBadgeVisible,
-                    proBadgeRevision: user.proBadgeRevision,
+                    vipBadgeVisible: user.vipBadgeVisible,
+                    vipBadgeRevision: user.vipBadgeRevision,
                     usernameFont: user.usernameFont,
                     messageFont: user.messageFont,
                     fontRevision: user.fontRevision,

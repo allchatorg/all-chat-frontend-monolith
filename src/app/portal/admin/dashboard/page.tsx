@@ -2,7 +2,7 @@
 
 import {SiteHeader} from "@ads/components/site-header"
 import {AdminSectionCards} from "@ads/components/admin-section-cards"
-import {AdminProStatistics} from "@ads/components/admin-pro-statistics"
+import {AdminVipStatistics} from "@ads/components/admin-vip-statistics"
 import {ChartAreaPurchasedAds} from "@ads/components/chart-area-purchased-ads"
 import {ChartBarRevenue} from "@ads/components/chart-bar-revenue"
 import {ChartPromotedRevenue} from "@ads/components/chart-promoted-revenue"
@@ -29,7 +29,7 @@ export default function AdminDashboardPage() {
                 <div className="@container/main flex flex-1 flex-col gap-2">
                     <div className="flex flex-col gap-4 py-4 md:gap-6 md:py-6">
                         <AdminSectionCards/>
-                        <AdminProStatistics/>
+                        <AdminVipStatistics/>
                         <div className="px-4 lg:px-6">
                             <ChartAreaPurchasedAds/>
                         </div>

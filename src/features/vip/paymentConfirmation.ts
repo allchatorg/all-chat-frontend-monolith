@@ -1,7 +1,7 @@
 import {getStripe, withStripeAuthentication} from '@/components/billing/stripe';
-import type {ProPaymentResult} from './types';
+import type {VipPaymentResult} from './types';
 
-export async function confirmProPayment(result: ProPaymentResult, paymentMethodId?: string) {
+export async function confirmVipPayment(result: VipPaymentResult, paymentMethodId?: string) {
     if (!result.clientSecret || ['succeeded', 'paid', 'processing'].includes(result.paymentStatus ?? '')) return result.paymentStatus;
     const stripe = await getStripe();
     if (!stripe) throw new Error('Payments are temporarily unavailable. Please try again later.');

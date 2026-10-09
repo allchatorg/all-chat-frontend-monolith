@@ -7,7 +7,7 @@ import {Apple, Car, Check, Clock, Diamond, Flag, Hash, Leaf, Lightbulb, Loader2,
 import {toast} from 'sonner';
 import {Button} from '@/components/ui/button';
 import {cn} from '@/lib/utils';
-import {PRO_REACTIONS, toCustomReactionToken} from './catalog';
+import {VIP_REACTIONS, toCustomReactionToken} from './catalog';
 import {getEmojiShortcode} from './emojiShortcodes';
 import type {EmojiSelection} from './emojiTypes';
 
@@ -39,7 +39,7 @@ interface EmojiSection {
 
 interface EmojiBrowserProps {
     mode: 'reaction' | 'message';
-    proActive: boolean;
+    vipActive: boolean;
     selectedReactionTokens?: ReadonlySet<string>;
     pending?: boolean;
     onSelect: (selection: EmojiSelection) => void | Promise<void>;
@@ -52,7 +52,7 @@ const recentStorageKey = 'allchat.emoji-browser.recents.v1';
 const toneStorageKey = 'allchat.emoji-browser.skin-tone.v1';
 const categoryDetails: Record<string, {name: string; Icon: typeof Smile}> = {
     recent: {name: 'Recent', Icon: Clock},
-    pro: {name: 'allchat VIP', Icon: Sparkles},
+    vip: {name: 'allchat VIP', Icon: Sparkles},
     people: {name: 'Smileys & people', Icon: Smile},
     nature: {name: 'Animals & nature', Icon: Leaf},
     foods: {name: 'Food & drink', Icon: Apple},
@@ -70,7 +70,7 @@ const skinTones = [
     {name: 'Medium-dark', native: '👋🏾'},
     {name: 'Dark', native: '👋🏿'},
 ];
-const customById = new Map(PRO_REACTIONS.map(emoji => [emoji.id, emoji]));
+const customById = new Map(VIP_REACTIONS.map(emoji => [emoji.id, emoji]));
 const aliasesById = new Map<string, string[]>();
 for (const [alias, id] of Object.entries(emojiData.aliases)) {
     aliasesById.set(id, [...(aliasesById.get(id) ?? []), alias]);
@@ -80,8 +80,8 @@ const searchableUnicode = new Map(Object.values(emojiData.emojis).map(emoji => [
         ...(aliasesById.get(emoji.id) ?? []).map(alias => `:${alias}:`),
         ...emoji.skins.map(skin => getEmojiShortcode({kind: 'unicode', id: emoji.id, native: skin.native})),
         ...emoji.skins.map(skin => skin.native)].join(' ').toLocaleLowerCase().replaceAll('_', ' ')]));
-const searchableCustom = new Map(PRO_REACTIONS.map(emoji => [emoji.id,
-    ['allchat VIP', 'pro', emoji.id, getEmojiShortcode({kind: 'custom', id: emoji.id}), emoji.name, ...emoji.tags].join(' ').toLocaleLowerCase().replaceAll('_', ' ')]));
+const searchableCustom = new Map(VIP_REACTIONS.map(emoji => [emoji.id,
+    ['allchat VIP', emoji.id, getEmojiShortcode({kind: 'custom', id: emoji.id}), emoji.name, ...emoji.tags].join(' ').toLocaleLowerCase().replaceAll('_', ' ')]));
 
 function selectionKey(selection: EmojiSelection): string {
     return selection.kind === 'custom' ? `custom:${selection.id}` : `unicode:${selection.id}:${selection.native}`;
@@ -119,7 +119,7 @@ function readRecents(): EmojiSelection[] {
     }
 }
 
-const customEntries = PRO_REACTIONS.map(emoji => toEntry({kind: 'custom', id: emoji.id})!);
+const customEntries = VIP_REACTIONS.map(emoji => toEntry({kind: 'custom', id: emoji.id})!);
 
 interface EmojiGridProps {
     section: EmojiSection;
@@ -127,7 +127,7 @@ interface EmojiGridProps {
     focusedKey?: string;
     busy: boolean;
     mode: 'reaction' | 'message';
-    proActive: boolean;
+    vipActive: boolean;
     selectedReactionTokens?: ReadonlySet<string>;
     buttonRefs: RefObject<Map<string, HTMLButtonElement>>;
     onPreview: (entry: EmojiEntry) => void;
@@ -137,7 +137,7 @@ interface EmojiGridProps {
 }
 
 // Hover previews do not need to rerender the entire Unicode collection.
-const EmojiGrid = memo(function EmojiGrid({section, headingId, focusedKey, busy, mode, proActive, selectedReactionTokens,
+const EmojiGrid = memo(function EmojiGrid({section, headingId, focusedKey, busy, mode, vipActive, selectedReactionTokens,
     buttonRefs, onPreview, onFocus, onNavigate, onSelect}: EmojiGridProps) {
     const focusKey = focusedKey && section.entries.some(entry => entry.key === focusedKey) ? focusedKey : section.entries[0]?.key;
     return <div role="grid" aria-labelledby={headingId} aria-colcount={columns} aria-rowcount={Math.ceil(section.entries.length / columns)}>
@@ -146,7 +146,7 @@ const EmojiGrid = memo(function EmojiGrid({section, headingId, focusedKey, busy,
                 const index = row * columns + column;
                 const custom = entry.selection.kind === 'custom' ? customById.get(entry.selection.id) : undefined;
                 const selected = mode === 'reaction' && selectedReactionTokens?.has(reactionToken(entry.selection)) === true;
-                const locked = Boolean(custom) && !proActive && !selected;
+                const locked = Boolean(custom) && !vipActive && !selected;
                 const label = selected ? `Remove ${entry.name} reaction` : locked ? `${entry.name} emoji, unlock with allchat VIP`
                     : mode === 'reaction' ? `React with ${entry.name}` : `Insert ${entry.name} emoji`;
                 return <div key={entry.key} role="gridcell" aria-selected={mode === 'reaction' ? selected : undefined}>
@@ -169,7 +169,7 @@ const EmojiGrid = memo(function EmojiGrid({section, headingId, focusedKey, busy,
 });
 
 /** Both composer and reaction pickers use the same native and paid emoji collection. */
-export function EmojiBrowser({mode, proActive, selectedReactionTokens, pending = false, onSelect, onUpgrade}: EmojiBrowserProps) {
+export function EmojiBrowser({mode, vipActive, selectedReactionTokens, pending = false, onSelect, onUpgrade}: EmojiBrowserProps) {
     const [query, setQuery] = useState('');
     const [tone, setTone] = useState(0);
     const [recents, setRecents] = useState<EmojiSelection[]>([]);
@@ -215,19 +215,19 @@ export function EmojiBrowser({mode, proActive, selectedReactionTokens, pending =
         const recentEntries = recents.flatMap(selection => toEntry(selection) ?? []);
         return [
             ...(recentEntries.length ? [{id: 'recent', name: 'Recent', entries: recentEntries}] : []),
-            {id: 'pro', name: 'allchat VIP', entries: customEntries},
+            {id: 'vip', name: 'allchat VIP', entries: customEntries},
             ...nativeSections,
         ];
     }, [query, recents, tone]);
 
     const isSelected = (entry: EmojiEntry) => mode === 'reaction' && selectedReactionTokens?.has(reactionToken(entry.selection)) === true;
-    const isLocked = (entry: EmojiEntry) => entry.selection.kind === 'custom' && !proActive && !isSelected(entry);
+    const isLocked = (entry: EmojiEntry) => entry.selection.kind === 'custom' && !vipActive && !isSelected(entry);
 
     const select = useCallback(async (entry: EmojiEntry) => {
         if (pending || selectingRef.current) return;
         setPreview(entry);
         const removing = mode === 'reaction' && selectedReactionTokens?.has(reactionToken(entry.selection)) === true;
-        if (entry.selection.kind === 'custom' && !proActive && !removing) {
+        if (entry.selection.kind === 'custom' && !vipActive && !removing) {
             onUpgrade();
             return;
         }
@@ -247,7 +247,7 @@ export function EmojiBrowser({mode, proActive, selectedReactionTokens, pending =
             selectingRef.current = false;
             setSelecting(false);
         }
-    }, [pending, mode, selectedReactionTokens, proActive, onUpgrade, onSelect]);
+    }, [pending, mode, selectedReactionTokens, vipActive, onUpgrade, onSelect]);
 
     const focusEntry = useCallback((section: EmojiSection, index: number) => {
         const entry = section.entries[Math.max(0, Math.min(section.entries.length - 1, index))];
@@ -327,7 +327,7 @@ export function EmojiBrowser({mode, proActive, selectedReactionTokens, pending =
                 {Object.entries(categoryDetails).map(([id, {name, Icon}]) => <button key={id} type="button" title={name}
                     disabled={busy || (id === 'recent' && recents.length === 0)} aria-label={name}
                     onClick={() => jumpToCategory(id)}
-                    className={cn('grid h-8 w-8 max-w-full shrink-0 place-items-center rounded-lg text-muted-foreground hover:bg-muted hover:text-foreground focus-visible:outline-2 focus-visible:outline-violet-500 disabled:opacity-30', id === 'pro' && 'bg-violet-500/10 text-violet-600 dark:text-violet-300')}>
+                    className={cn('grid h-8 w-8 max-w-full shrink-0 place-items-center rounded-lg text-muted-foreground hover:bg-muted hover:text-foreground focus-visible:outline-2 focus-visible:outline-violet-500 disabled:opacity-30', id === 'vip' && 'bg-violet-500/10 text-violet-600 dark:text-violet-300')}>
                     <Icon aria-hidden="true" className="h-4 w-4"/>
                 </button>)}
             </nav>
@@ -340,7 +340,7 @@ export function EmojiBrowser({mode, proActive, selectedReactionTokens, pending =
                         <span aria-hidden="true" className="h-px min-w-0 flex-1 bg-current opacity-15"/>
                     </h3>
                     <EmojiGrid section={section} headingId={`${headingPrefix}-${section.id}`} focusedKey={focusedKeys[section.id]}
-                               busy={busy} mode={mode} proActive={proActive} selectedReactionTokens={selectedReactionTokens}
+                               busy={busy} mode={mode} vipActive={vipActive} selectedReactionTokens={selectedReactionTokens}
                                buttonRefs={buttonRefs} onPreview={setPreview} onFocus={onEntryFocus} onNavigate={navigateGrid} onSelect={select}/>
                 </section>)}
                 {count === 0 && <div role="status" className="flex min-h-36 flex-col items-center justify-center px-3 text-center">
@@ -365,7 +365,7 @@ export function EmojiBrowser({mode, proActive, selectedReactionTokens, pending =
                 </p>}
             </div>
         </div>
-        {!proActive && <div className="shrink-0 border-t border-violet-500/15 bg-violet-500/5 p-3">
+        {!vipActive && <div className="shrink-0 border-t border-violet-500/15 bg-violet-500/5 p-3">
             <Button type="button" disabled={busy} onClick={onUpgrade} className="w-full gap-2 bg-violet-600 text-white hover:bg-violet-700"><Diamond aria-hidden="true" className="h-4 w-4"/>Unlock with allchat VIP</Button>
         </div>}
     </div>;

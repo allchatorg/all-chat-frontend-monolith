@@ -63,7 +63,7 @@ export const BlockedUsersSettings = ({isMobile = false}: BlockedUsersSettingsPro
                                 className="flex items-center justify-between py-2 px-3 md:py-3 md:px-4 rounded-lg border bg-card hover:bg-accent/50 transition-colors"
                             >
                                 <div className="flex min-w-0 items-center pr-3">
-                                    <UserName userId={blockedUser.id} username={blockedUser.username} proBadgeVisible={blockedUser.proBadgeVisible} proBadgeRevision={blockedUser.proBadgeRevision} usernameFont={blockedUser.usernameFont} messageFont={blockedUser.messageFont} fontRevision={blockedUser.fontRevision} className="font-medium"/>
+                                    <UserName userId={blockedUser.id} username={blockedUser.username} vipBadgeVisible={blockedUser.vipBadgeVisible} vipBadgeRevision={blockedUser.vipBadgeRevision} usernameFont={blockedUser.usernameFont} messageFont={blockedUser.messageFont} fontRevision={blockedUser.fontRevision} className="font-medium"/>
                                 </div>
                                 <Button
                                     variant="outline"

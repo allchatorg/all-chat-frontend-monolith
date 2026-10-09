@@ -37,14 +37,14 @@ interface MessageActionSheetProps {
     actions: MessageAction[];
     canReact: boolean;
     reactions: readonly Reaction[];
-    proActive: boolean;
+    vipActive: boolean;
     isGuest: boolean;
     onReact: (emoji: string, emojiId: string) => Promise<void>;
     onUpgrade: () => void;
 }
 
 /** Mobile replacement for the hover actions menu and reaction popover. */
-export function MessageActionSheet({openView, onClose, title, preview, actions, canReact, reactions, proActive, isGuest, onReact, onUpgrade}: MessageActionSheetProps) {
+export function MessageActionSheet({openView, onClose, title, preview, actions, canReact, reactions, vipActive, isGuest, onReact, onUpgrade}: MessageActionSheetProps) {
     const open = openView !== null;
     const onOpenChange = (next: boolean) => {if (!next) onClose();};
     const [view, setView] = useState<MessageActionSheetView>(openView ?? 'actions');
@@ -105,7 +105,7 @@ export function MessageActionSheet({openView, onClose, title, preview, actions, 
                     <ArrowLeft aria-hidden="true" className="h-4 w-4"/>Back
                 </Button>
                 <div className="min-h-0 flex-1 border-t">
-                    <ReactionPicker className="h-full" proActive={proActive} reactions={reactions}
+                    <ReactionPicker className="h-full" vipActive={vipActive} reactions={reactions}
                                     onSelect={onReact} onClose={() => onOpenChange(false)}
                                     onUpgrade={() => closeThen(onUpgrade)}/>
                 </div>

@@ -2,8 +2,8 @@
 
 import {useEffect, useState} from 'react';
 import {Area, AreaChart, CartesianGrid, XAxis} from 'recharts';
-import {dashboardRevenueQueryOptions, useGetProStatisticsQuery} from '@ads/store/services/adminProApi';
-import {ProStatisticsDailyPoint, ProStatisticsDays} from '@ads/models/pro-statistics';
+import {dashboardRevenueQueryOptions, useGetVipStatisticsQuery} from '@ads/store/services/adminVipApi';
+import {VipStatisticsDailyPoint, VipStatisticsDays} from '@ads/models/vip-statistics';
 import {Card, CardAction, CardContent, CardDescription, CardHeader, CardTitle} from '@ads/components/ui/card';
 import {ChartContainer, ChartTooltip, ChartTooltipContent} from '@ads/components/ui/chart';
 import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue} from '@ads/components/ui/select';
@@ -15,7 +15,7 @@ import {computeRevenueTrend, formatReportingDay, formatSynchronizationTime, form
 
 const revenueConfig = {revenue: {label: 'Net revenue', color: '#059669'}};
 
-function ProMetricCard({title, value, description}: {title: string; value: string; description: string}) {
+function VipMetricCard({title, value, description}: {title: string; value: string; description: string}) {
     return (
         <Card className="gap-2 py-4">
             <CardHeader className="gap-2 px-4">
@@ -27,7 +27,7 @@ function ProMetricCard({title, value, description}: {title: string; value: strin
     );
 }
 
-function ProChart({daily}: {daily: ProStatisticsDailyPoint[]}) {
+function VipChart({daily}: {daily: VipStatisticsDailyPoint[]}) {
     return (
         <ChartContainer config={revenueConfig} className="aspect-auto h-[250px] w-full" aria-label="allchat VIP revenue by day">
             <AreaChart data={daily} accessibilityLayer margin={{top: 12}}>
@@ -56,15 +56,15 @@ function ProChart({daily}: {daily: ProStatisticsDailyPoint[]}) {
     );
 }
 
-export function AdminProStatistics() {
+export function AdminVipStatistics() {
     const isMobile = useIsMobile();
-    const [days, setDays] = useState<ProStatisticsDays>(90);
+    const [days, setDays] = useState<VipStatisticsDays>(90);
 
     useEffect(() => {
         if (isMobile) setDays(7);
     }, [isMobile]);
 
-    const {currentData: data, isFetching, isError, refetch} = useGetProStatisticsQuery(days, dashboardRevenueQueryOptions);
+    const {currentData: data, isFetching, isError, refetch} = useGetVipStatisticsQuery(days, dashboardRevenueQueryOptions);
     const loading = isFetching && !data;
     const unavailable = isError || !data;
     const revenueUnavailable = unavailable || data.synchronization.status === 'UNAVAILABLE';
@@ -74,7 +74,7 @@ export function AdminProStatistics() {
     const rangeLabel = days === 90 ? 'Last 3 months' : `Last ${days} days`;
     const rangeRevenue = daily.reduce((total, point) => total + point.revenue, 0);
     const onRangeChange = (value: string) => {
-        if (value) setDays(Number(value) as ProStatisticsDays);
+        if (value) setDays(Number(value) as VipStatisticsDays);
     };
     const hasPayments = daily.some(point => point.initialPayments + point.renewalPayments + point.otherPayments > 0);
     const todayTrend = data && !partial
@@ -86,9 +86,9 @@ export function AdminProStatistics() {
                 : `Yesterday: ${formatUsd(data!.revenue.yesterday)}`;
 
     return (
-        <section className="space-y-4 px-4 lg:px-6" aria-labelledby="pro-statistics-heading">
+        <section className="space-y-4 px-4 lg:px-6" aria-labelledby="vip-statistics-heading">
             <div>
-                <h2 id="pro-statistics-heading" className="text-lg font-semibold">allchat VIP</h2>
+                <h2 id="vip-statistics-heading" className="text-lg font-semibold">allchat VIP</h2>
                 <p className="text-sm text-muted-foreground">Current paid memberships and subscription payments.</p>
             </div>
             {syncMessage && (
@@ -108,15 +108,15 @@ export function AdminProStatistics() {
                 <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 @5xl/main:grid-cols-5">
                     {loading ? Array.from({length: 5}, (_, index) => <Skeleton key={index} className="h-32 rounded-xl"/>) : data && (
                         <>
-                            <ProMetricCard title="Active paid members" value={data.memberships.active.toLocaleString()}
+                            <VipMetricCard title="Active paid members" value={data.memberships.active.toLocaleString()}
                                            description={`${data.memberships.monthly.toLocaleString()} monthly · ${data.memberships.yearly.toLocaleString()} yearly`}/>
-                            <ProMetricCard title="Scheduled cancellations" value={data.memberships.scheduledCancellations.toLocaleString()}
+                            <VipMetricCard title="Scheduled cancellations" value={data.memberships.scheduledCancellations.toLocaleString()}
                                            description="Paid members whose subscriptions will not renew"/>
-                            <ProMetricCard title="Payment issues" value={data.memberships.paymentIssues.toLocaleString()}
+                            <VipMetricCard title="Payment issues" value={data.memberships.paymentIssues.toLocaleString()}
                                            description="Current subscriptions past due or unpaid"/>
-                            <ProMetricCard title={`Subscription revenue today${!revenueUnavailable && partial ? ' (partial)' : ''}`}
+                            <VipMetricCard title={`Subscription revenue today${!revenueUnavailable && partial ? ' (partial)' : ''}`}
                                            value={revenueUnavailable ? 'Unavailable' : formatUsd(data.revenue.today)} description={todayDescription}/>
-                            <ProMetricCard title={`Total subscription revenue${!revenueUnavailable && partial ? ' (partial)' : ''}`}
+                            <VipMetricCard title={`Total subscription revenue${!revenueUnavailable && partial ? ' (partial)' : ''}`}
                                            value={revenueUnavailable ? 'Unavailable' : formatUsd(data.revenue.total)}
                                            description="All-time revenue"/>
                         </>
@@ -161,7 +161,7 @@ export function AdminProStatistics() {
                         <div className="flex h-[250px] items-center justify-center p-4 text-center text-sm text-muted-foreground">
                             {partial ? 'No subscription revenue has been recorded for this range yet. Reporting is incomplete.' : 'No subscription revenue recorded for this period yet.'}
                         </div>
-                    ) : <ProChart daily={daily}/>}
+                    ) : <VipChart daily={daily}/>}
                     <p className="mt-3 text-xs text-muted-foreground">Refunds reduce revenue on the original payment date.</p>
                 </CardContent>
             </Card>

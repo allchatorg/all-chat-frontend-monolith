@@ -1,7 +1,7 @@
 import {ChatRoomNoiseLevelEnum} from "@/models/ChatRoomNoiseLevelEnum";
 
 export interface RoomPopulation {
-    proOnly?: boolean;
+    vipOnly?: boolean;
     roomId: number;
     roomName: string;
     onlineUsersCount: number;

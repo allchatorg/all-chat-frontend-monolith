@@ -24,7 +24,7 @@ const ReportCard: React.FC<ReportCardProps> = ({report}) => {
                                 <UserName userId={report.reporter.id} username={reporterLabel}
                                           usernameFont={report.reporter.usernameFont} messageFont={report.reporter.messageFont}
                                           fontRevision={report.reporter.fontRevision}
-                                          proBadgeVisible={report.reporter.proBadgeVisible} proBadgeRevision={report.reporter.proBadgeRevision}/>
+                                          vipBadgeVisible={report.reporter.vipBadgeVisible} vipBadgeRevision={report.reporter.vipBadgeRevision}/>
                             )}
                         </span>
                         {isSystemReport && (

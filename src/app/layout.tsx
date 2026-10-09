@@ -18,164 +18,164 @@ const geistMono = localFont({
 // Normalize visible letter bodies against the default system sans (about 0.52em).
 // Values use measured outlines, not unreliable font metadata; see fonts/README.md.
 // Keep the system fallback at its native size until each optional face loads.
-const proRoboto = localFont({
+const vipRoboto = localFont({
     src: [
         {path: './fonts/RobotoVariable.woff2', weight: '100 900', style: 'normal'},
         {path: './fonts/RobotoVariable-Italic.woff2', weight: '100 900', style: 'italic'},
     ],
-    variable: '--font-pro-roboto',
+    variable: '--font-vip-roboto',
     declarations: [{prop: 'size-adjust', value: '97%'}],
     adjustFontFallback: false,
     display: 'swap',
     preload: false,
 });
-const proPetitFormalScript = localFont({
+const vipPetitFormalScript = localFont({
     src: './fonts/PetitFormalScript-Regular.woff2',
     weight: '400',
     style: 'normal',
-    variable: '--font-pro-petit-formal-script',
+    variable: '--font-vip-petit-formal-script',
     declarations: [{prop: 'size-adjust', value: '87%'}],
     adjustFontFallback: false,
     display: 'swap',
     preload: false,
 });
-const proItalianno = localFont({
+const vipItalianno = localFont({
     src: './fonts/Italianno-Regular.woff2',
     weight: '400',
     style: 'normal',
-    variable: '--font-pro-italianno',
+    variable: '--font-vip-italianno',
     declarations: [{prop: 'size-adjust', value: '178%'}],
     adjustFontFallback: false,
     display: 'swap',
     preload: false,
 });
-const proKablammo = localFont({
+const vipKablammo = localFont({
     src: './fonts/KablammoVariable.woff2',
     weight: '400',
     style: 'normal',
-    variable: '--font-pro-kablammo',
+    variable: '--font-vip-kablammo',
     declarations: [{prop: 'size-adjust', value: '95%'}],
     adjustFontFallback: false,
     display: 'swap',
     preload: false,
 });
-const proCraftyGirls = localFont({
+const vipCraftyGirls = localFont({
     src: './fonts/CraftyGirls-Regular.woff2',
     weight: '400',
     style: 'normal',
-    variable: '--font-pro-crafty-girls',
+    variable: '--font-vip-crafty-girls',
     declarations: [{prop: 'size-adjust', value: '92%'}],
     adjustFontFallback: false,
     display: 'swap',
     preload: false,
 });
-const proEmilysCandy = localFont({
+const vipEmilysCandy = localFont({
     src: './fonts/EmilysCandy-Regular.woff2',
     weight: '400',
     style: 'normal',
-    variable: '--font-pro-emilys-candy',
+    variable: '--font-vip-emilys-candy',
     declarations: [{prop: 'size-adjust', value: '101%'}],
     adjustFontFallback: false,
     display: 'swap',
     preload: false,
 });
-const proEvelyne = localFont({
+const vipEvelyne = localFont({
     src: './fonts/Evelyne-Regular.woff2',
     weight: '400',
     style: 'normal',
-    variable: '--font-pro-evelyne',
+    variable: '--font-vip-evelyne',
     declarations: [{prop: 'size-adjust', value: '181%'}],
     adjustFontFallback: false,
     display: 'swap',
     preload: false,
 });
-const proMessyHandwritten = localFont({
+const vipMessyHandwritten = localFont({
     src: './fonts/MessyHandwritten-Regular.woff2',
     weight: '400',
     style: 'normal',
-    variable: '--font-pro-messy-handwritten',
+    variable: '--font-vip-messy-handwritten',
     declarations: [{prop: 'size-adjust', value: '156%'}],
     adjustFontFallback: false,
     display: 'swap',
     preload: false,
 });
-const proLoveLight = localFont({
+const vipLoveLight = localFont({
     src: './fonts/LoveLight-Regular.woff2',
     weight: '400',
     style: 'normal',
-    variable: '--font-pro-love-light',
+    variable: '--font-vip-love-light',
     declarations: [{prop: 'size-adjust', value: '147%'}],
     adjustFontFallback: false,
     display: 'swap',
     preload: false,
 });
-const proClickerScript = localFont({
+const vipClickerScript = localFont({
     src: './fonts/ClickerScript-Regular.woff2',
     weight: '400',
     style: 'normal',
-    variable: '--font-pro-clicker-script',
+    variable: '--font-vip-clicker-script',
     declarations: [{prop: 'size-adjust', value: '154%'}],
     adjustFontFallback: false,
     display: 'swap',
     preload: false,
 });
-const proTangerine = localFont({
+const vipTangerine = localFont({
     src: [
         {path: './fonts/Tangerine-Regular.woff2', weight: '400', style: 'normal'},
         {path: './fonts/Tangerine-Bold.woff2', weight: '700', style: 'normal'},
     ],
-    variable: '--font-pro-tangerine',
+    variable: '--font-vip-tangerine',
     declarations: [{prop: 'size-adjust', value: '203%'}],
     adjustFontFallback: false,
     display: 'swap',
     preload: false,
 });
-const proSahirYesta = localFont({
+const vipSahirYesta = localFont({
     src: './fonts/SahirYesta-Regular.woff2',
     weight: '400',
     style: 'normal',
-    variable: '--font-pro-sahir-yesta',
+    variable: '--font-vip-sahir-yesta',
     declarations: [{prop: 'size-adjust', value: '105%'}],
     adjustFontFallback: false,
     display: 'swap',
     preload: false,
 });
-const proGistaDanes = localFont({
+const vipGistaDanes = localFont({
     src: './fonts/GistaDanes-Regular.woff2',
     weight: '400',
     style: 'normal',
-    variable: '--font-pro-gista-danes',
+    variable: '--font-vip-gista-danes',
     declarations: [{prop: 'size-adjust', value: '185%'}],
     adjustFontFallback: false,
     display: 'swap',
     preload: false,
 });
-const proAYummyApology = localFont({
+const vipAYummyApology = localFont({
     src: './fonts/AYummyApology-Regular.woff2',
     weight: '400',
     style: 'normal',
-    variable: '--font-pro-a-yummy-apology',
+    variable: '--font-vip-a-yummy-apology',
     declarations: [{prop: 'size-adjust', value: '171%'}],
     adjustFontFallback: false,
     display: 'swap',
     preload: false,
 });
-const proPrincessSofia = localFont({
+const vipPrincessSofia = localFont({
     src: './fonts/PrincessSofia-Regular.woff2',
     weight: '400',
     style: 'normal',
-    variable: '--font-pro-princess-sofia',
+    variable: '--font-vip-princess-sofia',
     declarations: [{prop: 'size-adjust', value: '105%'}],
     adjustFontFallback: false,
     display: 'swap',
     preload: false,
 });
-const proRainKiss = localFont({
+const vipRainKiss = localFont({
     src: [
         {path: './fonts/RainKiss-Regular.woff2', weight: '400', style: 'normal'},
         {path: './fonts/RainKiss-Italic.woff2', weight: '400', style: 'italic'},
     ],
-    variable: '--font-pro-rain-kiss',
+    variable: '--font-vip-rain-kiss',
     declarations: [{prop: 'size-adjust', value: '89%'}],
     adjustFontFallback: false,
     display: 'swap',
@@ -184,10 +184,10 @@ const proRainKiss = localFont({
 
 // Defining optional faces globally lets chat messages use them on every route.
 // preload: false keeps their binaries on demand, including picker previews.
-const proFontVariables = [
-    proRoboto, proPetitFormalScript, proItalianno, proKablammo, proCraftyGirls,
-    proEmilysCandy, proEvelyne, proMessyHandwritten, proLoveLight, proClickerScript,
-    proTangerine, proSahirYesta, proGistaDanes, proAYummyApology, proPrincessSofia, proRainKiss,
+const vipFontVariables = [
+    vipRoboto, vipPetitFormalScript, vipItalianno, vipKablammo, vipCraftyGirls,
+    vipEmilysCandy, vipEvelyne, vipMessyHandwritten, vipLoveLight, vipClickerScript,
+    vipTangerine, vipSahirYesta, vipGistaDanes, vipAYummyApology, vipPrincessSofia, vipRainKiss,
 ].map(font => font.variable).join(' ');
 
 export const metadata: Metadata = {
@@ -213,7 +213,7 @@ export default function RootLayout({
         {/* Extensions such as ColorZilla add body attributes before hydration.
             Suppress warnings on this element; descendants are still checked. */}
         <body
-            className={`${geistSans.variable} ${geistMono.variable} ${proFontVariables} app-background flex flex-col h-full`}
+            className={`${geistSans.variable} ${geistMono.variable} ${vipFontVariables} app-background flex flex-col h-full`}
             suppressHydrationWarning
         >
         <RouteProgressBar/>

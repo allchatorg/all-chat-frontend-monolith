@@ -13,8 +13,8 @@ export function NavUser({
     user: Partial<FontSnapshot> & {
         id?: number
         name: string
-        proBadgeVisible?: boolean
-        proBadgeRevision?: number
+        vipBadgeVisible?: boolean
+        vipBadgeRevision?: number
         email: string
         avatar: string
     }
@@ -43,7 +43,7 @@ export function NavUser({
                         <AvatarFallback className="rounded-lg">{initials}</AvatarFallback>
                     </Avatar>
                     <div className="grid flex-1 text-left text-sm leading-tight">
-                        <UserName userId={user.id} username={user.name} proBadgeVisible={user.proBadgeVisible} proBadgeRevision={user.proBadgeRevision} usernameFont={user.usernameFont} messageFont={user.messageFont} fontRevision={user.fontRevision} className="font-medium"/>
+                        <UserName userId={user.id} username={user.name} vipBadgeVisible={user.vipBadgeVisible} vipBadgeRevision={user.vipBadgeRevision} usernameFont={user.usernameFont} messageFont={user.messageFont} fontRevision={user.fontRevision} className="font-medium"/>
                         <span className="text-muted-foreground truncate text-xs">
                             {user.email}
                         </span>

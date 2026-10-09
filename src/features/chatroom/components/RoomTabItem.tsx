@@ -1,4 +1,4 @@
-import {RoomProBadge} from "@/components/RoomProBadge";
+import {RoomVipBadge} from "@/components/RoomVipBadge";
 import {UserChatRoom} from "@/models/UserChatRoom";
 import {Archive, MessageSquare, UserCheck, Volume2, VolumeX, X} from "lucide-react";
 import {MouseEvent, useEffect, useRef} from "react";
@@ -47,7 +47,7 @@ export function RoomTabContent({
     const {canPlaySound, soundMode} = useChatRoomSoundSettings();
     const isToggleInert = soundMode !== 'ALL';
     const isStaffRoom = getRoleLevel(room.chatRoomRequiredAccessLevel) > getRoleLevel(Role.GUEST);
-    const isBugReportsRoom = !room.proOnly && isBugReportsChatRoomName(room.chatRoomName);
+    const isBugReportsRoom = !room.vipOnly && isBugReportsChatRoomName(room.chatRoomName);
     const isArchived = room.roomPopulation.archived;
 
     const getNoiseIndicator = (level: ChatRoomNoiseLevelEnum) => {
@@ -162,7 +162,7 @@ export function RoomTabContent({
                 >
                     {room.chatRoomName}
                 </span>
-                <RoomProBadge proOnly={room.proOnly}/>
+                <RoomVipBadge vipOnly={room.vipOnly}/>
                 {isArchived && (
                     <Badge
                         variant="outline"

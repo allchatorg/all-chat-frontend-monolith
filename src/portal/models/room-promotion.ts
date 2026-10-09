@@ -15,7 +15,7 @@ export interface RoomPromotion {
     id: number;
     chatRoomId: number;
     chatRoomName: string;
-    chatRoomProOnly?: boolean;
+    chatRoomVipOnly?: boolean;
     status: RoomPromotionStatus;
     amount: number;
     currency: string;

@@ -3,7 +3,7 @@ import api from '@/lib/api';
 import type {FontPreset, FontSnapshot} from '@/lib/fontPresets';
 
 export interface FontSettings extends FontSnapshot {
-    proActive: boolean;
+    vipActive: boolean;
     dailyLimit: number;
     changesRemaining: number;
     resetsAt: string;

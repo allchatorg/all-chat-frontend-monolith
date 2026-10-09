@@ -1,7 +1,7 @@
 import {Message} from "@/models/message";
 
 export interface ChatRoom {
-    proOnly?: boolean;
+    vipOnly?: boolean;
     id: number;
     name: string;
     messages: Message[];

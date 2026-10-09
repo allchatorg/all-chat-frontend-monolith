@@ -64,7 +64,7 @@ import {fetchNotificationsThunk, fetchUnreadCountThunk} from "@/redux/notificati
 import {getNotificationRoute} from "@/features/notifications/notificationRoutes";
 import {adsApi as adsPortalApi} from "@ads/store/services/adsApi";
 import {adminAdsApi} from "@ads/store/services/adminAdsApi";
-import {applyProBadgeUpdate, ProBadgeUpdate, refreshRegisteredProBadges} from "@/lib/proBadgeStore";
+import {applyVipBadgeUpdate, VipBadgeUpdate, refreshRegisteredVipBadges} from "@/lib/vipBadgeStore";
 import {applyFontUpdate, ingestFontSnapshots} from '@/lib/fontStore';
 import {getMe} from "@/api/user/userAPI";
 import {setUser} from "@/redux/user/userSlice";
@@ -77,7 +77,7 @@ const PRIVATE_MESSAGES_QUEUE = "/user/queue/private-messages";
 
 let pendingAccountRefresh: {userId: number; token: string; promise: Promise<void>} | null = null;
 
-function refreshCurrentProUser(): Promise<void> {
+function refreshCurrentVipUser(): Promise<void> {
     const userId = selectUser(store.getState())?.id;
     const token = getSessionToken()?.token;
     if (!userId || !token) return Promise.resolve();
@@ -141,20 +141,20 @@ export function useStompWithRedux(
     // account snapshot, without polling the billing provider.
     useEffect(() => {
         if (!user?.id || user.banned) return;
-        const refresh = () => { void refreshCurrentProUser(); };
+        const refresh = () => { void refreshCurrentVipUser(); };
         const refreshVisible = () => {
             if (document.visibilityState === "visible") refresh();
         };
         refresh();
         window.addEventListener("focus", refresh);
         window.addEventListener("online", refresh);
-        window.addEventListener("allchat:pro-changed", refresh);
+        window.addEventListener("allchat:vip-changed", refresh);
         document.addEventListener("visibilitychange", refreshVisible);
         const timer = window.setInterval(refreshVisible, 60_000);
         return () => {
             window.removeEventListener("focus", refresh);
             window.removeEventListener("online", refresh);
-            window.removeEventListener("allchat:pro-changed", refresh);
+            window.removeEventListener("allchat:vip-changed", refresh);
             document.removeEventListener("visibilitychange", refreshVisible);
             window.clearInterval(timer);
         };
@@ -167,14 +167,14 @@ export function useStompWithRedux(
     useEffect(() => {
         if (user) applyFontUpdate({userId: user.id, usernameFont: user.usernameFont,
             messageFont: user.messageFont, fontRevision: user.fontRevision});
-        if (user?.proBadgeVisible !== undefined) {
-            applyProBadgeUpdate({
+        if (user?.vipBadgeVisible !== undefined) {
+            applyVipBadgeUpdate({
                 userId: user.id,
-                proBadgeVisible: user.proBadgeVisible,
-                proBadgeRevision: user.proBadgeRevision ?? 0,
+                vipBadgeVisible: user.vipBadgeVisible,
+                vipBadgeRevision: user.vipBadgeRevision ?? 0,
             });
         }
-    }, [user?.id, user?.proBadgeVisible, user?.proBadgeRevision, user?.usernameFont, user?.messageFont, user?.fontRevision]);
+    }, [user?.id, user?.vipBadgeVisible, user?.vipBadgeRevision, user?.usernameFont, user?.messageFont, user?.fontRevision]);
 
     useEffect(() => {
         loadedChatRoomsRef.current = loadedChatRooms;
@@ -314,10 +314,10 @@ export function useStompWithRedux(
                         }
                         break;
 
-                    case WebSocketMessageType.PRO_BADGE_UPDATED: {
-                        const update = data as ProBadgeUpdate;
-                        applyProBadgeUpdate(update);
-                        if (update.userId === userRef.current?.id) void refreshCurrentProUser();
+                    case WebSocketMessageType.VIP_BADGE_UPDATED: {
+                        const update = data as VipBadgeUpdate;
+                        applyVipBadgeUpdate(update);
+                        if (update.userId === userRef.current?.id) void refreshCurrentVipUser();
                         break;
                     }
 
@@ -575,8 +575,8 @@ export function useStompWithRedux(
                 // Subscribe before refreshing persisted notifications so new
                 // deliveries cannot slip between the fetch and subscription.
                 manageSubscriptionsRef.current(client);
-                refreshRegisteredProBadges();
-                if (userRef.current?.id) void refreshCurrentProUser();
+                refreshRegisteredVipBadges();
+                if (userRef.current?.id) void refreshCurrentVipUser();
                 if (!isInitialConnect.current) {
                     dispatch(setStompReconnected(true));
                     setTimeout(() => dispatch(setStompReconnected(false)), 500);

@@ -7,12 +7,12 @@ import {toast} from 'sonner';
 import {Button} from '@/components/ui/button';
 import {selectUser} from '@/redux/user/userSelectors';
 import {cn} from '@/lib/utils';
-import {ProInterval} from './types';
-import {proErrorMessage, startProCheckout} from './api';
-import {ProCheckout} from './ProCheckout';
+import {VipInterval} from './types';
+import {vipErrorMessage, startVipCheckout} from './api';
+import {VipCheckout} from './VipCheckout';
 import {getStripe} from '@/components/billing/stripe';
-import {useProSubscription} from './useProSubscription';
-import {ProBenefits, ProComparison} from './ProBenefits';
+import {useVipSubscription} from './useVipSubscription';
+import {VipBenefits, VipComparison} from './VipBenefits';
 import {isStaff} from '@/models/Role';
 import {SubscriptionsSettings} from './SubscriptionsSettings';
 
@@ -20,16 +20,16 @@ function BannerSparkle({className}: {className: string}) {
     return <svg aria-hidden="true" viewBox="0 0 24 40" fill="currentColor" className={cn('pointer-events-none absolute text-white', className)}><path d="M12 0C10 14 8 17 0 20c8 3 10 6 12 20 2-14 4-17 12-20-8-3-10-6-12-20Z"/></svg>;
 }
 
-export function ProOffer({onManage, onClaim}: {onManage: () => void; onClaim: () => void}) {
+export function VipOffer({onManage, onClaim}: {onManage: () => void; onClaim: () => void}) {
     const user = useSelector(selectUser);
     if (user && isStaff(user.role)) return <SubscriptionsSettings/>;
-    return <PaidProOffer onManage={onManage} onClaim={onClaim}/>;
+    return <PaidVipOffer onManage={onManage} onClaim={onClaim}/>;
 }
 
-function PaidProOffer({onManage, onClaim}: {onManage: () => void; onClaim: () => void}) {
+function PaidVipOffer({onManage, onClaim}: {onManage: () => void; onClaim: () => void}) {
     const user = useSelector(selectUser);
-    const {subscription, loading, error, refresh} = useProSubscription();
-    const [interval, setInterval] = useState<ProInterval>('MONTHLY');
+    const {subscription, loading, error, refresh} = useVipSubscription();
+    const [interval, setInterval] = useState<VipInterval>('MONTHLY');
     const intervalSelected = useRef(false);
     const plansRef = useRef<HTMLElement>(null);
     const plansHeadingId = useId();
@@ -46,7 +46,7 @@ function PaidProOffer({onManage, onClaim}: {onManage: () => void; onClaim: () =>
         ? subscription.checkoutInterval : null;
     const selectedInterval = lockedCheckoutInterval ?? (yearlyBillingEnabled ? interval : 'MONTHLY');
     const managesExisting = Boolean(subscription && subscription.canManageBilling && (subscription.status === 'INCOMPLETE' || (!canContinueCheckout && !subscription.canPurchase && subscription.status !== 'NONE')));
-    const availableIntervals: ProInterval[] = yearlyBillingEnabled ? ['MONTHLY', 'YEARLY'] : ['MONTHLY'];
+    const availableIntervals: VipInterval[] = yearlyBillingEnabled ? ['MONTHLY', 'YEARLY'] : ['MONTHLY'];
     const actionDisabled = redirecting || (!mustClaim && !managesExisting && (loading || !!error || unavailableYearlyCheckout || (!subscription?.canPurchase && !canContinueCheckout)));
     const actionLabel = mustClaim ? 'Claim your account to get VIP' : managesExisting ? subscription?.status === 'INCOMPLETE' ? 'Complete subscription payment' : 'Manage your subscription' : unavailableYearlyCheckout ? 'Checkout being confirmed' : canContinueCheckout ? 'Continue checkout' : 'Get allchat VIP';
 
@@ -64,10 +64,10 @@ function PaidProOffer({onManage, onClaim}: {onManage: () => void; onClaim: () =>
         setRedirecting(true);
         try {
             if (!getStripe()) throw new Error('Payments are temporarily unavailable.');
-            const {clientSecret} = await startProCheckout(selectedInterval);
+            const {clientSecret} = await startVipCheckout(selectedInterval);
             setCheckoutSecret(clientSecret);
         } catch (failure) {
-            toast.error(proErrorMessage(failure));
+            toast.error(vipErrorMessage(failure));
             void refresh();
         } finally {
             setRedirecting(false);
@@ -80,7 +80,7 @@ function PaidProOffer({onManage, onClaim}: {onManage: () => void; onClaim: () =>
     };
 
     if (checkoutComplete) return <SubscriptionsSettings billingReturn={{checkout: 'success', billingUpdated: false}}/>;
-    if (checkoutSecret) return <ProCheckout clientSecret={checkoutSecret} onComplete={() => setCheckoutComplete(true)} onBack={() => {setCheckoutSecret(null); void refresh(true);}}/>;
+    if (checkoutSecret) return <VipCheckout clientSecret={checkoutSecret} onComplete={() => setCheckoutComplete(true)} onBack={() => {setCheckoutSecret(null); void refresh(true);}}/>;
 
     return (
         <div className="bg-background text-foreground">
@@ -107,14 +107,14 @@ function PaidProOffer({onManage, onClaim}: {onManage: () => void; onClaim: () =>
             </div>
 
             <div className="space-y-10 px-5 py-9 sm:px-8 sm:py-10">
-                <ProBenefits username={user?.username || 'Your username'}/>
+                <VipBenefits username={user?.username || 'Your username'}/>
 
                 <section ref={plansRef} tabIndex={-1} aria-labelledby={plansHeadingId} className="scroll-mt-6 space-y-6 rounded-2xl outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-4">
                     <div className="text-center">
                         <h2 id={plansHeadingId} className="text-2xl font-extrabold tracking-tight">Find your kind of allchat.</h2>
                         <p className="mt-2 text-sm leading-6 text-muted-foreground">Start with Basic. Choose VIP for more space to share and connect.</p>
                     </div>
-                    <ProComparison yearly={selectedInterval === 'YEARLY'}/>
+                    <VipComparison yearly={selectedInterval === 'YEARLY'}/>
 
                     <div className="rounded-2xl border border-blue-200 bg-blue-50/60 p-5 dark:border-blue-500/30 dark:bg-blue-500/5 sm:p-6">
                         <div className="flex flex-wrap items-start justify-between gap-4">

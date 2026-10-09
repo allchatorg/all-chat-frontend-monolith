@@ -6,7 +6,7 @@ import {Check, Diamond, Loader2, LockKeyhole, Search, Smile, Sparkles, Sticker, 
 import {Button} from '@/components/ui/button';
 import {Tabs, TabsContent, TabsList, TabsTrigger} from '@/components/ui/tabs';
 import {cn} from '@/lib/utils';
-import {PRO_REACTIONS, ProReaction, toCustomReactionToken} from './catalog';
+import {VIP_REACTIONS, VipReaction, toCustomReactionToken} from './catalog';
 import {EmojiBrowser} from './EmojiBrowser';
 import type {EmojiSelection} from './emojiTypes';
 
@@ -16,35 +16,35 @@ interface ExpressionPickerProps {
     tab: ExpressionPickerTab;
     onTabChange: (tab: ExpressionPickerTab) => void;
     mode: 'reaction' | 'message';
-    proActive: boolean;
+    vipActive: boolean;
     selectedStickerTokens?: ReadonlySet<string>;
     allowStickers?: boolean;
     pending?: boolean;
     onEmojiSelect: (emoji: EmojiSelection) => void | Promise<void>;
-    onStickerSelect: (sticker: ProReaction) => void;
+    onStickerSelect: (sticker: VipReaction) => void;
     onUpgrade: () => void;
 }
 
 /** One shared picker keeps every sticker, including locked ones, in the same tab. */
-export function ExpressionPicker({tab, onTabChange, mode, proActive, selectedStickerTokens, allowStickers = true, pending = false,
+export function ExpressionPicker({tab, onTabChange, mode, vipActive, selectedStickerTokens, allowStickers = true, pending = false,
     onEmojiSelect, onStickerSelect, onUpgrade}: ExpressionPickerProps) {
     const [query, setQuery] = useState('');
-    const [preview, setPreview] = useState<ProReaction>(PRO_REACTIONS[0]);
+    const [preview, setPreview] = useState<VipReaction>(VIP_REACTIONS[0]);
     const searchRef = useRef<HTMLInputElement>(null);
     const searchId = useId();
     const filteredStickers = useMemo(() => {
         const normalized = query.trim().toLocaleLowerCase();
-        return PRO_REACTIONS.filter(sticker =>
+        return VIP_REACTIONS.filter(sticker =>
             [sticker.name, sticker.id, ...sticker.tags].some(value => value.toLocaleLowerCase().includes(normalized)));
     }, [query]);
-    const isSelected = (sticker: ProReaction) => mode === 'reaction'
+    const isSelected = (sticker: VipReaction) => mode === 'reaction'
         && selectedStickerTokens?.has(toCustomReactionToken(sticker.id)) === true;
 
-    const selectSticker = (sticker: ProReaction) => {
+    const selectSticker = (sticker: VipReaction) => {
         if (pending) return;
         setPreview(sticker);
         // An expired subscription must not prevent removing an existing reaction.
-        if (!proActive && !isSelected(sticker)) {
+        if (!vipActive && !isSelected(sticker)) {
             onUpgrade();
             return;
         }
@@ -61,7 +61,7 @@ export function ExpressionPicker({tab, onTabChange, mode, proActive, selectedSti
                 {pending && <Loader2 aria-label={mode === 'reaction' ? 'Updating reaction' : 'Sending sticker'} className="ml-auto h-4 w-4 animate-spin text-muted-foreground"/>}
             </TabsList>
             <TabsContent value="emoji" className="m-0 min-h-0 flex-1 overflow-hidden">
-                <EmojiBrowser mode={mode} proActive={proActive} selectedReactionTokens={selectedStickerTokens}
+                <EmojiBrowser mode={mode} vipActive={vipActive} selectedReactionTokens={selectedStickerTokens}
                               pending={pending} onSelect={onEmojiSelect} onUpgrade={onUpgrade}/>
             </TabsContent>
             {allowStickers && <TabsContent value="stickers" className="m-0 flex min-h-0 flex-1 flex-col overflow-y-auto overscroll-contain data-[state=inactive]:hidden">
@@ -88,7 +88,7 @@ export function ExpressionPicker({tab, onTabChange, mode, proActive, selectedSti
                             <ul aria-label="Internet classics stickers" className="grid grid-cols-4 gap-1">
                                 {filteredStickers.map(sticker => {
                                     const selected = isSelected(sticker);
-                                    const locked = !proActive && !selected;
+                                    const locked = !vipActive && !selected;
                                     const label = selected ? `Remove ${sticker.name} reaction` : locked
                                         ? `${sticker.name} sticker, unlock with allchat VIP`
                                         : mode === 'reaction' ? `Add ${sticker.name} reaction` : `Send ${sticker.name} sticker`;
@@ -117,11 +117,11 @@ export function ExpressionPicker({tab, onTabChange, mode, proActive, selectedSti
                     <div className="min-w-0 flex-1">
                         <p className="truncate text-sm font-semibold">{preview.name}</p>
                         <p className="mt-0.5 text-xs text-muted-foreground">{isSelected(preview) ? 'Select to remove your reaction.'
-                            : !proActive ? `Unlock ${PRO_REACTIONS.length} stickers with allchat VIP.`
+                            : !vipActive ? `Unlock ${VIP_REACTIONS.length} stickers with allchat VIP.`
                             : mode === 'reaction' ? 'Select to react to this message.' : 'Select to send this sticker.'}</p>
                     </div>
                 </div>
-                {!proActive && <div className="shrink-0 border-t border-violet-500/15 bg-violet-500/5 p-3">
+                {!vipActive && <div className="shrink-0 border-t border-violet-500/15 bg-violet-500/5 p-3">
                     <Button type="button" disabled={pending} onClick={onUpgrade} className="w-full gap-2 bg-violet-600 text-white hover:bg-violet-700"><Diamond aria-hidden="true" className="h-4 w-4"/>Unlock with allchat VIP</Button>
                 </div>}
             </TabsContent>}

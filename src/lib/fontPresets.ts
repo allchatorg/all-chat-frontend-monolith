@@ -42,22 +42,22 @@ export function isFontSnapshot(value: Partial<FontSnapshot> | undefined | null):
 }
 
 const FONT_FAMILIES: Record<Exclude<FontPreset, 'DEFAULT'>, string> = {
-    ROBOTO: 'var(--font-pro-roboto)',
-    PETIT_FORMAL_SCRIPT: 'var(--font-pro-petit-formal-script)',
-    ITALIANNO: 'var(--font-pro-italianno)',
-    KABLAMMO: 'var(--font-pro-kablammo)',
-    CRAFTY_GIRLS: 'var(--font-pro-crafty-girls)',
-    EMILYS_CANDY: 'var(--font-pro-emilys-candy)',
-    EVELYNE: 'var(--font-pro-evelyne)',
-    MESSY_HANDWRITTEN: 'var(--font-pro-messy-handwritten)',
-    LOVE_LIGHT: 'var(--font-pro-love-light)',
-    CLICKER_SCRIPT: 'var(--font-pro-clicker-script)',
-    TANGERINE: 'var(--font-pro-tangerine)',
-    SAHIR_YESTA: 'var(--font-pro-sahir-yesta)',
-    GISTA_DANES: 'var(--font-pro-gista-danes)',
-    A_YUMMY_APOLOGY: 'var(--font-pro-a-yummy-apology)',
-    PRINCESS_SOFIA: 'var(--font-pro-princess-sofia)',
-    RAIN_KISS: 'var(--font-pro-rain-kiss)',
+    ROBOTO: 'var(--font-vip-roboto)',
+    PETIT_FORMAL_SCRIPT: 'var(--font-vip-petit-formal-script)',
+    ITALIANNO: 'var(--font-vip-italianno)',
+    KABLAMMO: 'var(--font-vip-kablammo)',
+    CRAFTY_GIRLS: 'var(--font-vip-crafty-girls)',
+    EMILYS_CANDY: 'var(--font-vip-emilys-candy)',
+    EVELYNE: 'var(--font-vip-evelyne)',
+    MESSY_HANDWRITTEN: 'var(--font-vip-messy-handwritten)',
+    LOVE_LIGHT: 'var(--font-vip-love-light)',
+    CLICKER_SCRIPT: 'var(--font-vip-clicker-script)',
+    TANGERINE: 'var(--font-vip-tangerine)',
+    SAHIR_YESTA: 'var(--font-vip-sahir-yesta)',
+    GISTA_DANES: 'var(--font-vip-gista-danes)',
+    A_YUMMY_APOLOGY: 'var(--font-vip-a-yummy-apology)',
+    PRINCESS_SOFIA: 'var(--font-vip-princess-sofia)',
+    RAIN_KISS: 'var(--font-vip-rain-kiss)',
 };
 
 /** Only allow shipped families; never interpolate CSS received from the API. */

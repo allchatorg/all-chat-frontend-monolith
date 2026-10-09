@@ -58,7 +58,7 @@ export default function MessageReactionsPanel() {
                     {!hasMembers ? <p className="py-8 text-center text-sm text-muted-foreground">No reactions yet</p> : loading ? <><span className="sr-only">Loading users</span>{[0, 1, 2].map(i => <Skeleton key={i} className="h-10 w-full"/>)}</>
                         : error ? <div role="alert" className="text-sm"><p>Could not load reactions.</p><button type="button" className="mt-2 underline" onClick={loadDetails}>Try again</button></div>
                         : selected.users?.length ? selected.users.map(reactor => <div key={reactor.id} className="glass-surface rounded-lg p-3">
-                            <p className="truncate text-sm font-medium"><ChatUserName userId={reactor.id} username={reactor.username} proBadgeVisible={reactor.proBadgeVisible} proBadgeRevision={reactor.proBadgeRevision} usernameFont={reactor.usernameFont} messageFont={reactor.messageFont} fontRevision={reactor.fontRevision}/></p>
+                            <p className="truncate text-sm font-medium"><ChatUserName userId={reactor.id} username={reactor.username} vipBadgeVisible={reactor.vipBadgeVisible} vipBadgeRevision={reactor.vipBadgeRevision} usernameFont={reactor.usernameFont} messageFont={reactor.messageFont} fontRevision={reactor.fontRevision}/></p>
                         </div>) : <p className="py-8 text-center text-sm text-muted-foreground">No reactions yet</p>}
                 </div></ScrollArea>
             </> : <p className="p-6 text-sm text-muted-foreground">Select a reaction to view details</p>}

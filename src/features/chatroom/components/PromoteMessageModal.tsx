@@ -1,7 +1,7 @@
 "use client";
 
 import {useRoomParticipation} from "@/lib/hooks/useRoomParticipation";
-import {RoomProBadge} from "@/components/RoomProBadge";
+import {RoomVipBadge} from "@/components/RoomVipBadge";
 import React, {useState} from "react";
 import {useRouter} from "next/navigation";
 import {Button} from "@/components/ui/button";
@@ -34,7 +34,7 @@ interface PromoteMessageModalProps {
 // the portal. PaymentMethodSelector brings its own Stripe <Elements> for the
 // nested AddCardForm dialog, so no outer Stripe provider is needed here.
 export const PromoteMessageModal: React.FC<PromoteMessageModalProps> = ({message}) => {
-    const participationDisabled = useRoomParticipation(message.chatRoomId, message.chatRoomProOnly);
+    const participationDisabled = useRoomParticipation(message.chatRoomId, message.chatRoomVipOnly);
     const {close} = useDialog();
     const router = useRouter();
     const [currentStep, setCurrentStep] = useState(0);
@@ -65,7 +65,7 @@ export const PromoteMessageModal: React.FC<PromoteMessageModalProps> = ({message
     };
 
     if (participationDisabled && !isSuccess) {
-        return <div className="space-y-4 py-4"><RoomProBadge proOnly/>
+        return <div className="space-y-4 py-4"><RoomVipBadge vipOnly/>
             <p className="text-sm text-muted-foreground">VIP is required to promote content in this room. You can still read and report.</p>
             <Button className="min-h-11" onClick={close}>Back to chat</Button>
         </div>;
@@ -111,7 +111,7 @@ export const PromoteMessageModal: React.FC<PromoteMessageModalProps> = ({message
                             <p className="font-semibold text-foreground">Shown in this room&apos;s sidebar</p>
                             <p className="text-muted-foreground">
                                 Your message is listed in the Promoted Messages sidebar of{" "}
-                                <span className="inline-flex max-w-full items-center gap-1.5 align-middle"><span className="min-w-0 truncate font-medium text-foreground">{message.chatRoomName}</span><RoomProBadge proOnly={message.chatRoomProOnly}/></span> only,
+                                <span className="inline-flex max-w-full items-center gap-1.5 align-middle"><span className="min-w-0 truncate font-medium text-foreground">{message.chatRoomName}</span><RoomVipBadge vipOnly={message.chatRoomVipOnly}/></span> only,
                                 with a PROMOTED badge once approved.
                             </p>
                         </div>
@@ -189,7 +189,7 @@ export const PromoteMessageModal: React.FC<PromoteMessageModalProps> = ({message
                             <div className="space-y-2 text-sm">
                                 <div className="flex justify-between">
                                     <span className="text-muted-foreground">Room</span>
-                                    <span className="inline-flex max-w-full items-center gap-1.5 align-middle"><span className="min-w-0 truncate font-medium text-foreground">{message.chatRoomName}</span><RoomProBadge proOnly={message.chatRoomProOnly}/></span>
+                                    <span className="inline-flex max-w-full items-center gap-1.5 align-middle"><span className="min-w-0 truncate font-medium text-foreground">{message.chatRoomName}</span><RoomVipBadge vipOnly={message.chatRoomVipOnly}/></span>
                                 </div>
                                 <div className="pt-2 border-t border-border flex justify-between items-center">
                                     <span className="font-bold text-foreground">Total</span>

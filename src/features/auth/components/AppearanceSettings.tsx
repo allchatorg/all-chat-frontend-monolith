@@ -18,31 +18,31 @@ import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue} from '@/c
 import {ColorPicker} from '@/components/ColorPickerEditor';
 import {UserName} from '@/components/UserName';
 import {RoomTabOrderSettings} from './RoomTabOrderSettings';
-import {ProFontSettings} from './ProFontSettings';
-import {proErrorMessage, updateProAppearance} from '@/features/pro/api';
-import {notifyProChanged, syncProAppearance, useProSubscription} from '@/features/pro/useProSubscription';
+import {VipFontSettings} from './VipFontSettings';
+import {vipErrorMessage, updateVipAppearance} from '@/features/vip/api';
+import {notifyVipChanged, syncVipAppearance, useVipSubscription} from '@/features/vip/useVipSubscription';
 
-export function AppearanceSettings({isMobile = false, onExplorePro}: {isMobile?: boolean; onExplorePro?: () => void}) {
+export function AppearanceSettings({isMobile = false, onExploreVip}: {isMobile?: boolean; onExploreVip?: () => void}) {
     const user = useSelector(selectUser);
     const {theme, setTheme} = useTheme();
     const dispatch = useDispatch();
     const showAppBackground = useSelector((state: RootState) => state.settings.showAppBackground !== false);
     const [changeColor, changeColorLoading] = useThunk(updateUserDisplayColorThunk);
     const [savingBadge, setSavingBadge] = useState(false);
-    const {subscription, loading, error, refresh} = useProSubscription();
-    const proActive = subscription?.proActive ?? user?.proActive === true;
-    const showBadge = user?.showProBadge !== false;
+    const {subscription, loading, error, refresh} = useVipSubscription();
+    const vipActive = subscription?.vipActive ?? user?.vipActive === true;
+    const showBadge = user?.showVipBadge !== false;
 
-    const toggleBadge = async (showProBadge: boolean) => {
+    const toggleBadge = async (showVipBadge: boolean) => {
         if (!user) return;
         setSavingBadge(true);
         try {
-            const appearance = await updateProAppearance(showProBadge);
-            syncProAppearance(user.id, appearance);
-            notifyProChanged();
-            toast.success(showProBadge ? 'Your VIP badge is visible.' : 'Your VIP badge is hidden.');
+            const appearance = await updateVipAppearance(showVipBadge);
+            syncVipAppearance(user.id, appearance);
+            notifyVipChanged();
+            toast.success(showVipBadge ? 'Your VIP badge is visible.' : 'Your VIP badge is hidden.');
         } catch (failure) {
-            toast.error(proErrorMessage(failure));
+            toast.error(vipErrorMessage(failure));
         } finally {
             setSavingBadge(false);
         }
@@ -62,14 +62,14 @@ export function AppearanceSettings({isMobile = false, onExplorePro}: {isMobile?:
             if (!user) return;
             changeColor({userId: user.id, color}).then(() => toast.success('Display color updated.')).catch(() => toast.error('Could not update display color.'));
         }}/>
-        <ProFontSettings onExplorePro={onExplorePro}/>
+        <VipFontSettings onExploreVip={onExploreVip}/>
         <Card className="overflow-hidden border-violet-200 dark:border-violet-900">
             <CardHeader><CardTitle className="flex items-center gap-2"><Diamond className="h-5 w-5 text-violet-500"/>VIP badge</CardTitle><CardDescription>A little extra next to your name. You decide when it shows.</CardDescription></CardHeader>
             <CardContent className="space-y-5">
-                <div className="rounded-xl bg-muted/50 p-4"><p className="mb-2 text-xs font-medium text-muted-foreground">Username preview</p><div className="min-w-0 font-semibold"><UserName userId={user?.id} username={user?.username || 'Your username'} usernameFont={user?.usernameFont} messageFont={user?.messageFont} fontRevision={user?.fontRevision} proBadgeVisible={proActive && showBadge} proBadgeRevision={user?.proBadgeRevision} className="max-w-full"/></div></div>
-                <div className="flex items-center justify-between gap-4"><div><Label htmlFor="show-pro-badge">Show my VIP badge</Label><p className="mt-1 text-xs leading-5 text-muted-foreground">Visible beside your username throughout allchat.</p></div><div className="flex items-center gap-2">{savingBadge && <Loader2 aria-label="Saving" className="h-4 w-4 animate-spin"/>}<Switch id="show-pro-badge" checked={showBadge} disabled={!proActive || loading || savingBadge || !!error} onCheckedChange={checked => void toggleBadge(checked)}/></div></div>
+                <div className="rounded-xl bg-muted/50 p-4"><p className="mb-2 text-xs font-medium text-muted-foreground">Username preview</p><div className="min-w-0 font-semibold"><UserName userId={user?.id} username={user?.username || 'Your username'} usernameFont={user?.usernameFont} messageFont={user?.messageFont} fontRevision={user?.fontRevision} vipBadgeVisible={vipActive && showBadge} vipBadgeRevision={user?.vipBadgeRevision} className="max-w-full"/></div></div>
+                <div className="flex items-center justify-between gap-4"><div><Label htmlFor="show-vip-badge">Show my VIP badge</Label><p className="mt-1 text-xs leading-5 text-muted-foreground">Visible beside your username throughout allchat.</p></div><div className="flex items-center gap-2">{savingBadge && <Loader2 aria-label="Saving" className="h-4 w-4 animate-spin"/>}<Switch id="show-vip-badge" checked={showBadge} disabled={!vipActive || loading || savingBadge || !!error} onCheckedChange={checked => void toggleBadge(checked)}/></div></div>
                 {error && <p role="alert" className="text-sm text-destructive dark:text-red-300">Could not load your VIP preferences. <button className="underline" onClick={() => void refresh()}>Try again</button></p>}
-                {!loading && !proActive && !error && <div className="border-t pt-4"><p className="text-sm text-muted-foreground">The badge is included with allchat VIP.</p>{onExplorePro && <Button variant="link" className="px-0 text-violet-600 dark:text-violet-300" onClick={onExplorePro}>Explore allchat VIP</Button>}</div>}
+                {!loading && !vipActive && !error && <div className="border-t pt-4"><p className="text-sm text-muted-foreground">The badge is included with allchat VIP.</p>{onExploreVip && <Button variant="link" className="px-0 text-violet-600 dark:text-violet-300" onClick={onExploreVip}>Explore allchat VIP</Button>}</div>}
             </CardContent>
         </Card>
     </div>;

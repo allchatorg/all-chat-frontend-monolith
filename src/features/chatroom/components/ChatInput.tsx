@@ -33,7 +33,7 @@ import OnionLinkWarning from "@/features/chatroom/components/OnionLinkWarning";
 import {Message} from "@/models/message";
 import {useIsMobile} from "@/lib/hooks/useIsMobile";
 import {ChatExpressionPicker} from "@/features/chatroom/components/ChatExpressionPicker";
-import {getSticker, getStickerLabel, ProReaction} from "@/features/stickers/catalog";
+import {getSticker, getStickerLabel, VipReaction} from "@/features/stickers/catalog";
 import imageCompression from "browser-image-compression";
 import {getAccountLimits, getAttachmentByteLimit} from "@/lib/accountLimits";
 
@@ -361,7 +361,7 @@ const ChatInput: React.FC<ChatInputProps> = ({
         stopDictation();
         try {
             // Keep the draft and uploaded attachment until the server accepts
-            // them: Pro can expire between the last refresh and this request.
+            // them: VIP can expire between the last refresh and this request.
             await onSendMessage(inputText.trim() ? inputText : "", attachmentToSend, editingMessage?.id);
             if (!mountedRef.current || context.editingId !== composerContextRef.current.editingId ||
                 (composerContextRef.current.replyingId !== undefined && context.replyingId !== composerContextRef.current.replyingId)) return;
@@ -390,7 +390,7 @@ const ChatInput: React.FC<ChatInputProps> = ({
         }
     };
 
-    const handleSendSticker = async (sticker: ProReaction) => {
+    const handleSendSticker = async (sticker: VipReaction) => {
         if (sendingRef.current || isCooldown) throw new Error('Please wait before sending another message.');
         if (!isConnected) throw new Error(disabledReason || 'Not connected');
         if (messageSendingBlocked) throw new Error(messageSendingDisabledReason);
@@ -751,7 +751,7 @@ const ChatInput: React.FC<ChatInputProps> = ({
                     <span
                         className="min-w-0 max-w-[40%] font-medium"
                     >
-                        <ChatUserName userId={replyingToMessage.senderId} username={replyingToMessage.senderUsername} proBadgeVisible={replyingToMessage.senderProBadgeVisible} proBadgeRevision={replyingToMessage.senderProBadgeRevision} usernameFont={replyingToMessage.senderUsernameFont} messageFont={replyingToMessage.senderMessageFont} fontRevision={replyingToMessage.senderFontRevision}/>
+                        <ChatUserName userId={replyingToMessage.senderId} username={replyingToMessage.senderUsername} vipBadgeVisible={replyingToMessage.senderVipBadgeVisible} vipBadgeRevision={replyingToMessage.senderVipBadgeRevision} usernameFont={replyingToMessage.senderUsernameFont} messageFont={replyingToMessage.senderMessageFont} fontRevision={replyingToMessage.senderFontRevision}/>
                     </span>
                     {replyingToMessage.attachments?.length > 0 && (
                         <Paperclip className="h-3 w-3 shrink-0" aria-label="Attachment"/>

@@ -2,14 +2,14 @@
 
 import {useId, useRef} from 'react';
 import {useDialog} from '@/components/providers/DialogProvider';
-import {ProDialog, type ProDialogOptions} from './ProDialog';
+import {VipDialog, type VipDialogOptions} from './VipDialog';
 
-export function useProDialog(options: ProDialogOptions = {}) {
+export function useVipDialog(options: VipDialogOptions = {}) {
     const {open} = useDialog();
     const instanceId = useId();
     const opening = useRef(0);
 
-    return () => open(<ProDialog key={`${instanceId}-${++opening.current}`} {...options}/>, {
+    return () => open(<VipDialog key={`${instanceId}-${++opening.current}`} {...options}/>, {
         title: 'allchat VIP',
         focusContent: true,
         allowStripe: true,

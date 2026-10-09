@@ -1,11 +1,11 @@
-export type ProStatisticsDays = 7 | 30 | 90;
+export type VipStatisticsDays = 7 | 30 | 90;
 
-export interface ProReportingSynchronization {
+export interface VipReportingSynchronization {
     status: 'CURRENT' | 'CATCHING_UP' | 'INCOMPLETE' | 'UNAVAILABLE';
     lastSynchronizedAt: string | null;
 }
 
-export interface ProStatisticsDailyPoint {
+export interface VipStatisticsDailyPoint {
     date: string;
     revenue: number;
     initialPayments: number;
@@ -13,8 +13,8 @@ export interface ProStatisticsDailyPoint {
     otherPayments: number;
 }
 
-export interface ProStatistics {
-    synchronization: ProReportingSynchronization;
+export interface VipStatistics {
+    synchronization: VipReportingSynchronization;
     memberships: {
         active: number;
         monthly: number;
@@ -28,5 +28,5 @@ export interface ProStatistics {
         yesterday: number;
         total: number;
     };
-    daily: ProStatisticsDailyPoint[];
+    daily: VipStatisticsDailyPoint[];
 }
