@@ -25,7 +25,7 @@ const benefits: {label: string; basic: ReactNode; pro: ReactNode}[] = [
     {label: 'Exclusive Pro badge', basic: false, pro: true},
     {label: 'Show or hide your Pro badge', basic: false, pro: true},
     {label: 'Username & message font presets', basic: false, pro: `${ACCOUNT_LIMITS.proDailyFontSaves} saves per day`},
-    {label: 'Exclusive stickers, custom emojis & reactions', basic: false, pro: `${PRO_REACTIONS.length} characters`},
+    {label: 'Exclusive stickers, custom emojis & reactions', basic: false, pro: `${PRO_REACTIONS.length} Catpuss designs`},
 ];
 
 function ComparisonValue({value}: {value: ReactNode}) {
@@ -98,14 +98,14 @@ export function ProBenefits({username}: {username: string}) {
                 </article>
                 <article className="overflow-hidden rounded-2xl border border-blue-200 bg-card dark:border-blue-500/30">
                     <div aria-hidden="true" className="flex h-36 items-center justify-center gap-3 overflow-hidden bg-sky-50 px-5 dark:bg-sky-950/20">
-                        {PRO_REACTIONS.filter(character => ['pepe', 'wojak', 'gondola'].includes(character.id)).map(character => (
-                            <Image key={character.id} src={character.src} alt="" width={76} height={76} unoptimized className="h-16 w-16 object-contain sm:h-20 sm:w-20"/>
+                        {PRO_REACTIONS.filter(sticker => ['catpuss-cheer', 'catpuss-love', 'catpuss-typing'].includes(sticker.id)).map(sticker => (
+                            <Image key={sticker.id} src={sticker.src} alt="" width={76} height={76} unoptimized className="h-16 w-16 object-contain sm:h-20 sm:w-20"/>
                         ))}
                     </div>
                     <div className="p-5">
                         <p className="flex items-center gap-1 text-[10px] font-bold uppercase tracking-widest text-blue-600 dark:text-blue-300"><Smile className="h-3 w-3"/>Pro exclusive</p>
                         <h3 className="mt-2 font-bold">A familiar face for every feeling.</h3>
-                        <p className="mt-2 text-sm leading-6 text-muted-foreground">Unlock {PRO_REACTIONS.length} exclusive characters. Send them as stickers, add them as custom emojis in your messages, or use them to react.</p>
+                        <p className="mt-2 text-sm leading-6 text-muted-foreground">Unlock {PRO_REACTIONS.length} exclusive Catpuss designs. Send them as stickers, add them as custom emojis in your messages, or use them to react.</p>
                     </div>
                 </article>
                 <article className="overflow-hidden rounded-2xl border border-blue-200 bg-card dark:border-blue-500/30">
