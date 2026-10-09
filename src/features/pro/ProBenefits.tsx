@@ -112,7 +112,7 @@ export function ProBenefits({username}: {username: string}) {
                     <div aria-hidden="true" className="flex h-36 items-center justify-center overflow-hidden bg-sky-50 px-5 dark:bg-sky-950/20">
                         <div className="min-w-0 -rotate-3 rounded-2xl border border-sky-200/60 bg-white px-6 py-4 text-slate-900 shadow-lg shadow-sky-900/5">
                             <p className="max-w-48 truncate text-sm font-bold" style={fontPresetStyle('ROBOTO')}>{username}</p>
-                            <p className="mt-2 text-2xl" style={fontPresetStyle('CRAFTY_GIRLS')}>Make yourself at home.</p>
+                            <p className="mt-2 text-2xl" style={fontPresetStyle('EMILYS_CANDY')}>Say it with a little love.</p>
                         </div>
                     </div>
                     <div className="p-5">
