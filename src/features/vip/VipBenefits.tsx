@@ -2,7 +2,7 @@ import type {ReactNode} from 'react';
 import Image from 'next/image';
 import {VIP_REACTIONS} from '@/features/stickers/catalog';
 import {fontPresetStyle} from '@/lib/fontPresets';
-import {Check, CloudUpload, Diamond, MessageCircle, Minus, Smile, Sparkles, Type} from 'lucide-react';
+import {Check, CloudUpload, Diamond, MegaphoneOff, MessageCircle, Minus, Smile, Sparkles, Type} from 'lucide-react';
 import {VipBadge} from '@/components/VipBadge';
 import {ACCOUNT_LIMITS} from '@/lib/accountLimits';
 
@@ -22,6 +22,7 @@ const benefits: {label: string; basic: ReactNode; vip: ReactNode}[] = [
     {label: 'Emoji reactions & replies', basic: true, vip: true},
     {label: 'Light & dark themes', basic: true, vip: true},
     {label: 'VIP-only chatrooms', basic: 'Read and report', vip: 'Create and participate'},
+    {label: 'Ad-free chatrooms', basic: false, vip: true},
     {label: 'Exclusive VIP badge', basic: false, vip: true},
     {label: 'Show or hide your VIP badge', basic: false, vip: true},
     {label: 'Username & message font presets', basic: false, vip: `${ACCOUNT_LIMITS.vipDailyFontSaves} saves per day`},
@@ -41,7 +42,7 @@ export function VipBenefits({username}: {username: string}) {
             <div className="mb-6 text-center">
                 <p className="text-xs font-bold uppercase tracking-[0.18em] text-blue-600 dark:text-blue-300">More space for every conversation</p>
                 <h2 id="vip-benefits-heading" className="mt-2 text-2xl font-extrabold tracking-tight">Share more with allchat VIP.</h2>
-                <p className="mx-auto mt-2 max-w-md text-sm leading-6 text-muted-foreground">Basic includes public chatrooms, media sharing, reactions, and themes. VIP adds higher limits, VIP-only chatrooms, custom fonts, exclusive stickers and emojis, and your own badge.</p>
+                <p className="mx-auto mt-2 max-w-md text-sm leading-6 text-muted-foreground">Basic includes public chatrooms, media sharing, reactions, and themes. VIP adds higher limits, VIP-only chatrooms, ad-free chatrooms, custom fonts, exclusive stickers and emojis, and your own badge.</p>
             </div>
             <div className="grid gap-4 sm:grid-cols-2">
                 <article className="overflow-hidden rounded-2xl border bg-card">
@@ -119,6 +120,20 @@ export function VipBenefits({username}: {username: string}) {
                         <p className="flex items-center gap-1 text-[10px] font-bold uppercase tracking-widest text-blue-600 dark:text-blue-300"><Type className="h-3 w-3"/>VIP exclusive</p>
                         <h3 className="mt-2 font-bold">Make your words your own.</h3>
                         <p className="mt-2 text-sm leading-6 text-muted-foreground">Choose classic, playful, or handwritten fonts for your username and messages in Appearance. Save your choices up to {ACCOUNT_LIMITS.vipDailyFontSaves} times per day; the allowance resets at midnight UTC.</p>
+                    </div>
+                </article>
+                <article className="overflow-hidden rounded-2xl border border-blue-200 bg-card dark:border-blue-500/30 sm:col-span-2">
+                    <div aria-hidden="true" className="flex h-36 items-center justify-center overflow-hidden bg-blue-50 px-6 dark:bg-blue-950/40">
+                        <div className="flex w-64 -rotate-2 flex-col gap-2">
+                            <div className="self-start rounded-2xl rounded-bl-sm bg-blue-600 px-4 py-2 text-sm font-semibold text-white shadow-lg shadow-blue-900/10">Where were we?</div>
+                            <div className="flex items-center gap-1.5 self-center rounded-full border border-dashed border-blue-300 px-3 py-1 text-[10px] font-bold uppercase tracking-widest text-blue-400 line-through dark:border-blue-500/50"><MegaphoneOff className="h-3 w-3"/>Sponsored</div>
+                            <div className="self-end rounded-2xl rounded-br-sm border border-blue-100 bg-white px-4 py-2 text-sm font-semibold text-blue-700 shadow-lg shadow-blue-900/10">Right where we left off.</div>
+                        </div>
+                    </div>
+                    <div className="p-5">
+                        <p className="flex items-center gap-1 text-[10px] font-bold uppercase tracking-widest text-blue-600 dark:text-blue-300"><MegaphoneOff className="h-3 w-3"/>VIP exclusive</p>
+                        <h3 className="mt-2 font-bold">Just your conversations.</h3>
+                        <p className="mt-2 text-sm leading-6 text-muted-foreground">No ads in your chatrooms. VIP keeps every feed about the people you&apos;re talking to.</p>
                     </div>
                 </article>
             </div>

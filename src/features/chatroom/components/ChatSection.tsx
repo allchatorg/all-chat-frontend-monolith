@@ -83,6 +83,8 @@ const ChatSection: React.FC<ChatSectionProps> = ({
     const messagingAvailability = useSelector(selectMessagingAvailability);
     const messagingDisabledReason = messagingAvailability.disabledReason ?? "Messaging is temporarily disabled until a moderator is online.";
     const participationDisabled = Boolean(chatRoom?.vipOnly && !user?.vipActive);
+    // VIP is ad-free: no fetching, and any persisted ad is dropped at render time.
+    const adsEnabled = user?.vipActive !== true;
     React.useEffect(() => {
         if (participationDisabled) {
             dispatch(setEditingMessage(null));
@@ -152,7 +154,7 @@ const ChatSection: React.FC<ChatSectionProps> = ({
     }, [composerDisabled, dispatch, replyingToMessage]);
 
     useEffect(() => {
-        if (!user || !chatRoom) return;
+        if (!user || !chatRoom || !adsEnabled) return;
 
         if (!isVisible) return;
 
@@ -172,13 +174,13 @@ const ChatSection: React.FC<ChatSectionProps> = ({
         const intervalId = setInterval(fetchAndSetAd, 10000);
 
         return () => clearInterval(intervalId);
-    }, [user?.id, chatRoom?.id, chatRoom?.name, isVisible]);
+    }, [user?.id, chatRoom?.id, chatRoom?.name, isVisible, adsEnabled]);
 
     useEffect(() => {
-        if (!user || !chatRoom || !isVisible || !currentAd) return;
+        if (!user || !chatRoom || !isVisible || !currentAd || !adsEnabled) return;
 
         void getAdRef.current(chatRoom, {fetchIfNeeded: false});
-    }, [user?.id, chatRoom?.id, isVisible, currentAd?.id, messagePlacementSignature]);
+    }, [user?.id, chatRoom?.id, isVisible, currentAd?.id, messagePlacementSignature, adsEnabled]);
 
 
     const hiddenAdIds = useSelector(selectHiddenAdIds);
@@ -193,8 +195,8 @@ const ChatSection: React.FC<ChatSectionProps> = ({
     // chatRoom.messages never drop and re-insert it (no layout shift).
     const renderedMessages = React.useMemo(() => {
         if (!chatRoom) return [];
-        return composeMessagesWithAd(chatRoom, currentAd, adPlacement, hiddenAdIds);
-    }, [chatRoom, currentAd, adPlacement, hiddenAdIds]);
+        return composeMessagesWithAd(chatRoom, adsEnabled ? currentAd : null, adPlacement, hiddenAdIds);
+    }, [chatRoom, currentAd, adPlacement, hiddenAdIds, adsEnabled]);
 
     // Track the advert at the tail of the rendered list; when it appears (ad arrives
     // after the initial scroll-to-bottom) and the user is at the bottom, follow it.
