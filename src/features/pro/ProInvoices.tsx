@@ -15,7 +15,7 @@ function paymentMonthLabel(value: string) {
     const created = new Date(value);
     return Number.isFinite(created.valueOf())
         ? created.toLocaleDateString(undefined, {month: 'long', year: 'numeric'})
-        : 'Pro subscription';
+        : 'VIP subscription';
 }
 
 export function ProInvoices({onChanged, pendingInvoiceId}: {onChanged: () => Promise<unknown>; pendingInvoiceId: string | null}) {

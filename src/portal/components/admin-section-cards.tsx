@@ -96,7 +96,7 @@ export function AdminSectionCards() {
                     value={totalToday === null ? 'Unavailable' : formatUsd(totalToday)}
                     {...totalTrend}
                     footerText={totalYesterday !== null ? 'Compared to yesterday' : ''}
-                    description={totalUnavailable ? 'One or more revenue sources could not be loaded' : 'Ads, message and room promotions, and allchat Pro'}
+                    description={totalUnavailable ? 'One or more revenue sources could not be loaded' : 'Ads, message and room promotions, and allchat VIP'}
                     compact
                 />
             )}

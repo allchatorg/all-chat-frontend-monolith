@@ -13,7 +13,7 @@ const chartConfig = {
     revenue: {label: 'Ad revenue', color: '#2563eb'},
     promotedRevenue: {label: 'Message promotions', color: '#ea580c'},
     roomPromotedRevenue: {label: 'Room promotions', color: '#a855f7'},
-    subscriptionRevenue: {label: 'allchat Pro', color: '#059669'},
+    subscriptionRevenue: {label: 'allchat VIP', color: '#059669'},
 };
 
 interface RevenuePoint {

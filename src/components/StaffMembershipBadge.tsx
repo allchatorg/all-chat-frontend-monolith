@@ -25,7 +25,7 @@ export function StaffMembershipBadge({proActive, role, loading = false}: StaffMe
             aria-busy={loading}
         >
             {proActive && <Diamond aria-hidden="true" className="h-3 w-3"/>}
-            {proActive ? role && isStaff(role) ? "allchat Pro · Staff access" : "allchat Pro · Paid member" : "Basic"}
+            {proActive ? role && isStaff(role) ? "allchat VIP · Staff access" : "allchat VIP · Paid member" : "Basic"}
         </Badge>
     );
 }

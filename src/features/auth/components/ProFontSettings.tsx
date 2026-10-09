@@ -135,7 +135,7 @@ function FontSettingsForm({userId, username, proActive, showProBadge, onExploreP
     return <Card className="overflow-hidden border-violet-200 dark:border-violet-900">
         <CardHeader>
             <CardTitle className="flex items-center gap-2"><Type className="h-5 w-5 text-violet-500"/>Fonts</CardTitle>
-            <CardDescription>Give your username and messages a little more personality with allchat Pro.</CardDescription>
+            <CardDescription>Give your username and messages a little more personality with allchat VIP.</CardDescription>
         </CardHeader>
         <CardContent className="space-y-5">
             <div className="grid gap-4 sm:grid-cols-2">
@@ -169,10 +169,10 @@ function FontSettingsForm({userId, username, proActive, showProBadge, onExploreP
             {settings && <div className="space-y-3 border-t pt-4">
                 <p role="status" className="text-xs leading-5 text-muted-foreground">{settings.changesRemaining} of {settings.dailyLimit} font changes remaining today. Resets at midnight UTC.</p>
                 {settings.proActive ? <Button className="w-full sm:w-auto" disabled={!canSave} onClick={() => void save()}>{saving && <Loader2 className="mr-2 h-4 w-4 animate-spin"/>}{saving ? 'Saving…' : 'Save fonts'}</Button> : <div className="space-y-2">
-                    <p className="text-sm text-muted-foreground">Save your fonts with allchat Pro. Both fonts return to Default when your Pro access ends.</p>
-                    {onExplorePro && <Button variant="outline" className="w-full sm:w-auto" onClick={onExplorePro}><Diamond className="mr-2 h-4 w-4 text-violet-500"/>Explore allchat Pro</Button>}
+                    <p className="text-sm text-muted-foreground">Save your fonts with allchat VIP. Both fonts return to Default when your VIP access ends.</p>
+                    {onExplorePro && <Button variant="outline" className="w-full sm:w-auto" onClick={onExplorePro}><Diamond className="mr-2 h-4 w-4 text-violet-500"/>Explore allchat VIP</Button>}
                 </div>}
-                {settings.proActive && <p className="text-xs leading-5 text-muted-foreground">Both fonts return to Default when your Pro access ends.</p>}
+                {settings.proActive && <p className="text-xs leading-5 text-muted-foreground">Both fonts return to Default when your VIP access ends.</p>}
             </div>}
         </CardContent>
     </Card>;

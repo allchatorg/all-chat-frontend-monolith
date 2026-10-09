@@ -96,7 +96,7 @@ export function UsersTable({
                                 <Button
                                     variant="ghost"
                                     onClick={() => toggleSort("totalSpent")}
-                                    title="Ads, message promotions, room promotions, and allchat Pro payments, after refunds"
+                                    title="Ads, message promotions, room promotions, and allchat VIP payments, after refunds"
                                     className="-ml-4 h-8 data-[state=open]:bg-accent"
                                 >
                                     Total Spent

@@ -66,7 +66,7 @@ export const PromoteMessageModal: React.FC<PromoteMessageModalProps> = ({message
 
     if (participationDisabled && !isSuccess) {
         return <div className="space-y-4 py-4"><RoomProBadge proOnly/>
-            <p className="text-sm text-muted-foreground">PRO is required to promote content in this room. You can still read and report.</p>
+            <p className="text-sm text-muted-foreground">VIP is required to promote content in this room. You can still read and report.</p>
             <Button className="min-h-11" onClick={close}>Back to chat</Button>
         </div>;
     }

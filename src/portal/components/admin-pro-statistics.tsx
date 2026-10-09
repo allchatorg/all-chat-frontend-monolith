@@ -29,7 +29,7 @@ function ProMetricCard({title, value, description}: {title: string; value: strin
 
 function ProChart({daily}: {daily: ProStatisticsDailyPoint[]}) {
     return (
-        <ChartContainer config={revenueConfig} className="aspect-auto h-[250px] w-full" aria-label="allchat Pro revenue by day">
+        <ChartContainer config={revenueConfig} className="aspect-auto h-[250px] w-full" aria-label="allchat VIP revenue by day">
             <AreaChart data={daily} accessibilityLayer margin={{top: 12}}>
                 <defs>
                     <linearGradient id="fillSubscriptionRevenue" x1="0" y1="0" x2="0" y2="1">
@@ -88,7 +88,7 @@ export function AdminProStatistics() {
     return (
         <section className="space-y-4 px-4 lg:px-6" aria-labelledby="pro-statistics-heading">
             <div>
-                <h2 id="pro-statistics-heading" className="text-lg font-semibold">allchat Pro</h2>
+                <h2 id="pro-statistics-heading" className="text-lg font-semibold">allchat VIP</h2>
                 <p className="text-sm text-muted-foreground">Current paid memberships and subscription payments.</p>
             </div>
             {syncMessage && (
@@ -100,7 +100,7 @@ export function AdminProStatistics() {
             {!loading && unavailable ? (
                 <Card>
                     <CardContent className="flex flex-wrap items-center justify-between gap-3" role="alert">
-                        <p className="text-sm text-muted-foreground">allchat Pro statistics are unavailable.</p>
+                        <p className="text-sm text-muted-foreground">allchat VIP statistics are unavailable.</p>
                         <Button size="sm" variant="outline" onClick={() => refetch()} disabled={isFetching}>Retry</Button>
                     </CardContent>
                 </Card>

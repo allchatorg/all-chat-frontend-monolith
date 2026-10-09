@@ -31,7 +31,7 @@ interface SearchRoomsResultsProps {
 
 const PRO_FILTER_EMPTY_LABEL: Record<RoomProFilter, string> = {
     all: "rooms",
-    pro: "PRO-only rooms",
+    pro: "VIP-only rooms",
     standard: "standard rooms",
 };
 
@@ -54,7 +54,7 @@ const SearchRoomsResults: React.FC<SearchRoomsResultsProps> = ({
                   className="mb-3">
                 <TabsList aria-label="Filter rooms by type" className="glass-surface grid w-full grid-cols-3">
                     <TabsTrigger value="all">All</TabsTrigger>
-                    <TabsTrigger value="pro">PRO only</TabsTrigger>
+                    <TabsTrigger value="pro">VIP only</TabsTrigger>
                     <TabsTrigger value="standard">Standard</TabsTrigger>
                 </TabsList>
             </Tabs>

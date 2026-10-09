@@ -52,7 +52,7 @@ const recentStorageKey = 'allchat.emoji-browser.recents.v1';
 const toneStorageKey = 'allchat.emoji-browser.skin-tone.v1';
 const categoryDetails: Record<string, {name: string; Icon: typeof Smile}> = {
     recent: {name: 'Recent', Icon: Clock},
-    pro: {name: 'allchat Pro', Icon: Sparkles},
+    pro: {name: 'allchat VIP', Icon: Sparkles},
     people: {name: 'Smileys & people', Icon: Smile},
     nature: {name: 'Animals & nature', Icon: Leaf},
     foods: {name: 'Food & drink', Icon: Apple},
@@ -81,7 +81,7 @@ const searchableUnicode = new Map(Object.values(emojiData.emojis).map(emoji => [
         ...emoji.skins.map(skin => getEmojiShortcode({kind: 'unicode', id: emoji.id, native: skin.native})),
         ...emoji.skins.map(skin => skin.native)].join(' ').toLocaleLowerCase().replaceAll('_', ' ')]));
 const searchableCustom = new Map(PRO_REACTIONS.map(emoji => [emoji.id,
-    ['allchat Pro', emoji.id, getEmojiShortcode({kind: 'custom', id: emoji.id}), emoji.name, ...emoji.tags].join(' ').toLocaleLowerCase().replaceAll('_', ' ')]));
+    ['allchat VIP', 'pro', emoji.id, getEmojiShortcode({kind: 'custom', id: emoji.id}), emoji.name, ...emoji.tags].join(' ').toLocaleLowerCase().replaceAll('_', ' ')]));
 
 function selectionKey(selection: EmojiSelection): string {
     return selection.kind === 'custom' ? `custom:${selection.id}` : `unicode:${selection.id}:${selection.native}`;
@@ -147,7 +147,7 @@ const EmojiGrid = memo(function EmojiGrid({section, headingId, focusedKey, busy,
                 const custom = entry.selection.kind === 'custom' ? customById.get(entry.selection.id) : undefined;
                 const selected = mode === 'reaction' && selectedReactionTokens?.has(reactionToken(entry.selection)) === true;
                 const locked = Boolean(custom) && !proActive && !selected;
-                const label = selected ? `Remove ${entry.name} reaction` : locked ? `${entry.name} emoji, unlock with allchat Pro`
+                const label = selected ? `Remove ${entry.name} reaction` : locked ? `${entry.name} emoji, unlock with allchat VIP`
                     : mode === 'reaction' ? `React with ${entry.name}` : `Insert ${entry.name} emoji`;
                 return <div key={entry.key} role="gridcell" aria-selected={mode === 'reaction' ? selected : undefined}>
                     <button type="button" data-emoji-button ref={element => {const key = `${section.id}:${entry.key}`; if (element) buttonRefs.current?.set(key, element); else buttonRefs.current?.delete(key);}}
@@ -215,7 +215,7 @@ export function EmojiBrowser({mode, proActive, selectedReactionTokens, pending =
         const recentEntries = recents.flatMap(selection => toEntry(selection) ?? []);
         return [
             ...(recentEntries.length ? [{id: 'recent', name: 'Recent', entries: recentEntries}] : []),
-            {id: 'pro', name: 'allchat Pro', entries: customEntries},
+            {id: 'pro', name: 'allchat VIP', entries: customEntries},
             ...nativeSections,
         ];
     }, [query, recents, tone]);
@@ -361,12 +361,12 @@ export function EmojiBrowser({mode, proActive, selectedReactionTokens, pending =
                     {mode === 'reaction' ? 'Shortcode' : 'Type'} <code className="select-text break-all font-mono text-[11px]">{previewShortcode}</code>
                 </p>
                 {(isSelected(preview) || isLocked(preview)) && <p className="mt-1 text-xs text-muted-foreground">
-                    {isSelected(preview) ? 'Select to remove your reaction.' : 'Unlock this emoji with allchat Pro.'}
+                    {isSelected(preview) ? 'Select to remove your reaction.' : 'Unlock this emoji with allchat VIP.'}
                 </p>}
             </div>
         </div>
         {!proActive && <div className="shrink-0 border-t border-violet-500/15 bg-violet-500/5 p-3">
-            <Button type="button" disabled={busy} onClick={onUpgrade} className="w-full gap-2 bg-violet-600 text-white hover:bg-violet-700"><Diamond aria-hidden="true" className="h-4 w-4"/>Unlock with allchat Pro</Button>
+            <Button type="button" disabled={busy} onClick={onUpgrade} className="w-full gap-2 bg-violet-600 text-white hover:bg-violet-700"><Diamond aria-hidden="true" className="h-4 w-4"/>Unlock with allchat VIP</Button>
         </div>}
     </div>;
 }

@@ -277,9 +277,9 @@ const ConversationView: React.FC<ConversationViewProps> = ({
                 <div role="status" className="glass-surface-strong -mx-2 flex flex-col items-start gap-3 rounded-b-xl border-t border-blue-400/20 px-4 py-4 sm:flex-row sm:items-center sm:justify-between">
                     <div className="min-w-0 space-y-2">
                         <RoomProBadge proOnly/>
-                        <p className="text-sm leading-relaxed text-muted-foreground">This is a PRO-only room. You can read messages and report content.</p>
+                        <p className="text-sm leading-relaxed text-muted-foreground">This is a VIP-only room. You can read messages and report content.</p>
                     </div>
-                    <Button type="button" onClick={openPro} className="min-h-11 w-full shrink-0 bg-blue-600 text-white hover:bg-blue-700 sm:w-auto">Get PRO</Button>
+                    <Button type="button" onClick={openPro} className="min-h-11 w-full shrink-0 bg-blue-600 text-white hover:bg-blue-700 sm:w-auto">Get VIP</Button>
                 </div>
             ) : isGuest ? (
                 <GuestBanner

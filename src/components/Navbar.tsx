@@ -248,7 +248,7 @@ export function Navbar() {
                 <div className="col-start-3 row-start-1 flex min-w-0 items-center justify-self-end">
                     {user && (
                         <div className="flex shrink-0 items-center gap-1 lg:gap-2">
-                            {!isStaffOrHigher && <Button onClick={openPro} aria-label="Explore allchat Pro" className={`${PRO_NAV_BUTTON_CLASS_NAME} hidden h-9 shrink-0 gap-2 px-3 lg:inline-flex`}><Diamond className="h-4 w-4"/><span><span className="hidden xl:inline">allchat </span>Pro</span></Button>}
+                            {!isStaffOrHigher && <Button onClick={openPro} aria-label="Explore allchat VIP" className={`${PRO_NAV_BUTTON_CLASS_NAME} hidden h-9 shrink-0 gap-2 px-3 lg:inline-flex`}><Diamond className="h-4 w-4"/><span><span className="hidden xl:inline">allchat </span>VIP</span></Button>}
                             <div className="hidden shrink-0 lg:flex items-center gap-2">
                                 {!isStaffOrHigher && (
                                     <Button
@@ -333,7 +333,7 @@ export function Navbar() {
                                         <DropdownMenuItem className="cursor-pointer gap-2 lg:hidden"
                                                           onSelect={() => afterMenuCloses(openPro)}>
                                             <Diamond className="h-4 w-4"/>
-                                            allchat Pro
+                                            allchat VIP
                                         </DropdownMenuItem>
                                     )}
                                     {isGuest && (

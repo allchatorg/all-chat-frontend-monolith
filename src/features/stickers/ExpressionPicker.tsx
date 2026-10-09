@@ -90,7 +90,7 @@ export function ExpressionPicker({tab, onTabChange, mode, proActive, selectedSti
                                     const selected = isSelected(sticker);
                                     const locked = !proActive && !selected;
                                     const label = selected ? `Remove ${sticker.name} reaction` : locked
-                                        ? `${sticker.name} sticker, unlock with allchat Pro`
+                                        ? `${sticker.name} sticker, unlock with allchat VIP`
                                         : mode === 'reaction' ? `Add ${sticker.name} reaction` : `Send ${sticker.name} sticker`;
                                     return <li key={sticker.id}>
                                         <button type="button" disabled={pending} aria-label={label}
@@ -117,12 +117,12 @@ export function ExpressionPicker({tab, onTabChange, mode, proActive, selectedSti
                     <div className="min-w-0 flex-1">
                         <p className="truncate text-sm font-semibold">{preview.name}</p>
                         <p className="mt-0.5 text-xs text-muted-foreground">{isSelected(preview) ? 'Select to remove your reaction.'
-                            : !proActive ? `Unlock ${PRO_REACTIONS.length} stickers with allchat Pro.`
+                            : !proActive ? `Unlock ${PRO_REACTIONS.length} stickers with allchat VIP.`
                             : mode === 'reaction' ? 'Select to react to this message.' : 'Select to send this sticker.'}</p>
                     </div>
                 </div>
                 {!proActive && <div className="shrink-0 border-t border-violet-500/15 bg-violet-500/5 p-3">
-                    <Button type="button" disabled={pending} onClick={onUpgrade} className="w-full gap-2 bg-violet-600 text-white hover:bg-violet-700"><Diamond aria-hidden="true" className="h-4 w-4"/>Unlock with allchat Pro</Button>
+                    <Button type="button" disabled={pending} onClick={onUpgrade} className="w-full gap-2 bg-violet-600 text-white hover:bg-violet-700"><Diamond aria-hidden="true" className="h-4 w-4"/>Unlock with allchat VIP</Button>
                 </div>}
             </TabsContent>}
         </Tabs>

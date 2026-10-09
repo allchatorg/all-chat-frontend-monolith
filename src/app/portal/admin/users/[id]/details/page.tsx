@@ -67,7 +67,7 @@ export default function UserDetailsPage() {
             <Card>
                 <CardHeader>
                     <CardTitle>Activity Summary</CardTitle>
-                    <CardDescription>Ads, message promotions, room promotions, and allchat Pro payments</CardDescription>
+                    <CardDescription>Ads, message promotions, room promotions, and allchat VIP payments</CardDescription>
                 </CardHeader>
                 <CardContent>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">

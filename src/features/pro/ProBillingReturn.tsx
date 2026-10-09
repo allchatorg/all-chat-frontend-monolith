@@ -35,8 +35,8 @@ export function ProBillingReturn() {
     return <main className="flex min-h-screen items-center justify-center bg-background p-6 text-foreground">
         <div className="max-w-sm space-y-5 text-center">
             <Diamond aria-hidden="true" className="mx-auto h-10 w-10 text-blue-600 dark:text-blue-400"/>
-            <h1 className="text-2xl font-bold">allchat Pro</h1>
-            <p className="text-sm leading-6 text-muted-foreground">View your subscription status, benefits, and billing in the allchat Pro window.</p>
+            <h1 className="text-2xl font-bold">allchat VIP</h1>
+            <p className="text-sm leading-6 text-muted-foreground">View your subscription status, benefits, and billing in the allchat VIP window.</p>
             <Button disabled={!user} onClick={openPro} className="bg-blue-600 text-white hover:bg-blue-700">View subscription</Button>
             <Link href={user?.banned ? ROUTES.BANNED : ROUTES.HOME} className="block text-sm text-muted-foreground underline underline-offset-4">{user?.banned ? 'Back to account status' : 'Back to allchat'}</Link>
         </div>

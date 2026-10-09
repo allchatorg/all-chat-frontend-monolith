@@ -27,7 +27,7 @@ const GROUPS = [
         {id: 'blocked', label: 'Blocked users', icon: Ban},
     ]},
     {label: 'Billing settings', tabs: [
-        {id: 'pro', label: 'allchat Pro', icon: Diamond},
+        {id: 'pro', label: 'allchat VIP', icon: Diamond},
         {id: 'subscriptions', label: 'Subscriptions', icon: CreditCard},
     ]},
 ];

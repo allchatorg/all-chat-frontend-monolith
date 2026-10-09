@@ -21,9 +21,9 @@ const benefits: {label: string; basic: ReactNode; pro: ReactNode}[] = [
     {label: 'Media & file sharing', basic: true, pro: true},
     {label: 'Emoji reactions & replies', basic: true, pro: true},
     {label: 'Light & dark themes', basic: true, pro: true},
-    {label: 'PRO-only chatrooms', basic: 'Read and report', pro: 'Create and participate'},
-    {label: 'Exclusive Pro badge', basic: false, pro: true},
-    {label: 'Show or hide your Pro badge', basic: false, pro: true},
+    {label: 'VIP-only chatrooms', basic: 'Read and report', pro: 'Create and participate'},
+    {label: 'Exclusive VIP badge', basic: false, pro: true},
+    {label: 'Show or hide your VIP badge', basic: false, pro: true},
     {label: 'Username & message font presets', basic: false, pro: `${ACCOUNT_LIMITS.proDailyFontSaves} saves per day`},
     {label: 'Exclusive stickers, custom emojis & reactions', basic: false, pro: `${PRO_REACTIONS.length} Catpuss designs`},
 ];
@@ -40,8 +40,8 @@ export function ProBenefits({username}: {username: string}) {
         <section aria-labelledby="pro-benefits-heading">
             <div className="mb-6 text-center">
                 <p className="text-xs font-bold uppercase tracking-[0.18em] text-blue-600 dark:text-blue-300">More space for every conversation</p>
-                <h2 id="pro-benefits-heading" className="mt-2 text-2xl font-extrabold tracking-tight">Share more with allchat Pro.</h2>
-                <p className="mx-auto mt-2 max-w-md text-sm leading-6 text-muted-foreground">Basic includes public chatrooms, media sharing, reactions, and themes. Pro adds higher limits, PRO-only chatrooms, custom fonts, exclusive stickers and emojis, and your own badge.</p>
+                <h2 id="pro-benefits-heading" className="mt-2 text-2xl font-extrabold tracking-tight">Share more with allchat VIP.</h2>
+                <p className="mx-auto mt-2 max-w-md text-sm leading-6 text-muted-foreground">Basic includes public chatrooms, media sharing, reactions, and themes. VIP adds higher limits, VIP-only chatrooms, custom fonts, exclusive stickers and emojis, and your own badge.</p>
             </div>
             <div className="grid gap-4 sm:grid-cols-2">
                 <article className="overflow-hidden rounded-2xl border bg-card">
@@ -53,7 +53,7 @@ export function ProBenefits({username}: {username: string}) {
                     <div className="p-5">
                         <p className="text-[10px] font-bold uppercase tracking-widest text-blue-600 dark:text-blue-300">More chatrooms</p>
                         <h3 className="mt-2 font-bold">Find more of your people.</h3>
-                        <p className="mt-2 text-sm leading-6 text-muted-foreground">Join up to {ACCOUNT_LIMITS.proRooms} chatrooms with Pro and keep all your communities close.</p>
+                        <p className="mt-2 text-sm leading-6 text-muted-foreground">Join up to {ACCOUNT_LIMITS.proRooms} chatrooms with VIP and keep all your communities close.</p>
                     </div>
                 </article>
                 <article className="overflow-hidden rounded-2xl border border-blue-200 bg-card dark:border-blue-500/30">
@@ -91,9 +91,9 @@ export function ProBenefits({username}: {username: string}) {
                         </div>
                     </div>
                     <div className="p-5">
-                        <p className="flex items-center gap-1 text-[10px] font-bold uppercase tracking-widest text-blue-600 dark:text-blue-300"><Diamond className="h-3 w-3"/>Pro exclusive</p>
+                        <p className="flex items-center gap-1 text-[10px] font-bold uppercase tracking-widest text-blue-600 dark:text-blue-300"><Diamond className="h-3 w-3"/>VIP exclusive</p>
                         <h3 className="mt-2 font-bold">Your badge. Your choice.</h3>
-                        <p className="mt-2 text-sm leading-6 text-muted-foreground">Add a Pro badge beside your name. Show or hide it anytime in Appearance; all your Pro benefits stay active either way.</p>
+                        <p className="mt-2 text-sm leading-6 text-muted-foreground">Add a VIP badge beside your name. Show or hide it anytime in Appearance; all your VIP benefits stay active either way.</p>
                     </div>
                 </article>
                 <article className="overflow-hidden rounded-2xl border border-blue-200 bg-card dark:border-blue-500/30">
@@ -103,7 +103,7 @@ export function ProBenefits({username}: {username: string}) {
                         ))}
                     </div>
                     <div className="p-5">
-                        <p className="flex items-center gap-1 text-[10px] font-bold uppercase tracking-widest text-blue-600 dark:text-blue-300"><Smile className="h-3 w-3"/>Pro exclusive</p>
+                        <p className="flex items-center gap-1 text-[10px] font-bold uppercase tracking-widest text-blue-600 dark:text-blue-300"><Smile className="h-3 w-3"/>VIP exclusive</p>
                         <h3 className="mt-2 font-bold">A familiar face for every feeling.</h3>
                         <p className="mt-2 text-sm leading-6 text-muted-foreground">Unlock {PRO_REACTIONS.length} exclusive Catpuss designs. Send them as stickers, add them as custom emojis in your messages, or use them to react.</p>
                     </div>
@@ -116,7 +116,7 @@ export function ProBenefits({username}: {username: string}) {
                         </div>
                     </div>
                     <div className="p-5">
-                        <p className="flex items-center gap-1 text-[10px] font-bold uppercase tracking-widest text-blue-600 dark:text-blue-300"><Type className="h-3 w-3"/>Pro exclusive</p>
+                        <p className="flex items-center gap-1 text-[10px] font-bold uppercase tracking-widest text-blue-600 dark:text-blue-300"><Type className="h-3 w-3"/>VIP exclusive</p>
                         <h3 className="mt-2 font-bold">Make your words your own.</h3>
                         <p className="mt-2 text-sm leading-6 text-muted-foreground">Choose classic, playful, or handwritten fonts for your username and messages in Appearance. Save your choices up to {ACCOUNT_LIMITS.proDailyFontSaves} times per day; the allowance resets at midnight UTC.</p>
                     </div>
@@ -131,12 +131,12 @@ export function ProComparison({yearly}: {yearly: boolean}) {
         <div className="space-y-3">
             <div className="overflow-hidden rounded-2xl border">
                 <table className="w-full table-fixed border-collapse text-xs leading-5 sm:text-sm">
-                    <caption className="sr-only">Basic and allchat Pro plan benefits and pricing</caption>
+                    <caption className="sr-only">Basic and allchat VIP plan benefits and pricing</caption>
                     <thead>
                         <tr className="border-b">
                             <th scope="col" className="w-[38%] px-2 py-4 text-left align-bottom text-xs font-medium text-muted-foreground sm:p-5">What&apos;s included</th>
                             <th scope="col" className="w-[34%] px-2 py-4 text-center sm:p-5"><span className="block text-sm font-extrabold sm:text-base">Basic</span><span className="mt-2 block text-xs font-normal text-muted-foreground">Free</span></th>
-                            <th scope="col" className="border-x border-blue-300 bg-blue-50 px-2 py-4 text-center dark:border-blue-500/40 dark:bg-blue-500/10 sm:p-5"><span className="block text-sm font-extrabold text-blue-700 dark:text-blue-300 sm:text-base">allchat Pro</span><span className="mt-2 block text-xs font-normal text-muted-foreground">{yearly ? '$50 / year' : '$5 / month'}</span></th>
+                            <th scope="col" className="border-x border-blue-300 bg-blue-50 px-2 py-4 text-center dark:border-blue-500/40 dark:bg-blue-500/10 sm:p-5"><span className="block text-sm font-extrabold text-blue-700 dark:text-blue-300 sm:text-base">allchat VIP</span><span className="mt-2 block text-xs font-normal text-muted-foreground">{yearly ? '$50 / year' : '$5 / month'}</span></th>
                         </tr>
                     </thead>
                     <tbody>
