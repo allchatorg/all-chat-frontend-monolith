@@ -1,4 +1,4 @@
 export interface CreateChatRoomRequest {
-    proOnly?: boolean;
+    vipOnly?: boolean;
     name: string;
 }

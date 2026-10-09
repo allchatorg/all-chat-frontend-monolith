@@ -1,11 +1,11 @@
 'use client';
 
 import {UserName, UserNameProps} from '@/components/UserName';
-import {useProDialog} from '@/features/pro/useProDialog';
+import {useVipDialog} from '@/features/vip/useVipDialog';
 import {cn} from '@/lib/utils';
 
-export function ChatUserName({className, ...props}: Omit<UserNameProps, 'onProClick'>) {
-    const openPro = useProDialog();
+export function ChatUserName({className, ...props}: Omit<UserNameProps, 'onVipClick'>) {
+    const openVip = useVipDialog();
 
-    return <UserName {...props} className={cn('dark:text-slate-200', className)} onProClick={openPro}/>;
+    return <UserName {...props} className={cn('dark:text-slate-200', className)} onVipClick={openVip}/>;
 }

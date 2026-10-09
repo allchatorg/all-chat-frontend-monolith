@@ -22,7 +22,7 @@ import {cn} from "@/lib/utils";
 import {Message} from "@/models/message";
 import {ReactionPicker} from "@/features/stickers/ReactionPicker";
 import {selectUser} from "@/redux/user/userSelectors";
-import {useProDialog} from "@/features/pro/useProDialog";
+import {useVipDialog} from "@/features/vip/useVipDialog";
 import {MessageAction, MessageActionSheet, MessageActionSheetView} from "@/features/chatroom/components/MessageActionSheet";
 import {chatPreviewText} from "@/features/chatroom/utils/messageMarkers";
 
@@ -78,15 +78,15 @@ export const MessageMenu: React.FC<MessageMenuProps> = ({
                                                             onEmojiPopoverOpenChange,
                                                             mobileSheet = false,
                                                         }) => {
-    const participationDisabled = useRoomParticipation(message.chatRoomId, message.chatRoomProOnly);
+    const participationDisabled = useRoomParticipation(message.chatRoomId, message.chatRoomVipOnly);
     const dispatch = useDispatch<AppDispatch>();
     const {open} = useDialog();
     const {isPrincipal, isStaffMember, currentRole} = useRoleAccess();
     const [internalEmojiPopoverOpen, setInternalEmojiPopoverOpen] = useState(false);
     const [isRemovePromotedDialogOpen, setIsRemovePromotedDialogOpen] = useState(false);
     const [sheetView, setSheetView] = useState<MessageActionSheetView | null>(null);
-    const proActive = useSelector(selectUser)?.proActive === true;
-    const openPro = useProDialog();
+    const vipActive = useSelector(selectUser)?.vipActive === true;
+    const openVip = useVipDialog();
     const upgradingRef = useRef(false);
     // An active promotion locks the message against edits: the promoted content
     // must stay what was reviewed/paid for. Removal of a PENDING one is handled
@@ -234,10 +234,10 @@ export const MessageMenu: React.FC<MessageMenuProps> = ({
             actions={actions}
             canReact={canAddReaction && !deleteOnly}
             reactions={message.reactions}
-            proActive={proActive}
+            vipActive={vipActive}
             isGuest={currentRole === Role.GUEST}
             onReact={(emoji, emojiId) => updateMessageReaction(messageId, emoji, emojiId)}
-            onUpgrade={openPro}
+            onUpgrade={openVip}
         />
     );
 
@@ -307,14 +307,14 @@ export const MessageMenu: React.FC<MessageMenuProps> = ({
                             }}
                         >
                             <ReactionPicker
-                                proActive={proActive}
+                                vipActive={vipActive}
                                 reactions={message.reactions}
                                 onSelect={(emoji, emojiId) => updateMessageReaction(messageId, emoji, emojiId)}
                                 onClose={() => handleEmojiPopoverOpenChange(false)}
                                 onUpgrade={() => {
                                     upgradingRef.current = true;
                                     handleEmojiPopoverOpenChange(false);
-                                    openPro();
+                                    openVip();
                                 }}
                             />
                         </PopoverContent>

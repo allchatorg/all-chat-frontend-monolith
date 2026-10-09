@@ -43,22 +43,22 @@ function mergeOwnerSnapshot(current: User | null, incoming: User | null): User |
 
     incoming = mergeOwnerFonts(current, incoming);
 
-    const currentRevision = current.proBadgeRevision ?? 0;
-    const incomingRevision = incoming.proBadgeRevision ?? 0;
+    const currentRevision = current.vipBadgeRevision ?? 0;
+    const incomingRevision = incoming.vipBadgeRevision ?? 0;
     // A delayed account refresh must not undo a newer appearance/billing update.
     if (incomingRevision < currentRevision ||
-        (incoming.proBadgeRevision === undefined && current.proBadgeRevision !== undefined)) {
+        (incoming.vipBadgeRevision === undefined && current.vipBadgeRevision !== undefined)) {
         return {
             ...incoming,
-            proActive: current.proActive,
-            showProBadge: current.showProBadge,
-            proBadgeVisible: current.proBadgeVisible,
-            proBadgeRevision: current.proBadgeRevision,
+            vipActive: current.vipActive,
+            showVipBadge: current.showVipBadge,
+            vipBadgeVisible: current.vipBadgeVisible,
+            vipBadgeRevision: current.vipBadgeRevision,
         };
     }
     // Expiry can hide a badge before the scheduled revision is published.
-    if (incomingRevision === currentRevision && current.proBadgeVisible === false) {
-        return {...incoming, proBadgeVisible: false};
+    if (incomingRevision === currentRevision && current.vipBadgeVisible === false) {
+        return {...incoming, vipBadgeVisible: false};
     }
     return incoming;
 }

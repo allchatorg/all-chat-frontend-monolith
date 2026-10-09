@@ -1,4 +1,4 @@
-import type {ProReportingSynchronization} from './pro-statistics';
+import type {VipReportingSynchronization} from './vip-statistics';
 
 export enum AdStatus {
     PENDING = "PENDING",
@@ -179,7 +179,7 @@ export interface MonthlyRevenueDto {
 
 export interface MonthlyRevenueResponseDto {
     data: MonthlyRevenueDto[];
-    subscriptionSynchronization: ProReportingSynchronization;
+    subscriptionSynchronization: VipReportingSynchronization;
 }
 
 export interface WeeklyRevenueDto {
@@ -194,5 +194,5 @@ export interface WeeklyRevenueDto {
 
 export interface WeeklyRevenueResponseDto {
     data: WeeklyRevenueDto[];
-    subscriptionSynchronization: ProReportingSynchronization;
+    subscriptionSynchronization: VipReportingSynchronization;
 }

@@ -1,9 +1,9 @@
 import api from "@/lib/api";
-import {ProBadgeUpdate} from "@/models/ProBadgeUpdate";
+import {VipBadgeUpdate} from "@/models/VipBadgeUpdate";
 import {applyFontUpdate, clearFontStore} from '@/lib/fontStore';
-export type {ProBadgeUpdate} from "@/models/ProBadgeUpdate";
+export type {VipBadgeUpdate} from "@/models/VipBadgeUpdate";
 
-const badges = new Map<number, ProBadgeUpdate>();
+const badges = new Map<number, VipBadgeUpdate>();
 const listeners = new Map<number, Set<() => void>>();
 const refreshedGeneration = new Map<number, number>();
 const queuedIds = new Set<number>();
@@ -11,30 +11,30 @@ let generation = 1;
 let sessionGeneration = 0;
 let refreshTimer: ReturnType<typeof setTimeout> | undefined;
 
-export function getProBadge(userId?: number): ProBadgeUpdate | undefined {
+export function getVipBadge(userId?: number): VipBadgeUpdate | undefined {
     return userId === undefined ? undefined : badges.get(userId);
 }
 
-export function applyProBadgeUpdate(update: ProBadgeUpdate): void {
+export function applyVipBadgeUpdate(update: VipBadgeUpdate): void {
     // Fonts have their own revision. A duplicate badge can still carry new fonts.
     applyFontUpdate(update);
     if (!update || !Number.isSafeInteger(update.userId) || update.userId <= 0 ||
-        typeof update.proBadgeVisible !== "boolean" ||
-        !Number.isSafeInteger(update.proBadgeRevision) || update.proBadgeRevision < 0) return;
+        typeof update.vipBadgeVisible !== "boolean" ||
+        !Number.isSafeInteger(update.vipBadgeRevision) || update.vipBadgeRevision < 0) return;
     const current = badges.get(update.userId);
     // Expiry can make an identity false before the scheduled revision update.
     // At the same revision, a stale visible snapshot must never resurrect it.
-    if (current && (current.proBadgeRevision > update.proBadgeRevision ||
-        (current.proBadgeRevision === update.proBadgeRevision &&
-            (!current.proBadgeVisible || current.proBadgeVisible === update.proBadgeVisible)))) {
+    if (current && (current.vipBadgeRevision > update.vipBadgeRevision ||
+        (current.vipBadgeRevision === update.vipBadgeRevision &&
+            (!current.vipBadgeVisible || current.vipBadgeVisible === update.vipBadgeVisible)))) {
         return;
     }
     badges.set(update.userId, update);
     listeners.get(update.userId)?.forEach(listener => listener());
 }
 
-export function applyProBadgeUpdates(updates: ProBadgeUpdate[]): void {
-    updates.forEach(applyProBadgeUpdate);
+export function applyVipBadgeUpdates(updates: VipBadgeUpdate[]): void {
+    updates.forEach(applyVipBadgeUpdate);
 }
 
 function queueRefresh(userId: number): void {
@@ -54,9 +54,9 @@ async function flushRefreshQueue(): Promise<void> {
     for (let offset = 0; offset < ids.length; offset += 100) {
         const batch = ids.slice(offset, offset + 100);
         try {
-            const {data} = await api.post<ProBadgeUpdate[]>("/pro/badges", batch);
+            const {data} = await api.post<VipBadgeUpdate[]>("/vip/badges", batch);
             if (requestSession !== sessionGeneration) return;
-            applyProBadgeUpdates(data);
+            applyVipBadgeUpdates(data);
             batch.forEach(id => refreshedGeneration.set(id, requestGeneration));
         } catch {
             // Keep existing identities usable while offline. The next reconnect
@@ -65,7 +65,7 @@ async function flushRefreshQueue(): Promise<void> {
     }
 }
 
-export function subscribeProBadge(userId: number | undefined, listener: () => void): () => void {
+export function subscribeVipBadge(userId: number | undefined, listener: () => void): () => void {
     if (userId === undefined || !Number.isSafeInteger(userId) || userId <= 0) return () => {};
     const userListeners = listeners.get(userId) ?? new Set<() => void>();
     userListeners.add(listener);
@@ -78,12 +78,12 @@ export function subscribeProBadge(userId: number | undefined, listener: () => vo
 }
 
 /** Refresh mounted identities and defer hidden/cached identities until mounted. */
-export function refreshRegisteredProBadges(): void {
+export function refreshRegisteredVipBadges(): void {
     generation += 1;
     listeners.forEach((_, userId) => queueRefresh(userId));
 }
 
-export function clearProBadgeStore(): void {
+export function clearVipBadgeStore(): void {
     sessionGeneration += 1;
     generation = 1;
     clearFontStore();

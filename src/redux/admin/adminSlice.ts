@@ -96,7 +96,7 @@ const adminSlice = createSlice({
                 if (state.userDetails.errorStatus === 403) {
                     state.userDetails.userAdminView = null;
                 } else if (state.userDetails.userAdminView) {
-                    state.userDetails.userAdminView.proActive = undefined;
+                    state.userDetails.userAdminView.vipActive = undefined;
                 }
             })
             .addCase(

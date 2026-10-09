@@ -9,7 +9,7 @@ import {useThunk} from "@/lib/hooks/useThunk";
 import {ShieldBan, ShieldCheck} from "lucide-react";
 import {isStaff, Role} from "@/models/Role";
 import {UserName} from "@/components/UserName";
-import {useProDialog} from "@/features/pro/useProDialog";
+import {useVipDialog} from "@/features/vip/useVipDialog";
 import {getRoleNameStyles} from "@/lib/roleStyles";
 
 
@@ -17,8 +17,8 @@ interface UserActionPopupProps extends Partial<FontSnapshot> {
     userId: number;
     username: string;
     role: Role;
-    proBadgeVisible?: boolean;
-    proBadgeRevision?: number;
+    vipBadgeVisible?: boolean;
+    vipBadgeRevision?: number;
     disabled?: boolean;
 }
 
@@ -26,8 +26,8 @@ export const UserActionPopup: React.FC<UserActionPopupProps> = ({
                                                                     userId,
                                                                     username,
                                                                     role,
-                                                                    proBadgeVisible,
-                                                                    proBadgeRevision,
+                                                                    vipBadgeVisible,
+                                                                    vipBadgeRevision,
                                                                     usernameFont,
                                                                     messageFont,
                                                                     fontRevision,
@@ -37,10 +37,10 @@ export const UserActionPopup: React.FC<UserActionPopupProps> = ({
     const [blockUser] = useThunk(blockUserThunk);
     const [unblockUser] = useThunk(unblockUserThunk);
     const [isOpen, setIsOpen] = useState(false);
-    const openPro = useProDialog();
-    const handleOpenPro = () => {
+    const openVip = useVipDialog();
+    const handleOpenVip = () => {
         setIsOpen(false);
-        openPro();
+        openVip();
     };
 
     const isBlocked = user?.blockedUsers?.some(u => u.id === userId);
@@ -60,12 +60,12 @@ export const UserActionPopup: React.FC<UserActionPopupProps> = ({
             <UserName
                 userId={userId}
                 username={username}
-                proBadgeVisible={proBadgeVisible}
-                proBadgeRevision={proBadgeRevision}
+                vipBadgeVisible={vipBadgeVisible}
+                vipBadgeRevision={vipBadgeRevision}
                 usernameFont={usernameFont}
                 messageFont={messageFont}
                 fontRevision={fontRevision}
-                onProClick={handleOpenPro}
+                onVipClick={handleOpenVip}
                 renderUsername={!isTargetStaff && !disabled ? name => (
                     <PopoverTrigger asChild>
                         <button type="button" onClick={event => event.stopPropagation()} className="inline-flex min-w-0 cursor-pointer text-left hover:underline decoration-dotted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
@@ -91,7 +91,7 @@ export const UserActionPopup: React.FC<UserActionPopupProps> = ({
     }
 
     const handleBlock = () => {
-        blockUser({id: userId, username, proBadgeVisible, proBadgeRevision, usernameFont, messageFont, fontRevision});
+        blockUser({id: userId, username, vipBadgeVisible, vipBadgeRevision, usernameFont, messageFont, fontRevision});
         setIsOpen(false); // Close popup after blocking
     };
 
@@ -111,7 +111,7 @@ export const UserActionPopup: React.FC<UserActionPopupProps> = ({
             >
                 <div className="flex flex-col gap-3">
                     <div className="font-semibold text-base pb-2 text-center truncate border-b-2 border-border dark:text-slate-200">
-                        <UserName userId={userId} username={username} proBadgeVisible={proBadgeVisible} proBadgeRevision={proBadgeRevision} usernameFont={usernameFont} messageFont={messageFont} fontRevision={fontRevision} onProClick={handleOpenPro}/>
+                        <UserName userId={userId} username={username} vipBadgeVisible={vipBadgeVisible} vipBadgeRevision={vipBadgeRevision} usernameFont={usernameFont} messageFont={messageFont} fontRevision={fontRevision} onVipClick={handleOpenVip}/>
                     </div>
                     {isBlocked ? (
                         <Button

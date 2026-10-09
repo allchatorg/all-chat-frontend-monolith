@@ -8,8 +8,8 @@ export interface ReplyInfo {
     id: number;
     senderId: number;
     senderUsername: string;
-    senderProBadgeVisible?: boolean;
-    senderProBadgeRevision?: number;
+    senderVipBadgeVisible?: boolean;
+    senderVipBadgeRevision?: number;
     senderUsernameFont?: FontPreset;
     senderMessageFont?: FontPreset;
     senderFontRevision?: number;
@@ -41,8 +41,8 @@ export interface Message {
     createdAt: string;
     senderId: number;
     senderUsername: string;
-    senderProBadgeVisible?: boolean;
-    senderProBadgeRevision?: number;
+    senderVipBadgeVisible?: boolean;
+    senderVipBadgeRevision?: number;
     senderUsernameFont?: FontPreset;
     senderMessageFont?: FontPreset;
     senderFontRevision?: number;
@@ -51,7 +51,7 @@ export interface Message {
     senderIdVerificationStatus?: IdVerificationStatus;
     chatRoomId: number;
     chatRoomName: string;
-    chatRoomProOnly?: boolean;
+    chatRoomVipOnly?: boolean;
     bannedUser: boolean;
     editedAt?: string;
     color: string;

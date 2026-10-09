@@ -112,7 +112,7 @@ export function UserSearchCommand({
                                 <CommandItem key={user.id} value={String(user.id)} onSelect={handleSelect}>
                                     <UserIcon className="mr-2 h-4 w-4"/>
                                     <div className="flex flex-col">
-                                        <span className="font-medium"><UserName userId={user.id} username={user.username} proBadgeVisible={user.proBadgeVisible} proBadgeRevision={user.proBadgeRevision} usernameFont={user.usernameFont} messageFont={user.messageFont} fontRevision={user.fontRevision}/></span>
+                                        <span className="font-medium"><UserName userId={user.id} username={user.username} vipBadgeVisible={user.vipBadgeVisible} vipBadgeRevision={user.vipBadgeRevision} usernameFont={user.usernameFont} messageFont={user.messageFont} fontRevision={user.fontRevision}/></span>
                                         <span className="text-xs text-muted-foreground">ID: {user.id}</span>
                                     </div>
                                 </CommandItem>

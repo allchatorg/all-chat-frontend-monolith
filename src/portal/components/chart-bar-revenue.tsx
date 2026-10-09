@@ -4,16 +4,16 @@ import {Bar, BarChart, CartesianGrid, XAxis, YAxis} from 'recharts';
 import {Card, CardContent, CardDescription, CardHeader, CardTitle} from '@ads/components/ui/card';
 import {ChartContainer, ChartLegend, ChartLegendContent, ChartTooltip} from '@ads/components/ui/chart';
 import {useGetMonthlyRevenueQuery, useGetWeeklyRevenueQuery} from '@ads/store/services/adminAdsApi';
-import {dashboardRevenueQueryOptions} from '@ads/store/services/adminProApi';
+import {dashboardRevenueQueryOptions} from '@ads/store/services/adminVipApi';
 import {Skeleton} from '@ads/components/ui/skeleton';
-import {ProReportingSynchronization} from '@ads/models/pro-statistics';
+import {VipReportingSynchronization} from '@ads/models/vip-statistics';
 import {formatUsd, reportingStatusMessage} from '@ads/lib/revenue-format';
 
 const chartConfig = {
     revenue: {label: 'Ad revenue', color: '#2563eb'},
     promotedRevenue: {label: 'Message promotions', color: '#ea580c'},
     roomPromotedRevenue: {label: 'Room promotions', color: '#a855f7'},
-    subscriptionRevenue: {label: 'allchat Pro', color: '#059669'},
+    subscriptionRevenue: {label: 'allchat VIP', color: '#059669'},
 };
 
 interface RevenuePoint {
@@ -30,7 +30,7 @@ function RevenueChart({title, description, data, loading, error, synchronization
     data?: RevenuePoint[];
     loading: boolean;
     error: boolean;
-    synchronization?: ProReportingSynchronization;
+    synchronization?: VipReportingSynchronization;
 }) {
     const subscriptionUnavailable = !synchronization || synchronization.status === 'UNAVAILABLE';
     const chartData = data?.map(point => ({...point, subscriptionRevenue: subscriptionUnavailable ? null : point.subscriptionRevenue ?? null}));

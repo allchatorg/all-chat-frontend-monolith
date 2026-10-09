@@ -1,6 +1,6 @@
 import React from "react";
 import {useDialog} from "@/components/providers/DialogProvider";
-import {useProDialog} from "@/features/pro/useProDialog";
+import {useVipDialog} from "@/features/vip/useVipDialog";
 import {useRoomSearch} from "@/features/chatroom/hooks/useRoomSearch";
 import SearchRoomsResults from "@/features/chatroom/components/SearchRoomsResults";
 import {Search, X} from "lucide-react";
@@ -27,19 +27,19 @@ const SearchRoomsMobile: React.FC<SearchRoomsMobileProps> = ({onClose, initialSe
         handleCreateChatRoom,
         clearSearch,
         showCreateOption,
-        proOnly, setProOnly, canCreate, proModeLocked, isCreating, creationError,
-        proFilter, setProFilter,
+        vipOnly, setVipOnly, canCreate, vipModeLocked, isCreating, creationError,
+        vipFilter, setVipFilter,
         validationResult,
         lastSearchedTerm,
         joinedRoomIds,
         user
     } = useRoomSearch(initialSearchTerm);
-    const openPro = useProDialog({onBack: () => open(
+    const openVip = useVipDialog({onBack: () => open(
         <SearchRoomsMobile onClose={close} initialSearchTerm={searchTerm}/>, roomSearchDialogOptions,
     )});
-    const handleProOnlyChange = (checked: boolean) => {
-        if (checked && !user?.proActive) openPro();
-        else setProOnly(checked);
+    const handleVipOnlyChange = (checked: boolean) => {
+        if (checked && !user?.vipActive) openVip();
+        else setVipOnly(checked);
     };
 
     const onJoin = async (roomId: number) => {
@@ -47,8 +47,8 @@ const SearchRoomsMobile: React.FC<SearchRoomsMobileProps> = ({onClose, initialSe
     };
 
     const onCreate = async () => {
-        if (proOnly && !user?.proActive) {
-            openPro();
+        if (vipOnly && !user?.vipActive) {
+            openVip();
             return;
         }
         if (await handleCreateChatRoom()) onClose();
@@ -96,9 +96,9 @@ const SearchRoomsMobile: React.FC<SearchRoomsMobileProps> = ({onClose, initialSe
                     user={user}
                     onJoin={onJoin}
                     onCreate={() => void onCreate()}
-                    proOnly={proOnly} onProOnlyChange={handleProOnlyChange} canCreate={canCreate}
-                    proModeLocked={proModeLocked} isCreating={isCreating} creationError={creationError}
-                    proFilter={proFilter} onProFilterChange={setProFilter}
+                    vipOnly={vipOnly} onVipOnlyChange={handleVipOnlyChange} canCreate={canCreate}
+                    vipModeLocked={vipModeLocked} isCreating={isCreating} creationError={creationError}
+                    vipFilter={vipFilter} onVipFilterChange={setVipFilter}
                 />
             </div>
         </div>

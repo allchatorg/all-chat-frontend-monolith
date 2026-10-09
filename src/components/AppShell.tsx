@@ -6,8 +6,8 @@ import {useSelector} from 'react-redux';
 import {selectUser} from '@/redux/user/userSelectors';
 import {selectIpDetails} from '@/redux/auth/authSelectors';
 import {isChatRestricted} from '@/lib/accountVerification';
-import {ProReturnModal} from '@/features/pro/ProReturnModal';
-import {ProBillingReturn} from '@/features/pro/ProBillingReturn';
+import {VipReturnModal} from '@/features/vip/VipReturnModal';
+import {VipBillingReturn} from '@/features/vip/VipBillingReturn';
 import {Navbar} from "@/components/Navbar";
 import AuthGuard from "@/components/AuthGuard";
 import {Toaster} from "@/components/ui/sonner";
@@ -79,12 +79,12 @@ export function AppShell({children}: { children: React.ReactNode }) {
     }
 
     if (isBillingRoute(pathname, searchParams) && isChatRestricted(user, ipDetails?.requiredVerification)) {
-        return <AuthGuard><ProBillingReturn/><Toaster/><RateLimitDialog/></AuthGuard>;
+        return <AuthGuard><VipBillingReturn/><Toaster/><RateLimitDialog/></AuthGuard>;
     }
 
     return (
         <AuthGuard>
-            {pathname === ROUTES.HOME && <ProReturnModal/>}
+            {pathname === ROUTES.HOME && <VipReturnModal/>}
             <StompBridge/>
             <AppInitializer>
                 <Navbar/>

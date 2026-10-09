@@ -11,13 +11,13 @@ import {useSelector} from 'react-redux';
 import {selectUser} from '@/redux/user/userSelectors';
 import {ROUTES} from '@/routes';
 import {isStaff} from '@/models/Role';
-import {ProOffer} from './ProOffer';
+import {VipOffer} from './VipOffer';
 import {SubscriptionsSettings} from './SubscriptionsSettings';
-import type {ProBillingReturnState} from './billingReturn';
+import type {VipBillingReturnState} from './billingReturn';
 
-export type ProDialogOptions = {initialView?: 'offer' | 'subscriptions'; billingReturn?: ProBillingReturnState; onBack?: () => void};
+export type VipDialogOptions = {initialView?: 'offer' | 'subscriptions'; billingReturn?: VipBillingReturnState; onBack?: () => void};
 
-export function ProDialog({initialView = 'offer', billingReturn, onBack}: ProDialogOptions) {
+export function VipDialog({initialView = 'offer', billingReturn, onBack}: VipDialogOptions) {
     const {busy: stripeBusy} = useStripeInteraction();
     const [selectedView, setView] = useState<'offer' | 'subscriptions' | 'claim'>(initialView);
     const user = useSelector(selectUser);
@@ -27,8 +27,8 @@ export function ProDialog({initialView = 'offer', billingReturn, onBack}: ProDia
     const router = useRouter();
     return <div className="h-full min-h-0 overflow-y-auto bg-background">
         {onBack && <div className="px-4 pt-3"><Button variant="ghost" className="min-h-11" disabled={stripeBusy} onClick={onBack}><ArrowLeft className="mr-2 h-4 w-4"/>Back to room search</Button></div>}
-        {view !== 'offer' && !user?.banned && !staff && <div className="px-4 pb-1 pt-3"><Button variant="ghost" onClick={() => setView('offer')}><ArrowLeft className="mr-2 h-4 w-4"/>allchat Pro</Button></div>}
-        {view === 'offer' && <ProOffer onManage={() => setView('subscriptions')} onClaim={() => {
+        {view !== 'offer' && !user?.banned && !staff && <div className="px-4 pb-1 pt-3"><Button variant="ghost" onClick={() => setView('offer')}><ArrowLeft className="mr-2 h-4 w-4"/>allchat VIP</Button></div>}
+        {view === 'offer' && <VipOffer onManage={() => setView('subscriptions')} onClaim={() => {
             if (!user || user.role === 'GUEST') {
                 close();
                 router.push(`${ROUTES.REGISTER}&redirect=${encodeURIComponent(ROUTES.SUBSCRIPTIONS)}`);

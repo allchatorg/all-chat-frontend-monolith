@@ -45,7 +45,7 @@ embedding while retaining the original font names and glyphs.
 
 ## Delivery
 
-Every optional Pro face uses WOFF2 through `next/font/local` in `src/app/layout.tsx`,
+Every optional VIP face uses WOFF2 through `next/font/local` in `src/app/layout.tsx`,
 with `preload: false` and `display: 'swap'`. Defining CSS variables globally does
 not download unused faces. A font is requested when a rendered username, message,
 or picker preview uses it; opening the picker can load all preview families.

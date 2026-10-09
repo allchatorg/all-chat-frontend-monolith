@@ -10,7 +10,7 @@ const fit = (s, dx = 0, dy = 0) => `translate(${256 + dx} ${266 + dy}) scale(${s
 const floatingHearts = (list = [[66, 112, 30, -16], [446, 140, 24, 14], [462, 330, 18, 10], [44, 300, 16, -10]]) =>
     list.map(([x, y, r, rot]) => heart(x, y, r, {rot, w: 7})).join('');
 
-/** IDs are stored in messages and allowlisted by the backend (ProCharacterCatalog). */
+/** IDs are stored in messages and allowlisted by the backend (VipCharacterCatalog). */
 const VARIANTS = [
     {
         id: 'catpuss-cheer', name: 'Cheering Catpuss', tags: ['yay', 'hooray', 'celebrate', 'happy', 'excited'],

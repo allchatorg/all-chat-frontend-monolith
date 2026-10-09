@@ -1,4 +1,4 @@
-import {getProBillingReturn} from '@/features/pro/billingReturn';
+import {getVipBillingReturn} from '@/features/vip/billingReturn';
 
 export const ROUTES = {
     HOME: '/',
@@ -18,7 +18,7 @@ export const ROUTES = {
     APPLY_MODERATOR: '/moderator-apply',
     PRIVATE_CHAT: '/private',
     SUBSCRIPTIONS: '/settings/subscriptions',
-    PRO_RETURN: '/pro/return',
+    VIP_RETURN: '/vip/return',
 } as const;
 
 export const PUBLIC_ROUTES = [
@@ -32,7 +32,7 @@ export const PROTECTED_ROUTES = [
     ROUTES.HOME,
     ROUTES.APPLY_MODERATOR,
     ROUTES.SUBSCRIPTIONS,
-    ROUTES.PRO_RETURN,
+    ROUTES.VIP_RETURN,
 ] as const;
 
 export const STAFF_ROUTES = [
@@ -49,8 +49,8 @@ export function isPublicRoute(pathname: string) {
 }
 
 export function isBillingRoute(pathname: string, searchParams?: {get: (key: string) => string | null}) {
-    return pathname === ROUTES.SUBSCRIPTIONS || pathname === ROUTES.PRO_RETURN ||
-        (pathname === ROUTES.HOME && !!searchParams && getProBillingReturn(searchParams) !== null);
+    return pathname === ROUTES.SUBSCRIPTIONS || pathname === ROUTES.VIP_RETURN ||
+        (pathname === ROUTES.HOME && !!searchParams && getVipBillingReturn(searchParams) !== null);
 }
 
 export function isProtectedRoute(pathname: string) {

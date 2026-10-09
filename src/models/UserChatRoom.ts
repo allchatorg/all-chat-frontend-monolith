@@ -3,7 +3,7 @@ import {Message} from "@/models/message";
 import {Role} from "@/models/Role";
 
 export interface UserChatRoom {
-    proOnly?: boolean;
+    vipOnly?: boolean;
     id: number;
     chatRoomName: string;
     chatRoomRequiredAccessLevel: Role;

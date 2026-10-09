@@ -13,24 +13,24 @@ import {FONT_PRESETS, FontPreset, fontPresetStyle} from '@/lib/fontPresets';
 import {getFontSnapshot} from '@/lib/fontStore';
 import {syncOwnFontSettings} from '@/lib/fontSettingsSync';
 import {selectUser} from '@/redux/user/userSelectors';
-import {FontSettings, fontSettingsErrorMessage, getFontSettings, updateFontSettings} from '@/features/pro/fontSettingsApi';
+import {FontSettings, fontSettingsErrorMessage, getFontSettings, updateFontSettings} from '@/features/vip/fontSettingsApi';
 
 interface Props {
-    onExplorePro?: () => void;
+    onExploreVip?: () => void;
 }
 
 /** Remount on account changes so a previous account's draft can never be saved. */
-export function ProFontSettings(props: Props) {
+export function VipFontSettings(props: Props) {
     const user = useSelector(selectUser);
     return user ? <FontSettingsForm key={user.id} {...props} userId={user.id} username={user.username}
-        proActive={user.proActive === true} showProBadge={user.showProBadge !== false}/> : null;
+        vipActive={user.vipActive === true} showVipBadge={user.showVipBadge !== false}/> : null;
 }
 
-function FontSettingsForm({userId, username, proActive, showProBadge, onExplorePro}: Props & {
+function FontSettingsForm({userId, username, vipActive, showVipBadge, onExploreVip}: Props & {
     userId: number;
     username: string;
-    proActive: boolean;
-    showProBadge: boolean;
+    vipActive: boolean;
+    showVipBadge: boolean;
 }) {
     const [settings, setSettings] = useState<FontSettings | null>(null);
     const [usernameFont, setUsernameFont] = useState<FontPreset>('DEFAULT');
@@ -53,7 +53,7 @@ function FontSettingsForm({userId, username, proActive, showProBadge, onExploreP
         // the saved choices change elsewhere or the subscription expires.
         if (replaceDraft || !previous || next.fontRevision !== previous.fontRevision ||
             next.usernameFont !== previous.usernameFont || next.messageFont !== previous.messageFont ||
-            next.proActive !== previous.proActive) {
+            next.vipActive !== previous.vipActive) {
             setUsernameFont(next.usernameFont);
             setMessageFont(next.messageFont);
         }
@@ -81,18 +81,18 @@ function FontSettingsForm({userId, username, proActive, showProBadge, onExploreP
         mounted.current = true;
         const onRefresh = () => void refresh();
         window.addEventListener('focus', onRefresh);
-        window.addEventListener('allchat:pro-changed', onRefresh);
+        window.addEventListener('allchat:vip-changed', onRefresh);
         return () => {
             mounted.current = false;
             requestVersion.current++;
             window.removeEventListener('focus', onRefresh);
-            window.removeEventListener('allchat:pro-changed', onRefresh);
+            window.removeEventListener('allchat:vip-changed', onRefresh);
         };
     }, [refresh]);
 
     useEffect(() => {
         void refresh();
-    }, [refresh, proActive]);
+    }, [refresh, vipActive]);
 
     // Refresh the open settings card once at the server's UTC quota boundary.
     // Focus refresh also covers a suspended/background tab returning the next day.
@@ -106,7 +106,7 @@ function FontSettingsForm({userId, username, proActive, showProBadge, onExploreP
     }, [resetsAt, refresh]);
 
     const dirty = !!settings && (settings.usernameFont !== usernameFont || settings.messageFont !== messageFont);
-    const canSave = !!settings?.proActive && dirty && settings.changesRemaining > 0 && !loading && !saving;
+    const canSave = !!settings?.vipActive && dirty && settings.changesRemaining > 0 && !loading && !saving;
 
     const save = async () => {
         if (!canSave || saveInFlight.current) return;
@@ -135,7 +135,7 @@ function FontSettingsForm({userId, username, proActive, showProBadge, onExploreP
     return <Card className="overflow-hidden border-violet-200 dark:border-violet-900">
         <CardHeader>
             <CardTitle className="flex items-center gap-2"><Type className="h-5 w-5 text-violet-500"/>Fonts</CardTitle>
-            <CardDescription>Give your username and messages a little more personality with allchat Pro.</CardDescription>
+            <CardDescription>Give your username and messages a little more personality with allchat VIP.</CardDescription>
         </CardHeader>
         <CardContent className="space-y-5">
             <div className="grid gap-4 sm:grid-cols-2">
@@ -158,7 +158,7 @@ function FontSettingsForm({userId, username, proActive, showProBadge, onExploreP
                 <p className="mb-3 text-xs font-medium text-muted-foreground">Preview</p>
                 <UserName username={username || 'Your username'} usernameFont={usernameFont}
                     messageFont={messageFont} fontRevision={settings?.fontRevision ?? 0}
-                    proBadgeVisible={!!settings?.proActive && showProBadge} className="font-semibold"/>
+                    vipBadgeVisible={!!settings?.vipActive && showVipBadge} className="font-semibold"/>
                 <p className="mt-2 break-words text-sm leading-6" style={fontPresetStyle(messageFont)}>Hey everyone! A <strong>little detail</strong> makes this feel like <em>me</em>. 👋</p>
             </div>
             <p className="text-xs leading-5 text-muted-foreground">Your choices apply to earlier and future messages. Preview freely. Saving one or both fonts together uses one change.</p>
@@ -168,11 +168,11 @@ function FontSettingsForm({userId, username, proActive, showProBadge, onExploreP
             {saveError && <p role="alert" className="text-sm text-destructive dark:text-red-300">{saveError}</p>}
             {settings && <div className="space-y-3 border-t pt-4">
                 <p role="status" className="text-xs leading-5 text-muted-foreground">{settings.changesRemaining} of {settings.dailyLimit} font changes remaining today. Resets at midnight UTC.</p>
-                {settings.proActive ? <Button className="w-full sm:w-auto" disabled={!canSave} onClick={() => void save()}>{saving && <Loader2 className="mr-2 h-4 w-4 animate-spin"/>}{saving ? 'Saving…' : 'Save fonts'}</Button> : <div className="space-y-2">
-                    <p className="text-sm text-muted-foreground">Save your fonts with allchat Pro. Both fonts return to Default when your Pro access ends.</p>
-                    {onExplorePro && <Button variant="outline" className="w-full sm:w-auto" onClick={onExplorePro}><Diamond className="mr-2 h-4 w-4 text-violet-500"/>Explore allchat Pro</Button>}
+                {settings.vipActive ? <Button className="w-full sm:w-auto" disabled={!canSave} onClick={() => void save()}>{saving && <Loader2 className="mr-2 h-4 w-4 animate-spin"/>}{saving ? 'Saving…' : 'Save fonts'}</Button> : <div className="space-y-2">
+                    <p className="text-sm text-muted-foreground">Save your fonts with allchat VIP. Both fonts return to Default when your VIP access ends.</p>
+                    {onExploreVip && <Button variant="outline" className="w-full sm:w-auto" onClick={onExploreVip}><Diamond className="mr-2 h-4 w-4 text-violet-500"/>Explore allchat VIP</Button>}
                 </div>}
-                {settings.proActive && <p className="text-xs leading-5 text-muted-foreground">Both fonts return to Default when your Pro access ends.</p>}
+                {settings.vipActive && <p className="text-xs leading-5 text-muted-foreground">Both fonts return to Default when your VIP access ends.</p>}
             </div>}
         </CardContent>
     </Card>;

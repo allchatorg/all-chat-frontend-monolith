@@ -12,8 +12,8 @@ export function addReactionRequestToMessage<T extends Pick<Message, "reactions">
     const userMinimal = {
         id: reactionRequest.reactedBy.id,
         username: reactionRequest.reactedBy.username,
-        proBadgeVisible: reactionRequest.reactedBy.proBadgeVisible,
-        proBadgeRevision: reactionRequest.reactedBy.proBadgeRevision,
+        vipBadgeVisible: reactionRequest.reactedBy.vipBadgeVisible,
+        vipBadgeRevision: reactionRequest.reactedBy.vipBadgeRevision,
         usernameFont: reactionRequest.reactedBy.usernameFont,
         messageFont: reactionRequest.reactedBy.messageFont,
         fontRevision: reactionRequest.reactedBy.fontRevision,

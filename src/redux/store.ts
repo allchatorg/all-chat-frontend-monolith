@@ -33,11 +33,11 @@ import {promotedMessagesApi} from "@ads/store/services/promotedMessagesApi";
 import {adminPromotedMessagesApi} from "@ads/store/services/adminPromotedMessagesApi";
 import {roomPromotionsApi} from "@ads/store/services/roomPromotionsApi";
 import {adminRoomPromotionsApi} from "@ads/store/services/adminRoomPromotionsApi";
-import {adminProApi} from "@ads/store/services/adminProApi";
-import {clearProBadgeStore} from '@/lib/proBadgeStore';
+import {adminVipApi} from "@ads/store/services/adminVipApi";
+import {clearVipBadgeStore} from '@/lib/vipBadgeStore';
 import {applyFontUpdate} from '@/lib/fontStore';
 
-const adsPortalApis = [userApi, paymentApi, adFormatsApi, fileApi, adsPortalApi, adminAdsApi, adminUsersApi, promotedMessagesApi, adminPromotedMessagesApi, roomPromotionsApi, adminRoomPromotionsApi, adminProApi];
+const adsPortalApis = [userApi, paymentApi, adFormatsApi, fileApi, adsPortalApi, adminAdsApi, adminUsersApi, promotedMessagesApi, adminPromotedMessagesApi, roomPromotionsApi, adminRoomPromotionsApi, adminVipApi];
 
 
 const settingsPersistConfig = {
@@ -115,7 +115,7 @@ const appReducer = combineReducers({
     [adminPromotedMessagesApi.reducerPath]: adminPromotedMessagesApi.reducer,
     [roomPromotionsApi.reducerPath]: roomPromotionsApi.reducer,
     [adminRoomPromotionsApi.reducerPath]: adminRoomPromotionsApi.reducer,
-    [adminProApi.reducerPath]: adminProApi.reducer,
+    [adminVipApi.reducerPath]: adminVipApi.reducer,
 });
 
 export const resetApp = createAction('app/reset');
@@ -149,7 +149,7 @@ store.subscribe(() => {
     const user = store.getState().user.user;
     if (user?.id !== appearanceUserId) {
         appearanceUserId = user?.id;
-        clearProBadgeStore();
+        clearVipBadgeStore();
     }
     if (user) applyFontUpdate({userId: user.id, usernameFont: user.usernameFont,
         messageFont: user.messageFont, fontRevision: user.fontRevision});

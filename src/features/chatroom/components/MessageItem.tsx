@@ -1,4 +1,4 @@
-import {RoomProBadge} from "@/components/RoomProBadge";
+import {RoomVipBadge} from "@/components/RoomVipBadge";
 import {useRoomParticipation} from "@/lib/hooks/useRoomParticipation";
 import {fontPresetStyle} from "@/lib/fontPresets";
 import {useUserFonts} from "@/lib/hooks/useUserFonts";
@@ -56,7 +56,7 @@ const MessageItem: React.FC<{
           onRemoveAttachment,
           interactionsDisabled = false,
       }) => {
-    const participationDisabled = useRoomParticipation(message.chatRoomId, message.chatRoomProOnly);
+    const participationDisabled = useRoomParticipation(message.chatRoomId, message.chatRoomVipOnly);
     const fonts = useUserFonts(message.advert ? undefined : message.senderId, {
         usernameFont: message.senderUsernameFont,
         messageFont: message.senderMessageFont,
@@ -163,7 +163,7 @@ const MessageItem: React.FC<{
     const ChatRoomBadge = () => (
         <span className="inline-flex min-w-0 max-w-full items-center gap-1.5">
             <span className="truncate rounded bg-blue-100 px-1.5 py-0.5 text-[10px] font-medium text-blue-700">{message.chatRoomName}</span>
-            <RoomProBadge proOnly={message.chatRoomProOnly}/>
+            <RoomVipBadge vipOnly={message.chatRoomVipOnly}/>
         </span>
     );
 
@@ -208,7 +208,7 @@ const MessageItem: React.FC<{
                     <div className="min-w-0 flex-1">
                         <div className="mb-1 flex items-center gap-2">
                                 <span className="min-w-0 text-sm font-medium transition-colors text-foreground">
-                                    <ChatUserName userId={message.senderId} username={message.senderUsername} proBadgeVisible={message.senderProBadgeVisible} proBadgeRevision={message.senderProBadgeRevision} usernameFont={message.senderUsernameFont} messageFont={message.senderMessageFont} fontRevision={message.senderFontRevision}
+                                    <ChatUserName userId={message.senderId} username={message.senderUsername} vipBadgeVisible={message.senderVipBadgeVisible} vipBadgeRevision={message.senderVipBadgeRevision} usernameFont={message.senderUsernameFont} messageFont={message.senderMessageFont} fontRevision={message.senderFontRevision}
                                                   className={showSenderRoleColor && isStaff(message.senderRole) ? getRoleNameStyles(message.senderRole) : undefined}/>
                                 </span>
                             {message.bannedUser && <BannedUserBadge/>}
@@ -282,7 +282,7 @@ const MessageItem: React.FC<{
             {!isOwn && (showSenderName || message.bannedUser || message.deleted || showChatRoomName || showPromotedBadge || showPromotionPendingBadge) && (
                 <div
                     className="text-xs font-medium transition-colors text-muted-foreground flex min-w-0 max-w-full items-center gap-1 mb-1">
-                    {showSenderName && <ChatUserName userId={message.senderId} username={message.senderUsername} proBadgeVisible={message.senderProBadgeVisible} proBadgeRevision={message.senderProBadgeRevision} usernameFont={message.senderUsernameFont} messageFont={message.senderMessageFont} fontRevision={message.senderFontRevision}/>}
+                    {showSenderName && <ChatUserName userId={message.senderId} username={message.senderUsername} vipBadgeVisible={message.senderVipBadgeVisible} vipBadgeRevision={message.senderVipBadgeRevision} usernameFont={message.senderUsernameFont} messageFont={message.senderMessageFont} fontRevision={message.senderFontRevision}/>}
                     {message.bannedUser && <BannedUserBadge/>}
                     {message.deleted && <DeletedBadge/>}
                     {showPromotedBadge && <PromotedBadge/>}

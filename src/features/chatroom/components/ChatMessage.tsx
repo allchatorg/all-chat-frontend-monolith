@@ -15,7 +15,7 @@ import ReplyPreview from "@/features/chatroom/components/ReplyPreview";
 import {useSelector} from "react-redux";
 import {selectUser} from "@/redux/user/userSelectors";
 import {getCustomReaction, isCustomReactionToken} from "@/features/stickers/catalog";
-import {useProDialog} from "@/features/pro/useProDialog";
+import {useVipDialog} from "@/features/vip/useVipDialog";
 import {toast} from "sonner";
 
 interface ChatMessageProps {
@@ -87,10 +87,10 @@ const ChatMessage: React.FC<ChatMessageProps> = ({
                                                  }) => {
 
     const [reactToMessage] = useThunk(reactToMessageThunk);
-    const participationDisabled = useRoomParticipation(message.chatRoomId, message.chatRoomProOnly);
+    const participationDisabled = useRoomParticipation(message.chatRoomId, message.chatRoomVipOnly);
     const [deleteReaction] = useThunk(deleteReactionThunk);
-    const proActive = useSelector(selectUser)?.proActive === true;
-    const openPro = useProDialog();
+    const vipActive = useSelector(selectUser)?.vipActive === true;
+    const openVip = useVipDialog();
     const reactionPendingRef = React.useRef(false);
     const [isRevealed, setIsRevealed] = React.useState(false);
     const [isBlinking, setIsBlinking] = React.useState(false);
@@ -186,9 +186,9 @@ const ChatMessage: React.FC<ChatMessageProps> = ({
         const removing = existingReaction?.reactedByCurrentUser === true;
         if (isCustomReactionToken(emoji) || isCustomReactionToken(emojiId)) {
             if (!getCustomReaction(emoji) || emoji !== emojiId) throw new Error('This character reaction is unavailable.');
-            if (!removing && !proActive) {
+            if (!removing && !vipActive) {
                 setIsReactionPopoverOpen(false);
-                openPro();
+                openVip();
                 return;
             }
         }
@@ -265,8 +265,8 @@ const ChatMessage: React.FC<ChatMessageProps> = ({
                             <span className="min-w-0">
                                 <UserActionPopup userId={message.senderId} username={message.senderUsername}
                                                  role={message.senderRole}
-                                                 proBadgeVisible={message.senderProBadgeVisible}
-                                                 proBadgeRevision={message.senderProBadgeRevision}
+                                                 vipBadgeVisible={message.senderVipBadgeVisible}
+                                                 vipBadgeRevision={message.senderVipBadgeRevision}
                                                  usernameFont={message.senderUsernameFont}
                                                  messageFont={message.senderMessageFont}
                                                  fontRevision={message.senderFontRevision}
@@ -354,8 +354,8 @@ const ChatMessage: React.FC<ChatMessageProps> = ({
                     <span className="min-w-0">
                         <UserActionPopup userId={message.senderId} username={message.senderUsername}
                                          role={message.senderRole}
-                                         proBadgeVisible={message.senderProBadgeVisible}
-                                         proBadgeRevision={message.senderProBadgeRevision}
+                                         vipBadgeVisible={message.senderVipBadgeVisible}
+                                         vipBadgeRevision={message.senderVipBadgeRevision}
                                          usernameFont={message.senderUsernameFont}
                                          messageFont={message.senderMessageFont}
                                          fontRevision={message.senderFontRevision}

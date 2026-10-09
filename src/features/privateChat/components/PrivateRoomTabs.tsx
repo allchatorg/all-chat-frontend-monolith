@@ -103,7 +103,7 @@ function PrivateRoomTabContent({
 
             <div className="flex max-w-48 items-center gap-2">
                 <span className="truncate text-base font-medium" title={counterpartName}>
-                    <UserName userId={conversation.counterpart?.id} username={counterpartName} proBadgeVisible={conversation.counterpart?.proBadgeVisible} proBadgeRevision={conversation.counterpart?.proBadgeRevision} usernameFont={conversation.counterpart?.usernameFont} messageFont={conversation.counterpart?.messageFont} fontRevision={conversation.counterpart?.fontRevision}/>
+                    <UserName userId={conversation.counterpart?.id} username={counterpartName} vipBadgeVisible={conversation.counterpart?.vipBadgeVisible} vipBadgeRevision={conversation.counterpart?.vipBadgeRevision} usernameFont={conversation.counterpart?.usernameFont} messageFont={conversation.counterpart?.messageFont} fontRevision={conversation.counterpart?.fontRevision}/>
                 </span>
                 {conversation.blocked && (
                     <span title="Blocked" className="inline-flex items-center text-red-500">

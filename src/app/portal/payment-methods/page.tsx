@@ -23,7 +23,7 @@ export default function Page() {
             toast.success("Payment method removed successfully");
         } catch (err) {
             console.error('Failed to remove payment method:', err);
-            toast.error("Could not remove this card. Check whether it is required for Pro or a pending payment.");
+            toast.error("Could not remove this card. Check whether it is required for VIP or a pending payment.");
         } finally {setRemovingCard(false);}
     };
 

@@ -67,7 +67,7 @@ const PrivateRightPanelContent: React.FC<{showHeader?: boolean}> = ({showHeader 
             {showHeader && (
                 <>
                     <CardHeader className="flex shrink-0 flex-row items-center justify-between gap-2 p-4">
-                        <CardTitle className="text-sm">Search messages with <UserName userId={conversation?.counterpart?.id} username={counterpartName} proBadgeVisible={conversation?.counterpart?.proBadgeVisible} proBadgeRevision={conversation?.counterpart?.proBadgeRevision} usernameFont={conversation?.counterpart?.usernameFont} messageFont={conversation?.counterpart?.messageFont} fontRevision={conversation?.counterpart?.fontRevision}/></CardTitle>
+                        <CardTitle className="text-sm">Search messages with <UserName userId={conversation?.counterpart?.id} username={counterpartName} vipBadgeVisible={conversation?.counterpart?.vipBadgeVisible} vipBadgeRevision={conversation?.counterpart?.vipBadgeRevision} usernameFont={conversation?.counterpart?.usernameFont} messageFont={conversation?.counterpart?.messageFont} fontRevision={conversation?.counterpart?.fontRevision}/></CardTitle>
                         <Button variant="ghost" size="sm" className="glass-control" onClick={handleClose} aria-label="Close message search">
                             <X className="h-4 w-4"/>
                         </Button>

@@ -12,7 +12,7 @@ import {useJoinRandomRoom} from "@/features/chatroom/hooks/useJoinRandomRoom";
 
 const DEBOUNCE_DELAY = 400;
 
-export type RoomProFilter = "all" | "pro" | "standard";
+export type RoomVipFilter = "all" | "vip" | "standard";
 
 export const useRoomSearch = (initialSearchTerm = "") => {
     const [runSearchRoomThunk, searchRoomIsLoading] = useThunk(searchChatRoomsByNameThunk);
@@ -23,8 +23,8 @@ export const useRoomSearch = (initialSearchTerm = "") => {
     const {handleJoinRoom, handleCreateRoom} = useChatRooms(user);
 
     const [searchTerm, setSearchTerm] = useState(initialSearchTerm);
-    const [proOnly, setProOnly] = useState(false);
-    const [proFilter, setProFilter] = useState<RoomProFilter>("all");
+    const [vipOnly, setVipOnly] = useState(false);
+    const [vipFilter, setVipFilter] = useState<RoomVipFilter>("all");
     const [isCreating, setIsCreating] = useState(false);
     const [creationError, setCreationError] = useState<string | null>(null);
     const creatingRef = useRef(false);
@@ -65,14 +65,14 @@ export const useRoomSearch = (initialSearchTerm = "") => {
 
     useEffect(() => {
         setCreationError(null);
-    }, [searchTerm, proOnly]);
+    }, [searchTerm, vipOnly]);
 
     useEffect(() => {
-        if (!user?.proActive) setProOnly(false);
-    }, [user?.proActive]);
+        if (!user?.vipActive) setVipOnly(false);
+    }, [user?.vipActive]);
 
     const clearSearch = () => {
-        setProOnly(false);
+        setVipOnly(false);
         setCreationError(null);
         setSearchTerm("");
         setRooms([]);
@@ -89,18 +89,18 @@ export const useRoomSearch = (initialSearchTerm = "") => {
         const normalizedQuery = searchTerm.trim().toLowerCase();
         return rooms.filter((room) =>
             (!normalizedQuery || room.roomName.toLowerCase().includes(normalizedQuery)) &&
-            (proFilter === "all" || (proFilter === "pro") === (room.proOnly === true))
+            (vipFilter === "all" || (vipFilter === "vip") === (room.vipOnly === true))
         );
-    }, [searchTerm, rooms, proFilter]);
+    }, [searchTerm, rooms, vipFilter]);
 
     const exactRooms = useMemo(() => rooms.filter(room =>
         room.roomName.trim().toLowerCase() === searchTerm.trim().toLowerCase()
     ), [rooms, searchTerm]);
-    const standardExists = exactRooms.some(room => !room.proOnly);
-    const proExists = exactRooms.some(room => room.proOnly);
+    const standardExists = exactRooms.some(room => !room.vipOnly);
+    const vipExists = exactRooms.some(room => room.vipOnly);
     // When one variant of the name already exists, only the other one can be created.
-    const proModeLocked = standardExists || proExists;
-    const effectiveProOnly = standardExists || (!proExists && proOnly);
+    const vipModeLocked = standardExists || vipExists;
+    const effectiveVipOnly = standardExists || (!vipExists && vipOnly);
 
     const validateName = (value: string) => {
         if (!value.trim()) return "Name cannot be empty.";
@@ -112,7 +112,7 @@ export const useRoomSearch = (initialSearchTerm = "") => {
     const validationResult: string | true = validateName(searchTerm);
     const showCreateOption =
         searchTerm.trim().length >= 1 &&
-        !(standardExists && proExists) &&
+        !(standardExists && vipExists) &&
         !searchRoomIsLoading &&
         lastSearchedTerm === searchTerm.trim() &&
         validationResult === true;
@@ -120,12 +120,12 @@ export const useRoomSearch = (initialSearchTerm = "") => {
     const canCreate = showCreateOption && !isCreating;
     const handleCreateChatRoom = async (): Promise<boolean> => {
         if (!canCreate || creatingRef.current || !user || user.role === Role.GUEST) return false;
-        if (effectiveProOnly && !user.proActive) return false;
+        if (effectiveVipOnly && !user.vipActive) return false;
         creatingRef.current = true;
         setIsCreating(true);
         setCreationError(null);
         try {
-            await handleCreateRoom({name: searchTerm.trim(), proOnly: effectiveProOnly});
+            await handleCreateRoom({name: searchTerm.trim(), vipOnly: effectiveVipOnly});
             clearSearch();
             return true;
         } catch (error) {
@@ -148,11 +148,11 @@ export const useRoomSearch = (initialSearchTerm = "") => {
         handleCreateChatRoom,
         clearSearch,
         showCreateOption,
-        proOnly: effectiveProOnly,
-        setProOnly,
-        proFilter,
-        setProFilter,
-        proModeLocked,
+        vipOnly: effectiveVipOnly,
+        setVipOnly,
+        vipFilter,
+        setVipFilter,
+        vipModeLocked,
         isCreating,
         creationError,
         canCreate,

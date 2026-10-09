@@ -1,7 +1,7 @@
 'use strict';
 
 // Renders the cat sticker set.
-//   node output/catpuss-stickers/build.cjs               → svg/, public/stickers/pro/*.png, preview.png
+//   node output/catpuss-stickers/build.cjs               → svg/, public/stickers/vip/*.png, preview.png
 //   node output/catpuss-stickers/build.cjs --sheet <png> [ids…]  → contact sheet only (for iteration)
 
 const fs = require('fs');
@@ -11,7 +11,7 @@ const {cat} = require('./cat-art.cjs');
 const {VARIANTS} = require('./variants.cjs');
 
 const ROOT = path.resolve(__dirname, '../..');
-const PUBLIC_DIR = path.join(ROOT, 'public/stickers/pro');
+const PUBLIC_DIR = path.join(ROOT, 'public/stickers/vip');
 const SVG_DIR = path.join(__dirname, 'svg');
 
 /** Render at 2× and downsample for smoother edges than librsvg's direct anti-aliasing. */
@@ -56,7 +56,7 @@ async function main() {
         fs.writeFileSync(path.join(PUBLIC_DIR, `${v.id}.png`), await render(svg));
     }
     await sheet(VARIANTS, path.join(__dirname, 'preview.png'));
-    fs.writeFileSync(path.join(__dirname, 'manifest.json'), `${JSON.stringify(VARIANTS.map(({id, name, tags}) => ({id, name, tags, file: `public/stickers/pro/${id}.png`})), null, 2)}\n`);
+    fs.writeFileSync(path.join(__dirname, 'manifest.json'), `${JSON.stringify(VARIANTS.map(({id, name, tags}) => ({id, name, tags, file: `public/stickers/vip/${id}.png`})), null, 2)}\n`);
     console.log(`Rendered ${VARIANTS.length} stickers.`);
 }
 

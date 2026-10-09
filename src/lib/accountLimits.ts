@@ -8,37 +8,37 @@ export const ACCOUNT_LIMITS = {
     guestRooms: 20,
     claimedRooms: 25,
     verifiedRooms: 50,
-    proRooms: 100,
-    proDailyFontSaves: 5,
+    vipRooms: 100,
+    vipDailyFontSaves: 5,
     regularMessageCharacters: 500,
-    proMessageCharacters: 2500,
+    vipMessageCharacters: 2500,
     regularRawMessageCharacters: 2000,
-    proRawMessageCharacters: 10000,
+    vipRawMessageCharacters: 10000,
     regularFileBytes: 10 * MEBIBYTE,
-    proFileBytes: 100 * MEBIBYTE,
+    vipFileBytes: 100 * MEBIBYTE,
     regularHourlyUploadBytes: 25 * MEBIBYTE,
-    proHourlyUploadBytes: 500 * MEBIBYTE,
+    vipHourlyUploadBytes: 500 * MEBIBYTE,
 } as const;
 
-type Account = Pick<User, "proActive" | "role" | "claimed" | "verified"> | null | undefined;
+type Account = Pick<User, "vipActive" | "role" | "claimed" | "verified"> | null | undefined;
 
 export function getAccountLimits(user: Account) {
-    const pro = user?.proActive === true;
+    const vip = user?.vipActive === true;
     const staff = user ? isStaff(user.role) : false;
     return {
-        messageCharacters: pro ? ACCOUNT_LIMITS.proMessageCharacters : ACCOUNT_LIMITS.regularMessageCharacters,
-        rawMessageCharacters: pro ? ACCOUNT_LIMITS.proRawMessageCharacters : ACCOUNT_LIMITS.regularRawMessageCharacters,
-        joinedPublicRooms: staff ? Infinity : pro ? ACCOUNT_LIMITS.proRooms
+        messageCharacters: vip ? ACCOUNT_LIMITS.vipMessageCharacters : ACCOUNT_LIMITS.regularMessageCharacters,
+        rawMessageCharacters: vip ? ACCOUNT_LIMITS.vipRawMessageCharacters : ACCOUNT_LIMITS.regularRawMessageCharacters,
+        joinedPublicRooms: staff ? Infinity : vip ? ACCOUNT_LIMITS.vipRooms
             : user?.verified ? ACCOUNT_LIMITS.verifiedRooms
                 : user?.claimed ? ACCOUNT_LIMITS.claimedRooms : ACCOUNT_LIMITS.guestRooms,
-        hourlyUploadBytes: staff ? Infinity : pro ? ACCOUNT_LIMITS.proHourlyUploadBytes : ACCOUNT_LIMITS.regularHourlyUploadBytes,
+        hourlyUploadBytes: staff ? Infinity : vip ? ACCOUNT_LIMITS.vipHourlyUploadBytes : ACCOUNT_LIMITS.regularHourlyUploadBytes,
     };
 }
 
-// Pro raises the per-file cap for every supported chat attachment type.
+// VIP raises the per-file cap for every supported chat attachment type.
 // The server remains authoritative for file validation and the rolling allowance.
 export function getAttachmentByteLimit(type: AttachmentType, user: Account): number {
-    return user?.proActive
-        ? ACCOUNT_LIMITS.proFileBytes
+    return user?.vipActive
+        ? ACCOUNT_LIMITS.vipFileBytes
         : type.maxFileSizeBytes;
 }

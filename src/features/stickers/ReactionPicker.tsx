@@ -8,7 +8,7 @@ import {EmojiBrowser} from './EmojiBrowser';
 import type {EmojiSelection} from './emojiTypes';
 
 interface ReactionPickerProps {
-    proActive: boolean;
+    vipActive: boolean;
     reactions: readonly Reaction[];
     onSelect: (emoji: string, emojiId: string) => Promise<void>;
     onClose: () => void;
@@ -17,7 +17,7 @@ interface ReactionPickerProps {
     className?: string;
 }
 
-export function ReactionPicker({proActive, reactions, onSelect, onClose, onUpgrade, className}: ReactionPickerProps) {
+export function ReactionPicker({vipActive, reactions, onSelect, onClose, onUpgrade, className}: ReactionPickerProps) {
     const [pending, setPending] = useState(false);
     const pendingRef = useRef(false);
     const selectedTokens = new Set(reactions.filter(reaction => reaction.reactedByCurrentUser).map(reaction => reaction.emoji));
@@ -38,7 +38,7 @@ export function ReactionPicker({proActive, reactions, onSelect, onClose, onUpgra
     };
 
     return <div className={cn('h-[min(520px,var(--radix-popover-content-available-height,520px))] min-h-0', className)}>
-        <EmojiBrowser mode="reaction" proActive={proActive} selectedReactionTokens={selectedTokens}
+        <EmojiBrowser mode="reaction" vipActive={vipActive} selectedReactionTokens={selectedTokens}
                       pending={pending} onSelect={selectReaction} onUpgrade={onUpgrade}/>
     </div>;
 }

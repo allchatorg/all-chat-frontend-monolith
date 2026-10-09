@@ -164,7 +164,7 @@ export default function UserDetailsPage() {
                             <User className="h-4 w-4 text-muted-foreground"/>
                             <div>
                                 <p className="text-sm font-medium">Username</p>
-                                <p className="text-sm text-muted-foreground"><UserName userId={user.id} username={user.username} proBadgeVisible={user.proBadgeVisible} proBadgeRevision={user.proBadgeRevision} usernameFont={user.usernameFont} messageFont={user.messageFont} fontRevision={user.fontRevision}/></p>
+                                <p className="text-sm text-muted-foreground"><UserName userId={user.id} username={user.username} vipBadgeVisible={user.vipBadgeVisible} vipBadgeRevision={user.vipBadgeRevision} usernameFont={user.usernameFont} messageFont={user.messageFont} fontRevision={user.fontRevision}/></p>
                             </div>
                         </div>
 
@@ -219,7 +219,7 @@ export default function UserDetailsPage() {
                 </CardHeader>
                 <CardContent>
                     <div className="flex flex-wrap gap-2">
-                        <StaffMembershipBadge proActive={detailsState.error ? undefined : user.proActive} role={user.role} loading={detailsState.loading}/>
+                        <StaffMembershipBadge vipActive={detailsState.error ? undefined : user.vipActive} role={user.role} loading={detailsState.loading}/>
                         <StatusBadge
                             condition={user.verified}
                             trueLabel="Verified"
@@ -251,7 +251,7 @@ export default function UserDetailsPage() {
                         <IdVerificationStatusBadge status={idVerificationStatus}/>
                     </div>
 
-                    {!detailsState.loading && (detailsState.error || typeof user.proActive !== "boolean") && (
+                    {!detailsState.loading && (detailsState.error || typeof user.vipActive !== "boolean") && (
                         <Button className="mt-3" variant="outline" size="sm" onClick={() => void refetchUserDetails()}>
                             Retry membership
                         </Button>

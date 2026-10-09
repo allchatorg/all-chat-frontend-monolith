@@ -9,8 +9,8 @@ export interface User extends Partial<FontSnapshot> {
     name: string;
     email: string;
     role: UserRole;
-    proBadgeVisible?: boolean;
-    proBadgeRevision?: number;
+    vipBadgeVisible?: boolean;
+    vipBadgeRevision?: number;
 }
 
 // Map backend/store Role enum to UI UserRole enum
@@ -35,8 +35,8 @@ export function useUser() {
             name: `${currentUser.firstName ?? ''} ${currentUser.lastName ?? ''}`.trim() || currentUser.email,
             email: currentUser.email,
             role: mapRole(currentUser.role),
-            proBadgeVisible: currentUser.proBadgeVisible,
-            proBadgeRevision: currentUser.proBadgeRevision,
+            vipBadgeVisible: currentUser.vipBadgeVisible,
+            vipBadgeRevision: currentUser.vipBadgeRevision,
             usernameFont: currentUser.usernameFont,
             messageFont: currentUser.messageFont,
             fontRevision: currentUser.fontRevision,

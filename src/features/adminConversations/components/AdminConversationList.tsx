@@ -111,7 +111,7 @@ const AdminConversationList: React.FC<AdminConversationListProps> = ({
                                         )}
                                     >
                                         <div className="flex items-center gap-2">
-                                            <span className="truncate font-medium"><UserName userId={conversation.counterpart?.id} username={"@" + counterpartName} proBadgeVisible={conversation.counterpart?.proBadgeVisible} proBadgeRevision={conversation.counterpart?.proBadgeRevision} usernameFont={conversation.counterpart?.usernameFont} messageFont={conversation.counterpart?.messageFont} fontRevision={conversation.counterpart?.fontRevision}/></span>
+                                            <span className="truncate font-medium"><UserName userId={conversation.counterpart?.id} username={"@" + counterpartName} vipBadgeVisible={conversation.counterpart?.vipBadgeVisible} vipBadgeRevision={conversation.counterpart?.vipBadgeRevision} usernameFont={conversation.counterpart?.usernameFont} messageFont={conversation.counterpart?.messageFont} fontRevision={conversation.counterpart?.fontRevision}/></span>
                                             {conversation.blocked && (
                                                 <Ban className="h-3.5 w-3.5 shrink-0 text-red-500"/>
                                             )}

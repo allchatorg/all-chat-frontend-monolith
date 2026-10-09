@@ -102,7 +102,7 @@ export const VerificationBlockingOverlay: React.FC<VerificationBlockingOverlayPr
                     {show === 'EMAIL' && <VerifyMail/>}
                     {show === 'PHONE' && <VerifyPhone/>}
                     {show === 'ID' && <VerifyIdentity/>}
-                    <Link href={ROUTES.SUBSCRIPTIONS} className="text-center text-xs text-muted-foreground underline underline-offset-4">Manage or cancel your Pro subscription</Link>
+                    <Link href={ROUTES.SUBSCRIPTIONS} className="text-center text-xs text-muted-foreground underline underline-offset-4">Manage or cancel your VIP subscription</Link>
                 </DialogContent>
             </Dialog>
         </>

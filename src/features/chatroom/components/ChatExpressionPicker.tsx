@@ -7,9 +7,9 @@ import {toast} from 'sonner';
 import {Button} from '@/components/ui/button';
 import {Popover, PopoverAnchor, PopoverContent} from '@/components/ui/popover';
 import {selectUser} from '@/redux/user/userSelectors';
-import {useProDialog} from '@/features/pro/useProDialog';
+import {useVipDialog} from '@/features/vip/useVipDialog';
 import {ExpressionPicker, ExpressionPickerTab} from '@/features/stickers/ExpressionPicker';
-import {ProReaction} from '@/features/stickers/catalog';
+import {VipReaction} from '@/features/stickers/catalog';
 import type {EmojiSelection} from '@/features/stickers/emojiTypes';
 
 interface ChatExpressionPickerProps {
@@ -17,7 +17,7 @@ interface ChatExpressionPickerProps {
     pending?: boolean;
     allowStickers?: boolean;
     onEmojiSelect: (emoji: EmojiSelection) => void;
-    onStickerSelect: (sticker: ProReaction) => Promise<void>;
+    onStickerSelect: (sticker: VipReaction) => Promise<void>;
     onRestoreComposerFocus: () => void;
 }
 
@@ -33,8 +33,8 @@ export function ChatExpressionPicker({disabled, pending, allowStickers = true, o
     const skipRestoreFocusRef = useRef(false);
     const focusComposerOnCloseRef = useRef(false);
     const contentId = useId();
-    const proActive = useSelector(selectUser)?.proActive === true;
-    const openPro = useProDialog();
+    const vipActive = useSelector(selectUser)?.vipActive === true;
+    const openVip = useVipDialog();
     const busy = sending || pending;
     const visible = open && (!disabled || sending);
     const activeTab = allowStickers ? tab : 'emoji';
@@ -43,7 +43,7 @@ export function ChatExpressionPicker({disabled, pending, allowStickers = true, o
         if (disabled && !sending) setOpen(false);
     }, [disabled, sending]);
 
-    const sendSticker = async (sticker: ProReaction) => {
+    const sendSticker = async (sticker: VipReaction) => {
         if (disabled || busy || sendingRef.current) return;
         sendingRef.current = true;
         setSending(true);
@@ -106,7 +106,7 @@ export function ChatExpressionPicker({disabled, pending, allowStickers = true, o
                                 skipRestoreFocusRef.current = false;
                                 focusComposerOnCloseRef.current = false;
                             }}>
-                <ExpressionPicker tab={activeTab} onTabChange={setTab} allowStickers={allowStickers} mode="message" proActive={proActive} pending={busy || disabled}
+                <ExpressionPicker tab={activeTab} onTabChange={setTab} allowStickers={allowStickers} mode="message" vipActive={vipActive} pending={busy || disabled}
                                   onEmojiSelect={emoji => {
                                       if (busy || disabled) throw new Error('The composer is currently unavailable.');
                                       onEmojiSelect(emoji);
@@ -117,7 +117,7 @@ export function ChatExpressionPicker({disabled, pending, allowStickers = true, o
                                   onUpgrade={() => {
                                       skipRestoreFocusRef.current = true;
                                       setOpen(false);
-                                      openPro();
+                                      openVip();
                                   }}/>
             </PopoverContent>
         </Popover>
