@@ -13,6 +13,7 @@ import {
     Flame,
     GripHorizontal,
     Loader2,
+    type LucideIcon,
     Megaphone,
     MessageSquare,
     MoreVertical,
@@ -29,6 +30,7 @@ import {useTopReactedSidebar} from "@/lib/hooks/useTopReactedSidebar";
 import {usePromotedMessagesSidebar} from "@/lib/hooks/usePromotedMessagesSidebar";
 import {ChatRoomNoiseLevelEnum} from "@/models/ChatRoomNoiseLevelEnum";
 import {useIsMobile} from "@/lib/hooks/useIsMobile";
+import {useElementWidth} from "@/lib/hooks/useElementWidth";
 import {
     DropdownMenuItem,
     DropdownMenuLabel,
@@ -85,6 +87,21 @@ const getNoiseIndicator = (level: ChatRoomNoiseLevelEnum) => {
 
 const ARCHIVE_HIDDEN_ROOM_NAMES = new Set(["super admins", "admins", "moderators"]);
 
+// Header widths (px) below which lower-priority items leave the title row, so
+// the room name keeps roughly 160-240px even next to the VIP badge. These are
+// measured on the header itself, so open sidebars shrink it too.
+const INLINE_SEARCH_BAR_MIN_WIDTH = 940;
+const INLINE_PANEL_ACTIONS_MIN_WIDTH = {desktop: 700, mobile: 600};
+const INLINE_ROOM_META_MIN_WIDTH = {desktop: 520, mobile: 420};
+
+interface PanelAction {
+    key: string;
+    label: string;
+    Icon: LucideIcon;
+    onSelect: () => void;
+    opensDialog?: boolean;
+}
+
 const ChatSectionHeader: React.FC<ChatSectionHeaderProps> = ({
                                                                  showRadio = false,
                                                                  chatRoomId,
@@ -100,6 +117,14 @@ const ChatSectionHeader: React.FC<ChatSectionHeaderProps> = ({
     const dispatch = useDispatch<AppDispatch>();
     const roomTabSortMode = useSelector(selectChatRoomTabSortMode);
     const [isExpanded, setIsExpanded] = useState(false);
+    const [headerNode, setHeaderNode] = useState<HTMLDivElement | null>(null);
+    // Unmeasured (server render) counts as roomy, matching the full layout.
+    const headerWidth = useElementWidth(headerNode) ?? Number.POSITIVE_INFINITY;
+    const layout = isMobile ? "mobile" : "desktop";
+    const searchBarCollapsed = isMobile || headerWidth < INLINE_SEARCH_BAR_MIN_WIDTH;
+    const panelActionsCollapsed = headerWidth < INLINE_PANEL_ACTIONS_MIN_WIDTH[layout];
+    const roomMetaCollapsed = headerWidth < INLINE_ROOM_META_MIN_WIDTH[layout];
+    const searchOpen = isExpanded && searchBarCollapsed;
     const noiseIndicator = getNoiseIndicator(noiseLevel);
     const {isAdmin, isStaffMember, currentRole} = useRoleAccess();
     const {open, close} = useDialog();
@@ -199,10 +224,9 @@ const ChatSectionHeader: React.FC<ChatSectionHeaderProps> = ({
         );
     };
 
-    const openArchiveConfirmAfterMenuClose = () => {
-        window.setTimeout(() => {
-            void handleArchiveConfirm();
-        }, 100);
+    // Dialogs opened from a menu item wait for the menu to finish closing.
+    const runAfterMenuClose = (action: () => void) => {
+        window.setTimeout(action, 100);
     };
 
     const handleArchiveToggle = async () => {
@@ -211,7 +235,7 @@ const ChatSectionHeader: React.FC<ChatSectionHeaderProps> = ({
         }
 
         if (!isArchived) {
-            openArchiveConfirmAfterMenuClose();
+            runAfterMenuClose(() => void handleArchiveConfirm());
             return;
         }
 
@@ -222,6 +246,55 @@ const ChatSectionHeader: React.FC<ChatSectionHeaderProps> = ({
             toast.error(error?.message || "Failed to unarchive chat room.");
         }
     };
+
+    // Shown as header buttons when there is room, otherwise in the options menu.
+    const panelActions: PanelAction[] = [
+        ...(canPromoteRoom ? [{
+            key: "promote-room",
+            label: promoteRoomButtonLabel,
+            Icon: Rocket,
+            onSelect: handlePromoteRoom,
+            opensDialog: true,
+        }] : []),
+        {key: "top-reacted", label: topReactedButtonLabel, Icon: Flame, onSelect: onToggleTopReactedSidebar},
+        {key: "promoted-messages", label: promotedButtonLabel, Icon: Megaphone, onSelect: onTogglePromotedSidebar},
+        {key: "active-rooms", label: popularityButtonLabel, Icon: Users, onSelect: onTogglePopularitySidebar},
+    ];
+
+    const renderPanelActionButtons = (
+        buttonClassName: string,
+        iconClassName: string,
+        variant: "ghost" | "outline"
+    ) => panelActions.map(({key, label, Icon, onSelect}) => (
+        <Button
+            key={key}
+            onClick={onSelect}
+            variant={variant}
+            size="sm"
+            className={buttonClassName}
+            aria-label={label}
+            title={label}
+        >
+            <Icon className={iconClassName}/>
+        </Button>
+    ));
+
+    const renderSearchToggle = (
+        buttonClassName: string,
+        iconClassName: string,
+        variant: "ghost" | "outline"
+    ) => (
+        <Button
+            onClick={toggleExpanded}
+            variant={variant}
+            size="sm"
+            className={buttonClassName}
+            aria-label={searchOpen ? "Close search" : "Open search"}
+            title={searchOpen ? "Close search" : "Open search"}
+        >
+            {searchOpen ? <X className={iconClassName}/> : <Search className={iconClassName}/>}
+        </Button>
+    );
 
     const roomTabOrderOptions = (
         <DropdownMenuRadioGroup
@@ -282,6 +355,30 @@ const ChatSectionHeader: React.FC<ChatSectionHeaderProps> = ({
                     collisionPadding={8}
                     className={`glass-popover max-w-[calc(100vw-1rem)] ${isMobile ? "w-60" : "w-52"}`}
                 >
+                    {roomMetaCollapsed && (
+                        <>
+                            <DropdownMenuLabel className="flex items-center gap-2 text-xs font-normal text-muted-foreground">
+                                <MessageSquare className="h-3.5 w-3.5 shrink-0" aria-hidden="true"/>
+                                {totalMessages} {totalMessages === 1 ? "message" : "messages"}
+                            </DropdownMenuLabel>
+                            <DropdownMenuSeparator/>
+                        </>
+                    )}
+                    {panelActionsCollapsed && (
+                        <>
+                            {panelActions.map(({key, label, Icon, onSelect, opensDialog}) => (
+                                <DropdownMenuItem
+                                    key={key}
+                                    className="cursor-pointer focus:bg-white/30 dark:focus:bg-white/10"
+                                    onSelect={() => opensDialog ? runAfterMenuClose(onSelect) : onSelect()}
+                                >
+                                    <Icon aria-hidden="true"/>
+                                    {label}
+                                </DropdownMenuItem>
+                            ))}
+                            <DropdownMenuSeparator/>
+                        </>
+                    )}
                     {isMobile ? (
                         <>
                             <DropdownMenuLabel className="text-xs text-muted-foreground">Room tab order</DropdownMenuLabel>
@@ -324,170 +421,95 @@ const ChatSectionHeader: React.FC<ChatSectionHeaderProps> = ({
         );
     };
 
+    const noiseDot = (
+        <div className={`w-3 h-3 shrink-0 rounded-full ${noiseIndicator.color}`}
+             title={noiseIndicator.title}></div>
+    );
+    const roomName = <span className="min-w-0 truncate" title={chatRoomName}>{chatRoomName}</span>;
+
     // Desktop layout
     if (!isMobile) {
+        const controlClassName = "glass-control z-10 h-10 w-10 p-2";
         return (
-            <CardTitle className="chat-header-floating flex items-center gap-2">
-                <div className={`w-3 h-3 shrink-0 rounded-full ${noiseIndicator.color}`}
-                     title={noiseIndicator.title}></div>
-                <span className="min-w-0 truncate" title={chatRoomName}>{chatRoomName}</span>
-                <RoomVipBadge vipOnly={vipOnly}/>
-                <div className="flex shrink-0 items-center gap-1.5 ml-2">
-                    <MessageSquare className="h-4 w-4 text-muted-foreground"/>
-                    <span className="text-sm font-normal text-muted-foreground">
-                        {totalMessages}
-                    </span>
-                </div>
-                <div className="ml-auto flex shrink-0 items-center gap-2">
-                    <ChatSearchBar/>
-                    {canPromoteRoom && (
-                        <Button
-                            onClick={handlePromoteRoom}
-                            variant="outline"
-                            size="sm"
-                            className="glass-control z-10 h-10 w-10 p-2"
-                            aria-label={promoteRoomButtonLabel}
-                            title={promoteRoomButtonLabel}
-                        >
-                            <Rocket className="h-5 w-5"/>
-                        </Button>
-                    )}
-                    <Button
-                        onClick={onToggleTopReactedSidebar}
-                        variant="outline"
-                        size="sm"
-                        className="glass-control z-10 h-10 w-10 p-2"
-                        aria-label={topReactedButtonLabel}
-                        title={topReactedButtonLabel}
-                    >
-                        <Flame className="h-5 w-5"/>
-                    </Button>
-                    <Button
-                        onClick={onTogglePromotedSidebar}
-                        variant="outline"
-                        size="sm"
-                        className="glass-control z-10 h-10 w-10 p-2"
-                        aria-label={promotedButtonLabel}
-                        title={promotedButtonLabel}
-                    >
-                        <Megaphone className="h-5 w-5"/>
-                    </Button>
-                    <Button
-                        onClick={onTogglePopularitySidebar}
-                        variant="outline"
-                        size="sm"
-                        className="glass-control z-10 h-10 w-10 p-2"
-                        aria-label={popularityButtonLabel}
-                        title={popularityButtonLabel}
-                    >
-                        <Users className="h-5 w-5"/>
-                    </Button>
-                    <NotificationSoundModeMenu
-                        variant="outline"
-                        buttonClassName="glass-control z-10 h-10 w-10 p-2"
-                        iconClassName="h-5 w-5"
-                    />
-                    {renderChatOptionsMenu("glass-control z-10 h-10 w-10 p-2", "h-5 w-5", "outline")}
-                </div>
+            <CardTitle ref={setHeaderNode} className="chat-header-floating flex items-center gap-2">
+                {searchOpen ? (
+                    <>
+                        <div className="min-w-0 flex-1 animate-in slide-in-from-right-2 duration-200">
+                            <ChatSearchBar/>
+                        </div>
+                        {renderSearchToggle(controlClassName, "h-5 w-5", "outline")}
+                        {renderChatOptionsMenu(controlClassName, "h-5 w-5", "outline")}
+                    </>
+                ) : (
+                    <>
+                        {noiseDot}
+                        {roomName}
+                        <RoomVipBadge vipOnly={vipOnly} compact={roomMetaCollapsed}/>
+                        {!roomMetaCollapsed && (
+                            <div className="flex shrink-0 items-center gap-1.5 ml-2">
+                                <MessageSquare className="h-4 w-4 text-muted-foreground"/>
+                                <span className="text-sm font-normal text-muted-foreground">
+                                    {totalMessages}
+                                </span>
+                            </div>
+                        )}
+                        <div className="ml-auto flex shrink-0 items-center gap-2">
+                            {searchBarCollapsed
+                                ? renderSearchToggle(controlClassName, "h-5 w-5", "outline")
+                                : <ChatSearchBar/>}
+                            {!panelActionsCollapsed && renderPanelActionButtons(controlClassName, "h-5 w-5", "outline")}
+                            <NotificationSoundModeMenu
+                                variant="outline"
+                                buttonClassName={controlClassName}
+                                iconClassName="h-5 w-5"
+                            />
+                            {renderChatOptionsMenu(controlClassName, "h-5 w-5", "outline")}
+                        </div>
+                    </>
+                )}
             </CardTitle>
         );
     }
 
     // Mobile layout
+    const controlClassName = "glass-control h-8 w-8 p-0";
     return (
-        <CardTitle className="chat-header-floating flex min-w-0 flex-wrap items-center gap-2">
-            {!isExpanded ? (
+        <CardTitle ref={setHeaderNode} className="chat-header-floating flex min-w-0 flex-wrap items-center gap-2">
+            {searchOpen ? (
                 <>
-                    <div className="flex min-w-0 flex-1 basis-32 items-center gap-2">
-                        <div className={`w-3 h-3 shrink-0 rounded-full ${noiseIndicator.color}`}
-                             title={noiseIndicator.title}></div>
-                        <span className="min-w-0 flex-1 truncate" title={chatRoomName}>{chatRoomName}</span>
-                        <RoomVipBadge vipOnly={vipOnly}/>
-                        <div className="flex shrink-0 items-center gap-1">
-                            <MessageSquare className="h-3.5 w-3.5 text-muted-foreground"/>
-                            <span className="text-sm font-normal text-muted-foreground whitespace-nowrap">
-                                {totalMessages}
-                            </span>
-                        </div>
-                    </div>
-                    <div className="ml-auto flex max-w-full flex-wrap items-center justify-end gap-1 [&>button]:shrink-0">
-                        {canPromoteRoom && (
-                            <Button
-                                onClick={handlePromoteRoom}
-                                variant="ghost"
-                                size="sm"
-                                className="glass-control h-8 w-8 p-0"
-                                aria-label={promoteRoomButtonLabel}
-                                title={promoteRoomButtonLabel}
-                            >
-                                <Rocket className="h-4 w-4"/>
-                            </Button>
-                        )}
-                        <Button
-                            onClick={onToggleTopReactedSidebar}
-                            variant="ghost"
-                            size="sm"
-                            className="glass-control h-8 w-8 p-0"
-                            aria-label={topReactedButtonLabel}
-                            title={topReactedButtonLabel}
-                        >
-                            <Flame className="h-4 w-4"/>
-                        </Button>
-                        <Button
-                            onClick={onTogglePromotedSidebar}
-                            variant="ghost"
-                            size="sm"
-                            className="glass-control h-8 w-8 p-0"
-                            aria-label={promotedButtonLabel}
-                            title={promotedButtonLabel}
-                        >
-                            <Megaphone className="h-4 w-4"/>
-                        </Button>
-                        <Button
-                            onClick={onTogglePopularitySidebar}
-                            variant="ghost"
-                            size="sm"
-                            className="glass-control h-8 w-8 p-0"
-                            aria-label={popularityButtonLabel}
-                            title={popularityButtonLabel}
-                        >
-                            <Users className="h-4 w-4"/>
-                        </Button>
-                        <NotificationSoundModeMenu
-                            variant="ghost"
-                            buttonClassName="glass-control h-8 w-8 p-0"
-                            iconClassName="h-4 w-4"
-                        />
-                        <Button
-                            onClick={toggleExpanded}
-                            variant="ghost"
-                            size="sm"
-                            className="glass-control h-8 w-8 p-0"
-                            aria-label="Open search"
-                            title="Open search"
-                        >
-                            <Search className="h-4 w-4"/>
-                        </Button>
-                        {renderChatOptionsMenu("glass-control h-8 w-8 p-0", "h-4 w-4", "ghost")}
-                    </div>
-                </>
-            ) : (
-                <>
-                    {/* Search view */}
                     <div className="min-w-0 flex-1 animate-in slide-in-from-right-2 duration-200">
                         <ChatSearchBar/>
                     </div>
-                    <Button
-                        onClick={toggleExpanded}
-                        variant="ghost"
-                        size="sm"
-                        className="glass-control h-8 w-8 p-0"
-                        aria-label="Close search"
-                        title="Close search"
-                    >
-                        <X className="h-4 w-4"/>
-                    </Button>
-                    {renderChatOptionsMenu("glass-control h-8 w-8 shrink-0 p-0", "h-4 w-4", "ghost")}
+                    {renderSearchToggle(`${controlClassName} shrink-0`, "h-4 w-4", "ghost")}
+                    {renderChatOptionsMenu(`${controlClassName} shrink-0`, "h-4 w-4", "ghost")}
+                </>
+            ) : (
+                <>
+                    {/* Sized to its content, so the actions only drop to a
+                        second row when the full room name wouldn't fit. */}
+                    <div className="flex min-w-0 flex-auto items-center gap-2">
+                        {noiseDot}
+                        {roomName}
+                        <RoomVipBadge vipOnly={vipOnly} compact={roomMetaCollapsed}/>
+                        {!roomMetaCollapsed && (
+                            <div className="flex shrink-0 items-center gap-1">
+                                <MessageSquare className="h-3.5 w-3.5 text-muted-foreground"/>
+                                <span className="text-sm font-normal text-muted-foreground whitespace-nowrap">
+                                    {totalMessages}
+                                </span>
+                            </div>
+                        )}
+                    </div>
+                    <div className="ml-auto flex shrink-0 items-center gap-1">
+                        {!panelActionsCollapsed && renderPanelActionButtons(controlClassName, "h-4 w-4", "ghost")}
+                        <NotificationSoundModeMenu
+                            variant="ghost"
+                            buttonClassName={controlClassName}
+                            iconClassName="h-4 w-4"
+                        />
+                        {renderSearchToggle(controlClassName, "h-4 w-4", "ghost")}
+                        {renderChatOptionsMenu(controlClassName, "h-4 w-4", "ghost")}
+                    </div>
                 </>
             )}
         </CardTitle>
