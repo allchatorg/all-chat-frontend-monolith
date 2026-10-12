@@ -23,10 +23,10 @@ const VARIANTS = [
     {
         id: 'catapuss-typing', name: 'Typing Catapuss', tags: ['laptop', 'typing', 'working', 'busy', 'computer'],
         spec: {
-            transform: fit(0.9, 0, 8),
+            transform: fit(0.88, 34, 6),
             front: P.laptop(),
-            top: sparkle(52, 150, 30, {rot: -8}) + sparkle(36, 230, 15) + sparkle(462, 176, 26, {rot: 8}) + sparkle(478, 252, 13)
-                + ticks(150, 372, [-80, -50], {len: 22, gap: 30}) + ticks(362, 372, [80, 50], {len: 22, gap: 30}),
+            top: sparkle(52, 110, 26, {rot: -8}) + sparkle(36, 182, 13) + sparkle(470, 150, 26, {rot: 8}) + sparkle(484, 226, 13)
+                + ticks(178, 296, [-40, -10], {len: 18, gap: 24}) + ticks(420, 360, [80, 50], {len: 20, gap: 28}),
         },
     },
     {
