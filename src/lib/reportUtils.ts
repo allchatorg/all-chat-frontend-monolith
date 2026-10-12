@@ -6,7 +6,7 @@ export const reportTypeLabels: Record<ReportType, string> = {
     [ReportType.POSTING_NSFW_CONTENT_AS_SFW]: "Posting NSFW content as SFW",
     [ReportType.IMPERSONATING_A_MODERATOR]: "Impersonating a moderator",
     [ReportType.PIRATED_CONTENT_TORRENTS]: "Pirated Content / Torrents",
-    [ReportType.CRIMINAL_INSTRUCTIONS]: "Criminal Instructions",
+    [ReportType.CRIMINAL_INSTRUCTIONS]: "Requesting or Providing Criminal Instructions",
     [ReportType.DOXXING_HARASSMENT_STALKING]: "Doxxing / Harassment / Stalking",
     [ReportType.NON_CONSENSUAL_SEXUAL_IMAGES]: "Non-consensual Sexual Images",
     [ReportType.INCITEMENT_TO_LAWLESS_ACTION]: "Incitement to Lawless Action",
