@@ -1,4 +1,4 @@
-# All Chat Catpuss stickers
+# All Chat Catapuss stickers
 
 25 VIP stickers / custom emojis / reactions in the style of the client's three kawaii-cat
 samples (cheering, typing, heart hug). They replace the earlier meme pack.
@@ -8,12 +8,12 @@ samples (cheering, typing, heart hug). They replace the earlier meme pack.
 - `build.cjs` — renders everything:
 
   ```bash
-  node output/catpuss-stickers/build.cjs
+  node output/catapuss-stickers/build.cjs
   ```
 
   writes `svg/<id>.svg`, `public/stickers/vip/<id>.png` (512 × 512 RGBA, rendered at 2× and
   downsampled), `preview.png` and `manifest.json`. For quick iteration,
-  `node output/catpuss-stickers/build.cjs --sheet /tmp/sheet.png catpuss-cheer catpuss-love` renders only a
+  `node output/catapuss-stickers/build.cjs --sheet /tmp/sheet.png catapuss-cheer catapuss-love` renders only a
   contact sheet.
 
 When adding or renaming a sticker, update `src/features/stickers/catalog.ts` and the backend

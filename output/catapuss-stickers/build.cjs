@@ -1,8 +1,8 @@
 'use strict';
 
 // Renders the cat sticker set.
-//   node output/catpuss-stickers/build.cjs               → svg/, public/stickers/vip/*.png, preview.png
-//   node output/catpuss-stickers/build.cjs --sheet <png> [ids…]  → contact sheet only (for iteration)
+//   node output/catapuss-stickers/build.cjs               → svg/, public/stickers/vip/*.png, preview.png
+//   node output/catapuss-stickers/build.cjs --sheet <png> [ids…]  → contact sheet only (for iteration)
 
 const fs = require('fs');
 const path = require('path');

@@ -26,7 +26,7 @@ const benefits: {label: string; basic: ReactNode; vip: ReactNode}[] = [
     {label: 'Exclusive VIP badge', basic: false, vip: true},
     {label: 'Show or hide your VIP badge', basic: false, vip: true},
     {label: 'Username & message font presets', basic: false, vip: `${ACCOUNT_LIMITS.vipDailyFontSaves} saves per day`},
-    {label: 'Exclusive stickers, custom emojis & reactions', basic: false, vip: `${VIP_REACTIONS.length} Catpuss designs`},
+    {label: 'Exclusive stickers, custom emojis & reactions', basic: false, vip: `${VIP_REACTIONS.length} Catapuss designs`},
 ];
 
 function ComparisonValue({value}: {value: ReactNode}) {
@@ -99,14 +99,14 @@ export function VipBenefits({username}: {username: string}) {
                 </article>
                 <article className="overflow-hidden rounded-2xl border border-blue-200 bg-card dark:border-blue-500/30">
                     <div aria-hidden="true" className="flex h-36 items-center justify-center gap-3 overflow-hidden bg-sky-50 px-5 dark:bg-sky-950/20">
-                        {VIP_REACTIONS.filter(sticker => ['catpuss-cheer', 'catpuss-love', 'catpuss-typing'].includes(sticker.id)).map(sticker => (
+                        {VIP_REACTIONS.filter(sticker => ['catapuss-cheer', 'catapuss-love', 'catapuss-typing'].includes(sticker.id)).map(sticker => (
                             <Image key={sticker.id} src={sticker.src} alt="" width={76} height={76} unoptimized className="h-16 w-16 object-contain sm:h-20 sm:w-20"/>
                         ))}
                     </div>
                     <div className="p-5">
                         <p className="flex items-center gap-1 text-[10px] font-bold uppercase tracking-widest text-blue-600 dark:text-blue-300"><Smile className="h-3 w-3"/>VIP exclusive</p>
                         <h3 className="mt-2 font-bold">A familiar face for every feeling.</h3>
-                        <p className="mt-2 text-sm leading-6 text-muted-foreground">Unlock {VIP_REACTIONS.length} exclusive Catpuss designs. Send them as stickers, add them as custom emojis in your messages, or use them to react.</p>
+                        <p className="mt-2 text-sm leading-6 text-muted-foreground">Unlock {VIP_REACTIONS.length} exclusive Catapuss designs. Send them as stickers, add them as custom emojis in your messages, or use them to react.</p>
                     </div>
                 </article>
                 <article className="overflow-hidden rounded-2xl border border-blue-200 bg-card dark:border-blue-500/30">

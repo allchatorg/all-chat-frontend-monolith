@@ -1,6 +1,6 @@
 'use strict';
 
-// Vector kawaii-cat ("Catpuss") sticker art, drawn in the style of the client's three cat samples:
+// Vector kawaii-cat ("Catapuss") sticker art, drawn in the style of the client's three cat samples:
 // a chubby white cat with a dark outline, pink ears and beans, striped blush, ^ ^ eyes and a
 // w-mouth. Every sticker is one 512×512 SVG; `cat(spec)` composes the shared parts below.
 
@@ -302,13 +302,30 @@ const props = {
     heartHug: () => limb('M92 440 Q112 404 146 394', 56) + limb('M420 448 Q400 414 366 406', 56)
         + heart(256, 410, 104, {w: OUT}) + paw(150, 390, {r: 40, rot: 55}) + paw(362, 402, {r: 40, rot: -55}),
 
-    /** Laptop seen from behind its lid, paws tapping the top edge (sample 2). */
-    laptop: () => `<path d="M104 472 L408 472 L420 490 L92 490Z" fill="#9c97b3" stroke="${INK}" stroke-width="${OUT}" stroke-linejoin="round"/>
-<rect x="132" y="360" width="248" height="118" rx="16" fill="#bdb8d1" stroke="${INK}" stroke-width="${OUT}"/>
-<path d="M146 372 L366 372" stroke="#d6d2e6" stroke-width="8" stroke-linecap="round"/>
-<g transform="translate(256 424)"><circle r="34" fill="#ffd9e3" opacity="0.55" filter="url(#soft)"/>
-<path d="M-24 14 Q-28 -8 -22 -26 L-10 -12 Q0 -16 10 -12 L22 -26 Q28 -8 24 14 Q0 26 -24 14Z" fill="#fff1f4"/></g>`
-        + paw(178, 362, {r: 34, rot: 0}) + paw(334, 362, {r: 34, rot: 0}),
+    /** Laptop turned three-quarters toward the cat: lid on the left, paws on the keyboard (sample 2). */
+    laptop: () => {
+        // Deck point at s along the hinge (0 back, 1 front) and t from the hinge towards the cat.
+        const deck = (s, t) => [20 + 116 * s + 268 * t, 436 + 40 * s - 38 * t];
+        const quad = (pts, fill, w = OUT) => shape(`M${pts.map(xy).join(' L')}Z`, fill, w);
+        const shift = ([x, y], dx, dy) => [x + dx, y + dy];
+        const [hl, hr, fr, fl] = [deck(0, 0), deck(1, 0), deck(1, 1), deck(0, 1)];
+        const [tl, tr] = [shift(hl, -26, -152), shift(hr, -26, -152)];
+        let keys = '';
+        for (let row = 0; row < 3; row++) {
+            for (let col = 0; col < 11; col++) {
+                const s = 0.15 + row * 0.153, t = 0.09 + col * 0.0745;
+                keys += `M${[deck(s, t), deck(s + 0.103, t), deck(s + 0.103, t + 0.052), deck(s, t + 0.052)].map(xy).join(' L')}Z`;
+            }
+        }
+        return quad([hl, hr, shift(hr, 0, 16), shift(hl, 0, 16)], '#8a85a3') + quad([hr, fr, shift(fr, 0, 16), shift(hr, 0, 16)], '#8a85a3')
+            + quad([hl, hr, fr, fl], '#c9c5db')
+            + quad([deck(0.1, 0.06), deck(0.66, 0.06), deck(0.66, 0.94), deck(0.1, 0.94)], '#5d5873', 4) + `<path d="${keys}" fill="#efedf7"/>`
+            + paw(...deck(0.4, 0.5), {r: 32, rot: -8}) + paw(...deck(0.4, 0.84), {r: 32, rot: -8})
+            // The lid's back faces us; its glowing logo sits at the centre.
+            + quad([hr, tr, shift(tr, 8, -2), shift(hr, 8, -2)], '#8a85a3') + quad([hl, hr, tr, tl], '#bdb8d1')
+            + `<g transform="translate(65 380) rotate(6) skewY(6)"><circle r="34" fill="#ffd9e3" opacity="0.55" filter="url(#soft)"/>
+<path d="M-24 14 Q-28 -8 -22 -26 L-10 -12 Q0 -16 10 -12 L22 -26 Q28 -8 24 14 Q0 26 -24 14Z" fill="#fff1f4"/></g>`;
+    },
 
     restPaws,
 
