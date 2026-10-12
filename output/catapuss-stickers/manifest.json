@@ -1,0 +1,286 @@
+[
+  {
+    "id": "catapuss-cheer",
+    "name": "Cheering Catapuss",
+    "tags": [
+      "yay",
+      "hooray",
+      "celebrate",
+      "happy",
+      "excited"
+    ],
+    "file": "public/stickers/vip/catapuss-cheer.png"
+  },
+  {
+    "id": "catapuss-typing",
+    "name": "Typing Catapuss",
+    "tags": [
+      "laptop",
+      "typing",
+      "working",
+      "busy",
+      "computer"
+    ],
+    "file": "public/stickers/vip/catapuss-typing.png"
+  },
+  {
+    "id": "catapuss-love",
+    "name": "Heart Hug Catapuss",
+    "tags": [
+      "love",
+      "heart",
+      "hug",
+      "cute",
+      "thanks"
+    ],
+    "file": "public/stickers/vip/catapuss-love.png"
+  },
+  {
+    "id": "catapuss-heart-eyes",
+    "name": "Heart Eyes Catapuss",
+    "tags": [
+      "love",
+      "crush",
+      "adore",
+      "heart eyes"
+    ],
+    "file": "public/stickers/vip/catapuss-heart-eyes.png"
+  },
+  {
+    "id": "catapuss-laugh",
+    "name": "Laughing Catapuss",
+    "tags": [
+      "lol",
+      "lmao",
+      "funny",
+      "joy",
+      "haha"
+    ],
+    "file": "public/stickers/vip/catapuss-laugh.png"
+  },
+  {
+    "id": "catapuss-cry",
+    "name": "Crying Catapuss",
+    "tags": [
+      "sob",
+      "tears",
+      "sad",
+      "feels"
+    ],
+    "file": "public/stickers/vip/catapuss-cry.png"
+  },
+  {
+    "id": "catapuss-sad",
+    "name": "Sad Catapuss",
+    "tags": [
+      "sad",
+      "down",
+      "gloomy",
+      "feels",
+      "rain"
+    ],
+    "file": "public/stickers/vip/catapuss-sad.png"
+  },
+  {
+    "id": "catapuss-angry",
+    "name": "Angry Catapuss",
+    "tags": [
+      "mad",
+      "grumpy",
+      "annoyed",
+      "hmph"
+    ],
+    "file": "public/stickers/vip/catapuss-angry.png"
+  },
+  {
+    "id": "catapuss-rage",
+    "name": "Rage Catapuss",
+    "tags": [
+      "furious",
+      "screaming",
+      "rage",
+      "fire"
+    ],
+    "file": "public/stickers/vip/catapuss-rage.png"
+  },
+  {
+    "id": "catapuss-shock",
+    "name": "Shocked Catapuss",
+    "tags": [
+      "surprised",
+      "omg",
+      "wow",
+      "gasp"
+    ],
+    "file": "public/stickers/vip/catapuss-shock.png"
+  },
+  {
+    "id": "catapuss-think",
+    "name": "Thinking Catapuss",
+    "tags": [
+      "hmm",
+      "thinking",
+      "wonder",
+      "pondering"
+    ],
+    "file": "public/stickers/vip/catapuss-think.png"
+  },
+  {
+    "id": "catapuss-smart",
+    "name": "Big Brain Catapuss",
+    "tags": [
+      "smart",
+      "genius",
+      "idea",
+      "nerd",
+      "glasses"
+    ],
+    "file": "public/stickers/vip/catapuss-smart.png"
+  },
+  {
+    "id": "catapuss-smug",
+    "name": "Smug Catapuss",
+    "tags": [
+      "smirk",
+      "knowing",
+      "sly"
+    ],
+    "file": "public/stickers/vip/catapuss-smug.png"
+  },
+  {
+    "id": "catapuss-cool",
+    "name": "Cool Catapuss",
+    "tags": [
+      "sunglasses",
+      "chill",
+      "swag",
+      "confident"
+    ],
+    "file": "public/stickers/vip/catapuss-cool.png"
+  },
+  {
+    "id": "catapuss-strong",
+    "name": "Strong Catapuss",
+    "tags": [
+      "muscles",
+      "gym",
+      "strong",
+      "workout",
+      "lift"
+    ],
+    "file": "public/stickers/vip/catapuss-strong.png"
+  },
+  {
+    "id": "catapuss-shy",
+    "name": "Shy Catapuss",
+    "tags": [
+      "blush",
+      "awkward",
+      "embarrassed",
+      "nervous"
+    ],
+    "file": "public/stickers/vip/catapuss-shy.png"
+  },
+  {
+    "id": "catapuss-sleepy",
+    "name": "Sleepy Catapuss",
+    "tags": [
+      "tired",
+      "sleep",
+      "zzz",
+      "night",
+      "bored"
+    ],
+    "file": "public/stickers/vip/catapuss-sleepy.png"
+  },
+  {
+    "id": "catapuss-party",
+    "name": "Party Catapuss",
+    "tags": [
+      "party",
+      "birthday",
+      "confetti",
+      "celebrate"
+    ],
+    "file": "public/stickers/vip/catapuss-party.png"
+  },
+  {
+    "id": "catapuss-confused",
+    "name": "Confused Catapuss",
+    "tags": [
+      "huh",
+      "what",
+      "question",
+      "dizzy"
+    ],
+    "file": "public/stickers/vip/catapuss-confused.png"
+  },
+  {
+    "id": "catapuss-blank",
+    "name": "Blank Stare Catapuss",
+    "tags": [
+      "neutral",
+      "meh",
+      "blank",
+      "unimpressed"
+    ],
+    "file": "public/stickers/vip/catapuss-blank.png"
+  },
+  {
+    "id": "catapuss-silly",
+    "name": "Silly Catapuss",
+    "tags": [
+      "wink",
+      "tongue",
+      "playful",
+      "goofy"
+    ],
+    "file": "public/stickers/vip/catapuss-silly.png"
+  },
+  {
+    "id": "catapuss-thumbs-up",
+    "name": "Thumbs Up Catapuss",
+    "tags": [
+      "yes",
+      "ok",
+      "agree",
+      "like",
+      "approve"
+    ],
+    "file": "public/stickers/vip/catapuss-thumbs-up.png"
+  },
+  {
+    "id": "catapuss-wave",
+    "name": "Waving Catapuss",
+    "tags": [
+      "hi",
+      "hello",
+      "bye",
+      "wave"
+    ],
+    "file": "public/stickers/vip/catapuss-wave.png"
+  },
+  {
+    "id": "catapuss-please",
+    "name": "Pleading Catapuss",
+    "tags": [
+      "please",
+      "beg",
+      "puppy eyes",
+      "pretty please"
+    ],
+    "file": "public/stickers/vip/catapuss-please.png"
+  },
+  {
+    "id": "catapuss-peek",
+    "name": "Peeking Catapuss",
+    "tags": [
+      "peek",
+      "lurk",
+      "watching",
+      "observer",
+      "quiet"
+    ],
+    "file": "public/stickers/vip/catapuss-peek.png"
+  }
+]

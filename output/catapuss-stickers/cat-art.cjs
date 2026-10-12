@@ -1,6 +1,6 @@
 'use strict';
 
-// Vector kawaii-cat ("Catpuss") sticker art, drawn in the style of the client's three cat samples:
+// Vector kawaii-cat ("Catapuss") sticker art, drawn in the style of the client's three cat samples:
 // a chubby white cat with a dark outline, pink ears and beans, striped blush, ^ ^ eyes and a
 // w-mouth. Every sticker is one 512×512 SVG; `cat(spec)` composes the shared parts below.
 
