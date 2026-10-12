@@ -1,6 +1,6 @@
 import {RoomVipBadge} from "@/components/RoomVipBadge";
 import {UserChatRoom} from "@/models/UserChatRoom";
-import {Archive, MessageSquare, UserCheck, Volume2, VolumeX, X} from "lucide-react";
+import {Archive, MessageSquare, UserCheck, X} from "lucide-react";
 import {MouseEvent, useEffect, useRef} from "react";
 import {useUser} from "@/lib/hooks/useUser";
 import {useNotificationSounds} from "@/lib/hooks/useNotificationSounds";
@@ -12,6 +12,7 @@ import {CSS} from "@dnd-kit/utilities";
 import {Badge} from "@/components/ui/badge";
 import {getMessageCategory} from "@/lib/utils";
 import {isBugReportsChatRoomName} from "@/lib/chatRooms";
+import {TabSoundToggle} from "@/components/TabSoundToggle";
 
 // The pure visual component (no sorting logic)
 export function RoomTabContent({
@@ -44,8 +45,7 @@ export function RoomTabContent({
     const previousMessageRef = useRef<typeof room.lastMessage>(null);
     const {user} = useUser();
     const {playNotificationSound} = useNotificationSounds();
-    const {canPlaySound, soundMode} = useChatRoomSoundSettings();
-    const isToggleInert = soundMode !== 'ALL';
+    const {canPlaySound} = useChatRoomSoundSettings();
     const isStaffRoom = getRoleLevel(room.chatRoomRequiredAccessLevel) > getRoleLevel(Role.GUEST);
     const isBugReportsRoom = !room.vipOnly && isBugReportsChatRoomName(room.chatRoomName);
     const isArchived = room.roomPopulation.archived;
@@ -155,6 +155,8 @@ export function RoomTabContent({
                 </button>
             )}
 
+            {!isArchived && <TabSoundToggle isSoundOn={isSoundOn} onToggle={onToggleSound}/>}
+
             <div className="flex max-w-48 items-center gap-2">
                 <span
                     className="min-w-0 truncate text-base font-medium"
@@ -174,7 +176,7 @@ export function RoomTabContent({
                 )}
             </div>
 
-            <div className="flex min-h-5.5 items-center mt-0.5 cursor-default">
+            <div className="flex min-h-5 items-center mt-0.5 cursor-default">
                 <div className="flex items-center gap-2 text-xs">
                     {!isArchived && (
                         <>
@@ -217,26 +219,6 @@ export function RoomTabContent({
                         </span>
                     )}
 
-                    {!isArchived && (
-                        <button
-                            onClick={(e) => {
-                                if (isToggleInert) return;
-                                onToggleSound(e);
-                            }}
-                            className={`rounded-full shrink-0 p-1 transition-colors text-muted-foreground ${isToggleInert
-                                ? "opacity-40 cursor-not-allowed"
-                                : "hover:bg-sky-100/35 hover:text-sky-700 dark:hover:bg-white/15 dark:hover:text-white"}`}
-                            title={soundMode === 'MUTED'
-                                ? "Sounds are muted globally"
-                                : soundMode === 'FOCUSED'
-                                    ? "Only the focused room plays sound"
-                                    : isSoundOn ? "Mute notifications" : "Unmute notifications"}
-                            aria-disabled={isToggleInert}
-                            onPointerDown={(e) => e.stopPropagation()}
-                        >
-                            {isSoundOn ? <Volume2 className="h-3.5 w-3.5"/> : <VolumeX className="h-3.5 w-3.5"/>}
-                        </button>
-                    )}
                 </div>
             </div>
         </div>

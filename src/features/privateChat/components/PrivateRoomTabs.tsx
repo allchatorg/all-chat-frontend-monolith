@@ -4,7 +4,7 @@ import {UserName} from "@/components/UserName";
 import React, {MouseEvent, useState} from "react";
 import {PrivateChatDTO} from "@/models/PrivateChatDTO";
 import {ScrollArea, ScrollBar} from "@/components/ui/scroll-area";
-import {Ban, Volume2, VolumeX, X} from "lucide-react";
+import {Ban, X} from "lucide-react";
 import {
     closestCenter,
     DndContext,
@@ -26,6 +26,7 @@ import {
 } from "@dnd-kit/sortable";
 import {CSS} from "@dnd-kit/utilities";
 import {useChatRoomSoundSettings} from "@/lib/hooks/useChatRoomSoundSettings";
+import {TabSoundToggle} from "@/components/TabSoundToggle";
 
 interface PrivateRoomTabsProps {
     tabs: PrivateChatDTO[];
@@ -64,9 +65,6 @@ function PrivateRoomTabContent({
     // which is always mounted on the page and covers every conversation —
     // tabs would double-fire for any conversation that's also open as a tab.
 
-    const {soundMode} = useChatRoomSoundSettings();
-    const isToggleInert = soundMode !== 'ALL';
-
     const tabStateClass = isSelected
         ? "glass-surface-strong room-tab-active text-blue-800 dark:text-emerald-100 font-semibold"
         : "glass-control room-tab-inactive text-slate-700 dark:text-muted-foreground hover:text-blue-800 dark:hover:text-emerald-100";
@@ -101,6 +99,8 @@ function PrivateRoomTabContent({
                 <X className="h-3 w-3"/>
             </button>
 
+            <TabSoundToggle isSoundOn={isSoundOn} onToggle={onToggleSound}/>
+
             <div className="flex max-w-48 items-center gap-2">
                 <span className="truncate text-base font-medium" title={counterpartName}>
                     <UserName userId={conversation.counterpart?.id} username={counterpartName} vipBadgeVisible={conversation.counterpart?.vipBadgeVisible} vipBadgeRevision={conversation.counterpart?.vipBadgeRevision} usernameFont={conversation.counterpart?.usernameFont} messageFont={conversation.counterpart?.messageFont} fontRevision={conversation.counterpart?.fontRevision}/>
@@ -112,7 +112,7 @@ function PrivateRoomTabContent({
                 )}
             </div>
 
-            <div className="flex items-center mt-0.5 cursor-default">
+            <div className="flex min-h-5 items-center mt-0.5 cursor-default">
                 <div className="flex items-center gap-2 text-xs">
                     {unread === null ? (
                         <span className="h-2 w-2 rounded-full bg-red-500" title="Unread messages"/>
@@ -124,24 +124,6 @@ function PrivateRoomTabContent({
                             {unread}
                         </span>
                     ) : null}
-                    <button
-                        onClick={(e) => {
-                            if (isToggleInert) return;
-                            onToggleSound(e);
-                        }}
-                        className={`rounded-full shrink-0 p-1 transition-colors text-muted-foreground ${isToggleInert
-                            ? "opacity-40 cursor-not-allowed"
-                            : "hover:bg-sky-100/35 hover:text-sky-700 dark:hover:bg-white/15 dark:hover:text-white"}`}
-                        title={soundMode === 'MUTED'
-                            ? "Sounds are muted globally"
-                            : soundMode === 'FOCUSED'
-                                ? "Only the focused room plays sound"
-                                : isSoundOn ? "Mute notifications" : "Unmute notifications"}
-                        aria-disabled={isToggleInert}
-                        onPointerDown={(e) => e.stopPropagation()}
-                    >
-                        {isSoundOn ? <Volume2 className="h-3.5 w-3.5"/> : <VolumeX className="h-3.5 w-3.5"/>}
-                    </button>
                 </div>
             </div>
         </div>
@@ -226,7 +208,7 @@ const PrivateRoomTabs: React.FC<PrivateRoomTabsProps> = ({
                     items={tabs.map(t => t.id)}
                     strategy={horizontalListSortingStrategy}
                 >
-                    <div className="flex gap-1">
+                    <div className="flex gap-2 pr-1">
                         {tabs.map((conversation) => (
                             <PrivateRoomTabItem
                                 key={conversation.id}
