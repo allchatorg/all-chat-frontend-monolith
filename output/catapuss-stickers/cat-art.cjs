@@ -23,6 +23,7 @@ const ANGER = '#ff4d6a';
 
 const OUT = 9; // outline width of the silhouette and props
 const FACE = 12; // face-line width
+const TINT = 0.22; // opacity of a spec's `tint` over the fur
 
 const f = n => Math.round(n * 10) / 10;
 const xy = ([x, y]) => `${f(x)} ${f(y)}`;
@@ -102,11 +103,13 @@ const BODY = 'M92 316 C62 400 58 460 90 484 L422 484 C454 460 450 400 420 316 Z'
 /**
  * A paw seen from the back (toe lines) or palm-out (pink beans), in local coordinates with its tip up, as at
  * the end of a raised arm. `down` points the tip at the viewer instead, as for a paw resting on something,
- * so the toe lines rise from the bottom edge; the shading stays lit from above either way.
+ * so the toe lines rise from the bottom edge; the shading stays lit from above either way. `tint` colours the
+ * fur to match a tinted cat.
  */
-function paw(x, y, {r = 38, rot = 0, beans = false, toes = true, down = false} = {}) {
+function paw(x, y, {r = 38, rot = 0, beans = false, toes = true, down = false, tint} = {}) {
     const ry = r * 0.9;
-    const body = `<ellipse cx="0" cy="0" rx="${r}" ry="${f(ry)}" fill="url(#pawShade)" stroke="${INK}" stroke-width="${OUT}"/>`;
+    const body = `<ellipse cx="0" cy="0" rx="${r}" ry="${f(ry)}" fill="url(#pawShade)" stroke="${INK}" stroke-width="${OUT}"/>`
+        + (tint ? `<ellipse cx="0" cy="0" rx="${f(r - OUT / 2)}" ry="${f(ry - OUT / 2)}" fill="${tint}" opacity="${TINT}"/>` : '');
     const detail = beans
         ? `<path d="M${f(-r * 0.42)} ${f(r * 0.38)} Q${f(-r * 0.46)} ${f(-r * 0.06)} 0 ${f(-r * 0.06)} Q${f(r * 0.46)} ${f(-r * 0.06)} ${f(r * 0.42)} ${f(r * 0.38)} Q0 ${f(r * 0.6)} ${f(-r * 0.42)} ${f(r * 0.38)}Z" fill="${EAR}"/>
 <circle cx="${f(-r * 0.52)}" cy="${f(-r * 0.36)}" r="${f(r * 0.17)}" fill="${EAR}"/><circle cx="0" cy="${f(-r * 0.56)}" r="${f(r * 0.18)}" fill="${EAR}"/><circle cx="${f(r * 0.52)}" cy="${f(-r * 0.36)}" r="${f(r * 0.17)}" fill="${EAR}"/>`
@@ -115,7 +118,7 @@ function paw(x, y, {r = 38, rot = 0, beans = false, toes = true, down = false} =
 }
 
 /** Front paws resting at the bottom of the body, toes toward the viewer. */
-const restPaws = () => paw(200, 468, {r: 40, down: true}) + paw(312, 468, {r: 40, down: true});
+const restPaws = (o = {}) => paw(200, 468, {r: 40, down: true, ...o}) + paw(312, 468, {r: 40, down: true, ...o});
 
 /** One raised arm rising from the body side, palm out, with a soft curve at the elbow. */
 function raisedArm(side, {to = [50, 228], from = [112, 404], bend = -14, rot = -16, r = 48, w = 70} = {}) {
@@ -454,7 +457,7 @@ ${spec.behind || ''}
 ${chin}
 ${shade}
 ${INNER_EARS[spec.ears || 'up']}
-${spec.tint ? `<g fill="${spec.tint}" opacity="0.22">${paths}</g>` : ''}
+${spec.tint ? `<g fill="${spec.tint}" opacity="${TINT}">${paths}</g>` : ''}
 ${face}
 ${spec.front || ''}
 ${spec.over || ''}
