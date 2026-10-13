@@ -131,7 +131,7 @@ const VARIANTS = [
         id: 'catapuss-wave', name: 'Waving Catapuss', tags: ['hi', 'hello', 'bye', 'wave'],
         spec: {
             transform: fit(0.86, -18, 22), eyes: 'happy', mouth: 'open',
-            front: paw(196, 468, {r: 40}) + raisedArm('right', {to: [54, 214], rot: -24}), top: P.waveLines(),
+            front: paw(196, 468, {r: 40, down: true}) + raisedArm('right', {to: [54, 214], rot: -24}), top: P.waveLines(),
         },
     },
     {
@@ -142,7 +142,7 @@ const VARIANTS = [
         id: 'catapuss-peek', name: 'Peeking Catapuss', tags: ['peek', 'lurk', 'watching', 'observer', 'quiet'],
         spec: {
             transform: 'translate(0 92)', clip: 'M0 0 H512 V420 H0Z', eyes: 'dot', mouth: 'w', blush: {scale: 0.85},
-            top: P.ledge() + paw(190, 404, {r: 36}) + paw(322, 404, {r: 36}),
+            top: P.ledge() + paw(190, 404, {r: 36, down: true}) + paw(322, 404, {r: 36, down: true}),
         },
     },
 ];

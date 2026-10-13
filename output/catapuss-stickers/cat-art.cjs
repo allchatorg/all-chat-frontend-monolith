@@ -99,19 +99,23 @@ const BODY = 'M92 316 C62 400 58 460 90 484 L422 484 C454 460 450 400 420 316 Z'
 
 /* ------------------------------------------------------------------ paws */
 
-/** A paw seen from above (toe lines) or palm-out (pink beans), in local coordinates facing up. */
-function paw(x, y, {r = 38, rot = 0, beans = false, toes = true} = {}) {
+/**
+ * A paw seen from the back (toe lines) or palm-out (pink beans), in local coordinates with its tip up, as at
+ * the end of a raised arm. `down` points the tip at the viewer instead, as for a paw resting on something,
+ * so the toe lines rise from the bottom edge; the shading stays lit from above either way.
+ */
+function paw(x, y, {r = 38, rot = 0, beans = false, toes = true, down = false} = {}) {
     const ry = r * 0.9;
     const body = `<ellipse cx="0" cy="0" rx="${r}" ry="${f(ry)}" fill="url(#pawShade)" stroke="${INK}" stroke-width="${OUT}"/>`;
     const detail = beans
         ? `<path d="M${f(-r * 0.42)} ${f(r * 0.38)} Q${f(-r * 0.46)} ${f(-r * 0.06)} 0 ${f(-r * 0.06)} Q${f(r * 0.46)} ${f(-r * 0.06)} ${f(r * 0.42)} ${f(r * 0.38)} Q0 ${f(r * 0.6)} ${f(-r * 0.42)} ${f(r * 0.38)}Z" fill="${EAR}"/>
 <circle cx="${f(-r * 0.52)}" cy="${f(-r * 0.36)}" r="${f(r * 0.17)}" fill="${EAR}"/><circle cx="0" cy="${f(-r * 0.56)}" r="${f(r * 0.18)}" fill="${EAR}"/><circle cx="${f(r * 0.52)}" cy="${f(-r * 0.36)}" r="${f(r * 0.17)}" fill="${EAR}"/>`
         : toes ? line(`M${f(-r * 0.3)} ${f(-ry + 1)} l${f(r * 0.04)} ${f(r * 0.36)} M${f(r * 0.3)} ${f(-ry + 1)} l${f(-r * 0.04)} ${f(r * 0.36)}`, 6.5) : '';
-    return `<g ${at(x, y, rot)}>${body}${detail}</g>`;
+    return `<g ${at(x, y, rot)}>${body}${down ? `<g transform="scale(1 -1)">${detail}</g>` : detail}</g>`;
 }
 
-/** Front paws resting at the bottom of the body. */
-const restPaws = () => paw(200, 468, {r: 40}) + paw(312, 468, {r: 40});
+/** Front paws resting at the bottom of the body, toes toward the viewer. */
+const restPaws = () => paw(200, 468, {r: 40, down: true}) + paw(312, 468, {r: 40, down: true});
 
 /** One raised arm rising from the body side, palm out, with a soft curve at the elbow. */
 function raisedArm(side, {to = [50, 228], from = [112, 404], bend = -14, rot = -16, r = 48, w = 70} = {}) {
@@ -320,7 +324,7 @@ const props = {
         return quad([hl, hr, shift(hr, 0, 16), shift(hl, 0, 16)], '#8a85a3') + quad([hr, fr, shift(fr, 0, 16), shift(hr, 0, 16)], '#8a85a3')
             + quad([hl, hr, fr, fl], '#c9c5db')
             + quad([deck(0.1, 0.06), deck(0.66, 0.06), deck(0.66, 0.94), deck(0.1, 0.94)], '#5d5873', 4) + `<path d="${keys}" fill="#efedf7"/>`
-            + paw(...deck(0.4, 0.5), {r: 32, rot: -8}) + paw(...deck(0.4, 0.84), {r: 32, rot: -8})
+            + paw(...deck(0.4, 0.5), {r: 32, rot: -8, down: true}) + paw(...deck(0.4, 0.84), {r: 32, rot: -8, down: true})
             // The lid's back faces us; its glowing logo sits at the centre.
             + quad([hr, tr, shift(tr, 8, -2), shift(hr, 8, -2)], '#8a85a3') + quad([hl, hr, tr, tl], '#bdb8d1')
             + `<g transform="translate(65 380) rotate(6) skewY(6)"><circle r="34" fill="#ffd9e3" opacity="0.55" filter="url(#soft)"/>
@@ -329,17 +333,17 @@ const props = {
 
     restPaws,
 
-    /** Paws pressed together under the chin. */
-    pray: () => paw(232, 396, {r: 36, rot: 22}) + paw(280, 396, {r: 36, rot: -22}) + restPaws(),
+    /** Paws pressed together under the chin, toes curled down. */
+    pray: () => paw(232, 396, {r: 36, rot: 22, down: true}) + paw(280, 396, {r: 36, rot: -22, down: true}) + restPaws(),
 
 
     /** One paw stroking the chin. */
-    chin: () => limb('M398 446 Q384 398 320 384', 58) + paw(306, 374, {r: 36, rot: -30}) + paw(196, 468, {r: 40}),
+    chin: () => limb('M398 446 Q384 398 320 384', 58) + paw(306, 374, {r: 36, rot: -30}) + paw(196, 468, {r: 40, down: true}),
 
     /** Thumbs-up paw. */
     thumb: () => `<g ${at(352, 410, -8)}>${limb('M14 -26 L18 -70', 30)}
 <rect x="-44" y="-34" width="88" height="70" rx="30" fill="${WHITE}" stroke="${INK}" stroke-width="${OUT}"/>
-${line('M-22 -2 L22 -2 M-22 18 L22 18', 7)}</g>` + paw(184, 468, {r: 40}),
+${line('M-22 -2 L22 -2 M-22 18 L22 18', 7)}</g>` + paw(184, 468, {r: 40, down: true}),
 
     /** Party hat between the ears. */
     partyHat: () => `<g ${at(262, 138, 14)}><clipPath id="hat"><path d="M-48 0 L0 -126 L48 0 Q0 16 -48 0Z"/></clipPath>
