@@ -60,7 +60,7 @@ const VARIANTS = [
         id: 'catapuss-rage', name: 'Rage Catapuss', tags: ['furious', 'screaming', 'rage', 'fire'],
         spec: {
             transform: fit(0.82, 0, 34), back: P.flames(), ears: 'down', brows: 'angry', eyes: 'angry', mouth: 'scream', blush: {strong: true},
-            tint: '#ff5a4d', front: restPaws(), top: angerMark(364, 232, 0.95),
+            tint: '#ff5a4d', front: restPaws({tint: '#ff5a4d'}), top: angerMark(364, 232, 0.95),
         },
     },
     {
