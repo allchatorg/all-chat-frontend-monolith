@@ -157,7 +157,7 @@ export function RoomTabContent({
 
             {!isArchived && <TabSoundToggle isSoundOn={isSoundOn} onToggle={onToggleSound}/>}
 
-            <div className="flex max-w-48 items-center gap-2">
+            <div className={`flex max-w-48 items-center gap-2 ${isArchived ? '' : 'pr-3'}`}>
                 <span
                     className="min-w-0 truncate text-base font-medium"
                     title={room.chatRoomName}

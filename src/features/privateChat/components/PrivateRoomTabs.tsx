@@ -101,7 +101,7 @@ function PrivateRoomTabContent({
 
             <TabSoundToggle isSoundOn={isSoundOn} onToggle={onToggleSound}/>
 
-            <div className="flex max-w-48 items-center gap-2">
+            <div className="flex max-w-48 items-center gap-2 pr-3">
                 <span className="truncate text-base font-medium" title={counterpartName}>
                     <UserName userId={conversation.counterpart?.id} username={counterpartName} vipBadgeVisible={conversation.counterpart?.vipBadgeVisible} vipBadgeRevision={conversation.counterpart?.vipBadgeRevision} usernameFont={conversation.counterpart?.usernameFont} messageFont={conversation.counterpart?.messageFont} fontRevision={conversation.counterpart?.fontRevision}/>
                 </span>
@@ -208,7 +208,7 @@ const PrivateRoomTabs: React.FC<PrivateRoomTabsProps> = ({
                     items={tabs.map(t => t.id)}
                     strategy={horizontalListSortingStrategy}
                 >
-                    <div className="flex gap-2 pr-1">
+                    <div className="flex gap-1">
                         {tabs.map((conversation) => (
                             <PrivateRoomTabItem
                                 key={conversation.id}
