@@ -104,7 +104,7 @@ export default function RoomTabs({
                     items={rooms.map((r) => r.chatRoomId)}
                     strategy={horizontalListSortingStrategy}
                 >
-                    <div className="flex gap-2 pr-1">
+                    <div className="flex gap-1">
                         {rooms.map((room, index) => {
                             return (
                                 <RoomTabItem
