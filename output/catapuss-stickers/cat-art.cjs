@@ -337,7 +337,7 @@ const props = {
     restPaws,
 
     /** Paws pressed together under the chin, toes curled down. */
-    pray: () => paw(232, 396, {r: 36, rot: 22, down: true}) + paw(280, 396, {r: 36, rot: -22, down: true}) + restPaws(),
+    pray: () => paw(232, 396, {r: 36, rot: 22, down: true}) + paw(280, 396, {r: 36, rot: -22, down: true}),
 
 
     /** One paw stroking the chin. */
