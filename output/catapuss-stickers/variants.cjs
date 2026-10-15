@@ -21,12 +21,12 @@ const VARIANTS = [
         },
     },
     {
-        id: 'catapuss-typing', name: 'Typing Catapuss', tags: ['laptop', 'typing', 'working', 'busy', 'computer'],
+        id: 'catapuss-typing', name: 'Typing Catapuss', tags: ['keyboard', 'typing', 'working', 'busy', 'computer'],
         spec: {
-            transform: fit(0.88, 34, 6),
-            front: P.laptop(),
-            top: sparkle(52, 110, 26, {rot: -8}) + sparkle(36, 182, 13) + sparkle(470, 150, 26, {rot: 8}) + sparkle(484, 226, 13)
-                + ticks(178, 296, [-40, -10], {len: 18, gap: 24}) + ticks(420, 360, [80, 50], {len: 20, gap: 28}),
+            transform: fit(0.86, 0, 2),
+            front: P.keyboard(),
+            over: ticks(150, 392, [-50, -20], {len: 16, gap: 20}) + ticks(362, 392, [50, 20], {len: 16, gap: 20}),
+            top: sparkle(52, 110, 26, {rot: -8}) + sparkle(36, 182, 13) + sparkle(470, 130, 26, {rot: 8}) + sparkle(484, 206, 13),
         },
     },
     {

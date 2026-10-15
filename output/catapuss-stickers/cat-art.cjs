@@ -309,29 +309,37 @@ const props = {
     heartHug: () => limb('M92 440 Q112 404 146 394', 56) + limb('M420 448 Q400 414 366 406', 56)
         + heart(256, 410, 104, {w: OUT}) + paw(150, 390, {r: 40, rot: 55}) + paw(362, 402, {r: 40, rot: -55}),
 
-    /** Laptop turned three-quarters toward the cat: lid on the left, paws on the keyboard (sample 2). */
-    laptop: () => {
-        // Deck point at s along the hinge (0 back, 1 front) and t from the hinge towards the cat.
-        const deck = (s, t) => [20 + 116 * s + 268 * t, 436 + 40 * s - 38 * t];
-        const quad = (pts, fill, w = OUT) => shape(`M${pts.map(xy).join(' L')}Z`, fill, w);
-        const shift = ([x, y], dx, dy) => [x + dx, y + dy];
-        const [hl, hr, fr, fl] = [deck(0, 0), deck(1, 0), deck(1, 1), deck(0, 1)];
-        const [tl, tr] = [shift(hl, -26, -152), shift(hr, -26, -152)];
+    /**
+     * A desk keyboard in front of the cat with both paws side by side on the keys — the viewer is the screen.
+     * Projected from a small 3D model seen from `tilt` above: x along the keyboard, y up and z away from the
+     * viewer toward the cat, so the space bar row sits on the far side, nearest the cat.
+     */
+    keyboard: ({origin: [ox, oy] = [92, 494], tilt = 50, w = 328, d = 124, thick = 18, paws = [[0.33, 0.6], [0.67, 0.6]]} = {}) => {
+        const [cf, sf] = [Math.cos(tilt * Math.PI / 180), Math.sin(tilt * Math.PI / 180)];
+        const top = (s, t, y = 0) => [ox + s * w, oy - y * cf - t * d * sf];
+        const poly = (pts, fill, sw = OUT) => shape(`M${pts.map(xy).join(' L')}Z`, fill, sw);
+        const quad = (fn, s0, t0, s1, t1) => [fn(s0, t0), fn(s1, t0), fn(s1, t1), fn(s0, t1)];
+        const flat = (pts, fill) => `<path d="M${pts.map(xy).join(' L')}Z" fill="${fill}"/>`;
+
+        // Keys are drawn far row first so nearer keycaps overlap the ones behind them; each cap sits raised on its well.
+        const [ks0, ks1, kt0, kt1, rows, cols] = [0.05, 0.95, 0.1, 0.9, 4, 13];
+        const [colStep, rowStep] = [(ks1 - ks0) / cols, (kt1 - kt0) / rows];
         let keys = '';
-        for (let row = 0; row < 3; row++) {
-            for (let col = 0; col < 11; col++) {
-                const s = 0.15 + row * 0.153, t = 0.09 + col * 0.0745;
-                keys += `M${[deck(s, t), deck(s + 0.103, t), deck(s + 0.103, t + 0.052), deck(s, t + 0.052)].map(xy).join(' L')}Z`;
+        for (let row = rows - 1; row >= 0; row--) {
+            const t0 = kt0 + row * rowStep + rowStep * 0.1, t1 = t0 + rowStep * 0.8;
+            const spans = row === rows - 1
+                ? [[0, 2], [2, 4], [4, 9], [9, 11], [11, 13]]
+                : Array.from({length: cols}, (_, c) => [c, c + 1]);
+            for (const [c0, c1] of spans) {
+                const s0 = ks0 + c0 * colStep + colStep * 0.1, s1 = ks0 + c1 * colStep - colStep * 0.1;
+                keys += flat(quad(top, s0, t0, s1, t1), '#a7a2bf')
+                    + flat(quad((s, t) => top(s, t, 5), s0 + 0.004, t0 + 0.02, s1 - 0.004, t1), '#f4f2fa');
             }
         }
-        return quad([hl, hr, shift(hr, 0, 16), shift(hl, 0, 16)], '#8a85a3') + quad([hr, fr, shift(fr, 0, 16), shift(hr, 0, 16)], '#8a85a3')
-            + quad([hl, hr, fr, fl], '#c9c5db')
-            + quad([deck(0.1, 0.06), deck(0.66, 0.06), deck(0.66, 0.94), deck(0.1, 0.94)], '#5d5873', 4) + `<path d="${keys}" fill="#efedf7"/>`
-            + paw(...deck(0.4, 0.5), {r: 32, rot: -8, down: true}) + paw(...deck(0.4, 0.84), {r: 32, rot: -8, down: true})
-            // The lid's back faces us; its glowing logo sits at the centre.
-            + quad([hr, tr, shift(tr, 8, -2), shift(hr, 8, -2)], '#8a85a3') + quad([hl, hr, tr, tl], '#bdb8d1')
-            + `<g transform="translate(65 380) rotate(6) skewY(6)"><circle r="34" fill="#ffd9e3" opacity="0.55" filter="url(#soft)"/>
-<path d="M-24 14 Q-28 -8 -22 -26 L-10 -12 Q0 -16 10 -12 L22 -26 Q28 -8 24 14 Q0 26 -24 14Z" fill="#fff1f4"/></g>`;
+
+        return poly([top(0, 0), top(1, 0), top(1, 0, -thick), top(0, 0, -thick)], '#8a85a3')
+            + poly(quad(top, 0, 0, 1, 1), '#c9c5db') + poly(quad(top, 0.03, 0.06, 0.97, 0.94), '#5d5873', 4) + keys
+            + paws.map(([s, t]) => paw(...top(s, t, 5), {r: 34, down: true})).join('');
     },
 
     restPaws,
