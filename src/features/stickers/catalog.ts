@@ -11,7 +11,7 @@ export interface VipReaction {
  */
 export const VIP_REACTIONS: readonly VipReaction[] = [
     {id: 'catapuss-cheer', name: 'Cheering Catapuss', tags: ['yay', 'hooray', 'celebrate', 'happy', 'excited']},
-    {id: 'catapuss-typing', name: 'Typing Catapuss', tags: ['laptop', 'typing', 'working', 'busy', 'computer']},
+    {id: 'catapuss-typing', name: 'Typing Catapuss', tags: ['keyboard', 'typing', 'working', 'busy', 'computer']},
     {id: 'catapuss-love', name: 'Heart Hug Catapuss', tags: ['love', 'heart', 'hug', 'cute', 'thanks']},
     {id: 'catapuss-heart-eyes', name: 'Heart Eyes Catapuss', tags: ['love', 'crush', 'adore', 'heart eyes']},
     {id: 'catapuss-laugh', name: 'Laughing Catapuss', tags: ['lol', 'lmao', 'funny', 'joy', 'haha']},
