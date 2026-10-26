@@ -59,6 +59,8 @@ export const DialogProvider = ({children}: { children: ReactNode }) => {
                 <DialogContent
                     ref={contentRef}
                     nonModalBackdrop={allowStripe}
+                    // Keep Embedded Checkout and 3DS open; a stray click would discard the payment.
+                    onBackdropPointerDown={() => {if (!stripeActive) close();}}
                     aria-modal="true"
                     showCloseButton={!stripeBusy}
                     onFocusCapture={event => {lastFocus.current = event.target as HTMLElement;}}

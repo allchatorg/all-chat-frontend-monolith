@@ -1,6 +1,6 @@
 'use client';
 
-import {ReactNode, useEffect} from 'react';
+import {ReactNode, useEffect, useRef} from 'react';
 import {useAttachmentHook} from "@/lib/hooks/useAttachmentHook";
 import {useUser} from "@/lib/hooks/useUser";
 import {useHeartbeat} from "@/lib/hooks/useHeartbeat";
@@ -10,6 +10,7 @@ import {useDispatch, useSelector} from "react-redux";
 import {useTheme} from "next-themes";
 import {AppDispatch, RootState} from "@/redux/store";
 import {setActiveLeftSidebar, setActiveRightSidebar} from "@/redux/settings/settingsSlice";
+import {selectActiveLeftPanel, selectActiveRightPanel} from "@/redux/settings/settingsSelector";
 import {fetchMessagingAvailabilityThunk} from "@/redux/messagingAvailability/messagingAvailabilityThunk";
 
 
@@ -18,6 +19,11 @@ export default function AppInitializer({children}: { children: ReactNode }) {
     const isMobile = useIsMobile();
     const showAppBackground = useSelector((state: RootState) => state.settings.showAppBackground !== false);
     const {resolvedTheme} = useTheme();
+    const activeLeftPanel = useSelector(selectActiveLeftPanel);
+    const activeRightPanel = useSelector(selectActiveRightPanel);
+    const panelsRef = useRef({left: activeLeftPanel, right: activeRightPanel});
+    panelsRef.current = {left: activeLeftPanel, right: activeRightPanel};
+    const desktopPanelsRef = useRef<typeof panelsRef.current | null>(null);
 
     useIpDetails();
     const {user} = useUser();
@@ -33,9 +39,18 @@ export default function AppInitializer({children}: { children: ReactNode }) {
 
     useEffect(() => {
         if (isMobile) {
+            desktopPanelsRef.current = panelsRef.current;
             dispatch(setActiveRightSidebar(null));
             dispatch(setActiveLeftSidebar(null));
+            return;
         }
+
+        // Back on desktop: reopen what was open before, unless a sheet was opened while narrow.
+        const desktopPanels = desktopPanelsRef.current;
+        if (!desktopPanels) return;
+        desktopPanelsRef.current = null;
+        if (!panelsRef.current.left) dispatch(setActiveLeftSidebar(desktopPanels.left));
+        if (!panelsRef.current.right) dispatch(setActiveRightSidebar(desktopPanels.right));
     }, [isMobile, dispatch]);
 
     useEffect(() => {

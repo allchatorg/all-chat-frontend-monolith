@@ -148,6 +148,9 @@ export default function ReportForm({messageId}: { messageId: number }) {
                                 >
                                     {reportLoading ? "Reporting..." : "Submit Report"}
                                 </Button>
+                                <p className="-mt-2 text-center text-xs text-muted-foreground">
+                                    Submitting a false report will result in a temporary ban.
+                                </p>
                             </div>
                         )}
 

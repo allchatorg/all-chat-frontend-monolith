@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import {Ban, FileText, Flag, Megaphone, MessageCircle, MessageSquare, Scale, UsersIcon} from "lucide-react";
+import {Ban, BarChart3, FileText, Flag, Megaphone, MessageCircle, MessageSquare, Scale, UsersIcon} from "lucide-react";
 import Image from "next/image";
 import {useRoleAccess} from "@/lib/hooks/useRoleAccess";
 import {usePathname, useRouter} from "next/navigation";
@@ -69,6 +69,11 @@ export const Sidebar: React.FC<SidebarProps> = ({className = "", onClose}) => {
             icon: <FileText className="h-5 w-5"/>,
             label: "Audit Logs",
             href: ROUTES.AUDIT_LOGS,
+        },
+        {
+            icon: <BarChart3 className="h-5 w-5"/>,
+            label: "Stats",
+            href: ROUTES.STATS,
         },
         ...(isAdmin()
             ? [{

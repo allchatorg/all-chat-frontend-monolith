@@ -12,6 +12,7 @@ export const ROUTES = {
     USERS: '/users',
     REPORTS: '/report-cases',
     AUDIT_LOGS: '/audit-logs',
+    STATS: '/stats',
     REGISTER: '/auth?view=register',
     REGISTER_ANONYMOUS: '/auth?view=register-anonymous',
     LOGIN: '/auth?view=login',
@@ -41,6 +42,7 @@ export const STAFF_ROUTES = [
     ROUTES.USERS,
     ROUTES.REPORTS,
     ROUTES.AUDIT_LOGS,
+    ROUTES.STATS,
     ROUTES.PRIVATE_CHAT,
 ]
 
