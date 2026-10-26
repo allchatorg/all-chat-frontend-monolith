@@ -10,6 +10,7 @@ import {UserAdminView} from "@/models/UserAdminView";
 import {SearchAuditLogsRequest} from "@/models/SearchAuditLogsRequest";
 import {AuditLogUnion} from "@/models/AuditLog";
 import {RoomPromotionsSummary} from "@/models/RoomPromotionsSummary";
+import {SiteStatistics, SiteTrends, TrendPeriod} from "@/models/SiteStatistics";
 
 const ADMIN_PATH = '/admin';
 
@@ -93,4 +94,14 @@ export const getRoomPromotionsSummary = async (roomId: number): Promise<RoomProm
 
 export const unarchiveChatRoom = async (roomId: number): Promise<void> => {
     await api.put(`${ADMIN_PATH}/chat-rooms/${roomId}/unarchive`);
+};
+
+export const getSiteStatistics = async (): Promise<SiteStatistics> => {
+    const res = await api.get<SiteStatistics>(`${ADMIN_PATH}/statistics`);
+    return res.data;
+};
+
+export const getSiteTrends = async (period: TrendPeriod): Promise<SiteTrends> => {
+    const res = await api.get<SiteTrends>(`${ADMIN_PATH}/statistics/trends`, {params: {period}});
+    return res.data;
 };
