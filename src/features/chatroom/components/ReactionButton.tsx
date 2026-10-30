@@ -14,7 +14,7 @@ import {useDialog} from '@/components/providers/DialogProvider';
 import {selectUser} from '@/redux/user/userSelectors';
 import MessageReactionsPanel from '@/features/chatroom/components/MessageReactionsPanel';
 import {ReactionGlyph} from '@/features/stickers/ReactionGlyph';
-import {getReactionLabel, isCustomReactionToken} from '@/features/stickers/catalog';
+import {getReactionLabel, isVipReactionToken} from '@/features/stickers/catalog';
 import {useVipDialog} from '@/features/vip/useVipDialog';
 import {toast} from 'sonner';
 
@@ -67,7 +67,7 @@ export const ReactionButton: React.FC<ReactionButtonProps> = ({reaction, message
     const handleReactionClick = async () => {
         if (participationDisabled) {showDetails(); return;}
         if (pendingRef.current) return;
-        if (!reactedByCurrentUser && isCustomReactionToken(reaction.emoji) && !user?.vipActive) {
+        if (!reactedByCurrentUser && isVipReactionToken(reaction.emoji) && !user?.vipActive) {
             handleHoverEnd();
             openVip();
             return;

@@ -3,11 +3,11 @@
 import {memo, useCallback, useEffect, useId, useMemo, useRef, useState, type KeyboardEvent, type RefObject} from 'react';
 import Image from 'next/image';
 import data from '@emoji-mart/data';
-import {Apple, Car, Check, Clock, Diamond, Flag, Hash, Leaf, Lightbulb, Loader2, LockKeyhole, Search, Smile, Sparkles, Trophy, X} from 'lucide-react';
+import {Apple, Car, Check, Clock, Diamond, Flag, Hash, Laugh, Leaf, Lightbulb, Loader2, LockKeyhole, Search, Smile, Sparkles, Trophy, X} from 'lucide-react';
 import {toast} from 'sonner';
 import {Button} from '@/components/ui/button';
 import {cn} from '@/lib/utils';
-import {VIP_REACTIONS, toCustomReactionToken} from './catalog';
+import {CUSTOM_EMOJIS, FREE_EMOJIS, VIP_REACTIONS, isFreeEmoji, toCustomReactionToken} from './catalog';
 import {getEmojiShortcode} from './emojiShortcodes';
 import type {EmojiSelection} from './emojiTypes';
 
@@ -52,6 +52,7 @@ const recentStorageKey = 'allchat.emoji-browser.recents.v1';
 const toneStorageKey = 'allchat.emoji-browser.skin-tone.v1';
 const categoryDetails: Record<string, {name: string; Icon: typeof Smile}> = {
     recent: {name: 'Recent', Icon: Clock},
+    allchat: {name: 'allchat', Icon: Laugh},
     vip: {name: 'allchat VIP', Icon: Sparkles},
     people: {name: 'Smileys & people', Icon: Smile},
     nature: {name: 'Animals & nature', Icon: Leaf},
@@ -70,7 +71,7 @@ const skinTones = [
     {name: 'Medium-dark', native: '👋🏾'},
     {name: 'Dark', native: '👋🏿'},
 ];
-const customById = new Map(VIP_REACTIONS.map(emoji => [emoji.id, emoji]));
+const customById = new Map(CUSTOM_EMOJIS.map(emoji => [emoji.id, emoji]));
 const aliasesById = new Map<string, string[]>();
 for (const [alias, id] of Object.entries(emojiData.aliases)) {
     aliasesById.set(id, [...(aliasesById.get(id) ?? []), alias]);
@@ -80,11 +81,15 @@ const searchableUnicode = new Map(Object.values(emojiData.emojis).map(emoji => [
         ...(aliasesById.get(emoji.id) ?? []).map(alias => `:${alias}:`),
         ...emoji.skins.map(skin => getEmojiShortcode({kind: 'unicode', id: emoji.id, native: skin.native})),
         ...emoji.skins.map(skin => skin.native)].join(' ').toLocaleLowerCase().replaceAll('_', ' ')]));
-const searchableCustom = new Map(VIP_REACTIONS.map(emoji => [emoji.id,
-    ['allchat VIP', emoji.id, getEmojiShortcode({kind: 'custom', id: emoji.id}), emoji.name, ...emoji.tags].join(' ').toLocaleLowerCase().replaceAll('_', ' ')]));
+const searchableCustom = new Map(CUSTOM_EMOJIS.map(emoji => [emoji.id,
+    [isFreeEmoji(emoji.id) ? 'allchat' : 'allchat VIP', emoji.id, getEmojiShortcode({kind: 'custom', id: emoji.id}), emoji.name, ...emoji.tags].join(' ').toLocaleLowerCase().replaceAll('_', ' ')]));
 
 function selectionKey(selection: EmojiSelection): string {
     return selection.kind === 'custom' ? `custom:${selection.id}` : `unicode:${selection.id}:${selection.native}`;
+}
+
+function needsVip(selection: EmojiSelection): boolean {
+    return selection.kind === 'custom' && !isFreeEmoji(selection.id);
 }
 
 function reactionToken(selection: EmojiSelection): string {
@@ -119,7 +124,8 @@ function readRecents(): EmojiSelection[] {
     }
 }
 
-const customEntries = VIP_REACTIONS.map(emoji => toEntry({kind: 'custom', id: emoji.id})!);
+const freeEntries = FREE_EMOJIS.map(emoji => toEntry({kind: 'custom', id: emoji.id})!);
+const vipEntries = VIP_REACTIONS.map(emoji => toEntry({kind: 'custom', id: emoji.id})!);
 
 interface EmojiGridProps {
     section: EmojiSection;
@@ -146,7 +152,7 @@ const EmojiGrid = memo(function EmojiGrid({section, headingId, focusedKey, busy,
                 const index = row * columns + column;
                 const custom = entry.selection.kind === 'custom' ? customById.get(entry.selection.id) : undefined;
                 const selected = mode === 'reaction' && selectedReactionTokens?.has(reactionToken(entry.selection)) === true;
-                const locked = Boolean(custom) && !vipActive && !selected;
+                const locked = needsVip(entry.selection) && !vipActive && !selected;
                 const label = selected ? `Remove ${entry.name} reaction` : locked ? `${entry.name} emoji, unlock with allchat VIP`
                     : mode === 'reaction' ? `React with ${entry.name}` : `Insert ${entry.name} emoji`;
                 return <div key={entry.key} role="gridcell" aria-selected={mode === 'reaction' ? selected : undefined}>
@@ -173,7 +179,7 @@ export function EmojiBrowser({mode, vipActive, selectedReactionTokens, pending =
     const [query, setQuery] = useState('');
     const [tone, setTone] = useState(0);
     const [recents, setRecents] = useState<EmojiSelection[]>([]);
-    const [preview, setPreview] = useState<EmojiEntry>(customEntries[0]);
+    const [preview, setPreview] = useState<EmojiEntry>(freeEntries[0]);
     const [selecting, setSelecting] = useState(false);
     const [focusedKeys, setFocusedKeys] = useState<Record<string, string>>({});
     const selectingRef = useRef(false);
@@ -205,7 +211,7 @@ export function EmojiBrowser({mode, vipActive, selectedReactionTokens, pending =
         const normalized = query.trim().toLocaleLowerCase().replaceAll('_', ' ');
         if (normalized) {
             const terms = normalized.split(/\s+/);
-            const matches = [...customEntries, ...nativeSections.flatMap(section => section.entries)].filter(entry => {
+            const matches = [...freeEntries, ...vipEntries, ...nativeSections.flatMap(section => section.entries)].filter(entry => {
                 const searchable = entry.selection.kind === 'custom'
                     ? searchableCustom.get(entry.selection.id) : searchableUnicode.get(entry.selection.id);
                 return terms.every(term => searchable?.includes(term));
@@ -215,19 +221,20 @@ export function EmojiBrowser({mode, vipActive, selectedReactionTokens, pending =
         const recentEntries = recents.flatMap(selection => toEntry(selection) ?? []);
         return [
             ...(recentEntries.length ? [{id: 'recent', name: 'Recent', entries: recentEntries}] : []),
-            {id: 'vip', name: 'allchat VIP', entries: customEntries},
+            {id: 'allchat', name: 'allchat', entries: freeEntries},
+            {id: 'vip', name: 'allchat VIP', entries: vipEntries},
             ...nativeSections,
         ];
     }, [query, recents, tone]);
 
     const isSelected = (entry: EmojiEntry) => mode === 'reaction' && selectedReactionTokens?.has(reactionToken(entry.selection)) === true;
-    const isLocked = (entry: EmojiEntry) => entry.selection.kind === 'custom' && !vipActive && !isSelected(entry);
+    const isLocked = (entry: EmojiEntry) => needsVip(entry.selection) && !vipActive && !isSelected(entry);
 
     const select = useCallback(async (entry: EmojiEntry) => {
         if (pending || selectingRef.current) return;
         setPreview(entry);
         const removing = mode === 'reaction' && selectedReactionTokens?.has(reactionToken(entry.selection)) === true;
-        if (entry.selection.kind === 'custom' && !vipActive && !removing) {
+        if (needsVip(entry.selection) && !vipActive && !removing) {
             onUpgrade();
             return;
         }
@@ -294,7 +301,7 @@ export function EmojiBrowser({mode, vipActive, selectedReactionTokens, pending =
             <label htmlFor={searchId} className="sr-only">Search emojis</label>
             <div className="flex items-center gap-2 rounded-lg border border-transparent bg-muted/70 px-3 focus-within:border-violet-500/60 focus-within:ring-2 focus-within:ring-violet-500/15">
                 <Search aria-hidden="true" className="h-4 w-4 shrink-0 text-muted-foreground"/>
-                <input ref={searchRef} id={searchId} value={query} disabled={busy}
+                <input ref={searchRef} id={searchId} value={query} disabled={busy} data-expression-search
                        onChange={event => setQuery(event.target.value)} placeholder="Find an emoji" autoComplete="off"
                        onKeyDown={event => {
                            if (event.key === 'ArrowDown' && sections[0]?.entries.length) {
