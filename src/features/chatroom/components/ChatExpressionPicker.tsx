@@ -43,6 +43,14 @@ export function ChatExpressionPicker({disabled, pending, allowStickers = true, o
         if (disabled && !sending) setOpen(false);
     }, [disabled, sending]);
 
+    // Typing straight after opening searches. Touch keeps the on-screen keyboard closed and focuses the tab instead.
+    const focusActiveTab = () => {
+        const content = contentRef.current;
+        const search = window.matchMedia('(pointer: coarse)').matches ? null
+            : content?.querySelector<HTMLInputElement>('[role="tabpanel"][data-state="active"] [data-expression-search]:not(:disabled)');
+        (search ?? content?.querySelector<HTMLButtonElement>('[role="tab"][data-state="active"]'))?.focus({preventScroll: true});
+    };
+
     const sendSticker = async (sticker: VipReaction) => {
         if (disabled || busy || sendingRef.current) return;
         sendingRef.current = true;
@@ -77,9 +85,7 @@ export function ChatExpressionPicker({disabled, pending, allowStickers = true, o
                                     const nextOpen = !visible || activeTab !== value;
                                     setTab(value);
                                     setOpen(nextOpen);
-                                    if (visible && nextOpen) requestAnimationFrame(() => {
-                                        contentRef.current?.querySelector<HTMLButtonElement>('[role="tab"][data-state="active"]')?.focus();
-                                    });
+                                    if (visible && nextOpen) requestAnimationFrame(focusActiveTab);
                                 }}>
                             <Icon aria-hidden="true" className="h-4 w-4"/>
                         </Button>
@@ -91,7 +97,7 @@ export function ChatExpressionPicker({disabled, pending, allowStickers = true, o
                             className="w-[min(380px,calc(100vw-24px))] overflow-hidden rounded-xl border bg-popover p-0 text-popover-foreground shadow-2xl"
                             onOpenAutoFocus={event => {
                                 event.preventDefault();
-                                contentRef.current?.querySelector<HTMLButtonElement>('[role="tab"][data-state="active"]')?.focus();
+                                focusActiveTab();
                             }}
                             onInteractOutside={event => {
                                 // Both buttons belong to this popover even though only one anchor is needed.
