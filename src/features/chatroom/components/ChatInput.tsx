@@ -33,7 +33,7 @@ import OnionLinkWarning from "@/features/chatroom/components/OnionLinkWarning";
 import {Message} from "@/models/message";
 import {useIsMobile} from "@/lib/hooks/useIsMobile";
 import {ChatExpressionPicker} from "@/features/chatroom/components/ChatExpressionPicker";
-import {getSticker, getStickerLabel, VipReaction} from "@/features/stickers/catalog";
+import {getCustomEmoji, getStickerLabel, VipReaction} from "@/features/stickers/catalog";
 import imageCompression from "browser-image-compression";
 import {getAccountLimits, getAttachmentByteLimit} from "@/lib/accountLimits";
 
@@ -688,7 +688,7 @@ const ChatInput: React.FC<ChatInputProps> = ({
                     if (!editor.chain().focus().insertContent(emoji.native).run()) throw new Error('Could not insert your emoji. Please try again.');
                     return;
                 }
-                if (!getSticker(emoji.id)) throw new Error('This emoji is unavailable.');
+                if (!getCustomEmoji(emoji.id)) throw new Error('This emoji is unavailable.');
                 const before = editor.state.selection.$from.parent.textBetween(0, editor.state.selection.$from.parentOffset, '', '\uFFFC');
                 // Separate an inserted image from a preceding URL so its marker stays an emoji on reload.
                 const nodes = [

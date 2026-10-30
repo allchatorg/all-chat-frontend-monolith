@@ -1,4 +1,4 @@
-import {getSticker} from './catalog';
+import {getCustomEmoji} from './catalog';
 
 /** Reserved inline identities are parsed separately from URLs and formatting. */
 export const CUSTOM_EMOJI_TOKEN_PATTERN = /:allchat:([a-zA-Z0-9_-]+):/g;
@@ -13,7 +13,7 @@ export function toCustomEmojiToken(id: unknown): string {
 
 /** Short names are for typing; stored messages retain their canonical identities. */
 export function getCustomEmojiShortcode(id: string): string {
-    return getSticker(id) ? `:${id}:` : '';
+    return getCustomEmoji(id) ? `:${id}:` : '';
 }
 
 export function findCustomEmojiShortcodes(text: string): {from: number; to: number; id: string}[] {
@@ -25,13 +25,13 @@ export function findCustomEmojiShortcodes(text: string): {from: number; to: numb
     for (const match of text.matchAll(/:([a-zA-Z0-9_-]+):/g)) {
         const from = match.index;
         const to = from + match[0].length;
-        if (!getSticker(match[1]) || matches.some(token => from < token.to && to > token.from)) continue;
+        if (!getCustomEmoji(match[1]) || matches.some(token => from < token.to && to > token.from)) continue;
         matches.push({from, to, id: match[1]});
     }
     return matches.sort((a, b) => a.from - b.from);
 }
 
 export function getCustomEmojiLabel(id?: string | null): string {
-    const emoji = getSticker(id);
+    const emoji = getCustomEmoji(id);
     return emoji ? `:${emoji.name}:` : ':Unavailable emoji:';
 }

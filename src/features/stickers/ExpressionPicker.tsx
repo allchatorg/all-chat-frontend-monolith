@@ -69,7 +69,7 @@ export function ExpressionPicker({tab, onTabChange, mode, vipActive, selectedSti
                     <label htmlFor={searchId} className="sr-only">Search stickers</label>
                     <div className="flex items-center gap-2 rounded-lg border border-transparent bg-muted/70 px-3 focus-within:border-violet-500/60 focus-within:ring-2 focus-within:ring-violet-500/15">
                         <Search aria-hidden="true" className="h-4 w-4 shrink-0 text-muted-foreground"/>
-                        <input ref={searchRef} id={searchId} value={query} onChange={event => setQuery(event.target.value)}
+                        <input ref={searchRef} id={searchId} value={query} data-expression-search onChange={event => setQuery(event.target.value)}
                                placeholder="Find a sticker" autoComplete="off"
                                className="h-10 min-w-0 flex-1 bg-transparent text-sm outline-none placeholder:text-muted-foreground"/>
                         {query && <button type="button" onClick={() => {setQuery(''); searchRef.current?.focus();}} aria-label="Clear sticker search" className="rounded p-1 text-muted-foreground hover:text-foreground focus-visible:outline-2 focus-visible:outline-violet-500"><X aria-hidden="true" className="h-3.5 w-3.5"/></button>}

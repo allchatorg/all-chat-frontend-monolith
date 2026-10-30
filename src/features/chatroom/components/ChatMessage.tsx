@@ -14,7 +14,7 @@ import {useIsMobile} from "@/lib/hooks/useIsMobile";
 import ReplyPreview from "@/features/chatroom/components/ReplyPreview";
 import {useSelector} from "react-redux";
 import {selectUser} from "@/redux/user/userSelectors";
-import {getCustomReaction, isCustomReactionToken} from "@/features/stickers/catalog";
+import {getCustomReaction, isCustomReactionToken, isVipReactionToken} from "@/features/stickers/catalog";
 import {useVipDialog} from "@/features/vip/useVipDialog";
 import {toast} from "sonner";
 
@@ -186,7 +186,7 @@ const ChatMessage: React.FC<ChatMessageProps> = ({
         const removing = existingReaction?.reactedByCurrentUser === true;
         if (isCustomReactionToken(emoji) || isCustomReactionToken(emojiId)) {
             if (!getCustomReaction(emoji) || emoji !== emojiId) throw new Error('This character reaction is unavailable.');
-            if (!removing && !vipActive) {
+            if (!removing && !vipActive && isVipReactionToken(emoji)) {
                 setIsReactionPopoverOpen(false);
                 openVip();
                 return;

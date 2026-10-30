@@ -1,9 +1,9 @@
 import Image from 'next/image';
-import {getSticker} from './catalog';
+import {getCustomEmoji} from './catalog';
 
 /** Display access is public; only sending an allowlisted custom emoji requires VIP. */
 export function CustomEmojiGlyph({id}: {id: string}) {
-    const emoji = getSticker(id);
+    const emoji = getCustomEmoji(id);
     return (
         <span data-allchat-emoji={id} className="inline-block align-middle leading-none" title={emoji?.name ?? 'Unavailable emoji'}>
             {emoji ? <Image src={emoji.src} alt={`:${emoji.name}:`} width={24} height={24} unoptimized draggable={false}

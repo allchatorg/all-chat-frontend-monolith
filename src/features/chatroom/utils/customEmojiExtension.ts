@@ -1,7 +1,7 @@
 import {Node} from '@tiptap/core';
 import {Fragment, Mark, Slice, type Node as ProseMirrorNode, type Schema} from '@tiptap/pm/model';
 import {Plugin, TextSelection} from '@tiptap/pm/state';
-import {getSticker} from '@/features/stickers/catalog';
+import {getCustomEmoji} from '@/features/stickers/catalog';
 import {markersToDoc} from '@/features/chatroom/utils/messageMarkers';
 import {findUnicodeEmojiShortcodes} from '@/features/stickers/emojiShortcodes';
 import {
@@ -110,7 +110,7 @@ export const CustomEmoji = Node.create({
 
     renderHTML({node}) {
         const id = isCustomEmojiId(node.attrs.id) ? node.attrs.id : null;
-        const emoji = getSticker(id);
+        const emoji = getCustomEmoji(id);
         const label = getCustomEmojiLabel(id);
         const attributes = {
             ...(id ? {'data-allchat-emoji': id} : {}),
