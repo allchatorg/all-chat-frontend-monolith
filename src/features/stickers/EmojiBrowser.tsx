@@ -3,7 +3,7 @@
 import {memo, useCallback, useEffect, useId, useMemo, useRef, useState, type KeyboardEvent, type RefObject} from 'react';
 import Image from 'next/image';
 import data from '@emoji-mart/data';
-import {Apple, Car, Check, Clock, Diamond, Flag, Hash, Laugh, Leaf, Lightbulb, Loader2, LockKeyhole, Search, Smile, Sparkles, Trophy, X} from 'lucide-react';
+import {Apple, Car, Check, Clock, Diamond, Flag, Hash, Leaf, Lightbulb, Loader2, LockKeyhole, Search, Smile, Sparkles, Trophy, X} from 'lucide-react';
 import {toast} from 'sonner';
 import {Button} from '@/components/ui/button';
 import {cn} from '@/lib/utils';
@@ -52,7 +52,6 @@ const recentStorageKey = 'allchat.emoji-browser.recents.v1';
 const toneStorageKey = 'allchat.emoji-browser.skin-tone.v1';
 const categoryDetails: Record<string, {name: string; Icon: typeof Smile}> = {
     recent: {name: 'Recent', Icon: Clock},
-    allchat: {name: 'allchat', Icon: Laugh},
     vip: {name: 'allchat VIP', Icon: Sparkles},
     people: {name: 'Smileys & people', Icon: Smile},
     nature: {name: 'Animals & nature', Icon: Leaf},
@@ -126,6 +125,8 @@ function readRecents(): EmojiSelection[] {
 
 const freeEntries = FREE_EMOJIS.map(emoji => toEntry({kind: 'custom', id: emoji.id})!);
 const vipEntries = VIP_REACTIONS.map(emoji => toEntry({kind: 'custom', id: emoji.id})!);
+const freeEntriesAfter = new Map<string, EmojiEntry[]>();
+FREE_EMOJIS.forEach((emoji, index) => freeEntriesAfter.set(emoji.after, [...(freeEntriesAfter.get(emoji.after) ?? []), freeEntries[index]]));
 
 interface EmojiGridProps {
     section: EmojiSection;
@@ -179,7 +180,7 @@ export function EmojiBrowser({mode, vipActive, selectedReactionTokens, pending =
     const [query, setQuery] = useState('');
     const [tone, setTone] = useState(0);
     const [recents, setRecents] = useState<EmojiSelection[]>([]);
-    const [preview, setPreview] = useState<EmojiEntry>(freeEntries[0]);
+    const [preview, setPreview] = useState<EmojiEntry>(vipEntries[0]);
     const [selecting, setSelecting] = useState(false);
     const [focusedKeys, setFocusedKeys] = useState<Record<string, string>>({});
     const selectingRef = useRef(false);
@@ -205,13 +206,15 @@ export function EmojiBrowser({mode, vipActive, selectedReactionTokens, pending =
             entries: category.emojis.flatMap(id => {
                 const emoji = emojiData.emojis[id];
                 if (!emoji) return [];
-                return [toEntry({kind: 'unicode', id, native: (emoji.skins[tone] ?? emoji.skins[0]).native})!];
+                return [toEntry({kind: 'unicode', id, native: (emoji.skins[tone] ?? emoji.skins[0]).native})!, ...(freeEntriesAfter.get(id) ?? [])];
             }),
         }));
         const normalized = query.trim().toLocaleLowerCase().replaceAll('_', ' ');
         if (normalized) {
             const terms = normalized.split(/\s+/);
-            const matches = [...freeEntries, ...vipEntries, ...nativeSections.flatMap(section => section.entries)].filter(entry => {
+            // Free emojis lead the results once, not again at their spot among the native ones.
+            const unicodeEntries = nativeSections.flatMap(section => section.entries.filter(entry => entry.selection.kind === 'unicode'));
+            const matches = [...freeEntries, ...vipEntries, ...unicodeEntries].filter(entry => {
                 const searchable = entry.selection.kind === 'custom'
                     ? searchableCustom.get(entry.selection.id) : searchableUnicode.get(entry.selection.id);
                 return terms.every(term => searchable?.includes(term));
@@ -221,7 +224,6 @@ export function EmojiBrowser({mode, vipActive, selectedReactionTokens, pending =
         const recentEntries = recents.flatMap(selection => toEntry(selection) ?? []);
         return [
             ...(recentEntries.length ? [{id: 'recent', name: 'Recent', entries: recentEntries}] : []),
-            {id: 'allchat', name: 'allchat', entries: freeEntries},
             {id: 'vip', name: 'allchat VIP', entries: vipEntries},
             ...nativeSections,
         ];
