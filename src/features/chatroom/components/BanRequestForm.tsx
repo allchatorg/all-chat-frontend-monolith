@@ -184,6 +184,7 @@ export default function BanRequestForm({
                         <FormField
                             control={form.control}
                             name="durationSelection"
+                            rules={{required: "Choose how long the ban lasts"}}
                             render={({field}) => (
                                 <FormItem>
                                     <FormLabel>Duration</FormLabel>
@@ -212,6 +213,10 @@ export default function BanRequestForm({
                         <FormField
                             control={form.control}
                             name="customDuration"
+                            rules={{
+                                required: "Enter how many minutes the ban lasts",
+                                min: {value: 1, message: "Enter at least 1 minute"}
+                            }}
                             render={({field}) => (
                                 <FormItem>
                                     <FormLabel>Duration (minutes)</FormLabel>
@@ -278,6 +283,7 @@ export default function BanRequestForm({
                     <FormField
                         control={form.control}
                         name="description"
+                        rules={{validate: (value) => Boolean(value?.trim()) || "Describe why the user is banned"}}
                         render={({field}) => (
                             <FormItem>
                                 <FormLabel>Ban Description</FormLabel>
