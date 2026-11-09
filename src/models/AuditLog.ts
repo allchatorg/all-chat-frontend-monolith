@@ -31,6 +31,7 @@ export enum AuditLogType {
     ID_VERIFICATION_PASSED = "ID_VERIFICATION_PASSED",
     ID_VERIFICATION_FAILED = "ID_VERIFICATION_FAILED",
     REQUEST_ELEVATION = "REQUEST_ELEVATION",
+    TAKE_OVER_CASE = "TAKE_OVER_CASE",
     AD_APPROVE = "AD_APPROVE",
     AD_REJECT = "AD_REJECT",
     AD_STOP = "AD_STOP",
@@ -108,6 +109,11 @@ export interface RequestElevationAuditLog extends AuditLog {
     reportCaseId: number;
 }
 
+export interface TakeOverCaseAuditLog extends AuditLog {
+    auditLogType: AuditLogType.TAKE_OVER_CASE;
+    reportCaseId: number;
+}
+
 export interface RoleChangeAuditLog extends AuditLog {
     auditLogType: AuditLogType.PROMOTE_ROLE | AuditLogType.DEMOTE_ROLE;
     targetUser: User;
@@ -180,6 +186,7 @@ export type AuditLogUnion =
     | ResolveCaseAuditLog
     | ReopenCaseAuditLog
     | RequestElevationAuditLog
+    | TakeOverCaseAuditLog
     | RoleChangeAuditLog
     | NcmecReportAuditLog
     | ChatRoomAuditLog

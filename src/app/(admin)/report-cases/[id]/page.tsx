@@ -42,6 +42,7 @@ import {Alert, AlertDescription} from "@/components/ui/alert";
 import {BanRequest} from "@/models/BanRequest";
 import {format} from "date-fns";
 import {useRoleAccess} from "@/lib/hooks/useRoleAccess";
+import {selectUser} from "@/redux/user/userSelectors";
 import {canActOn} from "@/models/Role";
 import {isCsamReportCase} from "@/lib/reportUtils";
 import {AuditLogType, NOT_CSAM_ACTION} from "@/models/AuditLog";
@@ -65,6 +66,7 @@ export default function Page() {
     const [submitNcmecReport, ncmecLoading] = useThunk(submitNcmecReportThunk);
 
     const selectedReportCase = useSelector(selectSelectedReportCase);
+    const currentUser = useSelector(selectUser);
     const surroundingMessages = useSelector(selectSelectedReportCaseMessages);
 
     // Helper to check if case is resolved
@@ -139,6 +141,13 @@ export default function Page() {
         refetchData();
     }, [refetchData]);
 
+    // Says why when the server refuses, and reloads the case: the usual reason is that someone
+    // else claimed or closed it since this page loaded.
+    const reportActionFailure = async (error: unknown) => {
+        toast.error(apiErrorMessage(error));
+        await refetchData();
+    };
+
     const handleJumpTo = (message: Message) => {
         router.push(`/?chatRoomId=${message.chatRoomId}&jumpTo=${message.id}`);
     };
@@ -157,7 +166,7 @@ export default function Page() {
             close();
             toast.success("User banned successfully!");
         } catch (error) {
-            toast.error("Failed to ban user");
+            await reportActionFailure(error);
             throw error;
         }
     };
@@ -208,7 +217,7 @@ export default function Page() {
                         }, 100);
                     } catch (error) {
                         close();
-                        toast.error(`Failed to delete message`);
+                        await reportActionFailure(error);
                     }
                 }}
             />
@@ -260,7 +269,7 @@ export default function Page() {
             toast.success("Warning sent successfully");
             await refetchData();
         } catch (error) {
-            toast.error(`Failed to send warning.`);
+            await reportActionFailure(error);
         }
         close();
     };
@@ -286,7 +295,7 @@ export default function Page() {
                     } catch (error) {
                         close();
                         // Says why when the server refuses, e.g. a child-safety report arrived since this page loaded.
-                        toast.error(apiErrorMessage(error));
+                        await reportActionFailure(error);
                     }
                 }}
             />
@@ -336,7 +345,7 @@ export default function Page() {
                         await refetchData();
                     } catch (error) {
                         close();
-                        toast.error("Failed to require ID verification");
+                        await reportActionFailure(error);
                     }
                 }}
             />
@@ -391,6 +400,14 @@ export default function Page() {
 
     // The case object can still be empty on the first render after navigating here.
     const canActOnSender = reportedMessage != null && canActOn(currentRole, reportedMessage.senderRole);
+
+    // Someone else's claimed case has to be taken over before acting on it; admins can step in.
+    // The server refuses too.
+    const caseAssignee = selectedReportCase.reportCase.assignee;
+    const claimedByOther = caseAssignee != null && caseAssignee.id !== currentUser?.id && !isAdmin();
+    const claimedByOtherReason = claimedByOther
+        ? `Claimed by ${caseAssignee.username}. Take over the case to act on it.`
+        : undefined;
 
     // Child-safety cases can be neither restored nor reopened (the server refuses too).
     const restoreMessageAction = canActOnSender && !isCsamCase && isMessageRestorable(reportedMessage) && (
@@ -475,6 +492,14 @@ export default function Page() {
                             <IdVerificationStatusBadge status={reportedUserIdStatus}/>
                         </div>
                     )}
+                    {!isResolved && claimedByOther && (
+                        <Alert className="border-amber-200 bg-amber-50">
+                            <AlertDescription className="text-amber-800">
+                                {caseAssignee?.username} is handling this case. Take it over to warn or ban the
+                                user, remove the message or resolve the case.
+                            </AlertDescription>
+                        </Alert>
+                    )}
                     {isResolved ? (
                         // Show resolved banner and navigation only
                         <div className="space-y-3">
@@ -545,7 +570,8 @@ export default function Page() {
                                 icon={<Flag className="h-5 w-5 text-orange-500"/>}
                                 label="Warn User"
                                 className="p-2 text-[10px] sm:p-3 sm:text-xs"
-                                disabled={!canActOn(currentRole, selectedReportCase.reportCase.message.senderRole)}
+                                disabled={claimedByOther || !canActOn(currentRole, selectedReportCase.reportCase.message.senderRole)}
+                                title={claimedByOtherReason}
                                 onClick={() => {
                                     open(
                                         <WarnUserComponent onSubmit={handleWarning}/>
@@ -557,7 +583,8 @@ export default function Page() {
                                     icon={<X className="h-5 w-5 text-gray-500"/>}
                                     label="Remove Message"
                                     className="p-2 text-[10px] sm:p-3 sm:text-xs"
-                                    disabled={selectedReportCase.reportCase?.message?.deleted || !canActOn(currentRole, selectedReportCase.reportCase.message.senderRole)}
+                                    disabled={claimedByOther || selectedReportCase.reportCase?.message?.deleted || !canActOn(currentRole, selectedReportCase.reportCase.message.senderRole)}
+                                    title={claimedByOtherReason}
                                     onClick={() => handleDeleteMessage()}
                                 />
                             )}
@@ -598,7 +625,8 @@ export default function Page() {
                                         </div>
                                     )
                                 }}
-                                disabled={!canActOn(currentRole, selectedReportCase.reportCase.message.senderRole)}
+                                disabled={claimedByOther || !canActOn(currentRole, selectedReportCase.reportCase.message.senderRole)}
+                                title={claimedByOtherReason}
                             />
 
                             {ncmecDecisionActions}
@@ -609,8 +637,8 @@ export default function Page() {
                                     icon={<IdCard className="h-5 w-5 text-amber-600"/>}
                                     label="Require ID Verification"
                                     className="p-2 text-[10px] sm:p-3 sm:text-xs"
-                                    disabled={idVerificationDisabled}
-                                    title={idVerificationDisabledReason}
+                                    disabled={claimedByOther || idVerificationDisabled}
+                                    title={claimedByOtherReason ?? idVerificationDisabledReason}
                                     onClick={() => handleRequireIdVerification()}
                                 />
                             )}
@@ -620,8 +648,8 @@ export default function Page() {
                                 icon={<CheckCircle2 className="h-5 w-5 text-green-600"/>}
                                 label="Resolve Case"
                                 className="p-2 text-[10px] sm:p-3 sm:text-xs"
-                                disabled={ncmecDecisionPending || !canActOn(currentRole, selectedReportCase.reportCase.message.senderRole)}
-                                title={ncmecDecisionPending ? "An admin closes this case by filing an NCMEC report or recording it as not CSAM" : undefined}
+                                disabled={claimedByOther || ncmecDecisionPending || !canActOn(currentRole, selectedReportCase.reportCase.message.senderRole)}
+                                title={ncmecDecisionPending ? "An admin closes this case by filing an NCMEC report or recording it as not CSAM" : claimedByOtherReason}
                                 onClick={() => handleResolveCase()}
                             />
                         </div>

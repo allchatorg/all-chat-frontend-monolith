@@ -16,6 +16,7 @@ import {
     Archive,
     ArchiveRestore,
     ArrowDownCircle,
+    ArrowRightLeft,
     ArrowUpCircle,
     Ban,
     CheckCircle,
@@ -76,6 +77,8 @@ const getActionIcon = (type: AuditLogType) => {
             return <ShieldX {...iconProps} className="text-red-600 dark:text-red-400"/>;
         case AuditLogType.REQUEST_ELEVATION:
             return <ShieldAlert {...iconProps} className="text-purple-600 dark:text-purple-400"/>;
+        case AuditLogType.TAKE_OVER_CASE:
+            return <ArrowRightLeft {...iconProps} className="text-sky-600 dark:text-sky-400"/>;
         case AuditLogType.AD_APPROVE:
         case AuditLogType.PROMOTION_APPROVE:
             return <CheckCircle {...iconProps} className="text-green-600 dark:text-green-400"/>;
@@ -134,6 +137,8 @@ const getActionColor = (type: AuditLogType) => {
             return "bg-red-100 text-red-800 border-red-200 dark:bg-red-900/30 dark:text-red-300 dark:border-red-800";
         case AuditLogType.REQUEST_ELEVATION:
             return "bg-purple-100 text-purple-800 border-purple-200 dark:bg-purple-900/30 dark:text-purple-300 dark:border-purple-800";
+        case AuditLogType.TAKE_OVER_CASE:
+            return "bg-sky-100 text-sky-800 border-sky-200 dark:bg-sky-900/30 dark:text-sky-300 dark:border-sky-800";
         case AuditLogType.AD_APPROVE:
         case AuditLogType.PROMOTION_APPROVE:
             return "bg-green-100 text-green-800 border-green-200 dark:bg-green-900/30 dark:text-green-300 dark:border-green-800";
@@ -265,6 +270,19 @@ const renderLogDetails = (log: AuditLogUnion) => {
 
         case AuditLogType.REQUEST_ELEVATION:
             return <Row label="Elevated Case ID" value={log.reportCaseId}/>;
+
+        case AuditLogType.TAKE_OVER_CASE:
+            return (
+                <div className="space-y-2">
+                    <Row label="Taken Over Case ID" value={log.reportCaseId}/>
+                    {log.description && (
+                        <div
+                            className="rounded border-l-4 border-sky-300 bg-sky-50 p-3 text-sm text-sky-800 dark:border-sky-700 dark:bg-sky-900/10 dark:text-sky-300">
+                            {log.description}
+                        </div>
+                    )}
+                </div>
+            );
 
         case AuditLogType.RESOLVE_CASE:
             return (

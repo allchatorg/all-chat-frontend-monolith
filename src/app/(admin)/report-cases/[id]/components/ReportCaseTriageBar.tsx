@@ -4,6 +4,8 @@ import Link from "next/link";
 import {useSelector} from "react-redux";
 import {toast} from "sonner";
 import {Button} from "@/components/ui/button";
+import {ConfirmModal} from "@/components/ConfirmModal";
+import {useDialog} from "@/components/providers/DialogProvider";
 import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue} from "@/components/ui/select";
 import {ReportSeverityBadge} from "@/app/(admin)/report-cases/components/ReportSeverityBadge";
 import {ReportCaseTimer} from "@/app/(admin)/report-cases/components/ReportCaseTimer";
@@ -17,16 +19,19 @@ import {
     assignCaseThunk,
     claimCaseThunk,
     getReportCaseThunk,
-    releaseCaseThunk
+    releaseCaseThunk,
+    takeOverCaseThunk
 } from "@/redux/report-cases/reportCasesThunk";
 import {ROUTES} from "@/routes";
 
 export default function ReportCaseTriageBar({reportCase}: { reportCase: ReportCase }) {
     const {isAdmin} = useRoleAccess();
+    const {open, close} = useDialog();
     const currentUser = useSelector(selectUser);
     const [claimCase, claimLoading] = useThunk(claimCaseThunk);
     const [releaseCase, releaseLoading] = useThunk(releaseCaseThunk);
     const [assignCase, assignLoading] = useThunk(assignCaseThunk);
+    const [takeOverCase, takeOverLoading] = useThunk(takeOverCaseThunk);
     const [fetchReportCase] = useThunk(getReportCaseThunk);
     const [staff, setStaff] = useState<User[]>([]);
 
@@ -34,7 +39,7 @@ export default function ReportCaseTriageBar({reportCase}: { reportCase: ReportCa
     const isOpen = resolutionDate === null;
     const isAssignee = Boolean(assignee) && assignee?.id === currentUser?.id;
     const canAssign = isOpen && isAdmin();
-    const isBusy = claimLoading || releaseLoading || assignLoading;
+    const isBusy = claimLoading || releaseLoading || assignLoading || takeOverLoading;
 
     useEffect(() => {
         if (!canAssign) {
@@ -55,6 +60,18 @@ export default function ReportCaseTriageBar({reportCase}: { reportCase: ReportCa
         }
     };
 
+    const confirmTakeOver = () => open(
+        <ConfirmModal
+            title={`Take over this case from ${assignee?.username}?`}
+            description="You become the assignee and they are notified. The takeover is recorded on the case."
+            onClose={close}
+            onConfirm={async () => {
+                await run(() => takeOverCase(id), "Case taken over", "Failed to take over the case");
+                close();
+            }}
+        />
+    );
+
     return (
         <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-sm">
             <ReportSeverityBadge severity={reportCase.severity} showName/>
@@ -72,6 +89,11 @@ export default function ReportCaseTriageBar({reportCase}: { reportCase: ReportCa
                 <Button size="sm" variant="outline" disabled={isBusy}
                         onClick={() => run(() => claimCase(id), "Case claimed", "Failed to claim the case")}>
                     Claim
+                </Button>
+            )}
+            {isOpen && assignee && !isAssignee && (
+                <Button size="sm" variant="outline" disabled={isBusy} onClick={confirmTakeOver}>
+                    Take over
                 </Button>
             )}
             {isOpen && assignee && (isAssignee || isAdmin()) && (

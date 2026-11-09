@@ -11,7 +11,8 @@ import {
     getReportCasesThunk,
     getReportCaseThunk,
     releaseCaseThunk,
-    resolveCaseThunk
+    resolveCaseThunk,
+    takeOverCaseThunk
 } from "@/redux/report-cases/reportCasesThunk";
 
 interface ReportCasesState {
@@ -54,7 +55,7 @@ const reportCasesSlice = createSlice({
             .addCase(resolveCaseThunk.fulfilled, (state, action) => {
                 state.selectedReportCase.reportCase = action.payload;
             })
-            .addMatcher(isFulfilled(claimCaseThunk, releaseCaseThunk, assignCaseThunk), (state, action) => {
+            .addMatcher(isFulfilled(claimCaseThunk, releaseCaseThunk, assignCaseThunk, takeOverCaseThunk), (state, action) => {
                 state.selectedReportCase.reportCase = action.payload;
             });
 

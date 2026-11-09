@@ -24,6 +24,11 @@ export const releaseCase = async (reportCaseId: number): Promise<ReportCase> => 
     return res.data;
 };
 
+export const takeOverCase = async (reportCaseId: number): Promise<ReportCase> => {
+    const res = await api.patch<ReportCase>(`${REPORT_CASES_PATH}/${reportCaseId}/take-over`);
+    return res.data;
+};
+
 export const assignCase = async (reportCaseId: number, assigneeId: number): Promise<ReportCase> => {
     const res = await api.patch<ReportCase>(`${REPORT_CASES_PATH}/${reportCaseId}/assign`, {assigneeId});
     return res.data;

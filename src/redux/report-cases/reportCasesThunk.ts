@@ -12,6 +12,7 @@ import {
     releaseCase,
     resolveCase,
     submitNcmecReport,
+    takeOverCase,
     warnUser
 } from "@/api/reportCases/reportCasesAPI";
 import {PaginatedResponse} from "@/models/PaginatedResponse";
@@ -153,6 +154,20 @@ export const releaseCaseThunk = createAsyncThunk<
     async (reportCaseId, {rejectWithValue}) => {
         try {
             return await releaseCase(reportCaseId);
+        } catch (error: any) {
+            return rejectWithValue(error.response?.data || error.message);
+        }
+    }
+);
+
+export const takeOverCaseThunk = createAsyncThunk<
+    ReportCase,
+    number
+>(
+    "report-cases/takeOverCase",
+    async (reportCaseId, {rejectWithValue}) => {
+        try {
+            return await takeOverCase(reportCaseId);
         } catch (error: any) {
             return rejectWithValue(error.response?.data || error.message);
         }

@@ -14,6 +14,7 @@ import {
     Archive,
     ArchiveRestore,
     ArrowDownCircle,
+    ArrowRightLeft,
     ArrowUpCircle,
     Ban,
     Calendar,
@@ -76,6 +77,8 @@ const getActionIcon = (type: AuditLogType) => {
             return <ShieldX {...iconProps} className="h-5 w-5 text-red-600 dark:text-red-400"/>;
         case AuditLogType.REQUEST_ELEVATION:
             return <ShieldAlert {...iconProps} className="h-5 w-5 text-purple-600 dark:text-purple-400"/>;
+        case AuditLogType.TAKE_OVER_CASE:
+            return <ArrowRightLeft {...iconProps} className="h-5 w-5 text-sky-600 dark:text-sky-400"/>;
         case AuditLogType.AD_APPROVE:
         case AuditLogType.PROMOTION_APPROVE:
             return <CheckCircle {...iconProps} className="h-5 w-5 text-green-600 dark:text-green-400"/>;
@@ -134,6 +137,8 @@ const getActionColor = (type: AuditLogType) => {
             return 'bg-red-100 text-red-800 border-red-200 dark:bg-red-900/30 dark:text-red-300 dark:border-red-800';
         case AuditLogType.REQUEST_ELEVATION:
             return 'bg-purple-100 text-purple-800 border-purple-200 dark:bg-purple-900/30 dark:text-purple-300 dark:border-purple-800';
+        case AuditLogType.TAKE_OVER_CASE:
+            return 'bg-sky-100 text-sky-800 border-sky-200 dark:bg-sky-900/30 dark:text-sky-300 dark:border-sky-800';
         case AuditLogType.AD_APPROVE:
         case AuditLogType.PROMOTION_APPROVE:
             return 'bg-green-100 text-green-800 border-green-200 dark:bg-green-900/30 dark:text-green-300 dark:border-green-800';
@@ -307,6 +312,27 @@ const renderLogDetails = (log: AuditLogUnion) => {
                         className="rounded bg-gray-100 px-2 py-1 font-mono text-sm dark:bg-gray-800 dark:text-gray-100">
                         {log.reportCaseId}
                     </span>
+                </div>
+            );
+
+        case AuditLogType.TAKE_OVER_CASE:
+            return (
+                <div className="space-y-2">
+                    <div className="flex items-center gap-2">
+                        <span className="text-sm font-medium">Taken Over Case ID:</span>
+                        <span
+                            className="rounded bg-gray-100 px-2 py-1 font-mono text-sm dark:bg-gray-800 dark:text-gray-100">
+                            {log.reportCaseId}
+                        </span>
+                    </div>
+                    {log.description && (
+                        <div
+                            className="rounded border-l-4 border-sky-300 bg-sky-50 p-3 dark:border-sky-700 dark:bg-sky-900/10">
+                            <span className="text-sm text-sky-800 dark:text-sky-300">
+                                {log.description}
+                            </span>
+                        </div>
+                    )}
                 </div>
             );
 

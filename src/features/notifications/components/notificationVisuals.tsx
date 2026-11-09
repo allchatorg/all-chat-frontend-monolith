@@ -1,5 +1,6 @@
 import {
     AlertTriangle,
+    ArrowRightLeft,
     Ban,
     Bell,
     CalendarDays,
@@ -147,6 +148,11 @@ const NOTIFICATION_VISUALS: Record<NotificationType, NotificationVisual> = {
         icon: UserCheck,
         iconClass: "text-blue-500",
         bgClass: "bg-blue-500/15",
+    },
+    [NotificationType.REPORT_CASE_TAKEN_OVER]: {
+        icon: ArrowRightLeft,
+        iconClass: "text-sky-500",
+        bgClass: "bg-sky-500/15",
     },
 };
 
