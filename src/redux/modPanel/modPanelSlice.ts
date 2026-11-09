@@ -103,7 +103,7 @@ const modPanelSlice = createSlice({
                 };
             })
             .addCase(revokeBanThunk.fulfilled, (state, action) => {
-                if (!state.loadedUser || state.loadedUser.id !== action.meta.arg) return;
+                if (!state.loadedUser || state.loadedUser.id !== action.meta.arg.userId) return;
                 state.loadedUser = {
                     ...state.loadedUser,
                     banned: false

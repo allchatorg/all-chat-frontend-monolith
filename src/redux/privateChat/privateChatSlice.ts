@@ -168,7 +168,7 @@ const privateChatSlice = createSlice({
                 // (matching how the deleted message itself is kept above).
                 room.messages = patchReplyPreviewsForDeletedMessage(
                     room.messages.map(m =>
-                        m.id === deletedMessage.id ? {...m, deleted: true} : m
+                        m.id === deletedMessage.id ? {...m, deleted: true, staffRemovedAt: deletedMessage.staffRemovedAt} : m
                     ),
                     deletedMessage.id,
                     true

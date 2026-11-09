@@ -1,6 +1,8 @@
 import {useCallback} from 'react';
 import {useRouter, useSearchParams} from 'next/navigation';
 import {ReportType} from '@/models/ReportTypeEnum';
+import {ReportSeverity} from "@/models/ReportSeverity";
+import {ReportAssignmentFilter} from "@/models/ReportAssignmentFilter";
 import {ColumnSort} from "@tanstack/react-table";
 import {ReportCasesSearchFilters} from "@/app/(admin)/report-cases/components/ReportCasesSearchFilters";
 
@@ -8,13 +10,23 @@ export function useReportCaseFilters() {
     const searchParams = useSearchParams();
     const router = useRouter();
 
+    const ncmecDecisionPending = searchParams.get("ncmecDecisionPending") === "true" ? true : undefined;
+
+    // The decision can be owed on a resolved case as well as an open one, so that view spans both tabs.
     const resolvedParam = searchParams.get("resolved");
-    const resolved: ReportCasesSearchFilters["resolved"] =
-        resolvedParam !== null ? resolvedParam === "true" : false;
+    const resolved: ReportCasesSearchFilters["resolved"] = ncmecDecisionPending
+        ? undefined
+        : resolvedParam !== null ? resolvedParam === "true" : false;
 
     const reportTypes = searchParams.get("reportTypes")
         ? (searchParams.get("reportTypes")!.split(",") as ReportType[])
         : undefined;
+
+    const severities = searchParams.get("severities")
+        ? (searchParams.get("severities")!.split(",") as ReportSeverity[])
+        : undefined;
+
+    const assignment = (searchParams.get("assignment") as ReportAssignmentFilter | null) || undefined;
 
     const reportedUserUsernameOrId =
         searchParams.get("reportedUserUsernameOrId") || undefined;
@@ -29,7 +41,7 @@ export function useReportCaseFilters() {
 
     const size = searchParams.get("size")
         ? parseInt(searchParams.get("size")!)
-        : 2;
+        : 25;
 
     const sortParam = searchParams.get("sort");
     let sort: ColumnSort[] | undefined = undefined;
@@ -45,8 +57,11 @@ export function useReportCaseFilters() {
     const filters: ReportCasesSearchFilters = {
         resolved,
         reportTypes,
+        severities,
+        assignment,
         reportedUserUsernameOrId,
         needsAttention,
+        ncmecDecisionPending,
         page,
         size,
         sort,
@@ -63,6 +78,16 @@ export function useReportCaseFilters() {
         } else {
             params.delete('reportTypes');
         }
+        if (filters.severities && filters.severities.length > 0) {
+            params.set('severities', filters.severities.join(','));
+        } else {
+            params.delete('severities');
+        }
+        if (filters.assignment) {
+            params.set('assignment', filters.assignment);
+        } else {
+            params.delete('assignment');
+        }
         if (filters.reportedUserUsernameOrId) {
             params.set('reportedUserUsernameOrId', filters.reportedUserUsernameOrId);
         } else {
@@ -70,6 +95,11 @@ export function useReportCaseFilters() {
         }
         if (filters.needsAttention !== undefined) {
             params.set("needsAttention", String(filters.needsAttention));
+        }
+        if (filters.ncmecDecisionPending) {
+            params.set("ncmecDecisionPending", "true");
+        } else {
+            params.delete("ncmecDecisionPending");
         }
         if (filters.page !== undefined) {
             params.set('page', filters.page.toString());

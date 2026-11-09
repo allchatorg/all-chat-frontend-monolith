@@ -30,7 +30,8 @@ export function SectionCards({statusCounts, isLoading, showAdStats = true}: Sect
     const activeCount = getStatusCount(statusCounts, AdStatus.ACTIVE);
     const completedCount = getStatusCount(statusCounts, AdStatus.COMPLETED);
     const rejectedCount = getStatusCount(statusCounts, AdStatus.REJECTED);
-    const totalAds = pendingAdsCount + activeCount + completedCount + rejectedCount;
+    const stoppedCount = getStatusCount(statusCounts, AdStatus.STOPPED);
+    const totalAds = pendingAdsCount + activeCount + completedCount + rejectedCount + stoppedCount;
 
     const {data: spendData, isLoading: isSpendLoading} = useGetMyPromotionSpendSummaryQuery();
     const pendingCount = spendData?.pendingCount ?? 0;

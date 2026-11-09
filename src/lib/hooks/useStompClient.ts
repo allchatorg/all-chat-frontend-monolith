@@ -23,6 +23,7 @@ import {
     handleDeletedMessageStaffUser,
     handleEditMessage,
     handleNewMessage,
+    handleRestoredMessage,
     handlePopularityUpdate,
     removeMessageReaction,
     updateLastReadMessage,
@@ -228,6 +229,10 @@ export function useStompWithRedux(
                         }
                         break;
 
+                    case WebSocketMessageType.RESTORE_MESSAGE:
+                        dispatch(handleRestoredMessage(data as Message));
+                        break;
+
                     case WebSocketMessageType.POPULARITY_UPDATE:
                         dispatch(handlePopularityUpdate(data as RoomPopulation));
                         break;
@@ -306,7 +311,8 @@ export function useStompWithRedux(
                                 NotificationType.ROOM_PROMOTION_DENIED].includes(notification.type)) {
                                 toast.error(notification.title, options);
                             } else if ([NotificationType.AD_CANCELED, NotificationType.PROMOTION_CANCELED,
-                                NotificationType.ROOM_PROMOTION_CANCELED].includes(notification.type)) {
+                                NotificationType.ROOM_PROMOTION_CANCELED,
+                                NotificationType.REPORT_CASE_ELEVATED].includes(notification.type)) {
                                 toast.warning(notification.title, options);
                             } else {
                                 toast.info(notification.title, options);
@@ -539,12 +545,12 @@ export function useStompWithRedux(
             releaseTyping = null;
         };
         const client = new Client({
-            webSocketFactory: () => {
+            webSocketFactory: () => new SockJS(WS_URL),
+            // The session token goes in the CONNECT frame, never the URL, so it stays out of
+            // server and proxy logs. Re-read on every (re)connect in case it was refreshed.
+            beforeConnect: (stompClient) => {
                 const latestToken = getSessionToken();
-                const dynamicUrl = latestToken
-                    ? `${WS_URL}?token=${encodeURIComponent(latestToken.token)}`
-                    : WS_URL;
-                return new SockJS(dynamicUrl);
+                stompClient.connectHeaders = latestToken ? {"X-Auth-Token": latestToken.token} : {};
             },
             connectHeaders: {},
             reconnectDelay: 5000,

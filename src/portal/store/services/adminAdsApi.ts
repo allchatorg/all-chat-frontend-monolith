@@ -19,6 +19,12 @@ export interface AdRejectionRequest {
     rejectionReason: string;
 }
 
+// Request DTO for stopping or refunding an ad
+export interface AdReasonRequest {
+    adId: number;
+    reason: string;
+}
+
 // Admin-specific ads API service
 export const adminAdsApi = createApi({
     reducerPath: 'adminAdsApi',
@@ -134,6 +140,30 @@ export const adminAdsApi = createApi({
                 'AdminAds',
             ],
         }),
+        // Stop an ACTIVE ad (no refund; reason required)
+        stopAd: builder.mutation<AdStatusDetails, AdReasonRequest>({
+            query: (request) => ({
+                url: '/admin/ads/stop',
+                method: 'POST',
+                body: request,
+            }),
+            invalidatesTags: (result, error, request) => [
+                {type: 'AdminAds', id: request.adId},
+                'AdminAds',
+            ],
+        }),
+        // Refund a captured ad payment in full; stops the ad if still running (Super Admin)
+        refundAd: builder.mutation<AdStatusDetails, AdReasonRequest>({
+            query: (request) => ({
+                url: '/admin/ads/refund',
+                method: 'POST',
+                body: request,
+            }),
+            invalidatesTags: (result, error, request) => [
+                {type: 'AdminAds', id: request.adId},
+                'AdminAds',
+            ],
+        }),
     }),
 });
 
@@ -151,4 +181,6 @@ export const {
     useGetAdByIdQuery,
     useRejectAdMutation,
     useApproveAdMutation,
+    useStopAdMutation,
+    useRefundAdMutation,
 } = adminAdsApi;

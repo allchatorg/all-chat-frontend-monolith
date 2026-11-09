@@ -33,6 +33,7 @@ import {RoomPromotionEvent} from "@/models/RoomPromotionEvent";
 import {PromotedRoom} from "@/models/PromotedRoom";
 import {
     addChatRoomReaction,
+    applyRestoredMessage,
     getLastNonAdvertMessage,
     patchReplyPreviewsForDeletedMessage,
     patchReplyPreviewsForEditedMessage,
@@ -452,7 +453,7 @@ const chatSlice = createSlice({
                 patchReplyPreviewsForDeletedMessage(
                     messages.map(message =>
                         message.id === deletedMessage.id
-                            ? {...message, deleted: true}
+                            ? {...message, deleted: true, staffRemovedAt: deletedMessage.staffRemovedAt}
                             : message
                     ),
                     deletedMessage.id,
@@ -492,6 +493,42 @@ const chatSlice = createSlice({
             }
         }
         ,
+        handleRestoredMessage(
+            state,
+            action: PayloadAction<Message>
+        ) {
+            const restoredMessage = action.payload;
+            const chatRoomId = restoredMessage.chatRoomId;
+
+            const restoreInRoom = <T extends ChatRoom>(room: T): T => ({
+                ...room,
+                messages: applyRestoredMessage(room, restoredMessage),
+                totalMessages: room.totalMessages + 1,
+            });
+            const restoreInUserChatRoom = (room: UserChatRoom): UserChatRoom => ({
+                ...room,
+                lastMessage: !room.lastMessage || restoredMessage.id > room.lastMessage.id
+                    ? restoredMessage
+                    : room.lastMessage,
+                roomPopulation: {
+                    ...room.roomPopulation,
+                    totalMessagesCount: (room.roomPopulation.totalMessagesCount || 0) + 1,
+                },
+            });
+
+            if (state.selectedChatRoom?.id === chatRoomId) {
+                state.selectedChatRoom = restoreInRoom(state.selectedChatRoom);
+            }
+            state.loadedChatRooms = state.loadedChatRooms.map(room =>
+                room.id === chatRoomId ? restoreInRoom(room) : room
+            );
+            state.joinedUserChatRooms = state.joinedUserChatRooms.map(room =>
+                room.chatRoomId === chatRoomId ? restoreInUserChatRoom(room) : room
+            );
+            if (state.selectedUserChatRoom?.chatRoomId === chatRoomId) {
+                state.selectedUserChatRoom = restoreInUserChatRoom(state.selectedUserChatRoom);
+            }
+        },
         handleDeletedMessageRegularUser(
             state,
             action: PayloadAction<Message>
@@ -905,7 +942,7 @@ const chatSlice = createSlice({
                 ];
             });
             builder.addCase(revokeBanThunk.fulfilled, (state, action) => {
-                const userId = action.meta.arg;
+                const {userId} = action.meta.arg;
 
                 if (state.selectedChatRoom) {
                     state.selectedChatRoom.messages = state.selectedChatRoom.messages.map(message =>
@@ -1035,6 +1072,7 @@ export const {
     handleChatRoomBanUserNotificationStaffUser,
     handleDeletedMessageRegularUser,
     handleDeletedMessageStaffUser,
+    handleRestoredMessage,
     updateUserMessageColor,
     addMessageReaction,
     removeMessageReaction,

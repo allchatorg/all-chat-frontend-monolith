@@ -83,6 +83,14 @@ export function AdDetailsStats({
                     : "Your ad has been rejected."
             };
         }
+        if (status === AdStatus.STOPPED) {
+            return {
+                title: isAdmin ? "Stopped Ad" : "Ad Status",
+                description: isAdmin
+                    ? "This ad was stopped before it finished."
+                    : "Your ad was stopped before it finished."
+            };
+        }
         return {
             title: isAdmin ? "Ad Performance" : "Your Ad Performance",
             description: isAdmin

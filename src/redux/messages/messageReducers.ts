@@ -180,6 +180,40 @@ export function patchReplyPreviewsForDeletedMessage(
     );
 }
 
+/**
+ * Puts a restored message back into a loaded room. Staff still hold it, marked deleted;
+ * regular viewers dropped it, so it returns in id order if it falls inside the loaded window.
+ */
+export function applyRestoredMessage(room: ChatRoom, restored: Message): Message[] {
+    const isRestored = (message: Message) => !message.advert && message.id === restored.id;
+    let messages = room.messages;
+
+    if (messages.some(isRestored)) {
+        messages = messages.map(message => isRestored(message) ? restored : message);
+    } else {
+        const nextIndex = messages.findIndex(message => !message.advert && message.id > restored.id);
+        const outsideLoadedWindow = nextIndex === -1 ? room.hasNext : nextIndex === 0 && room.hasPrevious;
+        if (!outsideLoadedWindow) {
+            const insertAt = nextIndex === -1 ? messages.length : nextIndex;
+            messages = [...messages.slice(0, insertAt), restored, ...messages.slice(insertAt)];
+        }
+    }
+
+    return messages.map(message =>
+        message.replyTo?.id === restored.id
+            ? {
+                ...message,
+                replyTo: {
+                    ...message.replyTo,
+                    deleted: false,
+                    content: restored.content,
+                    stickerId: restored.stickerId ?? null,
+                },
+            }
+            : message
+    );
+}
+
 export function getLastNonAdvertMessage(messages: Message[]): Message | null {
     for (let i = messages.length - 1; i >= 0; i--) {
         if (!messages[i].advert) {

@@ -56,9 +56,19 @@ export interface Message {
     editedAt?: string;
     color: string;
     deleted: boolean;
+    /** Set only while a staff removal can still be traced; see isMessageRestorable. */
+    staffRemovedAt?: string | null;
     attachments: Attachment[];
     reactions: Reaction[];
     advert?: boolean;
     replyTo?: ReplyInfo | null;
     promotion?: PromotionInfo | null;
 }
+
+const MESSAGE_RESTORE_WINDOW_MS = 24 * 60 * 60 * 1000;
+
+/** Staff can bring back a message staff removed for 24 hours. The server enforces the same window. */
+export const isMessageRestorable = (message: Pick<Message, "deleted" | "staffRemovedAt">): boolean =>
+    message.deleted
+    && Boolean(message.staffRemovedAt)
+    && Date.now() - new Date(message.staffRemovedAt as string).getTime() < MESSAGE_RESTORE_WINDOW_MS;

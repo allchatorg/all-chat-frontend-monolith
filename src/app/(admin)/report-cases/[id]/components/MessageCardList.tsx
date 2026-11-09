@@ -1,4 +1,5 @@
 import * as React from 'react';
+import {useEffect, useRef} from 'react';
 import MessageItem from "@/features/chatroom/components/MessageItem";
 import {ScrollArea} from '@/components/ui/scroll-area';
 import {Card, CardHeader} from '@/components/ui/card';
@@ -11,6 +12,7 @@ type MessageCardListProps = {
     maxHeight?: string,
     onMessageClick?: (message: any) => void,
     reportedMessageId?: number,
+    scrollToReported?: boolean,
     redacted?: boolean
 };
 
@@ -22,8 +24,23 @@ const MessageCardList: React.FC<MessageCardListProps> = ({
                                                              onMessageClick = () => {
                                                              },
                                                              reportedMessageId,
+                                                             scrollToReported = false,
                                                              redacted = false
                                                          }) => {
+    const reportedMessageRef = useRef<HTMLDivElement>(null);
+
+    useEffect(() => {
+        const element = reportedMessageRef.current;
+        const viewport = element?.closest('[data-radix-scroll-area-viewport]');
+        if (!scrollToReported || !element || !viewport) {
+            return;
+        }
+
+        // Scrolls this list only; scrollIntoView would also move the page.
+        const offset = element.getBoundingClientRect().top - viewport.getBoundingClientRect().top;
+        viewport.scrollTop += offset - (viewport.clientHeight - element.clientHeight) / 2;
+    }, [scrollToReported, reportedMessageId, messages.length]);
+
     return (
         <Card className="flex w-full flex-col" style={{minHeight: height, maxHeight}}>
             {title && (
@@ -46,17 +63,27 @@ const MessageCardList: React.FC<MessageCardListProps> = ({
                 ) : (
                     <div className="flex flex-col gap-2 p-4">
                         {messages && messages.length > 0 ? (
-                            messages.map((message) => (
-                                <MessageItem
-                                    key={message.id}
-                                    message={message}
-                                    viewMode={'chat'}
-                                    className={
-                                        message.id === reportedMessageId ? 'bg-destructive/15 rounded-lg p-2' : ''
-                                    }
-                                    handleMessageClick={() => onMessageClick(message)}
-                                />
-                            ))
+                            messages.map((message) => {
+                                const isReported = message.id === reportedMessageId;
+                                // On a wrapper: a message's own background is an inline color, and
+                                // attachment-only messages have no bubble to style.
+                                return (
+                                    <div
+                                        key={message.id}
+                                        ref={isReported ? reportedMessageRef : undefined}
+                                        className={isReported ? 'rounded-lg border-l-4 border-destructive bg-destructive/15 p-2' : undefined}
+                                    >
+                                        {isReported && (
+                                            <p className="mb-1 text-xs font-semibold text-red-700 dark:text-red-300">Reported message</p>
+                                        )}
+                                        <MessageItem
+                                            message={message}
+                                            viewMode={'chat'}
+                                            handleMessageClick={() => onMessageClick(message)}
+                                        />
+                                    </div>
+                                );
+                            })
                         ) : (
                             <div className="py-4 text-center text-gray-500">
                                 No messages found.

@@ -5,10 +5,13 @@ import {Badge} from "@ads/components/ui/badge";
 import {useGetUserByIdQuery} from "@ads/store/services/adminUsersApi";
 import {UserRole} from "@ads/models/user-role";
 import {formatUsd} from "@ads/lib/revenue-format";
+import {useUser} from "@ads/hooks/use-user";
+import {VipPaymentsCard} from "@ads/components/vip-payments-card";
 
 export default function UserDetailsPage() {
     const params = useParams();
     const userId = Number(params.id);
+    const {isSuperAdmin} = useUser();
 
     const {data: user, isLoading} = useGetUserByIdQuery(userId, {
         skip: isNaN(userId),
@@ -82,6 +85,8 @@ export default function UserDetailsPage() {
                     </div>
                 </CardContent>
             </Card>
+
+            {isSuperAdmin && <VipPaymentsCard userId={userId}/>}
         </div>
     );
 }

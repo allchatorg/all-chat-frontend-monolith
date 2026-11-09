@@ -2,7 +2,7 @@ import {useRoomParticipation} from "@/lib/hooks/useRoomParticipation";
 import React, {useRef, useState} from "react";
 import {Button} from "@/components/ui/button";
 import {DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger,} from "@/components/ui/dropdown-menu";
-import {Flag, Megaphone, MoreHorizontal, Pencil, Reply, Shield, Smile, Trash2} from "lucide-react";
+import {Flag, Megaphone, MoreHorizontal, Pencil, Reply, Shield, Smile, Trash2, Undo2} from "lucide-react";
 import {Popover, PopoverContent, PopoverTrigger} from "@/components/ui/popover";
 import {useDispatch, useSelector} from "react-redux";
 import {AppDispatch} from "@/redux/store";
@@ -19,7 +19,12 @@ import {canActOn, Role} from "@/models/Role";
 import {setMessageReactions, setSelectedReaction} from "@/redux/chatRoom/chatRoomUiSlice";
 import MessageReactionsPanel from "@/features/chatroom/components/MessageReactionsPanel";
 import {cn} from "@/lib/utils";
-import {Message} from "@/models/message";
+import {isMessageRestorable, Message} from "@/models/message";
+import {ConfirmModal} from "@/components/ConfirmModal";
+import {restoreMessage} from "@/api/chatting/chattingAPI";
+import {apiErrorMessage} from "@/lib/apiError";
+import {markObserverMessageRestored} from "@/redux/observerChat/observerChatSlice";
+import {toast} from "sonner";
 import {ReactionPicker} from "@/features/stickers/ReactionPicker";
 import {selectUser} from "@/redux/user/userSelectors";
 import {useVipDialog} from "@/features/vip/useVipDialog";
@@ -80,7 +85,7 @@ export const MessageMenu: React.FC<MessageMenuProps> = ({
                                                         }) => {
     const participationDisabled = useRoomParticipation(message.chatRoomId, message.chatRoomVipOnly);
     const dispatch = useDispatch<AppDispatch>();
-    const {open} = useDialog();
+    const {open, close} = useDialog();
     const {isPrincipal, isStaffMember, currentRole} = useRoleAccess();
     const [internalEmojiPopoverOpen, setInternalEmojiPopoverOpen] = useState(false);
     const [isRemovePromotedDialogOpen, setIsRemovePromotedDialogOpen] = useState(false);
@@ -99,11 +104,12 @@ export const MessageMenu: React.FC<MessageMenuProps> = ({
     const canReply = Boolean(!participationDisabled && onReply && !deleted && !archivedRoom);
     const canEditMessage = Boolean(!participationDisabled && isPrincipal(userId) && !deleted && !archivedRoom && !activePromotionStatus && !message.stickerId);
     const canRemoveMessage = Boolean(!participationDisabled && (isPrincipal(userId) || canActOn(currentRole, role)) && !deleted && !archivedRoom);
+    const canRestoreMessage = Boolean(!participationDisabled && canActOn(currentRole, role) && isMessageRestorable(message) && !archivedRoom);
     const canOpenModView = Boolean(allowModView && isStaffMember() && !isPrincipal(userId));
     const canReport = Boolean(!isPrincipal(userId) && allowReport);
     // Staff are excluded from the paid funnel (backend returns 403 as well)
     const canPromote = Boolean(!participationDisabled && allowPromote && isPrincipal(userId) && !isStaffMember() && !deleted && !archivedRoom && !message.promotion && !message.stickerId);
-    const canOpenActionsMenu = canViewReactions || canReply || canEditMessage || canRemoveMessage || canOpenModView || canReport || canPromote;
+    const canOpenActionsMenu = canViewReactions || canReply || canEditMessage || canRemoveMessage || canRestoreMessage || canOpenModView || canReport || canPromote;
     const canAddReaction = Boolean(!participationDisabled && !deleted && !archivedRoom);
     const isEmojiPopoverControlled = emojiPopoverOpen !== undefined;
     const isOpenEmojiPopover = isEmojiPopoverControlled ? emojiPopoverOpen : internalEmojiPopoverOpen;
@@ -134,9 +140,43 @@ export const MessageMenu: React.FC<MessageMenuProps> = ({
         if (participationDisabled) return;
         if (activePromotionStatus) {
             setIsRemovePromotedDialogOpen(true);
-        } else {
+        } else if (isPrincipal(userId)) {
             removeMessage?.(messageId);
+        } else {
+            open(
+                <ConfirmModal
+                    title="Remove this message?"
+                    description={`${message.senderUsername}'s message will be hidden from everyone except staff. Staff can restore it for 24 hours, except on child-safety cases.`}
+                    onClose={close}
+                    onConfirm={() => {
+                        close();
+                        removeMessage?.(messageId);
+                    }}
+                />
+            );
         }
+    };
+
+    const handleRestoreMessage = () => {
+        open(
+            <ConfirmModal
+                title="Restore this message?"
+                description={`${message.senderUsername}'s message will be visible to everyone in the room again.`}
+                onClose={close}
+                onConfirm={async () => {
+                    try {
+                        await restoreMessage(messageId);
+                        close();
+                        // deleteOnly is the observer view, which no socket event reaches.
+                        if (deleteOnly) dispatch(markObserverMessageRestored(messageId));
+                        toast.success("Message restored");
+                    } catch (error) {
+                        close();
+                        toast.error(apiErrorMessage(error));
+                    }
+                }}
+            />
+        );
     };
 
     const removePromotedDialog = activePromotionStatus ? (
@@ -154,7 +194,8 @@ export const MessageMenu: React.FC<MessageMenuProps> = ({
     ) : null;
 
     const removeAction: MessageAction = {key: "remove", label: "Remove Message", Icon: Trash2, onSelect: handleRemoveMessage, destructive: true};
-    const actions: MessageAction[] = deleteOnly ? (canRemoveMessage ? [removeAction] : []) : [
+    const restoreAction: MessageAction = {key: "restore", label: "Restore Message", Icon: Undo2, onSelect: handleRestoreMessage};
+    const actions: MessageAction[] = deleteOnly ? (canRemoveMessage ? [removeAction] : canRestoreMessage ? [restoreAction] : []) : [
         canViewReactions && {
             key: "view-reactions", label: "View Reactions", Icon: Smile, onSelect: () => {
                 dispatch(setMessageReactions(message.reactions));
@@ -165,6 +206,7 @@ export const MessageMenu: React.FC<MessageMenuProps> = ({
         canReply && {key: "reply", label: "Reply", Icon: Reply, onSelect: () => onReply?.(message)},
         canEditMessage && {key: "edit", label: "Edit Message", Icon: Pencil, onSelect: () => setEditingMessage?.(message)},
         canRemoveMessage && removeAction,
+        canRestoreMessage && restoreAction,
         canPromote && {
             key: "promote", label: "Promote Message", Icon: Megaphone, onSelect: () => {
                 // Promoting requires a claimed account (backend rejects
@@ -258,10 +300,10 @@ export const MessageMenu: React.FC<MessageMenuProps> = ({
         </div>
     );
 
-    // Observer/delete-only mode: render just a Remove action (when permitted), nothing else.
+    // Observer/delete-only mode: render just a Remove or Restore action (when permitted), nothing else.
     // Checked before `disabled` because the observer passes disabled={true} to suppress reactions.
     if (deleteOnly) {
-        if (!canRemoveMessage) {
+        if (!canRemoveMessage && !canRestoreMessage) {
             return null;
         }
         return (

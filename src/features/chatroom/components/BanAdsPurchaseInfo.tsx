@@ -24,6 +24,7 @@ function buildPurchaseSummary(summary: BanAdsSummary): string {
         {count: summary.completedCount, label: "completed"},
         {count: summary.pendingCount, label: "pending"},
         {count: summary.rejectedCount, label: "rejected"},
+        {count: summary.stoppedCount, label: "stopped"},
     ].filter((segment) => segment.count > 0);
 
     const adsWord = summary.totalAds === 1 ? "ad" : "ads";
@@ -74,7 +75,7 @@ function buildPromotionsRefundWarning(summary: BanPromotionsSummary): string {
     }
     if (summary.approvedCount > 0) {
         const promotionsWord = summary.approvedCount === 1 ? "approved promotion" : "approved promotions";
-        parts.push(`${summary.approvedCount} ${promotionsWord} will NOT be refunded and will keep running unless their messages are deleted`);
+        parts.push(`${summary.approvedCount} ${promotionsWord} will be stopped and will NOT be refunded`);
     }
     return `${parts.join("; ")}.`;
 }
@@ -93,10 +94,7 @@ function buildRoomPromotionsBanWarning(summary: BanRoomPromotionsSummary): strin
     }
     if (summary.approvedCount > 0) {
         const promotionsWord = summary.approvedCount === 1 ? "approved room promotion" : "approved room promotions";
-        const listingText = summary.approvedCount === 1
-            ? "will keep the room listed unless staff cancels the promotion or archives the room"
-            : "will keep their rooms listed unless staff cancels the promotions or archives those rooms";
-        parts.push(`${summary.approvedCount} ${promotionsWord} totaling ${formatCurrency(summary.approvedCapturedTotal)} will NOT be refunded and ${listingText}`);
+        parts.push(`${summary.approvedCount} ${promotionsWord} totaling ${formatCurrency(summary.approvedCapturedTotal)} will be stopped and will NOT be refunded`);
     }
     return `${parts.join("; ")}.`;
 }
@@ -153,6 +151,8 @@ export default function BanAdsPurchaseInfo({userId, banType, deleteMessagesEnabl
         currency: data.currency || "USD",
     }).format(data.pendingRefundTotal) : "";
     const pendingAdsWord = showAds && data.pendingRefundCount === 1 ? "pending ad" : "pending ads";
+    const showActiveAdsWarning = showAds && banType === BanTypeEnum.PERMANENT && data.activeCount > 0;
+    const activeAdsWord = showAds && data.activeCount === 1 ? "active ad" : "active ads";
 
     const showPromotionsRefundWarning = showPromotions
         && banType === BanTypeEnum.PERMANENT
@@ -188,6 +188,16 @@ export default function BanAdsPurchaseInfo({userId, banType, deleteMessagesEnabl
                 </Alert>
             )}
 
+            {showActiveAdsWarning && (
+                <Alert variant="warning">
+                    <AlertTriangle className="h-4 w-4"/>
+                    <AlertTitle>Active ads will be stopped</AlertTitle>
+                    <AlertDescription>
+                        {`${data.activeCount} ${activeAdsWord} will be stopped and will NOT be refunded when this permanent ban is applied.`}
+                    </AlertDescription>
+                </Alert>
+            )}
+
             {showPromotions && (
                 <Alert>
                     <Info className="h-4 w-4"/>
@@ -199,7 +209,11 @@ export default function BanAdsPurchaseInfo({userId, banType, deleteMessagesEnabl
             {showPromotionsRefundWarning && (
                 <Alert variant="warning">
                     <AlertTriangle className="h-4 w-4"/>
-                    <AlertTitle>Pending promotion holds will be released</AlertTitle>
+                    <AlertTitle>
+                        {promotionsData.pendingCount > 0
+                            ? "Pending promotion holds will be released"
+                            : "Approved promotions will be stopped"}
+                    </AlertTitle>
                     <AlertDescription>{buildPromotionsRefundWarning(promotionsData)}</AlertDescription>
                 </Alert>
             )}
@@ -218,7 +232,7 @@ export default function BanAdsPurchaseInfo({userId, banType, deleteMessagesEnabl
                     <AlertTitle>
                         {roomPromotionsData.pendingCount > 0
                             ? "Pending room promotions will be canceled"
-                            : "Approved room promotions are not refunded"}
+                            : "Approved room promotions will be stopped"}
                     </AlertTitle>
                     <AlertDescription>{buildRoomPromotionsBanWarning(roomPromotionsData)}</AlertDescription>
                 </Alert>

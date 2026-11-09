@@ -49,14 +49,16 @@ export const banUserThunk = createAsyncThunk<void, BanRequest>(
     }
 );
 
-export const revokeBanThunk = createAsyncThunk<void, number>(
+export const revokeBanThunk = createAsyncThunk<void, { userId: number; reason: string }>(
     "modPanel/revokeBan",
-    async (userId: number, {rejectWithValue}) => {
+    async ({userId, reason}, {rejectWithValue}) => {
         try {
-            await revokeBan(userId).then(
+            await revokeBan(userId, reason).then(
                 () => toast.success("Ban revoked successfully")
             );
         } catch (error: any) {
+            // Staff can only revoke bans of users they outrank.
+            toast.error(`Failed to revoke ban: ${error.response?.data?.message ?? error.message}`);
             return rejectWithValue(error.response?.data || error.message);
         }
     }

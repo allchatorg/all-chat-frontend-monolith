@@ -8,6 +8,7 @@ export interface BanRequest {
     banType: BanTypeEnum;
     description?: string;
     deleteMessages: boolean;
+    deleteAllMessages?: boolean;
     deleteMessagesDuration?: number;
     reportCaseId?: number;
 }

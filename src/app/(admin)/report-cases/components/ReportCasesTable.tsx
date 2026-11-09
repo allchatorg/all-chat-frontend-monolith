@@ -11,6 +11,9 @@ import {
     DropdownMenu,
     DropdownMenuCheckboxItem,
     DropdownMenuContent,
+    DropdownMenuGroup,
+    DropdownMenuLabel,
+    DropdownMenuSeparator,
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import {Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger,} from "@/components/ui/sheet";
@@ -18,7 +21,6 @@ import {
     ColumnFiltersState,
     getCoreRowModel,
     getFilteredRowModel,
-    getPaginationRowModel,
     getSortedRowModel,
     SortingState,
     VisibilityState,
@@ -33,6 +35,22 @@ import {usePathname, useRouter, useSearchParams} from "next/navigation";
 import {ROUTES} from "@/routes";
 import {useIsMobile} from "@/lib/hooks/useIsMobile";
 import {ReportType} from "@/models/ReportTypeEnum";
+import {ReportSeverity} from "@/models/ReportSeverity";
+import {ReportAssignmentFilter} from "@/models/ReportAssignmentFilter";
+import {useRoleAccess} from "@/lib/hooks/useRoleAccess";
+import {ReportCasesSearchFilters} from "@/app/(admin)/report-cases/components/ReportCasesSearchFilters";
+import {
+    filterableReportTypes,
+    getReportTypeLabel,
+    reportSeverityLabels,
+    reportTypeSeverity
+} from "@/lib/reportUtils";
+import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue} from "@/components/ui/select";
+import {useSelector} from "react-redux";
+import {selectUser} from "@/redux/user/userSelectors";
+import {useThunk} from "@/lib/hooks/useThunk";
+import {claimCaseThunk} from "@/redux/report-cases/reportCasesThunk";
+import {toast} from "sonner";
 
 interface Props {
     isLoading: boolean,
@@ -41,7 +59,12 @@ interface Props {
     handleSearchParamsChange: (params: ReportSearchRequest) => void
 }
 
-const PAGE_SIZE = 10;
+const PAGE_SIZE_OPTIONS = [10, 25, 50, 100];
+
+const assignmentLabels: Record<ReportAssignmentFilter, string> = {
+    [ReportAssignmentFilter.MINE]: "Claimed by me",
+    [ReportAssignmentFilter.UNASSIGNED]: "Unclaimed",
+};
 
 export function ReportCasesTable({
                                      content,
@@ -75,9 +98,12 @@ export function ReportCasesTable({
                 "needsAttention": false,
                 "underage": false,
                 "reportCount": false,
-                "message.content": false,
+                "message_content": false,
+                "assignee": false,
                 "message.sender.username": true,
-                "isResolved": true,
+                "isResolved": false,
+                "severity": true,
+                "timer": true,
                 "viewDetails": true
             });
         } else {
@@ -105,10 +131,28 @@ export function ReportCasesTable({
     }, [debouncedSearch, filters.resolved, sorting]);
 
 
+    const currentUser = useSelector(selectUser);
+    const {isAdmin} = useRoleAccess();
+    const [claimCase] = useThunk(claimCaseThunk);
+
+    const handleClaim = async (reportCaseId: number) => {
+        try {
+            await claimCase(reportCaseId);
+            toast.success("Case claimed");
+        } catch (error) {
+            toast.error(error instanceof Error && error.message ? error.message : "Failed to claim the case");
+        }
+
+        // Also after a failure: someone else's claim is why it failed, and the list should show it.
+        handleSearchParamsChange({...filters, sort: sortParamsToQueryString(sorting)});
+    };
+
     const tableColumns = useReportCasesTableColumns({
         onViewDetails: (reportCaseId: string) => {
             router.push(getReportCaseHref(reportCaseId));
-        }
+        },
+        onClaim: handleClaim,
+        currentUserId: currentUser?.id,
     });
 
     const table = useReactTable({
@@ -117,7 +161,6 @@ export function ReportCasesTable({
         onSortingChange: setSorting,
         onColumnFiltersChange: setColumnFilters,
         getCoreRowModel: getCoreRowModel(),
-        getPaginationRowModel: getPaginationRowModel(),
         getSortedRowModel: getSortedRowModel(),
         getFilteredRowModel: getFilteredRowModel(),
         onColumnVisibilityChange: setColumnVisibility,
@@ -158,15 +201,15 @@ export function ReportCasesTable({
         return mappedSorting.length > 0 ? encodeURIComponent(JSON.stringify(mappedSorting)) : undefined;
     }
 
-    const underageFilterActive = filters.reportTypes?.includes(ReportType.UNDERAGE) ?? false;
+    const selectedReportTypes = filters.reportTypes ?? [];
+    const selectedSeverities = filters.severities ?? [];
+    const underageFilterActive = selectedReportTypes.includes(ReportType.UNDERAGE);
 
-    const toggleUnderageFilter = () => {
-        const reportTypes = underageFilterActive ? undefined : [ReportType.UNDERAGE];
-
+    const applyFilters = (changes: Partial<ReportCasesSearchFilters>) => {
         const updatedFilters = {
             ...filters,
+            ...changes,
             page: 1,
-            reportTypes,
         };
 
         setFilters(updatedFilters);
@@ -176,6 +219,27 @@ export function ReportCasesTable({
             sort: sortParamsToQueryString(sorting),
         });
     };
+
+    const toggleReportType = (type: ReportType) => {
+        const reportTypes = selectedReportTypes.includes(type)
+            ? selectedReportTypes.filter(selected => selected !== type)
+            : [...selectedReportTypes, type];
+        applyFilters({reportTypes: reportTypes.length > 0 ? reportTypes : undefined});
+    };
+
+    const toggleSeverity = (severity: ReportSeverity) => {
+        const severities = selectedSeverities.includes(severity)
+            ? selectedSeverities.filter(selected => selected !== severity)
+            : [...selectedSeverities, severity];
+        applyFilters({severities: severities.length > 0 ? severities : undefined});
+    };
+
+    const toggleUnderageFilter = () => toggleReportType(ReportType.UNDERAGE);
+
+    // That view spans both tabs, so leaving it goes back to the tab in the URL.
+    const toggleNcmecDecisionPending = () => applyFilters(filters.ncmecDecisionPending
+        ? {ncmecDecisionPending: undefined, resolved: searchParams.get("resolved") === "true"}
+        : {ncmecDecisionPending: true, resolved: undefined});
 
     const clearAllFilters = () => {
         table.resetColumnFilters();
@@ -186,7 +250,11 @@ export function ReportCasesTable({
             ...filters,
             page: 1,
             reportTypes: undefined,
+            severities: undefined,
+            assignment: undefined,
             reportedUserUsernameOrId: undefined,
+            ncmecDecisionPending: undefined,
+            resolved: searchParams.get("resolved") === "true",
         };
 
         setFilters(updatedFilters);
@@ -197,6 +265,95 @@ export function ReportCasesTable({
         });
     };
 
+    const assignmentMenu = (
+        <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+                <Button variant={filters.assignment ? "default" : "outline"} size={isMobile ? "sm" : "default"}>
+                    {filters.assignment ? assignmentLabels[filters.assignment] : "Assignee"}
+                    <ChevronDown className="ml-2 h-4 w-4"/>
+                </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+                {Object.values(ReportAssignmentFilter).map((assignment) => (
+                    <DropdownMenuCheckboxItem
+                        key={assignment}
+                        checked={filters.assignment === assignment}
+                        onCheckedChange={() => applyFilters({
+                            assignment: filters.assignment === assignment ? undefined : assignment
+                        })}
+                    >
+                        {assignmentLabels[assignment]}
+                    </DropdownMenuCheckboxItem>
+                ))}
+            </DropdownMenuContent>
+        </DropdownMenu>
+    );
+
+    // A case's severity is that of its most serious report; the type filter matches any report.
+    const severityMenu = (
+        <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+                <Button variant={selectedSeverities.length > 0 ? "default" : "outline"} size={isMobile ? "sm" : "default"}>
+                    Severity{selectedSeverities.length > 0 ? ` (${selectedSeverities.length})` : ""}
+                    <ChevronDown className="ml-2 h-4 w-4"/>
+                </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+                {Object.values(ReportSeverity).map((severity) => (
+                    <DropdownMenuCheckboxItem
+                        key={severity}
+                        checked={selectedSeverities.includes(severity)}
+                        onCheckedChange={() => toggleSeverity(severity)}
+                        onSelect={(event) => event.preventDefault()}
+                    >
+                        {reportSeverityLabels[severity]}
+                    </DropdownMenuCheckboxItem>
+                ))}
+            </DropdownMenuContent>
+        </DropdownMenu>
+    );
+
+    const reportTypeMenu = (
+        <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+                <Button variant={selectedReportTypes.length > 0 ? "default" : "outline"} size={isMobile ? "sm" : "default"}>
+                    Report type{selectedReportTypes.length > 0 ? ` (${selectedReportTypes.length})` : ""}
+                    <ChevronDown className="ml-2 h-4 w-4"/>
+                </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="max-h-80 overflow-y-auto">
+                {Object.values(ReportSeverity).map((severity, index) => (
+                    <DropdownMenuGroup key={severity}>
+                        {index > 0 && <DropdownMenuSeparator/>}
+                        <DropdownMenuLabel>{reportSeverityLabels[severity]}</DropdownMenuLabel>
+                        {filterableReportTypes
+                            .filter((type) => reportTypeSeverity[type] === severity)
+                            .map((type) => (
+                                <DropdownMenuCheckboxItem
+                                    key={type}
+                                    checked={selectedReportTypes.includes(type)}
+                                    onCheckedChange={() => toggleReportType(type)}
+                                    onSelect={(event) => event.preventDefault()}
+                                >
+                                    {getReportTypeLabel(type)}
+                                </DropdownMenuCheckboxItem>
+                            ))}
+                    </DropdownMenuGroup>
+                ))}
+            </DropdownMenuContent>
+        </DropdownMenu>
+    );
+
+    // Only admins and super admins can make this decision.
+    const ncmecDecisionFilter = isAdmin() && (
+        <Button
+            variant={filters.ncmecDecisionPending ? "default" : "outline"}
+            size={isMobile ? "sm" : "default"}
+            onClick={toggleNcmecDecisionPending}
+        >
+            Needs NCMEC decision
+        </Button>
+    );
 
     return (
         <div className="flex h-full w-full flex-col">
@@ -254,14 +411,20 @@ export function ReportCasesTable({
                                     </div>
                                 </div>
                                 <div className="space-y-2">
-                                    <h4 className="font-medium leading-none">Report type</h4>
-                                    <Button
-                                        variant={underageFilterActive ? "default" : "outline"}
-                                        size="sm"
-                                        onClick={toggleUnderageFilter}
-                                    >
-                                        Underage
-                                    </Button>
+                                    <h4 className="font-medium leading-none">Severity and report type</h4>
+                                    <div className="flex flex-wrap gap-2">
+                                        {assignmentMenu}
+                                        {severityMenu}
+                                        {reportTypeMenu}
+                                        <Button
+                                            variant={underageFilterActive ? "default" : "outline"}
+                                            size="sm"
+                                            onClick={toggleUnderageFilter}
+                                        >
+                                            Underage
+                                        </Button>
+                                        {ncmecDecisionFilter}
+                                    </div>
                                 </div>
                                 <Button
                                     variant="ghost"
@@ -274,13 +437,17 @@ export function ReportCasesTable({
                         </SheetContent>
                     </Sheet>
                 ) : (
-                    <div className="ml-auto flex gap-2">
+                    <div className="ml-auto flex flex-wrap justify-end gap-2">
+                        {assignmentMenu}
+                        {severityMenu}
+                        {reportTypeMenu}
                         <Button
                             variant={underageFilterActive ? "default" : "outline"}
                             onClick={toggleUnderageFilter}
                         >
                             Underage
                         </Button>
+                        {ncmecDecisionFilter}
 
                         <Button
                             variant="ghost"
@@ -371,12 +538,27 @@ export function ReportCasesTable({
                 </div>
             </div>
 
-            <div className="mt-4">
-                <PaginationFooter
-                    totalPages={totalPages}
-                    currentPage={filters.page}
-                    onPageChange={handlePageChange}
-                />
+            <div className="mt-4 flex flex-wrap items-center gap-3">
+                <div className="w-full min-w-0 sm:w-auto sm:flex-1">
+                    <PaginationFooter
+                        totalPages={totalPages}
+                        currentPage={filters.page}
+                        onPageChange={handlePageChange}
+                    />
+                </div>
+                <div className="ml-auto flex items-center gap-2 text-sm text-muted-foreground">
+                    <span>Per page</span>
+                    <Select value={String(filters.size)} onValueChange={(size) => applyFilters({size: Number(size)})}>
+                        <SelectTrigger className="w-20" aria-label="Cases per page">
+                            <SelectValue/>
+                        </SelectTrigger>
+                        <SelectContent>
+                            {[...new Set([...PAGE_SIZE_OPTIONS, filters.size])].sort((a, b) => a - b).map((size) => (
+                                <SelectItem key={size} value={String(size)}>{size}</SelectItem>
+                            ))}
+                        </SelectContent>
+                    </Select>
+                </div>
             </div>
         </div>
     );

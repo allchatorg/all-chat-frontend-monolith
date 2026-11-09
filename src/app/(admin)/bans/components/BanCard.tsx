@@ -7,14 +7,15 @@ import React from "react";
 import {useDialog} from "@/components/providers/DialogProvider";
 import {BanDetailsCard} from "@/app/(admin)/bans/components/BanDetailsCard";
 import {getReportTypeLabel, isCsamReportType} from "@/lib/reportUtils";
+import {useRevokeBanDialog} from "@/lib/hooks/useRevokeBanDialog";
 
 interface BanCardProps {
     ban: Ban;
-    revokeBan: (userId: number) => void;
 }
 
-export const BanCard: React.FC<BanCardProps> = ({ban, revokeBan}) => {
+export const BanCard: React.FC<BanCardProps> = ({ban}) => {
     const {open} = useDialog();
+    const openRevokeBanDialog = useRevokeBanDialog();
 
     return (
         <Card className="p-3 transition-shadow hover:shadow-md">
@@ -51,9 +52,7 @@ export const BanCard: React.FC<BanCardProps> = ({ban, revokeBan}) => {
                     </Button>
                     {!isCsamReportType(ban.reportType) && (
                         <Button
-                            onClick={() => {
-                                revokeBan(ban.userId)
-                            }}
+                            onClick={() => openRevokeBanDialog(ban.userId, ban.username)}
                             variant="destructive"
                             size="sm"
                             className="flex-1 sm:flex-none"

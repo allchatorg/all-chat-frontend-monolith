@@ -2,6 +2,11 @@ export const usernameValidationRules = {
     required: "Username is required",
     minLength: {value: 3, message: "Username must be between 3 and 50 characters"},
     maxLength: {value: 50, message: "Username must be between 3 and 50 characters"},
+    // Mirrors the backend's Utils.USERNAME_REGEX.
+    pattern: {
+        value: /^[A-Za-z0-9._-]+$/,
+        message: "Use only letters, numbers, dots, underscores or hyphens",
+    },
     validate: (value: string) => value.trim().length > 0 || "Username is required",
 };
 

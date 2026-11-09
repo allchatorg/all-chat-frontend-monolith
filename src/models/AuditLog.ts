@@ -3,6 +3,9 @@ import {BanTypeEnum} from "@/models/BanTypeEnum";
 import {Message} from "@/models/message";
 import {ReportType} from "@/models/ReportTypeEnum";
 
+/** Action of the audit log for a case recorded as not CSAM. Must match the backend's ResolveCaseAuditLog.NOT_CSAM_ACTION. */
+export const NOT_CSAM_ACTION = "RESOLVE_CASE_NOT_CSAM";
+
 export enum AuditLogActorType {
     USER = "USER",
     SYSTEM = "SYSTEM",
@@ -12,9 +15,11 @@ export enum AuditLogType {
     BAN = "BAN",
     CHANGE_USERNAME = "CHANGE_USERNAME",
     MESSAGE_DELETE = "MESSAGE_DELETE",
+    MESSAGE_RESTORE = "MESSAGE_RESTORE",
     REVOKE_BAN = "REVOKE_BAN",
     WARNING = "WARNING",
     RESOLVE_CASE = "RESOLVE_CASE",
+    REOPEN_CASE = "REOPEN_CASE",
     PROMOTE_ROLE = "PROMOTE_ROLE",
     DEMOTE_ROLE = "DEMOTE_ROLE",
     NCMEC_REPORT = "NCMEC_REPORT",
@@ -25,6 +30,17 @@ export enum AuditLogType {
     CLEAR_ID_VERIFICATION = "CLEAR_ID_VERIFICATION",
     ID_VERIFICATION_PASSED = "ID_VERIFICATION_PASSED",
     ID_VERIFICATION_FAILED = "ID_VERIFICATION_FAILED",
+    REQUEST_ELEVATION = "REQUEST_ELEVATION",
+    AD_APPROVE = "AD_APPROVE",
+    AD_REJECT = "AD_REJECT",
+    AD_STOP = "AD_STOP",
+    AD_REFUND = "AD_REFUND",
+    PROMOTION_APPROVE = "PROMOTION_APPROVE",
+    PROMOTION_DENY = "PROMOTION_DENY",
+    PROMOTION_CANCEL = "PROMOTION_CANCEL",
+    PROMOTION_REFUND = "PROMOTION_REFUND",
+    VIP_CANCEL = "VIP_CANCEL",
+    VIP_REFUND = "VIP_REFUND",
 }
 
 export interface AuditLog {
@@ -45,7 +61,8 @@ export interface BanAuditLog extends AuditLog {
     reportType: ReportType;
     banDurationSeconds: number;
     deleteMessages: boolean;
-    deleteMessagesDurationSeconds: number;
+    deleteAllMessages: boolean | null;
+    deleteMessagesDurationSeconds: number | null;
 }
 
 export interface RevokeBanAuditLog extends AuditLog {
@@ -56,6 +73,11 @@ export interface RevokeBanAuditLog extends AuditLog {
 export interface MessageDeleteAuditLog extends AuditLog {
     auditLogType: AuditLogType.MESSAGE_DELETE;
     deletedMessage: Message;
+}
+
+export interface MessageRestoreAuditLog extends AuditLog {
+    auditLogType: AuditLogType.MESSAGE_RESTORE;
+    restoredMessage: Message;
 }
 
 export interface ChangeUsernameAuditLog extends AuditLog {
@@ -73,6 +95,16 @@ export interface WarningAuditLog extends AuditLog {
 
 export interface ResolveCaseAuditLog extends AuditLog {
     auditLogType: AuditLogType.RESOLVE_CASE;
+    reportCaseId: number;
+}
+
+export interface ReopenCaseAuditLog extends AuditLog {
+    auditLogType: AuditLogType.REOPEN_CASE;
+    reportCaseId: number;
+}
+
+export interface RequestElevationAuditLog extends AuditLog {
+    auditLogType: AuditLogType.REQUEST_ELEVATION;
     reportCaseId: number;
 }
 
@@ -115,14 +147,39 @@ export interface IdVerificationAuditLog extends AuditLog {
     reportCaseId?: number | null;
 }
 
+export interface PurchaseAuditLog extends AuditLog {
+    auditLogType:
+        | AuditLogType.AD_APPROVE
+        | AuditLogType.AD_REJECT
+        | AuditLogType.AD_STOP
+        | AuditLogType.AD_REFUND
+        | AuditLogType.PROMOTION_APPROVE
+        | AuditLogType.PROMOTION_DENY
+        | AuditLogType.PROMOTION_CANCEL
+        | AuditLogType.PROMOTION_REFUND
+        | AuditLogType.VIP_CANCEL
+        | AuditLogType.VIP_REFUND;
+    targetUser: User;
+    purchaseType: string;
+    purchaseReference: string;
+    reason: string | null;
+    amount: number | null;
+    currency: string | null;
+    paymentStatus: string | null;
+}
+
 export type AuditLogUnion =
+    | PurchaseAuditLog
     | BanAuditLog
     | RevokeBanAuditLog
     | BanAppealResolveAuditLog
     | MessageDeleteAuditLog
+    | MessageRestoreAuditLog
     | ChangeUsernameAuditLog
     | WarningAuditLog
     | ResolveCaseAuditLog
+    | ReopenCaseAuditLog
+    | RequestElevationAuditLog
     | RoleChangeAuditLog
     | NcmecReportAuditLog
     | ChatRoomAuditLog
@@ -155,6 +212,48 @@ export const getAuditLogActorLabel = (log: AuditLog): string => {
     }
 
     return log.createdBy?.username ?? "Unknown User";
+};
+
+const PURCHASE_LABELS: Record<string, string> = {
+    AD: "Ad #",
+    PROMOTED_MESSAGE: "Promoted message #",
+    ROOM_PROMOTION: "Room promotion #",
+    VIP: "VIP ",
+};
+
+export const getPurchaseLabel = (log: PurchaseAuditLog): string =>
+    `${PURCHASE_LABELS[log.purchaseType] ?? `${log.purchaseType} `}${log.purchaseReference}`;
+
+export const formatPurchaseAmount = (log: PurchaseAuditLog): string | null =>
+    log.amount == null
+        ? null
+        : new Intl.NumberFormat("en-US", {
+            style: "currency",
+            currency: (log.currency ?? "USD").toUpperCase(),
+        }).format(log.amount);
+
+export const formatAuditDuration = (seconds: number): string => {
+    const days = Math.floor(seconds / 86400);
+    const hours = Math.floor((seconds % 86400) / 3600);
+    const minutes = Math.floor((seconds % 3600) / 60);
+
+    if (days > 0) return `${days} day${days > 1 ? "s" : ""}`;
+    if (hours > 0) return `${hours} hour${hours > 1 ? "s" : ""}`;
+    return `${minutes} minute${minutes > 1 ? "s" : ""}`;
+};
+
+export const getBanMessageDeletionLabel = (log: BanAuditLog): string => {
+    // Bans logged before deleteAllMessages existed recorded "Delete All" as a missing duration.
+    if (log.deleteAllMessages || log.deleteMessagesDurationSeconds == null) {
+        return "All messages deleted";
+    }
+
+    // Older bans could be submitted with no period, which sent 0 and deleted nothing.
+    if (log.deleteMessagesDurationSeconds === 0) {
+        return "No messages deleted";
+    }
+
+    return `Messages deleted (${formatAuditDuration(log.deleteMessagesDurationSeconds)})`;
 };
 
 export const processAuditLog = (log: AuditLogUnion) => {

@@ -99,6 +99,15 @@ const observerChatSlice = createSlice({
                 state.selectedChatId = null;
             }
         },
+        // The observer isn't a member of the room, so no socket event reports a restore.
+        markObserverMessageRestored(state, action: PayloadAction<number>) {
+            state.loadedRooms = state.loadedRooms.map(room => ({
+                ...room,
+                messages: room.messages.map(m =>
+                    m.id === action.payload ? {...m, deleted: false, staffRemovedAt: null} : m,
+                ),
+            }));
+        },
         clearObserverChat() {
             return initialState;
         },
@@ -210,7 +219,7 @@ const observerChatSlice = createSlice({
             state.loadedRooms = state.loadedRooms.map(room => ({
                 ...room,
                 messages: room.messages.map(m =>
-                    m.id === messageId ? {...m, deleted: true} : m,
+                    m.id === messageId ? {...m, deleted: true, staffRemovedAt: new Date().toISOString()} : m,
                 ),
             }));
         });
@@ -225,6 +234,7 @@ export const {
     closeObserverMessageSearch,
     setSelectedObserverChat,
     removeObserverConversation,
+    markObserverMessageRestored,
     clearObserverChat,
 } = observerChatSlice.actions;
 

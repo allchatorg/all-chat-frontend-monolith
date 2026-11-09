@@ -76,6 +76,18 @@ export const adminPromotedMessagesApi = createApi({
                 'AdminPromotedMessages',
             ],
         }),
+        // Refund a captured promotion in full; stops it if still running (Super Admin)
+        refundPromotedMessage: builder.mutation<PromotedMessageDetail, PromotionReasonRequest>({
+            query: (request) => ({
+                url: '/admin/promoted-messages/refund',
+                method: 'POST',
+                body: request,
+            }),
+            invalidatesTags: (result, error, request) => [
+                {type: 'AdminPromotedMessages', id: request.promotionId},
+                'AdminPromotedMessages',
+            ],
+        }),
         // Get Ban Promotions Summary (Staff) — counts + release/refund totals for the ban form
         getBanPromotionsSummary: builder.query<BanPromotionsSummary, number>({
             query: (userId) => ({
@@ -110,6 +122,7 @@ export const {
     useApprovePromotedMessageMutation,
     useDenyPromotedMessageMutation,
     useCancelPromotedMessageMutation,
+    useRefundPromotedMessageMutation,
     useGetBanPromotionsSummaryQuery,
     useGetPromotedRevenueSummaryQuery,
     useGetPromotedRevenueDailyQuery,

@@ -21,12 +21,14 @@ interface PromotionReasonForm {
 
 export type PromotionReasonMode =
     | "deny" | "cancel-pending" | "cancel-approved" | "request-cancel"
-    | "room-deny" | "room-cancel-pending" | "room-cancel-approved" | "room-request-cancel";
+    | "room-deny" | "room-cancel-pending" | "room-cancel-approved" | "room-request-cancel"
+    | "refund" | "room-refund" | "ad-stop" | "ad-refund" | "vip-refund";
 
 interface PromotionReasonModalProps {
     // Admin: deny (PENDING), cancel-pending (hold released), cancel-approved
     // (promotion stopped, NO refund). User: request-cancel (PENDING only).
     // The room-* variants are the same actions for room promotions ($2.50).
+    // Admin on other purchases: ad-stop (NO refund). Super admin: the *-refund modes.
     mode: PromotionReasonMode;
     onSubmit: (reason: string) => void;
     disabled?: boolean;
@@ -101,6 +103,46 @@ const MODE_CONFIG: Record<PromotionReasonMode, {
             "accepts your request.",
         confirmLabel: "Submit Request",
         placeholder: "Tell us why you want this promotion canceled...",
+    },
+    "refund": {
+        triggerLabel: "Refund",
+        title: "Refund Promotion",
+        description: "This refunds the full $0.50 to the user's card and cannot be undone. If the promotion is " +
+            "still running, it is stopped. A reason is required.",
+        confirmLabel: "Refund in Full",
+        placeholder: "Enter a detailed reason for this refund...",
+    },
+    "room-refund": {
+        triggerLabel: "Refund",
+        title: "Refund Room Promotion",
+        description: "This refunds the full $2.50 to the user's card and cannot be undone. If the promotion is " +
+            "still running, it is stopped. A reason is required.",
+        confirmLabel: "Refund in Full",
+        placeholder: "Enter a detailed reason for this refund...",
+    },
+    "ad-stop": {
+        triggerLabel: "Stop Ad",
+        title: "Stop Ad",
+        description: "This stops the ad immediately, so it is no longer shown to anyone. The captured payment " +
+            "will NOT be refunded. A reason is required.",
+        confirmLabel: "Stop Ad",
+        placeholder: "Enter a detailed reason for stopping this ad...",
+    },
+    "ad-refund": {
+        triggerLabel: "Refund",
+        title: "Refund Ad",
+        description: "This refunds the full payment to the user's card and cannot be undone. If the ad is still " +
+            "running, it is stopped. A reason is required.",
+        confirmLabel: "Refund in Full",
+        placeholder: "Enter a detailed reason for this refund...",
+    },
+    "vip-refund": {
+        triggerLabel: "Refund",
+        title: "Refund VIP Payment",
+        description: "This refunds this payment to the user's card and cannot be undone. VIP access stays until " +
+            "the paid period ends. A reason is required.",
+        confirmLabel: "Refund in Full",
+        placeholder: "Enter a detailed reason for this refund...",
     },
 };
 

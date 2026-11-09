@@ -3,11 +3,14 @@ import {ReportCaseSummary} from "@/models/ReportCaseSummary";
 import {ReportCase} from "@/models/ReportCase";
 import {Message} from "@/models/message";
 import {createEmptyPaginatedResponse} from "@/lib/utils";
-import {createSlice} from "@reduxjs/toolkit";
+import {createSlice, isFulfilled} from "@reduxjs/toolkit";
 import {
+    assignCaseThunk,
+    claimCaseThunk,
     fetchReportedMessageSurroundingMessagesThunk,
     getReportCasesThunk,
     getReportCaseThunk,
+    releaseCaseThunk,
     resolveCaseThunk
 } from "@/redux/report-cases/reportCasesThunk";
 
@@ -49,6 +52,9 @@ const reportCasesSlice = createSlice({
                 }
             )
             .addCase(resolveCaseThunk.fulfilled, (state, action) => {
+                state.selectedReportCase.reportCase = action.payload;
+            })
+            .addMatcher(isFulfilled(claimCaseThunk, releaseCaseThunk, assignCaseThunk), (state, action) => {
                 state.selectedReportCase.reportCase = action.payload;
             });
 

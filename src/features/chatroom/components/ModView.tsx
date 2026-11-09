@@ -9,7 +9,8 @@ import {setActiveRightSidebar} from "@/redux/settings/settingsSlice";
 import BanRequestForm from "@/features/chatroom/components/BanRequestForm";
 import {useModPanelHook} from "@/lib/hooks/useModPanelHook";
 import {useThunk} from "@/lib/hooks/useThunk";
-import {banUserThunk, revokeBanThunk, warnUserThunk} from "@/redux/modPanel/modPanelThunk";
+import {banUserThunk, warnUserThunk} from "@/redux/modPanel/modPanelThunk";
+import {useRevokeBanDialog} from "@/lib/hooks/useRevokeBanDialog";
 import {toast} from "sonner";
 import WarnUserComponent from "@/features/chatroom/components/WarnUserComponent";
 import {useRoleAccess} from "@/lib/hooks/useRoleAccess";
@@ -37,7 +38,7 @@ const ModView: React.FC<ModViewProps> = ({
         membershipLoading, membershipError, refreshMembership,
     } = useModPanelHook(isOpen);
     const roleAccess = useRoleAccess();
-    const [revokeBan, revokeBanLoading, revokeBanError] = useThunk(revokeBanThunk);
+    const openRevokeBanDialog = useRevokeBanDialog();
     const [warnUser, warnUserLoading, warnUserError] = useThunk(warnUserThunk);
     const [banUser, banUserLoading, banUserError] = useThunk(banUserThunk);
     const isMobile = useIsMobile();
@@ -93,7 +94,7 @@ const ModView: React.FC<ModViewProps> = ({
                                 <button
                                     onClick={() => {
                                         if (userId) {
-                                            revokeBan(userId);
+                                            openRevokeBanDialog(userId, user?.username ?? "This user");
                                         }
                                     }}
                                     className="glass-surface flex h-full w-full flex-col items-center justify-center rounded-md p-3 transition-colors"

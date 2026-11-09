@@ -11,7 +11,9 @@ import {
     useCancelPromotedMessageMutation,
     useDenyPromotedMessageMutation,
     useGetPromotedMessageByIdQuery,
+    useRefundPromotedMessageMutation,
 } from "@ads/store/services/adminPromotedMessagesApi";
+import {useUser} from "@ads/hooks/use-user";
 import {PromotedMessageStatus} from "@ads/models/promoted-message";
 import {toast} from "sonner";
 
@@ -24,10 +26,13 @@ export default function AdminPromotedMessageDetailsPage() {
     const [approvePromotion, {isLoading: isApproving}] = useApprovePromotedMessageMutation();
     const [denyPromotion, {isLoading: isDenying}] = useDenyPromotedMessageMutation();
     const [cancelPromotion, {isLoading: isCanceling}] = useCancelPromotedMessageMutation();
+    const [refundPromotion, {isLoading: isRefunding}] = useRefundPromotedMessageMutation();
+    const {isSuperAdmin} = useUser();
 
     const isPending = data?.status === PromotedMessageStatus.PENDING;
     const isApproved = data?.status === PromotedMessageStatus.APPROVED;
-    const isMutating = isApproving || isDenying || isCanceling;
+    const canRefund = isSuperAdmin && data?.receiptStatus === "CAPTURED";
+    const isMutating = isApproving || isDenying || isCanceling || isRefunding;
 
     const handleApprove = async () => {
         if (!data) return;
@@ -58,6 +63,16 @@ export default function AdminPromotedMessageDetailsPage() {
                 : "Promotion canceled. The payment hold has been released.");
         } catch {
             toast.error("Failed to cancel the promotion. Please try again.");
+        }
+    };
+
+    const handleRefund = async (reason: string) => {
+        if (!data) return;
+        try {
+            await refundPromotion({promotionId: data.id, reason}).unwrap();
+            toast.success("Promotion payment refunded.");
+        } catch {
+            toast.error("Failed to refund the promotion. Please try again.");
         }
     };
 
@@ -138,6 +153,9 @@ export default function AdminPromotedMessageDetailsPage() {
                                     onSubmit={handleCancel}
                                     disabled={isMutating}
                                 />
+                            )}
+                            {canRefund && (
+                                <PromotionReasonModal mode="refund" onSubmit={handleRefund} disabled={isMutating}/>
                             )}
                             <ActionButton onClick={handleGoToMessage} variant="default"
                                           className="bg-transparent border border-indigo-200 text-indigo-700 hover:bg-indigo-50 dark:border-indigo-800 dark:text-indigo-400 dark:hover:bg-indigo-950/50 shadow-none">

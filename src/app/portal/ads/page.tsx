@@ -60,6 +60,7 @@ function AdsPageContent() {
         pending: statusCountsData?.find(sc => sc.status === AdStatus.PENDING)?.count || 0,
         completed: statusCountsData?.find(sc => sc.status === AdStatus.COMPLETED)?.count || 0,
         rejected: statusCountsData?.find(sc => sc.status === AdStatus.REJECTED)?.count || 0,
+        stopped: statusCountsData?.find(sc => sc.status === AdStatus.STOPPED)?.count || 0,
     };
 
     return (

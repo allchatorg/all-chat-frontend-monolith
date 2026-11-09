@@ -48,10 +48,17 @@ const statusConfig: Record<AdStatus, {
         variant: "destructive",
         href: "/portal/admin/ads?status=REJECTED",
     },
+    [AdStatus.STOPPED]: {
+        label: "Stopped Ads",
+        buttonLabel: "View",
+        description: "Ads stopped by staff or a ban",
+        variant: "destructive",
+        href: "/portal/admin/ads?status=STOPPED",
+    },
 };
 
 // Define the order in which to display the status cards
-const statusDisplayOrder: AdStatus[] = [AdStatus.PENDING, AdStatus.ACTIVE, AdStatus.COMPLETED, AdStatus.REJECTED];
+const statusDisplayOrder: AdStatus[] = [AdStatus.PENDING, AdStatus.ACTIVE, AdStatus.COMPLETED, AdStatus.REJECTED, AdStatus.STOPPED];
 
 export function AdminSectionCards() {
     const {data: statusCounts, isLoading: isStatusLoading, isError: isStatusError} = useGetAdStatusCountsQuery();

@@ -1,13 +1,15 @@
 import {AppNotification} from "@/models/AppNotification";
+import {ROUTES} from "@/routes";
 
 /**
- * referenceType → portal detail route. Notifications without a resolvable
+ * referenceType → detail route. Notifications without a resolvable
  * link (null reference, unknown type) return null and open the details modal.
  */
 const REFERENCE_ROUTES: Record<string, (id: number) => string> = {
     AD: (id) => `/portal/ads/${id}`,
     PROMOTED_MESSAGE: (id) => `/portal/promoted-messages/${id}`,
     ROOM_PROMOTION: (id) => `/portal/room-promotions/${id}`,
+    REPORT_CASE: (id) => `${ROUTES.REPORTS}/${id}`,
 };
 
 export const getNotificationRoute = (notification: AppNotification): string | null => {

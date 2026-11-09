@@ -111,7 +111,7 @@ export default function BanRequestForm({
         if (data.deleteMessages) {
             const deleteDurationSelection = form.getValues("deleteMessagesDurationSelection");
             if (deleteDurationSelection === "all") {
-                banRequest.deleteMessagesDuration = undefined;
+                banRequest.deleteAllMessages = true;
             } else if (deleteDurationSelection === "other") {
                 const customDeleteDuration = form.getValues("customDeleteDuration");
                 banRequest.deleteMessagesDuration = customDeleteDuration ? customDeleteDuration * 60 : undefined;
@@ -310,6 +310,7 @@ export default function BanRequestForm({
                         <FormField
                             control={form.control}
                             name="deleteMessagesDurationSelection"
+                            rules={{required: "Choose which messages to delete"}}
                             render={({field}) => (
                                 <FormItem>
                                     <FormLabel>Delete Messages From</FormLabel>
@@ -339,6 +340,10 @@ export default function BanRequestForm({
                         <FormField
                             control={form.control}
                             name="customDeleteDuration"
+                            rules={{
+                                required: "Enter how many minutes of messages to delete",
+                                min: {value: 1, message: "Enter at least 1 minute"}
+                            }}
                             render={({field}) => (
                                 <FormItem>
                                     <FormLabel>Delete Messages Duration (minutes)</FormLabel>
