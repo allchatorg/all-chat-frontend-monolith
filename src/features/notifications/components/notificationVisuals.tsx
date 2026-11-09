@@ -124,6 +124,16 @@ const NOTIFICATION_VISUALS: Record<NotificationType, NotificationVisual> = {
         iconClass: "text-blue-500",
         bgClass: "bg-blue-500/15",
     },
+    [NotificationType.PURCHASE_REFUND_PENDING]: {
+        icon: Clock3,
+        iconClass: "text-blue-500",
+        bgClass: "bg-blue-500/15",
+    },
+    [NotificationType.PURCHASE_REFUND_FAILED]: {
+        icon: XCircle,
+        iconClass: "text-red-500",
+        bgClass: "bg-red-500/15",
+    },
     [NotificationType.MODERATOR_ACCEPTED]: {
         icon: ShieldCheck,
         iconClass: "text-emerald-500",

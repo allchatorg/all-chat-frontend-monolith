@@ -152,7 +152,7 @@ export default function PromotedMessageDetails({data, className, isAdmin = false
                                         : "-"}
                                     {data.receiptStatus && (
                                         <span className="ml-2 text-xs font-normal uppercase text-muted-foreground">
-                                            {data.receiptStatus}
+                                            {data.receiptStatus.replace(/_/g, " ")}
                                         </span>
                                     )}
                                 </p>

@@ -48,7 +48,7 @@ export interface PromotedMessageDetail extends PromotedMessage {
     // Payment info
     cardBrand?: string | null;
     cardLast4?: string | null;
-    receiptStatus?: string | null; // AUTHORIZED / CAPTURED / RELEASED / REFUNDED
+    receiptStatus?: string | null; // AUTHORIZED / CAPTURED / RELEASED / REFUND_PENDING / REFUNDED / REFUND_FAILED
     // Owner-submitted cancellation request (PENDING promotions only)
     cancelRequestReason?: string | null;
     cancelRequestedAt?: string | null;

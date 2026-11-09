@@ -84,8 +84,10 @@ export default function AdminAdDetailsPage() {
         if (!adData) return;
 
         try {
-            await refundAd({adId: adData.id, reason}).unwrap();
-            toast.success("Ad payment refunded.");
+            const refunded = await refundAd({adId: adData.id, reason}).unwrap();
+            toast.success(refunded.receiptStatus === "REFUND_PENDING"
+                ? "Refund requested. Stripe has not confirmed it yet."
+                : "Ad payment refunded.");
         } catch {
             toast.error("Failed to refund the ad. Please try again.");
         }

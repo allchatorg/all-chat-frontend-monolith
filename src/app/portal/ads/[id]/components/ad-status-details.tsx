@@ -247,6 +247,12 @@ export default function AdStatusDetails({data, className, isAdmin = false}: AdSt
                                 {data.receiptStatus === "REFUNDED" && (
                                     <p className="text-sm text-muted-foreground">Refunded</p>
                                 )}
+                                {data.receiptStatus === "REFUND_PENDING" && (
+                                    <p className="text-sm text-muted-foreground">Refund pending</p>
+                                )}
+                                {data.receiptStatus === "REFUND_FAILED" && (
+                                    <p className="text-sm text-muted-foreground">Refund failed</p>
+                                )}
                             </div>
                         </div>
                     </div>

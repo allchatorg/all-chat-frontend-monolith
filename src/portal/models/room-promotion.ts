@@ -39,7 +39,7 @@ export interface RoomPromotionDetail extends RoomPromotion {
     // Payment info
     cardBrand?: string | null;
     cardLast4?: string | null;
-    receiptStatus?: string | null; // AUTHORIZED / CAPTURED / CANCELLED / REFUNDED
+    receiptStatus?: string | null; // AUTHORIZED / CAPTURED / CANCELLED / REFUND_PENDING / REFUNDED / REFUND_FAILED
     // Owner-submitted cancellation request (PENDING promotions only)
     cancelRequestReason?: string | null;
     cancelRequestedAt?: string | null;

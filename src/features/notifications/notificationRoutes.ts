@@ -9,6 +9,10 @@ const REFERENCE_ROUTES: Record<string, (id: number) => string> = {
     AD: (id) => `/portal/ads/${id}`,
     PROMOTED_MESSAGE: (id) => `/portal/promoted-messages/${id}`,
     ROOM_PROMOTION: (id) => `/portal/room-promotions/${id}`,
+    // Staff notices about a purchase open its review page, not the owner's.
+    ADMIN_AD: (id) => `/portal/admin/ads/${id}`,
+    ADMIN_PROMOTED_MESSAGE: (id) => `/portal/admin/promoted-messages/${id}`,
+    ADMIN_ROOM_PROMOTION: (id) => `/portal/admin/room-promotions/${id}`,
     REPORT_CASE: (id) => `${ROUTES.REPORTS}/${id}`,
 };
 

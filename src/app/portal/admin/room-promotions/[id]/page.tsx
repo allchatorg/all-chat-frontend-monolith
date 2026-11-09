@@ -69,8 +69,10 @@ export default function AdminRoomPromotionDetailsPage() {
     const handleRefund = async (reason: string) => {
         if (!data) return;
         try {
-            await refundPromotion({promotionId: data.id, reason}).unwrap();
-            toast.success("Promotion payment refunded.");
+            const refunded = await refundPromotion({promotionId: data.id, reason}).unwrap();
+            toast.success(refunded.receiptStatus === "REFUND_PENDING"
+                ? "Refund requested. Stripe has not confirmed it yet."
+                : "Promotion payment refunded.");
         } catch {
             toast.error("Failed to refund the promotion. Please try again.");
         }

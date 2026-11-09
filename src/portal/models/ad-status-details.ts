@@ -18,5 +18,5 @@ export interface AdStatusDetails {
     cardLast4: string;
     // Why the ad was rejected or stopped
     rejectionReason?: string;
-    receiptStatus?: string | null; // AUTHORIZED / CAPTURED / CANCELLED / REFUNDED
+    receiptStatus?: string | null; // AUTHORIZED / CAPTURED / CANCELLED / REFUND_PENDING / REFUNDED / REFUND_FAILED
 }
