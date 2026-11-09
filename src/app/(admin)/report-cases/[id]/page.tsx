@@ -43,6 +43,7 @@ import {BanRequest} from "@/models/BanRequest";
 import {format} from "date-fns";
 import {useRoleAccess} from "@/lib/hooks/useRoleAccess";
 import {selectUser} from "@/redux/user/userSelectors";
+import {describeBan, useActiveBan} from "@/lib/hooks/useActiveBan";
 import {canActOn} from "@/models/Role";
 import {isCsamReportCase} from "@/lib/reportUtils";
 import {AuditLogType, NOT_CSAM_ACTION} from "@/models/AuditLog";
@@ -90,6 +91,8 @@ export default function Page() {
     const hasUnderageReport = (selectedReportCase?.reportCase?.reports ?? [])
         .some(report => report.reportType === ReportType.UNDERAGE);
     const reportedMessage = selectedReportCase?.reportCase?.message;
+    // Looked up again after each action on the case, since one of them may have been a ban.
+    const reportedUserBan = useActiveBan(reportedMessage?.senderId, selectedReportCase?.reportCase?.auditLogs?.length);
     const reportedUserIdStatus = reportedMessage?.senderIdVerificationStatus ?? 'NONE';
     const idVerificationDisabled = reportedUserIdStatus === 'REQUIRED'
         || reportedUserIdStatus === 'PENDING'
@@ -500,6 +503,14 @@ export default function Page() {
                             </AlertDescription>
                         </Alert>
                     )}
+                    {!isResolved && reportedUserBan && (
+                        <Alert className="border-amber-200 bg-amber-50">
+                            <AlertDescription className="text-amber-800">
+                                {reportedMessage?.senderUsername} is already banned {describeBan(reportedUserBan)}.
+                                Another ban would replace that one.
+                            </AlertDescription>
+                        </Alert>
+                    )}
                     {isResolved ? (
                         // Show resolved banner and navigation only
                         <div className="space-y-3">
@@ -590,7 +601,7 @@ export default function Page() {
                             )}
                             <ActionButton
                                 icon={<Ban className="h-5 w-5 text-red-500"/>}
-                                label="Ban User"
+                                label={reportedUserBan ? "Replace Ban" : "Ban User"}
                                 className="p-2 text-[10px] sm:p-3 sm:text-xs"
                                 onClick={() => {
                                     const userId = selectedReportCase.reportCase.message.senderId;

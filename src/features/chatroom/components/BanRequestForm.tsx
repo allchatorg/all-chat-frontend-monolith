@@ -20,8 +20,11 @@ import {Input} from "@/components/ui/input";
 import {BanTypeEnum} from "@/models/BanTypeEnum";
 import {BanRequest} from "@/models/BanRequest";
 import {ReportType} from "@/models/ReportTypeEnum";
-import {getReportTypeLabel} from "@/lib/reportUtils";
+import {getReportTypeLabel, isCsamReportType} from "@/lib/reportUtils";
 import {ReportTypeUtils} from "@/lib/utils";
+import {Alert, AlertDescription} from "@/components/ui/alert";
+import {Ban} from "@/models/Ban";
+import {describeBan, useActiveBan} from "@/lib/hooks/useActiveBan";
 import BanAdsPurchaseInfo from "./BanAdsPurchaseInfo";
 
 const durationOptions = ["1h", "1d", "7d", "30d"];
@@ -47,17 +50,52 @@ interface BanRequestFormProps {
     isSubmitting?: boolean;
 }
 
-export default function BanRequestForm({
-                                           userId,
-                                           onClose,
-                                           reportCaseId,
-                                           defaultReportType,
-                                           onSubmit,
-                                           isSubmitting = false
-                                       }: BanRequestFormProps) {
-    const initialReportType = defaultReportType && isSelectableReportType(defaultReportType)
+// The form's defaults and choices depend on the ban the user already has, so it opens once that is known.
+export default function BanRequestForm(props: BanRequestFormProps) {
+    const currentBan = useActiveBan(Number(props.userId));
+
+    if (currentBan === undefined) {
+        return <div className="p-2 w-[80vw] md:w-[500px] text-sm text-muted-foreground">Loading...</div>;
+    }
+
+    return <BanRequestFormFields {...props} currentBan={currentBan}/>;
+}
+
+function BanRequestFormFields({
+                                  userId,
+                                  onClose,
+                                  reportCaseId,
+                                  defaultReportType,
+                                  onSubmit,
+                                  isSubmitting = false,
+                                  currentBan
+                              }: BanRequestFormProps & { currentBan: Ban | null }) {
+    // A new ban replaces the current one and may not weaken it; the server refuses the same choices.
+    const currentIsPermanent = currentBan?.type === BanTypeEnum.PERMANENT;
+    const currentIsCsam = currentBan !== null && isCsamReportType(currentBan.reportType);
+    const remainingSeconds = currentBan && !currentIsPermanent && currentBan.expiresAt
+        ? Math.max(0, (new Date(currentBan.expiresAt).getTime() - Date.now()) / 1000)
+        : 0;
+    const isAllowedReportType = (reportType: ReportType) => !currentIsCsam || isCsamReportType(reportType);
+    const allowedStandaloneReportTypes = standaloneReportTypes.filter(isAllowedReportType);
+    const allowedGroupedReportTypes = groupedReportTypes
+        .map((group) => ({...group, options: group.options.filter(isAllowedReportType)}))
+        .filter((group) => group.options.length > 0);
+
+    const allowedReportTypes = [
+        ...allowedStandaloneReportTypes,
+        ...allowedGroupedReportTypes.flatMap((group) => group.options)
+    ];
+
+    const preferredReportType = defaultReportType && isSelectableReportType(defaultReportType)
         ? defaultReportType
         : ReportType.SPAMMING_ADVERTISING_BEGGING;
+    // The current ban's own type may be a group heading, which the list can't offer: then staff choose.
+    const initialReportType = allowedReportTypes.includes(preferredReportType)
+        ? preferredReportType
+        : currentBan && allowedReportTypes.includes(currentBan.reportType)
+            ? currentBan.reportType
+            : undefined;
 
     const form = useForm<BanRequest & {
         durationSelection?: string;
@@ -73,6 +111,8 @@ export default function BanRequestForm({
             deleteMessages: false,
         }
     });
+
+    const minimumMinutes = Math.max(1, Math.ceil(remainingSeconds / 60));
 
     const watchBanType = form.watch("banType");
     const watchDeleteMessages = form.watch("deleteMessages");
@@ -152,6 +192,19 @@ export default function BanRequestForm({
             <Form {...form}>
                 <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
 
+                    {currentBan && (
+                        <Alert className="border-amber-200 bg-amber-50">
+                            <AlertDescription className="space-y-1 text-amber-800">
+                                <p className="font-medium">Already banned {describeBan(currentBan)}.</p>
+                                {currentBan.description && <p>Reason given: {currentBan.description}</p>}
+                                <p>
+                                    A new ban replaces this one and closes any open appeal on it. It can't be
+                                    shorter or weaker: to shorten a ban, revoke it first.
+                                </p>
+                            </AlertDescription>
+                        </Alert>
+                    )}
+
                     <BanAdsPurchaseInfo userId={userId} banType={watchBanType}
                                         deleteMessagesEnabled={watchDeleteMessages}/>
 
@@ -168,7 +221,9 @@ export default function BanRequestForm({
                                         </SelectTrigger>
                                     </FormControl>
                                     <SelectContent>
-                                        {Object.values(BanTypeEnum).map((type) => (
+                                        {Object.values(BanTypeEnum)
+                                            .filter((type) => !(currentIsPermanent && type === BanTypeEnum.TEMPORARY))
+                                            .map((type) => (
                                             <SelectItem key={type} value={type}>
                                                 {type}
                                             </SelectItem>
@@ -196,7 +251,8 @@ export default function BanRequestForm({
                                         </FormControl>
                                         <SelectContent>
                                             {durationOptions.map((option) => (
-                                                <SelectItem key={option} value={option}>
+                                                <SelectItem key={option} value={option}
+                                                            disabled={convertDurationToMinutes(option) < remainingSeconds}>
                                                     {option}
                                                 </SelectItem>
                                             ))}
@@ -215,7 +271,12 @@ export default function BanRequestForm({
                             name="customDuration"
                             rules={{
                                 required: "Enter how many minutes the ban lasts",
-                                min: {value: 1, message: "Enter at least 1 minute"}
+                                min: {
+                                    value: minimumMinutes,
+                                    message: minimumMinutes > 1
+                                        ? `The current ban runs longer. Enter at least ${minimumMinutes} minutes`
+                                        : "Enter at least 1 minute"
+                                }
                             }}
                             render={({field}) => (
                                 <FormItem>
@@ -240,6 +301,7 @@ export default function BanRequestForm({
                     <FormField
                         control={form.control}
                         name="reportType"
+                        rules={{required: "Choose a report type"}}
                         render={({field}) => (
                             <FormItem>
                                 <FormLabel>Report Type</FormLabel>
@@ -250,18 +312,20 @@ export default function BanRequestForm({
                                         </SelectTrigger>
                                     </FormControl>
                                     <SelectContent className="max-h-80">
-                                        <SelectGroup>
-                                            <SelectLabel>Report Types</SelectLabel>
-                                            {standaloneReportTypes.map((reportType) => (
-                                                <SelectItem key={reportType} value={reportType}>
-                                                    {getReportTypeLabel(reportType)}
-                                                </SelectItem>
-                                            ))}
-                                        </SelectGroup>
+                                        {allowedStandaloneReportTypes.length > 0 && (
+                                            <SelectGroup>
+                                                <SelectLabel>Report Types</SelectLabel>
+                                                {allowedStandaloneReportTypes.map((reportType) => (
+                                                    <SelectItem key={reportType} value={reportType}>
+                                                        {getReportTypeLabel(reportType)}
+                                                    </SelectItem>
+                                                ))}
+                                            </SelectGroup>
+                                        )}
 
-                                        {groupedReportTypes.map((group) => (
+                                        {allowedGroupedReportTypes.map((group, index) => (
                                             <React.Fragment key={group.label}>
-                                                <SelectSeparator/>
+                                                {(index > 0 || allowedStandaloneReportTypes.length > 0) && <SelectSeparator/>}
                                                 <SelectGroup>
                                                     <SelectLabel>{group.label}</SelectLabel>
                                                     {group.options.map((reportType) => (
@@ -371,7 +435,7 @@ export default function BanRequestForm({
                     )}
 
                     <Button type="submit" disabled={isSubmitting}>
-                        {isSubmitting ? 'Submitting...' : 'Submit Ban'}
+                        {isSubmitting ? 'Submitting...' : currentBan ? 'Replace Ban' : 'Submit Ban'}
                     </Button>
                 </form>
             </Form>
