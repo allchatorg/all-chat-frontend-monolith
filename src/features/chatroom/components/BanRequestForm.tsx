@@ -2,7 +2,7 @@
 
 import React from "react";
 import {useForm} from "react-hook-form";
-import {Form, FormControl, FormField, FormItem, FormLabel, FormMessage} from "@/components/ui/form";
+import {Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage} from "@/components/ui/form";
 import {Textarea} from "@/components/ui/textarea";
 import {Button} from "@/components/ui/button";
 import {Switch} from "@/components/ui/switch";
@@ -351,9 +351,12 @@ function BanRequestFormFields({
                         render={({field}) => (
                             <FormItem>
                                 <FormLabel>Ban Description</FormLabel>
+                                <FormDescription>
+                                    The banned user sees this text word for word.
+                                </FormDescription>
                                 <FormControl>
                                     <Textarea
-                                        placeholder="Add moderator context for this ban..."
+                                        placeholder="Tell the user why they are banned..."
                                         className="min-h-24"
                                         {...field}
                                     />

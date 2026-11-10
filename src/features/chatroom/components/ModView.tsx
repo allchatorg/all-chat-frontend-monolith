@@ -15,6 +15,7 @@ import {toast} from "sonner";
 import WarnUserComponent from "@/features/chatroom/components/WarnUserComponent";
 import {useRoleAccess} from "@/lib/hooks/useRoleAccess";
 import {canActOn, Role} from '@/models/Role';
+import {BanRequest} from "@/models/BanRequest";
 import {Button} from "@/components/ui/button";
 import {useIsMobile} from "@/lib/hooks/useIsMobile";
 import {StaffMembershipBadge} from "@/components/StaffMembershipBadge";
@@ -71,6 +72,19 @@ const ModView: React.FC<ModViewProps> = ({
         close();
     };
 
+    // Rethrows so the ban form stays open when the ban was refused.
+    const handleBan = async (banRequest: BanRequest) => {
+        try {
+            await banUser(banRequest);
+            toast.success("User banned successfully");
+        } catch (error) {
+            toast.error(`Failed to ban user: ${error instanceof Error ? error.message : "Unknown error"}`);
+            throw error;
+        }
+    };
+
+    const canActOnUser = canActOn(roleAccess.currentRole, user ? user.role : Role.UNCLAIMED_USER);
+
     return (
         <div className="glass-panel flex h-full min-h-0 w-full flex-col rounded-xl border">
             {showHeader && <div className="flex shrink-0 items-center justify-between border-b p-4">
@@ -88,7 +102,7 @@ const ModView: React.FC<ModViewProps> = ({
             </div>}
             <div className="shrink-0 border-b p-4">
                 <div className="flex gap-2 mb-3">
-                    {canActOn(roleAccess.currentRole, user ? user.role : Role.UNCLAIMED_USER) &&
+                    {canActOnUser &&
                         <div className="flex-1">
                             {user?.banned ? (
                                 <button
@@ -108,7 +122,7 @@ const ModView: React.FC<ModViewProps> = ({
                                         open(
                                             <div className="w-full">
                                                 {userId ? (
-                                                    <BanRequestForm onSubmit={banUser} userId={userId.toString()}
+                                                    <BanRequestForm onSubmit={handleBan} userId={userId.toString()}
                                                                     onClose={close}/>
                                                 ) : (
                                                     <div className="text-destructive">No user selected</div>
@@ -130,7 +144,8 @@ const ModView: React.FC<ModViewProps> = ({
                         <span className="text-xs font-medium text-muted-foreground">Copy ID</span>
                     </button>
 
-                    <button
+                    {/* The server refuses a warning on a user the viewer doesn't outrank. */}
+                    {canActOnUser && <button
                         onClick={() => {
                             open(
                                 <WarnUserComponent onSubmit={handleWarning}/>
@@ -139,7 +154,7 @@ const ModView: React.FC<ModViewProps> = ({
                         className="glass-surface flex flex-1 flex-col items-center justify-center rounded-md p-3 transition-colors">
                         <Flag className="mb-1 h-5 w-5 text-orange-500"/>
                         <span className="text-xs font-medium text-muted-foreground">Warning</span>
-                    </button>
+                    </button>}
                 </div>
 
                 <div className="flex gap-2">

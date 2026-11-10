@@ -49,7 +49,7 @@ export default function Bans() {
         <div className="flex h-full w-full flex-col px-2 sm:px-4 space-y-2 sm:space-y-4">
             <AdminPageHeader
                 title="Ban List"
-                description="Bans are by default account bans and IP bans. Use the search to find specific users or review active restrictions."
+                description="Bans block the account, not the IP address: the user's last network only gets extra sign-up checks. Use the search to find specific users or review active restrictions."
                 icon={Shield}
             />
 
