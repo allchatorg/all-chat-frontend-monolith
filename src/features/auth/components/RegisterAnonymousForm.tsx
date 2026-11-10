@@ -20,6 +20,7 @@ import {useDialog} from "@/components/providers/DialogProvider";
 import PrivacyPolicy from "@/components/PrivacyPolicy";
 import TermsOfService from "@/components/TermsOfService";
 import {Turnstile, TurnstileInstance} from '@marsidev/react-turnstile'
+import {usernameValidationRules} from "@/features/auth/lib/validation";
 
 interface ApiError {
     status: number;
@@ -114,7 +115,7 @@ export function RegisterAnonymousForm({
                                 id="username"
                                 placeholder="Enter your username"
                                 disabled={isSubmitting}
-                                {...register("username", {required: "Username is required"})}
+                                {...register("username", usernameValidationRules)}
                             />
                             {errors.username && (
                                 <p className="text-sm text-red-500">{errors.username.message}</p>

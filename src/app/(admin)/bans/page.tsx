@@ -11,7 +11,6 @@ import {searchActiveBansThunk} from "@/redux/admin/adminThunk";
 import {useSelector} from "react-redux";
 import {selectActiveBans} from "@/redux/admin/adminSelector";
 import {BanCard} from "@/app/(admin)/bans/components/BanCard";
-import {revokeBanThunk} from "@/redux/modPanel/modPanelThunk";
 import {AdminPageHeader} from "@/components/AdminPageHeader";
 
 const PAGE_SIZE = 10;
@@ -19,7 +18,6 @@ const DEBOUNCE_DELAY = 500;
 
 export default function Bans() {
     const [fetchActiveBans, isLoading, error] = useThunk(searchActiveBansThunk);
-    const [revokeBan, revokeBanIsLoading, revokeBanError] = useThunk(revokeBanThunk);
 
     const {content = [], totalPages = 0, number: pageIndex = 0, totalElements} = useSelector(selectActiveBans);
 
@@ -51,7 +49,7 @@ export default function Bans() {
         <div className="flex h-full w-full flex-col px-2 sm:px-4 space-y-2 sm:space-y-4">
             <AdminPageHeader
                 title="Ban List"
-                description="Bans are by default account bans and IP bans. Use the search to find specific users or review active restrictions."
+                description="Bans block the account, not the IP address: the user's last network only gets extra sign-up checks. Use the search to find specific users or review active restrictions."
                 icon={Shield}
             />
 
@@ -107,7 +105,7 @@ export default function Bans() {
                                 </div>
                             ) : (
                                 content.map((ban) => (
-                                    <BanCard key={ban.id} ban={ban} revokeBan={revokeBan}/>
+                                    <BanCard key={ban.id} ban={ban}/>
                                 ))
                             )}
                         </div>

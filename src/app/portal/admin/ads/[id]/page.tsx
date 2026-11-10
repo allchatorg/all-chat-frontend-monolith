@@ -8,7 +8,15 @@ import {Badge} from "@ads/components/ui/badge";
 import {Calendar, CheckCircle, DollarSign, Loader2, Mail, Shield, TrendingUp, User} from "lucide-react";
 import {RejectAdModal} from "@/app/portal/ads/[id]/components/reject-ad-modal";
 import {useParams, useRouter} from "next/navigation";
-import {useApproveAdMutation, useGetAdByIdQuery, useRejectAdMutation} from "@ads/store/services/adminAdsApi";
+import {PromotionReasonModal} from "@ads/components/promotion-reason-modal";
+import {
+    useApproveAdMutation,
+    useGetAdByIdQuery,
+    useRefundAdMutation,
+    useRejectAdMutation,
+    useStopAdMutation,
+} from "@ads/store/services/adminAdsApi";
+import {useUser} from "@ads/hooks/use-user";
 import {useGetAdDailyStatsQuery} from "@ads/store/services/adsApi";
 import {useGetUserByIdQuery} from "@ads/store/services/adminUsersApi";
 import {AdStatus} from "@ads/models/ad";
@@ -23,12 +31,17 @@ export default function AdminAdDetailsPage() {
     const {data: statsData} = useGetAdDailyStatsQuery({id: adId});
     const [rejectAd, {isLoading: isRejecting}] = useRejectAdMutation();
     const [approveAd, {isLoading: isApproving}] = useApproveAdMutation();
+    const [stopAd, {isLoading: isStopping}] = useStopAdMutation();
+    const [refundAd, {isLoading: isRefunding}] = useRefundAdMutation();
+    const {isSuperAdmin} = useUser();
 
     const {data: userData, isLoading: isUserLoading} = useGetUserByIdQuery(adData?.userId ?? 0, {
         skip: !adData?.userId,
     });
 
     const isPending = adData?.status === AdStatus.PENDING;
+    const isActive = adData?.status === AdStatus.ACTIVE;
+    const canRefund = isSuperAdmin && adData?.receiptStatus === "CAPTURED";
 
     const handleApprove = async () => {
         if (!adData) return;
@@ -53,6 +66,30 @@ export default function AdminAdDetailsPage() {
             toast.success("Ad rejected successfully");
         } catch {
             toast.error("Failed to reject the ad. Please try again.");
+        }
+    };
+
+    const handleStop = async (reason: string) => {
+        if (!adData) return;
+
+        try {
+            await stopAd({adId: adData.id, reason}).unwrap();
+            toast.success("Ad stopped. The payment was not refunded.");
+        } catch {
+            toast.error("Failed to stop the ad. Please try again.");
+        }
+    };
+
+    const handleRefund = async (reason: string) => {
+        if (!adData) return;
+
+        try {
+            const refunded = await refundAd({adId: adData.id, reason}).unwrap();
+            toast.success(refunded.receiptStatus === "REFUND_PENDING"
+                ? "Refund requested. Stripe has not confirmed it yet."
+                : "Ad payment refunded.");
+        } catch {
+            toast.error("Failed to refund the ad. Please try again.");
         }
     };
 
@@ -127,14 +164,22 @@ export default function AdminAdDetailsPage() {
             </ActionButton>
         </>
     ) : (
-        <ActionButton
-            onClick={handleViewProfile}
-            variant="default"
-            className="bg-transparent border border-indigo-200 text-indigo-700 hover:bg-indigo-50 dark:border-indigo-800 dark:text-indigo-400 dark:hover:bg-indigo-950/50 shadow-none"
-        >
-            <User className="mr-2 h-4 w-4"/>
-            View Profile
-        </ActionButton>
+        <>
+            {isActive && (
+                <PromotionReasonModal mode="ad-stop" onSubmit={handleStop} disabled={isStopping || isRefunding}/>
+            )}
+            {canRefund && (
+                <PromotionReasonModal mode="ad-refund" onSubmit={handleRefund} disabled={isStopping || isRefunding}/>
+            )}
+            <ActionButton
+                onClick={handleViewProfile}
+                variant="default"
+                className="bg-transparent border border-indigo-200 text-indigo-700 hover:bg-indigo-50 dark:border-indigo-800 dark:text-indigo-400 dark:hover:bg-indigo-950/50 shadow-none"
+            >
+                <User className="mr-2 h-4 w-4"/>
+                View Profile
+            </ActionButton>
+        </>
     );
 
     return (

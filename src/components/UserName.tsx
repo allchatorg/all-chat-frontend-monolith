@@ -15,9 +15,10 @@ export interface UserNameProps extends Partial<FontSnapshot> {
     className?: string;
     onVipClick?: () => void;
     renderUsername?: (username: ReactNode) => ReactNode;
+    staffBadge?: ReactNode;
 }
 
-export function UserName({userId, username, vipBadgeVisible, vipBadgeRevision = 0, usernameFont, messageFont, fontRevision, className, onVipClick, renderUsername}: UserNameProps) {
+export function UserName({userId, username, vipBadgeVisible, vipBadgeRevision = 0, usernameFont, messageFont, fontRevision, className, onVipClick, renderUsername, staffBadge}: UserNameProps) {
     const fonts = useUserFonts(userId, {usernameFont, messageFont, fontRevision});
     const subscribe = useCallback((listener: () => void) => subscribeVipBadge(userId, listener), [userId]);
     const getSnapshot = useCallback(() => getVipBadge(userId), [userId]);
@@ -38,6 +39,7 @@ export function UserName({userId, username, vipBadgeVisible, vipBadgeRevision = 
     return (
         <span className={cn("inline-flex min-w-0 max-w-full items-center gap-1 align-bottom", className)}>
             {renderUsername ? renderUsername(name) : name}
+            {staffBadge}
             {visible && <VipBadge onClick={onVipClick}/>}
         </span>
     );

@@ -39,6 +39,10 @@ export const deleteMessage = async (messageId: number): Promise<void> => {
     await api.delete(CHATTING_PATH + `/messages/${messageId}`);
 };
 
+export const restoreMessage = async (messageId: number): Promise<void> => {
+    await api.post(CHATTING_PATH + `/messages/${messageId}/restore`);
+};
+
 export const editMessage = async (messageId: number, editMessageRequest: EditMessageRequest): Promise<Message> => {
     const res = await api.patch(CHATTING_PATH + `/messages/${messageId}/edit`, editMessageRequest);
     return res.data;

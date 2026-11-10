@@ -1,4 +1,12 @@
-import {AuditLogType, AuditLogUnion, getAuditLogActorLabel} from "@/models/AuditLog";
+import {
+    AuditLogType,
+    AuditLogUnion,
+    formatAuditDuration,
+    formatPurchaseAmount,
+    getAuditLogActorLabel,
+    getBanMessageDeletionLabel,
+    getPurchaseLabel
+} from "@/models/AuditLog";
 import {Badge} from "./ui/badge";
 import {BanTypeEnum} from "@/models/BanTypeEnum";
 import {
@@ -6,6 +14,7 @@ import {
     Archive,
     ArchiveRestore,
     ArrowDownCircle,
+    ArrowRightLeft,
     ArrowUpCircle,
     Ban,
     Calendar,
@@ -13,27 +22,18 @@ import {
     Clock,
     IdCard,
     MessageSquareX,
+    RotateCcw,
     Scale,
+    ShieldAlert,
     ShieldBan,
     ShieldCheck,
     ShieldX,
+    Undo2,
     User,
     UserCheck
 } from "lucide-react";
 import {Card, CardContent, CardHeader} from "./ui/card";
 import {getReportTypeLabel} from "@/lib/reportUtils";
-
-const formatDuration = (seconds: number): string => {
-    if (seconds === 0) return 'Permanent';
-
-    const days = Math.floor(seconds / 86400);
-    const hours = Math.floor((seconds % 86400) / 3600);
-    const minutes = Math.floor((seconds % 3600) / 60);
-
-    if (days > 0) return `${days} day${days > 1 ? 's' : ''}`;
-    if (hours > 0) return `${hours} hour${hours > 1 ? 's' : ''}`;
-    return `${minutes} minute${minutes > 1 ? 's' : ''}`;
-};
 
 const getActionIcon = (type: AuditLogType) => {
     const iconProps = {className: "w-5 h-5"};
@@ -49,6 +49,10 @@ const getActionIcon = (type: AuditLogType) => {
             return <User {...iconProps} className="h-5 w-5 text-blue-500 dark:text-blue-400"/>;
         case AuditLogType.WARNING:
             return <AlertTriangle {...iconProps} className="h-5 w-5 text-yellow-500 dark:text-yellow-400"/>;
+        case AuditLogType.MESSAGE_RESTORE:
+            return <Undo2 {...iconProps} className="h-5 w-5 text-teal-500 dark:text-teal-400"/>;
+        case AuditLogType.REOPEN_CASE:
+            return <RotateCcw {...iconProps} className="h-5 w-5 text-sky-500 dark:text-sky-400"/>;
         case AuditLogType.RESOLVE_CASE:
             return <CheckCircle {...iconProps} className="h-5 w-5 text-purple-500 dark:text-purple-400"/>;
         case AuditLogType.PROMOTE_ROLE:
@@ -71,6 +75,23 @@ const getActionIcon = (type: AuditLogType) => {
             return <ShieldCheck {...iconProps} className="h-5 w-5 text-green-600 dark:text-green-400"/>;
         case AuditLogType.ID_VERIFICATION_FAILED:
             return <ShieldX {...iconProps} className="h-5 w-5 text-red-600 dark:text-red-400"/>;
+        case AuditLogType.REQUEST_ELEVATION:
+            return <ShieldAlert {...iconProps} className="h-5 w-5 text-purple-600 dark:text-purple-400"/>;
+        case AuditLogType.TAKE_OVER_CASE:
+            return <ArrowRightLeft {...iconProps} className="h-5 w-5 text-sky-600 dark:text-sky-400"/>;
+        case AuditLogType.AD_APPROVE:
+        case AuditLogType.PROMOTION_APPROVE:
+            return <CheckCircle {...iconProps} className="h-5 w-5 text-green-600 dark:text-green-400"/>;
+        case AuditLogType.AD_REJECT:
+        case AuditLogType.AD_STOP:
+        case AuditLogType.PROMOTION_DENY:
+        case AuditLogType.PROMOTION_CANCEL:
+        case AuditLogType.VIP_CANCEL:
+            return <Ban {...iconProps} className="h-5 w-5 text-orange-500 dark:text-orange-400"/>;
+        case AuditLogType.AD_REFUND:
+        case AuditLogType.PROMOTION_REFUND:
+        case AuditLogType.VIP_REFUND:
+            return <Undo2 {...iconProps} className="h-5 w-5 text-blue-500 dark:text-blue-400"/>;
         default:
             return null;
     }
@@ -88,6 +109,10 @@ const getActionColor = (type: AuditLogType) => {
             return 'bg-blue-100 text-blue-800 border-blue-200 dark:bg-blue-900/30 dark:text-blue-300 dark:border-blue-800';
         case AuditLogType.WARNING:
             return 'bg-yellow-100 text-yellow-800 border-yellow-200 dark:bg-yellow-900/30 dark:text-yellow-300 dark:border-yellow-800';
+        case AuditLogType.MESSAGE_RESTORE:
+            return 'bg-teal-100 text-teal-800 border-teal-200 dark:bg-teal-900/30 dark:text-teal-300 dark:border-teal-800';
+        case AuditLogType.REOPEN_CASE:
+            return 'bg-sky-100 text-sky-800 border-sky-200 dark:bg-sky-900/30 dark:text-sky-300 dark:border-sky-800';
         case AuditLogType.RESOLVE_CASE:
             return 'bg-purple-100 text-purple-800 border-purple-200 dark:bg-purple-900/30 dark:text-purple-300 dark:border-purple-800';
         case AuditLogType.PROMOTE_ROLE:
@@ -110,6 +135,23 @@ const getActionColor = (type: AuditLogType) => {
             return 'bg-green-100 text-green-800 border-green-200 dark:bg-green-900/30 dark:text-green-300 dark:border-green-800';
         case AuditLogType.ID_VERIFICATION_FAILED:
             return 'bg-red-100 text-red-800 border-red-200 dark:bg-red-900/30 dark:text-red-300 dark:border-red-800';
+        case AuditLogType.REQUEST_ELEVATION:
+            return 'bg-purple-100 text-purple-800 border-purple-200 dark:bg-purple-900/30 dark:text-purple-300 dark:border-purple-800';
+        case AuditLogType.TAKE_OVER_CASE:
+            return 'bg-sky-100 text-sky-800 border-sky-200 dark:bg-sky-900/30 dark:text-sky-300 dark:border-sky-800';
+        case AuditLogType.AD_APPROVE:
+        case AuditLogType.PROMOTION_APPROVE:
+            return 'bg-green-100 text-green-800 border-green-200 dark:bg-green-900/30 dark:text-green-300 dark:border-green-800';
+        case AuditLogType.AD_REJECT:
+        case AuditLogType.AD_STOP:
+        case AuditLogType.PROMOTION_DENY:
+        case AuditLogType.PROMOTION_CANCEL:
+        case AuditLogType.VIP_CANCEL:
+            return 'bg-orange-100 text-orange-800 border-orange-200 dark:bg-orange-900/30 dark:text-orange-300 dark:border-orange-800';
+        case AuditLogType.AD_REFUND:
+        case AuditLogType.PROMOTION_REFUND:
+        case AuditLogType.VIP_REFUND:
+            return 'bg-blue-100 text-blue-800 border-blue-200 dark:bg-blue-900/30 dark:text-blue-300 dark:border-blue-800';
         default:
             return 'bg-gray-100 text-gray-800 border-gray-200 dark:bg-gray-800 dark:text-gray-300 dark:border-gray-700';
     }
@@ -153,12 +195,12 @@ const renderLogDetails = (log: AuditLogUnion) => {
                     {log.banDurationSeconds > 0 && (
                         <div className="flex items-center gap-2">
                             <Clock className="h-4 w-4 text-gray-500 dark:text-gray-400"/>
-                            <span className="text-sm">Duration: {formatDuration(log.banDurationSeconds)}</span>
+                            <span className="text-sm">Duration: {formatAuditDuration(log.banDurationSeconds)}</span>
                         </div>
                     )}
                     {log.deleteMessages && (
                         <div className="text-sm text-orange-600 dark:text-orange-400">
-                            Messages deleted ({formatDuration(log.deleteMessagesDurationSeconds)})
+                            {getBanMessageDeletionLabel(log)}
                         </div>
                     )}
                 </div>
@@ -191,6 +233,36 @@ const renderLogDetails = (log: AuditLogUnion) => {
                             "{log.deletedMessage.content}"
                         </span>
                     </div>
+                </div>
+            );
+
+        case AuditLogType.MESSAGE_RESTORE:
+            return (
+                <div className="space-y-2">
+                    <div className="flex items-center gap-2">
+                        <span className="text-sm font-medium">Message Author:</span>
+                        <span
+                            className="rounded bg-gray-100 px-2 py-1 font-mono text-sm dark:bg-gray-800 dark:text-gray-100">
+                            {log.restoredMessage.senderUsername}
+                        </span>
+                    </div>
+                    <div
+                        className="rounded border-l-4 border-gray-300 bg-gray-50 p-3 dark:border-gray-700 dark:bg-gray-900/50">
+                        <span className="text-sm italic text-gray-600 dark:text-gray-400">
+                            "{log.restoredMessage.content}"
+                        </span>
+                    </div>
+                </div>
+            );
+
+        case AuditLogType.REOPEN_CASE:
+            return (
+                <div className="flex items-center gap-2">
+                    <span className="text-sm font-medium">Reopened Case ID:</span>
+                    <span
+                        className="rounded bg-gray-100 px-2 py-1 font-mono text-sm dark:bg-gray-800 dark:text-gray-100">
+                        {log.reportCaseId}
+                    </span>
                 </div>
             );
 
@@ -229,6 +301,38 @@ const renderLogDetails = (log: AuditLogUnion) => {
                             </div>
                         )
                     }
+                </div>
+            );
+
+        case AuditLogType.REQUEST_ELEVATION:
+            return (
+                <div className="flex items-center gap-2">
+                    <span className="text-sm font-medium">Elevated Case ID:</span>
+                    <span
+                        className="rounded bg-gray-100 px-2 py-1 font-mono text-sm dark:bg-gray-800 dark:text-gray-100">
+                        {log.reportCaseId}
+                    </span>
+                </div>
+            );
+
+        case AuditLogType.TAKE_OVER_CASE:
+            return (
+                <div className="space-y-2">
+                    <div className="flex items-center gap-2">
+                        <span className="text-sm font-medium">Taken Over Case ID:</span>
+                        <span
+                            className="rounded bg-gray-100 px-2 py-1 font-mono text-sm dark:bg-gray-800 dark:text-gray-100">
+                            {log.reportCaseId}
+                        </span>
+                    </div>
+                    {log.description && (
+                        <div
+                            className="rounded border-l-4 border-sky-300 bg-sky-50 p-3 dark:border-sky-700 dark:bg-sky-900/10">
+                            <span className="text-sm text-sky-800 dark:text-sky-300">
+                                {log.description}
+                            </span>
+                        </div>
+                    )}
                 </div>
             );
 
@@ -419,6 +523,43 @@ const renderLogDetails = (log: AuditLogUnion) => {
                             <span
                                 className="rounded bg-gray-100 px-2 py-1 font-mono text-sm dark:bg-gray-800 dark:text-gray-100">
                                 {log.reportCaseId}
+                            </span>
+                        </div>
+                    )}
+                </div>
+            );
+
+        case AuditLogType.AD_APPROVE:
+        case AuditLogType.AD_REJECT:
+        case AuditLogType.AD_STOP:
+        case AuditLogType.AD_REFUND:
+        case AuditLogType.PROMOTION_APPROVE:
+        case AuditLogType.PROMOTION_DENY:
+        case AuditLogType.PROMOTION_CANCEL:
+        case AuditLogType.PROMOTION_REFUND:
+        case AuditLogType.VIP_CANCEL:
+        case AuditLogType.VIP_REFUND:
+            return (
+                <div className="space-y-2">
+                    {[
+                        {label: "Owner", value: log.targetUser.username},
+                        {label: "Purchase", value: getPurchaseLabel(log)},
+                        {label: "Amount", value: formatPurchaseAmount(log)},
+                        {label: "Payment", value: log.paymentStatus},
+                    ].filter((row) => row.value).map((row) => (
+                        <div key={row.label} className="flex items-center gap-2">
+                            <span className="text-sm font-medium">{row.label}:</span>
+                            <span
+                                className="rounded bg-gray-100 px-2 py-1 font-mono text-sm dark:bg-gray-800 dark:text-gray-100">
+                                {row.value}
+                            </span>
+                        </div>
+                    ))}
+                    {log.reason && (
+                        <div
+                            className="rounded border-l-4 border-orange-300 bg-orange-50 p-3 dark:border-orange-700 dark:bg-orange-900/10">
+                            <span className="text-sm text-orange-800 wrap-break-word dark:text-orange-300">
+                                {log.reason}
                             </span>
                         </div>
                     )}

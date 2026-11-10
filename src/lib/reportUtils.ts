@@ -1,5 +1,6 @@
 import {ReportType} from "@/models/ReportTypeEnum";
 import {Report} from "@/models/Report";
+import {ReportSeverity} from "@/models/ReportSeverity";
 
 export const reportTypeLabels: Record<ReportType, string> = {
     [ReportType.SPAMMING_ADVERTISING_BEGGING]: "Spamming / Advertising / Begging",
@@ -29,6 +30,59 @@ export const reportTypeLabels: Record<ReportType, string> = {
 export function getReportTypeLabel(reportType: ReportType | string): string {
     return reportTypeLabels[reportType as ReportType] ?? reportType.replace(/_/g, " ");
 }
+
+export const reportSeverityLabels: Record<ReportSeverity, string> = {
+    [ReportSeverity.P0]: "P0 — Critical",
+    [ReportSeverity.P1]: "P1 — Urgent",
+    [ReportSeverity.P2]: "P2 — Standard",
+    [ReportSeverity.P3]: "P3 — Low",
+};
+
+/**
+ * Severity tier of each report type. Must match the backend's ReportSeverity.of, which the
+ * severity filter uses.
+ */
+export const reportTypeSeverity: Record<ReportType, ReportSeverity> = {
+    [ReportType.REAL_CHILD_SEXUAL_ABUSE_MATERIAL]: ReportSeverity.P0,
+    [ReportType.FICTIONAL_CHILD_SEXUAL_ABUSE_MATERIAL]: ReportSeverity.P0,
+    [ReportType.INAPPROPRIATE_COMMUNICATION_WITH_MINOR]: ReportSeverity.P0,
+    [ReportType.KNOWINGLY_SOLICITING_IDENTIFYING_INFO_OR_SEXUAL_CONTENT_FROM_MINOR]: ReportSeverity.P0,
+    [ReportType.KNOWINGLY_SENDING_SEXUAL_MESSAGES_OR_CONTENT_TO_MINOR]: ReportSeverity.P0,
+    [ReportType.TRUE_THREAT]: ReportSeverity.P1,
+    [ReportType.DOXXING_HARASSMENT_STALKING]: ReportSeverity.P1,
+    [ReportType.NON_CONSENSUAL_SEXUAL_IMAGES]: ReportSeverity.P1,
+    [ReportType.UNDERAGE]: ReportSeverity.P1,
+    [ReportType.SNUFF_CRUSH_MATERIAL]: ReportSeverity.P1,
+    [ReportType.ATTEMPTING_TO_TRIGGER_EPILEPSY]: ReportSeverity.P1,
+    [ReportType.CRIMINAL_INSTRUCTIONS]: ReportSeverity.P1,
+    [ReportType.POSTING_IN_A_ROOM_DEDICATED_TO_CRIMINAL_ACTIVITY]: ReportSeverity.P1,
+    [ReportType.INCITEMENT_TO_LAWLESS_ACTION]: ReportSeverity.P1,
+    [ReportType.OTHER_REAL_OBSCENE_PORNOGRAPHY]: ReportSeverity.P2,
+    [ReportType.OTHER_FICTIONAL_OBSCENE_PORNOGRAPHY]: ReportSeverity.P2,
+    [ReportType.POSTING_NSFW_CONTENT_AS_SFW]: ReportSeverity.P2,
+    [ReportType.IMPERSONATING_A_MODERATOR]: ReportSeverity.P2,
+    [ReportType.ILLEGAL_CONTENT]: ReportSeverity.P2,
+    [ReportType.SPAMMING_ADVERTISING_BEGGING]: ReportSeverity.P3,
+    [ReportType.PIRATED_CONTENT_TORRENTS]: ReportSeverity.P3,
+    [ReportType.POSTING_ONION_LINK]: ReportSeverity.P3,
+};
+
+/** A duration as the queue timers show it: "<1m", "45m", "2h 5m", "3d 4h". */
+export function formatElapsed(milliseconds: number): string {
+    const minutes = Math.floor(milliseconds / 60_000);
+    if (minutes < 1) return "<1m";
+    if (minutes < 60) return `${minutes}m`;
+
+    const hours = Math.floor(minutes / 60);
+    if (hours < 24) return `${hours}h ${minutes % 60}m`;
+
+    return `${Math.floor(hours / 24)}d ${hours % 24}h`;
+}
+
+/** Report types staff can filter by, in severity order. "Illegal Content" is a parent users never pick. */
+export const filterableReportTypes: ReportType[] = Object.values(ReportType)
+    .filter((type) => type !== ReportType.ILLEGAL_CONTENT)
+    .sort((a, b) => reportTypeSeverity[a].localeCompare(reportTypeSeverity[b]));
 
 /**
  * Report types that fall under the CSAM (Child Sexual Abuse Material) group.

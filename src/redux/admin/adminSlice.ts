@@ -59,7 +59,7 @@ const adminSlice = createSlice({
                 state.activeBans = action.payload;
             })
             .addCase(revokeBanThunk.fulfilled, (state, action) => {
-                const userId = action.meta.arg;
+                const {userId} = action.meta.arg;
                 state.activeBans.content = state.activeBans.content.filter(ban => ban.userId !== userId);
                 state.activeBans.totalElements = state.activeBans.totalElements - 1;
                 state.activeBans.numberOfElements = state.activeBans.content.length;

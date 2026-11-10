@@ -3,12 +3,16 @@ import {ReportCase} from "@/models/ReportCase";
 import {MessagePage} from "@/models/MessagePage";
 import {getChatRoomMessages} from "@/api/chatRoom/chatRoomInteractionAPI";
 import {
+    assignCase,
     banUser,
+    claimCase,
     deleteMessage,
     getReportCase,
     getReportCases,
+    releaseCase,
     resolveCase,
     submitNcmecReport,
+    takeOverCase,
     warnUser
 } from "@/api/reportCases/reportCasesAPI";
 import {PaginatedResponse} from "@/models/PaginatedResponse";
@@ -121,6 +125,63 @@ export const submitNcmecReportThunk = createAsyncThunk<
     async (request, {rejectWithValue}) => {
         try {
             return await submitNcmecReport(request);
+        } catch (error: any) {
+            return rejectWithValue(error.response?.data || error.message);
+        }
+    }
+);
+
+
+export const claimCaseThunk = createAsyncThunk<
+    ReportCase,
+    number
+>(
+    "report-cases/claimCase",
+    async (reportCaseId, {rejectWithValue}) => {
+        try {
+            return await claimCase(reportCaseId);
+        } catch (error: any) {
+            return rejectWithValue(error.response?.data || error.message);
+        }
+    }
+);
+
+export const releaseCaseThunk = createAsyncThunk<
+    ReportCase,
+    number
+>(
+    "report-cases/releaseCase",
+    async (reportCaseId, {rejectWithValue}) => {
+        try {
+            return await releaseCase(reportCaseId);
+        } catch (error: any) {
+            return rejectWithValue(error.response?.data || error.message);
+        }
+    }
+);
+
+export const takeOverCaseThunk = createAsyncThunk<
+    ReportCase,
+    number
+>(
+    "report-cases/takeOverCase",
+    async (reportCaseId, {rejectWithValue}) => {
+        try {
+            return await takeOverCase(reportCaseId);
+        } catch (error: any) {
+            return rejectWithValue(error.response?.data || error.message);
+        }
+    }
+);
+
+export const assignCaseThunk = createAsyncThunk<
+    ReportCase,
+    { reportCaseId: number; assigneeId: number }
+>(
+    "report-cases/assignCase",
+    async ({reportCaseId, assigneeId}, {rejectWithValue}) => {
+        try {
+            return await assignCase(reportCaseId, assigneeId);
         } catch (error: any) {
             return rejectWithValue(error.response?.data || error.message);
         }

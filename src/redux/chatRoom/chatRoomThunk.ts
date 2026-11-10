@@ -234,7 +234,7 @@ export const reportMessageThunk = createAsyncThunk<void, ReportRequest>(
     "chat/reportMessage",
     async (reportRequest, {rejectWithValue}) => {
         try {
-            reportMessage(reportRequest)
+            return await reportMessage(reportRequest);
         } catch (err: any) {
             return rejectWithValue(err.response?.data || err.message);
         }

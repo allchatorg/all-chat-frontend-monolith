@@ -42,11 +42,11 @@ export const searchUsersThunk = createAsyncThunk<
 
 export const updateUserRoleThunk = createAsyncThunk<
     void,
-    { userId: number; role: string }>(
+    { userId: number; role: string; reason: string }>(
     "admin/updateUserRole",
-    async ({userId, role}, {rejectWithValue}) => {
+    async ({userId, role, reason}, {rejectWithValue}) => {
         try {
-            await updateUserRole(userId, role);
+            await updateUserRole(userId, role, reason);
         } catch (error: any) {
             return rejectWithValue(error.response?.data || error.message);
         }

@@ -5,14 +5,42 @@ import api from "@/lib/api";
 import {ReportCase} from "@/models/ReportCase";
 import {BanRequest} from "@/models/BanRequest";
 import {NcmecReportRequest} from "@/models/NcmecReportRequest";
+import {User} from "@/models/User";
 
 const REPORT_CASES_PATH = '/report-cases';
+
+export const getAssignableStaff = async (): Promise<User[]> => {
+    const res = await api.get<User[]>(`${REPORT_CASES_PATH}/assignees`);
+    return res.data;
+};
+
+export const claimCase = async (reportCaseId: number): Promise<ReportCase> => {
+    const res = await api.patch<ReportCase>(`${REPORT_CASES_PATH}/${reportCaseId}/claim`);
+    return res.data;
+};
+
+export const releaseCase = async (reportCaseId: number): Promise<ReportCase> => {
+    const res = await api.patch<ReportCase>(`${REPORT_CASES_PATH}/${reportCaseId}/release`);
+    return res.data;
+};
+
+export const takeOverCase = async (reportCaseId: number): Promise<ReportCase> => {
+    const res = await api.patch<ReportCase>(`${REPORT_CASES_PATH}/${reportCaseId}/take-over`);
+    return res.data;
+};
+
+export const assignCase = async (reportCaseId: number, assigneeId: number): Promise<ReportCase> => {
+    const res = await api.patch<ReportCase>(`${REPORT_CASES_PATH}/${reportCaseId}/assign`, {assigneeId});
+    return res.data;
+};
 
 export const getReportCases = async (
     request: ReportSearchRequest
 ): Promise<PaginatedResponse<ReportCaseSummary>> => {
     const res = await api.get<PaginatedResponse<ReportCaseSummary>>(
-        `${REPORT_CASES_PATH}`, {params: request}
+        `${REPORT_CASES_PATH}`,
+        // Repeat array params (reportTypes=A&reportTypes=B); Spring does not bind axios's default reportTypes[]=A.
+        {params: request, paramsSerializer: {indexes: null}}
     );
     return res.data;
 };
@@ -53,6 +81,16 @@ export const banUser = async (
 
 export const resolveCase = async (reportCaseId: number): Promise<ReportCase> => {
     const res = await api.patch<ReportCase>(`${REPORT_CASES_PATH}/${reportCaseId}/resolve-case`);
+    return res.data;
+}
+
+export const reopenCase = async (reportCaseId: number): Promise<ReportCase> => {
+    const res = await api.patch<ReportCase>(`${REPORT_CASES_PATH}/${reportCaseId}/reopen-case`);
+    return res.data;
+}
+
+export const recordNotCsam = async (reportCaseId: number, reason: string): Promise<ReportCase> => {
+    const res = await api.patch<ReportCase>(`${REPORT_CASES_PATH}/${reportCaseId}/not-csam`, {reason});
     return res.data;
 }
 

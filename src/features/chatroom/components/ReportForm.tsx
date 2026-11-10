@@ -48,10 +48,10 @@ export default function ReportForm({messageId}: { messageId: number }) {
                 ...(showMessage && description.trim() ? {description: description.trim()} : {})
             });
             toast.success("Report was successfully submitted and will be reviewed by our team.");
-        } catch {
-            toast.error("An error occurred while submitting the report.");
-        } finally {
             close();
+        } catch (error) {
+            // The form stays open so the reporter can retry without re-entering anything.
+            toast.error(error instanceof Error ? error.message : "An error occurred while submitting the report.");
         }
     }
 

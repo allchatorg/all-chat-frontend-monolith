@@ -4,7 +4,8 @@ export enum AdStatus {
     PENDING = "PENDING",
     ACTIVE = "ACTIVE",
     COMPLETED = "COMPLETED",
-    REJECTED = "REJECTED"
+    REJECTED = "REJECTED",
+    STOPPED = "STOPPED"
 }
 
 export enum AdFormatType {
@@ -82,6 +83,7 @@ export interface BanAdsSummary {
     activeCount: number;
     completedCount: number;
     rejectedCount: number;
+    stoppedCount: number;
     pendingRefundCount: number;
     pendingRefundTotal: number;
     currency: string;

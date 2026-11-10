@@ -12,8 +12,12 @@ import {Role} from "@/models/Role";
 import {toast} from "sonner";
 import UserTable from "@/app/(admin)/users/components/UserTable";
 import {AdminPageHeader} from "@/components/AdminPageHeader";
+import {useDialog} from "@/components/providers/DialogProvider";
+import {ReasonConfirmModal} from "@/components/ReasonConfirmModal";
+import {apiErrorMessage} from "@/lib/apiError";
 
 export default function MembersPage() {
+    const {open, close} = useDialog();
 
     const [searchUsersThunkAction, searchUsersLoading, searchUsersError] = useThunk(searchUsersThunk)
     const [updateUserRole, updateUserRoleLoading, updateUserRoleError] = useThunk(updateUserRoleThunk);
@@ -53,12 +57,23 @@ export default function MembersPage() {
     };
 
     const handleRoleChange = (user: User, newRole: Role) => {
-        updateUserRole({userId: user.id, role: newRole}).then(
-            () => {
-                toast.success("Role updated successfully");
-                searchUsersThunkAction(searchParams);
-            }
-        )
+        open(
+            <ReasonConfirmModal
+                title="Change this user's role?"
+                description={`${user.username} will change from ${user.role} to ${newRole}.`}
+                onClose={close}
+                onConfirm={async reason => {
+                    try {
+                        await updateUserRole({userId: user.id, role: newRole, reason});
+                        close();
+                        toast.success("Role updated successfully");
+                        searchUsersThunkAction(searchParams);
+                    } catch (error) {
+                        toast.error(apiErrorMessage(error));
+                    }
+                }}
+            />
+        );
     };
 
     return (

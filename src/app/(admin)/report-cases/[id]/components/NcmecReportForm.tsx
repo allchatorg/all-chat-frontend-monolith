@@ -104,19 +104,27 @@ export default function NcmecReportForm({
                     <ul className="list-disc list-inside space-y-1 ml-1">
                         <li>
                             <strong>Send a formal CyberTipline report to NCMEC</strong> containing
-                            the incident details, user information, and any file attachments
+                            the incident details, user information, and any files attached to the
+                            reported message. NCMEC reviews the report and may pass it to law
+                            enforcement.
                         </li>
                         <li>
-                            <strong>Permanently ban and delete the reported user</strong> from the
-                            platform, including all of their messages
+                            <strong>Permanently delete every file the user has ever uploaded</strong>,
+                            not only the reported files. Files that are not on the reported message
+                            are not sent to NCMEC.
+                        </li>
+                        <li>
+                            <strong>Permanently ban and quarantine the reported user</strong>. All of
+                            their messages are deleted, and the account and its messages are hidden
+                            from everyone, staff included. The records are kept.
                         </li>
                         <li>
                             <strong>Log the action</strong> in the audit trail for compliance and
-                            record-keeping purposes
+                            record-keeping purposes.
                         </li>
                     </ul>
                     <p className="font-medium">
-                        This action cannot be undone. The report will be filed with law enforcement.
+                        This action cannot be undone.
                     </p>
                 </AlertDescription>
             </Alert>
@@ -216,8 +224,9 @@ export default function NcmecReportForm({
                         className="text-sm font-medium leading-snug cursor-pointer text-red-800 dark:text-red-300"
                     >
                         I am absolutely certain that I want to proceed with this action. I
-                        understand that a report will be submitted to NCMEC, the user will be
-                        permanently banned and deleted, and this action cannot be reversed.
+                        understand that a report will be submitted to NCMEC, every file the user
+                        has ever uploaded will be permanently deleted, the user will be permanently
+                        banned and quarantined, and this action cannot be reversed.
                     </Label>
                 </div>
 

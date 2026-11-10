@@ -9,6 +9,7 @@ interface ConfirmModalProps {
     description: string;
     // Optional rich content rendered under the description (kept outside the <p>)
     children?: React.ReactNode;
+    confirmDisabled?: boolean;
 }
 
 export const ConfirmModal: React.FC<ConfirmModalProps> = ({
@@ -16,7 +17,8 @@ export const ConfirmModal: React.FC<ConfirmModalProps> = ({
                                                               onConfirm,
                                                               title,
                                                               description,
-                                                              children
+                                                              children,
+                                                              confirmDisabled = false
                                                           }) => {
     const [isConfirming, setIsConfirming] = useState(false);
 
@@ -40,7 +42,7 @@ export const ConfirmModal: React.FC<ConfirmModalProps> = ({
                 <Button variant="outline" onClick={onClose} disabled={isConfirming}>
                     No
                 </Button>
-                <Button variant="destructive" onClick={handleConfirm} disabled={isConfirming}>
+                <Button variant="destructive" onClick={handleConfirm} disabled={isConfirming || confirmDisabled}>
                     {isConfirming && <Loader2 className="mr-2 h-4 w-4 animate-spin"/>}
                     Yes
                 </Button>

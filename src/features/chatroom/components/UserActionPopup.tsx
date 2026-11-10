@@ -56,7 +56,7 @@ export const UserActionPopup: React.FC<UserActionPopupProps> = ({
     };
 
     const content = (
-        <span className={`flex min-w-0 items-center gap-1 ${roleStyles}`}>
+        <span className={`flex min-w-0 items-center ${roleStyles}`}>
             <UserName
                 userId={userId}
                 username={username}
@@ -73,12 +73,12 @@ export const UserActionPopup: React.FC<UserActionPopupProps> = ({
                         </button>
                     </PopoverTrigger>
                 ) : undefined}
+                staffBadge={showShield ? (
+                    <span title={formatRoleName(role)} className="cursor-help flex items-center">
+                        <ShieldCheck className="h-4 w-4 outline-hidden" style={{shapeRendering: 'crispEdges'}}/>
+                    </span>
+                ) : undefined}
             />
-            {showShield && (
-                <span title={formatRoleName(role)} className="cursor-help flex items-center">
-                    <ShieldCheck className="h-4 w-4 outline-hidden" style={{shapeRendering: 'crispEdges'}}/>
-                </span>
-            )}
         </span>
     );
 

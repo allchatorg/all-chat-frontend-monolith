@@ -4,7 +4,7 @@ import * as React from 'react';
 import {useCallback, useEffect} from 'react';
 import {AdminPageHeader} from "@/components/AdminPageHeader";
 import {AdminBreadcrumb} from "@/components/AdminBreadcrumb";
-import {Ban, CheckCircle2, Flag, IdCard, MessageSquare, Shield, ShieldAlert, ShieldBan, X} from "lucide-react";
+import {Ban, CheckCircle2, Flag, IdCard, MessageSquare, RotateCcw, Shield, ShieldAlert, ShieldBan, ShieldCheck, Undo2, X} from "lucide-react";
 import {Card} from "@/components/ui/card";
 import {useThunk} from "@/lib/hooks/useThunk";
 import {useSelector} from "react-redux";
@@ -12,8 +12,9 @@ import {useParams, useRouter} from "next/navigation";
 import AuditLogCardList from "@/components/AuditLogCardList";
 import MessageCardList from "@/app/(admin)/report-cases/[id]/components/MessageCardList";
 import ReportCard from "@/app/(admin)/report-cases/[id]/components/ReportCard";
+import ReportCaseTriageBar from "@/app/(admin)/report-cases/[id]/components/ReportCaseTriageBar";
 import ActionButton from "@/components/ActionButton";
-import {Message} from "@/models/message";
+import {isMessageRestorable, Message} from "@/models/message";
 import {toast} from 'sonner';
 import WarnUserComponent from "@/features/chatroom/components/WarnUserComponent";
 import {useDialog} from "@/components/providers/DialogProvider";
@@ -27,20 +28,25 @@ import {
     warnUserThunkReportCase
 } from "@/redux/report-cases/reportCasesThunk";
 import {selectSelectedReportCase, selectSelectedReportCaseMessages} from "@/redux/report-cases/reportCasesSelector";
-import {requestElevation} from "@/api/reportCases/reportCasesAPI";
+import {recordNotCsam, reopenCase, requestElevation} from "@/api/reportCases/reportCasesAPI";
+import {restoreMessage} from "@/api/chatting/chattingAPI";
+import {apiErrorMessage} from "@/lib/apiError";
 import {requireIdVerification} from "@/api/admin/adminAPI";
 import {ConfirmModal} from "@/components/ConfirmModal";
 import {IdVerificationStatusBadge} from "@/components/IdVerificationStatusBadge";
 import BanRequestForm from "@/features/chatroom/components/BanRequestForm";
 import NcmecReportForm from "@/app/(admin)/report-cases/[id]/components/NcmecReportForm";
+import NotCsamDecisionForm from "@/app/(admin)/report-cases/[id]/components/NotCsamDecisionForm";
 import {NcmecReportRequest} from "@/models/NcmecReportRequest";
 import {Alert, AlertDescription} from "@/components/ui/alert";
 import {BanRequest} from "@/models/BanRequest";
 import {format} from "date-fns";
 import {useRoleAccess} from "@/lib/hooks/useRoleAccess";
+import {selectUser} from "@/redux/user/userSelectors";
+import {describeBan, useActiveBan} from "@/lib/hooks/useActiveBan";
 import {canActOn} from "@/models/Role";
 import {isCsamReportCase} from "@/lib/reportUtils";
-import {AuditLogType} from "@/models/AuditLog";
+import {AuditLogType, NOT_CSAM_ACTION} from "@/models/AuditLog";
 import {ReportType} from "@/models/ReportTypeEnum";
 import {ReportTypeUtils} from "@/lib/utils";
 import {ROUTES} from "@/routes";
@@ -49,7 +55,7 @@ export default function Page() {
     const params = useParams();
     const router = useRouter();
     const {open, close} = useDialog();
-    const {currentRole} = useRoleAccess();
+    const {currentRole, isAdmin} = useRoleAccess();
 
     const reportCaseId = Number(params.id);
     const [fetchReportCase] = useThunk(getReportCaseThunk);
@@ -61,6 +67,7 @@ export default function Page() {
     const [submitNcmecReport, ncmecLoading] = useThunk(submitNcmecReportThunk);
 
     const selectedReportCase = useSelector(selectSelectedReportCase);
+    const currentUser = useSelector(selectUser);
     const surroundingMessages = useSelector(selectSelectedReportCaseMessages);
 
     // Helper to check if case is resolved
@@ -70,12 +77,22 @@ export default function Page() {
     const hasNcmecLog = (selectedReportCase?.reportCase?.auditLogs ?? [])
         .some(log => log.auditLogType === AuditLogType.NCMEC_REPORT);
 
+    // Check if this case was recorded as not CSAM
+    const hasNotCsamDecision = (selectedReportCase?.reportCase?.auditLogs ?? [])
+        .some(log => log.action === NOT_CSAM_ACTION);
+
     const isCsamCase = Boolean(selectedReportCase?.reportCase?.csamCase) || isCsamReportCase(selectedReportCase?.reportCase?.reports ?? []);
+
+    // A CSAM-related case stays fileable, even once resolved, until it is filed or recorded as not CSAM
+    const ncmecDecisionPending = Boolean(selectedReportCase?.reportCase?.ncmecDecisionPending);
+    const canDecideNcmec = ncmecDecisionPending && isAdmin();
 
     // Underage cases can require the reported user to verify their age via Stripe Identity
     const hasUnderageReport = (selectedReportCase?.reportCase?.reports ?? [])
         .some(report => report.reportType === ReportType.UNDERAGE);
     const reportedMessage = selectedReportCase?.reportCase?.message;
+    // Looked up again after each action on the case, since one of them may have been a ban.
+    const reportedUserBan = useActiveBan(reportedMessage?.senderId, selectedReportCase?.reportCase?.auditLogs?.length);
     const reportedUserIdStatus = reportedMessage?.senderIdVerificationStatus ?? 'NONE';
     const idVerificationDisabled = reportedUserIdStatus === 'REQUIRED'
         || reportedUserIdStatus === 'PENDING'
@@ -88,8 +105,10 @@ export default function Page() {
                 ? "ID verification has already been required for this user"
                 : undefined;
 
-    // Redact messages for resolved CSAM cases, when CSAM flag is true, or when an NCMEC log exists
-    const shouldRedactMessages = hasNcmecLog || selectedReportCase?.reportCase?.csamCase || (isResolved && isCsamCase);
+    // Redact messages for resolved CSAM cases, when CSAM flag is true, or when an NCMEC log exists.
+    // The admins who still have to make the NCMEC decision need to see the content,
+    // and a case recorded as not CSAM has nothing to redact.
+    const shouldRedactMessages = hasNcmecLog || selectedReportCase?.reportCase?.csamCase || (isResolved && isCsamCase && !canDecideNcmec && !hasNotCsamDecision);
 
     const defaultBanReportType = (selectedReportCase?.reportCase?.reports ?? []).reduce<ReportType | undefined>(
         (highestPriorityType, report) => {
@@ -125,6 +144,13 @@ export default function Page() {
         refetchData();
     }, [refetchData]);
 
+    // Says why when the server refuses, and reloads the case: the usual reason is that someone
+    // else claimed or closed it since this page loaded.
+    const reportActionFailure = async (error: unknown) => {
+        toast.error(apiErrorMessage(error));
+        await refetchData();
+    };
+
     const handleJumpTo = (message: Message) => {
         router.push(`/?chatRoomId=${message.chatRoomId}&jumpTo=${message.id}`);
     };
@@ -143,7 +169,7 @@ export default function Page() {
             close();
             toast.success("User banned successfully!");
         } catch (error) {
-            toast.error("Failed to ban user");
+            await reportActionFailure(error);
             throw error;
         }
     };
@@ -162,11 +188,12 @@ export default function Page() {
                 refetchData();
             }, 100);
         } catch (error) {
-            toast.error("Failed to escalate the report. Please try again.");
+            // Says why when the server refuses, e.g. the case was resolved since this page loaded.
+            toast.error(apiErrorMessage(error));
         }
     }
 
-    const handleDeleteMessage = async () => {
+    const handleDeleteMessage = () => {
         if (!selectedReportCase?.reportCase?.message?.id) {
             toast.error("Message data not available");
             return;
@@ -174,16 +201,57 @@ export default function Page() {
 
         const messageId = selectedReportCase.reportCase.message.id;
         const reportCaseId = selectedReportCase.reportCase.id;
+        const senderUsername = selectedReportCase.reportCase.message.senderUsername;
 
-        try {
-            await removeMessage({messageId: messageId, reportCaseId: reportCaseId});
-            toast.success("Message deleted successfully");
-            setTimeout(() => {
-                refetchData();
-            }, 100);
-        } catch (error) {
-            toast.error(`Failed to delete message`);
+        open(
+            <ConfirmModal
+                title="Remove this message?"
+                description={isCsamCase
+                    ? `${senderUsername}'s message will be hidden from everyone except staff. Removals on child-safety cases cannot be undone.`
+                    : `${senderUsername}'s message will be hidden from everyone except staff. Staff can restore it for 24 hours.`}
+                onClose={close}
+                onConfirm={async () => {
+                    try {
+                        await removeMessage({messageId: messageId, reportCaseId: reportCaseId});
+                        close();
+                        toast.success("Message deleted successfully");
+                        setTimeout(() => {
+                            refetchData();
+                        }, 100);
+                    } catch (error) {
+                        close();
+                        await reportActionFailure(error);
+                    }
+                }}
+            />
+        );
+    };
+
+    const handleRestoreMessage = () => {
+        const message = selectedReportCase?.reportCase?.message;
+        if (!message?.id) {
+            toast.error("Message data not available");
+            return;
         }
+
+        open(
+            <ConfirmModal
+                title="Restore this message?"
+                description={`${message.senderUsername}'s message will be visible to everyone in the room again.`}
+                onClose={close}
+                onConfirm={async () => {
+                    try {
+                        await restoreMessage(message.id);
+                        close();
+                        toast.success("Message restored");
+                        await refetchData();
+                    } catch (error) {
+                        close();
+                        toast.error(apiErrorMessage(error));
+                    }
+                }}
+            />
+        );
     };
 
     const handleWarning = async (description: string) => {
@@ -204,25 +272,58 @@ export default function Page() {
             toast.success("Warning sent successfully");
             await refetchData();
         } catch (error) {
-            toast.error(`Failed to send warning.`);
+            await reportActionFailure(error);
         }
         close();
     };
 
-    const handleResolveCase = async () => {
+    const handleResolveCase = () => {
         if (!selectedReportCase?.reportCase?.id) {
             toast.error("Report case data not available");
             return;
         }
 
         const reportCaseId = selectedReportCase.reportCase.id;
-        try {
-            await resolveCase(reportCaseId);
-            toast.success("Report case resolved successfully");
-            await refetchData();
-        } catch (error) {
-            toast.error("Failed to resolve report case");
-        }
+        open(
+            <ConfirmModal
+                title="Resolve this case?"
+                description="The case leaves the open queue. Staff can reopen it if this was a mistake."
+                onClose={close}
+                onConfirm={async () => {
+                    try {
+                        await resolveCase(reportCaseId);
+                        close();
+                        toast.success("Report case resolved successfully");
+                        await refetchData();
+                    } catch (error) {
+                        close();
+                        // Says why when the server refuses, e.g. a child-safety report arrived since this page loaded.
+                        await reportActionFailure(error);
+                    }
+                }}
+            />
+        );
+    }
+
+    const handleReopenCase = () => {
+        open(
+            <ConfirmModal
+                title="Reopen this case?"
+                description="The case returns to the open queue. Bans, warnings and removals already applied stay in place."
+                onClose={close}
+                onConfirm={async () => {
+                    try {
+                        await reopenCase(reportCaseId);
+                        close();
+                        toast.success("Report case reopened");
+                        await refetchData();
+                    } catch (error) {
+                        close();
+                        toast.error(apiErrorMessage(error));
+                    }
+                }}
+            />
+        );
     }
 
     const handleRequireIdVerification = () => {
@@ -247,7 +348,7 @@ export default function Page() {
                         await refetchData();
                     } catch (error) {
                         close();
-                        toast.error("Failed to require ID verification");
+                        await reportActionFailure(error);
                     }
                 }}
             />
@@ -258,10 +359,23 @@ export default function Page() {
         try {
             await submitNcmecReport(request);
             close();
-            toast.success("NCMEC report submitted successfully. The user has been banned and deleted.");
+            toast.success("NCMEC report submitted successfully. The user has been banned and quarantined, and their files have been deleted.");
             await refetchData();
         } catch (error) {
-            toast.error("Failed to submit NCMEC report");
+            // The server refuses before filing when a precondition fails; show why.
+            toast.error(error instanceof Error && error.message ? error.message : "Failed to submit NCMEC report");
+            throw error;
+        }
+    };
+
+    const handleNotCsamSubmit = async (reason: string): Promise<void> => {
+        try {
+            await recordNotCsam(reportCaseId, reason);
+            close();
+            toast.success("Recorded as not CSAM. The case is resolved.");
+            await refetchData();
+        } catch (error) {
+            toast.error("Failed to record the decision");
             throw error;
         }
     };
@@ -287,6 +401,66 @@ export default function Page() {
         );
     }
 
+    // The case object can still be empty on the first render after navigating here.
+    const canActOnSender = reportedMessage != null && canActOn(currentRole, reportedMessage.senderRole);
+
+    // Someone else's claimed case has to be taken over before acting on it; admins can step in.
+    // The server refuses too.
+    const caseAssignee = selectedReportCase.reportCase.assignee;
+    const claimedByOther = caseAssignee != null && caseAssignee.id !== currentUser?.id && !isAdmin();
+    const claimedByOtherReason = claimedByOther
+        ? `Claimed by ${caseAssignee.username}. Take over the case to act on it.`
+        : undefined;
+
+    // Child-safety cases can be neither restored nor reopened (the server refuses too).
+    const restoreMessageAction = canActOnSender && !isCsamCase && isMessageRestorable(reportedMessage) && (
+        <ActionButton
+            icon={<Undo2 className="h-5 w-5 text-teal-600"/>}
+            label="Restore Message"
+            className="p-2 text-[10px] sm:p-3 sm:text-xs"
+            onClick={() => handleRestoreMessage()}
+        />
+    );
+    const reopenCaseAction = canActOnSender && !isCsamCase && (
+        <ActionButton
+            icon={<RotateCcw className="h-5 w-5 text-sky-600"/>}
+            label="Reopen Case"
+            className="p-2 text-[10px] sm:p-3 sm:text-xs"
+            onClick={() => handleReopenCase()}
+        />
+    );
+
+    // NCMEC Report and its counterpart - CSAM cases awaiting the decision, admins and super admins only
+    const ncmecDecisionActions = canDecideNcmec && (
+        <>
+            <ActionButton
+                icon={<ShieldBan className="h-5 w-5 text-red-700"/>}
+                label="NCMEC Report"
+                className="p-2 text-[10px] sm:p-3 sm:text-xs"
+                disabled={!canActOn(currentRole, selectedReportCase.reportCase.message.senderRole)}
+                onClick={() => {
+                    const rcId = selectedReportCase.reportCase.id;
+                    const hasAttachments = (selectedReportCase.reportCase.message?.attachments?.length ?? 0) > 0;
+                    open(
+                        <NcmecReportForm
+                            reportCaseId={rcId}
+                            hasAttachments={hasAttachments}
+                            onSubmit={handleNcmecSubmit}
+                            onClose={close}
+                        />
+                    );
+                }}
+            />
+            <ActionButton
+                icon={<ShieldCheck className="h-5 w-5 text-gray-500"/>}
+                label="Not CSAM"
+                className="p-2 text-[10px] sm:p-3 sm:text-xs"
+                disabled={!canActOn(currentRole, selectedReportCase.reportCase.message.senderRole)}
+                onClick={() => open(<NotCsamDecisionForm onSubmit={handleNotCsamSubmit} onClose={close}/>)}
+            />
+        </>
+    );
+
     return (
         <div className="flex h-full w-full flex-col px-2 sm:px-4 space-y-4">
             <div className="mx-auto w-full space-y-4">
@@ -306,6 +480,9 @@ export default function Page() {
             <Card className="flex min-h-0 flex-1 flex-col p-4 space-y-6">
                 {/* Actions */}
                 <div className="flex flex-col gap-4">
+                    {selectedReportCase.reportCase.id !== undefined && (
+                        <ReportCaseTriageBar reportCase={selectedReportCase.reportCase}/>
+                    )}
                     {hasUnderageReport && (
                         <div className="flex flex-wrap items-center gap-2">
                             <span className="text-sm font-medium">
@@ -317,6 +494,22 @@ export default function Page() {
                             </span>
                             <IdVerificationStatusBadge status={reportedUserIdStatus}/>
                         </div>
+                    )}
+                    {!isResolved && claimedByOther && (
+                        <Alert className="border-amber-200 bg-amber-50">
+                            <AlertDescription className="text-amber-800">
+                                {caseAssignee?.username} is handling this case. Take it over to warn or ban the
+                                user, remove the message or resolve the case.
+                            </AlertDescription>
+                        </Alert>
+                    )}
+                    {!isResolved && reportedUserBan && (
+                        <Alert className="border-amber-200 bg-amber-50">
+                            <AlertDescription className="text-amber-800">
+                                {reportedMessage?.senderUsername} is already banned {describeBan(reportedUserBan)}.
+                                Another ban would replace that one.
+                            </AlertDescription>
+                        </Alert>
                     )}
                     {isResolved ? (
                         // Show resolved banner and navigation only
@@ -341,9 +534,17 @@ export default function Page() {
                                 </div>
                             </Alert>
 
-                            {/* Show only navigation button for resolved cases (hide for NCMEC) */}
+                            {canDecideNcmec && (
+                                <Alert className="border-amber-200 bg-amber-50">
+                                    <AlertDescription className="text-amber-800">
+                                        This case still needs a decision: file an NCMEC report or record it as not CSAM.
+                                    </AlertDescription>
+                                </Alert>
+                            )}
+
+                            {/* Resolved cases keep navigation (hidden for NCMEC) and any NCMEC decision still owed */}
                             {!hasNcmecLog && (
-                                <div className="flex">
+                                <div className="flex gap-2">
                                     <ActionButton
                                         icon={<MessageSquare className="h-5 w-5 text-blue-500"/>}
                                         label="Go to Message"
@@ -351,6 +552,9 @@ export default function Page() {
                                             handleJumpTo(selectedReportCase.reportCase.message)
                                         }
                                     />
+                                    {ncmecDecisionActions}
+                                    {restoreMessageAction}
+                                    {reopenCaseAction}
                                 </div>
                             )}
                         </div>
@@ -377,22 +581,27 @@ export default function Page() {
                                 icon={<Flag className="h-5 w-5 text-orange-500"/>}
                                 label="Warn User"
                                 className="p-2 text-[10px] sm:p-3 sm:text-xs"
+                                disabled={claimedByOther || !canActOn(currentRole, selectedReportCase.reportCase.message.senderRole)}
+                                title={claimedByOtherReason}
                                 onClick={() => {
                                     open(
                                         <WarnUserComponent onSubmit={handleWarning}/>
                                     )
                                 }}
                             />
-                            <ActionButton
-                                icon={<X className="h-5 w-5 text-gray-500"/>}
-                                label="Remove Message"
-                                className="p-2 text-[10px] sm:p-3 sm:text-xs"
-                                disabled={selectedReportCase.reportCase?.message?.deleted || !canActOn(currentRole, selectedReportCase.reportCase.message.senderRole)}
-                                onClick={() => handleDeleteMessage()}
-                            />
+                            {restoreMessageAction || (
+                                <ActionButton
+                                    icon={<X className="h-5 w-5 text-gray-500"/>}
+                                    label="Remove Message"
+                                    className="p-2 text-[10px] sm:p-3 sm:text-xs"
+                                    disabled={claimedByOther || selectedReportCase.reportCase?.message?.deleted || !canActOn(currentRole, selectedReportCase.reportCase.message.senderRole)}
+                                    title={claimedByOtherReason}
+                                    onClick={() => handleDeleteMessage()}
+                                />
+                            )}
                             <ActionButton
                                 icon={<Ban className="h-5 w-5 text-red-500"/>}
-                                label="Ban User"
+                                label={reportedUserBan ? "Replace Ban" : "Ban User"}
                                 className="p-2 text-[10px] sm:p-3 sm:text-xs"
                                 onClick={() => {
                                     const userId = selectedReportCase.reportCase.message.senderId;
@@ -412,7 +621,11 @@ export default function Page() {
                                                         <AlertDescription className="text-amber-800">
                                                             <div className="flex items-center gap-2">
                                                                 <Shield className="h-4 w-4"/>
-                                                                <span className="font-medium">Banning this user will automatically resolve the report case</span>
+                                                                <span className="font-medium">
+                                                                    {ncmecDecisionPending
+                                                                        ? "This case stays open after the ban so it can still be reported to NCMEC"
+                                                                        : "Banning this user will automatically resolve the report case"}
+                                                                </span>
                                                             </div>
                                                         </AlertDescription>
                                                     </Alert>
@@ -423,29 +636,11 @@ export default function Page() {
                                         </div>
                                     )
                                 }}
-                                disabled={!canActOn(currentRole, selectedReportCase.reportCase.message.senderRole)}
+                                disabled={claimedByOther || !canActOn(currentRole, selectedReportCase.reportCase.message.senderRole)}
+                                title={claimedByOtherReason}
                             />
 
-                            {/* NCMEC Report - Only visible for CSAM cases */}
-                            {isCsamCase && (
-                                <ActionButton
-                                    icon={<ShieldBan className="h-5 w-5 text-red-700"/>}
-                                    label="NCMEC Report"
-                                    className="p-2 text-[10px] sm:p-3 sm:text-xs"
-                                    onClick={() => {
-                                        const rcId = selectedReportCase.reportCase.id;
-                                        const hasAttachments = (selectedReportCase.reportCase.message?.attachments?.length ?? 0) > 0;
-                                        open(
-                                            <NcmecReportForm
-                                                reportCaseId={rcId}
-                                                hasAttachments={hasAttachments}
-                                                onSubmit={handleNcmecSubmit}
-                                                onClose={close}
-                                            />
-                                        );
-                                    }}
-                                />
-                            )}
+                            {ncmecDecisionActions}
 
                             {/* Require ID Verification - Only visible for underage cases */}
                             {hasUnderageReport && (
@@ -453,8 +648,8 @@ export default function Page() {
                                     icon={<IdCard className="h-5 w-5 text-amber-600"/>}
                                     label="Require ID Verification"
                                     className="p-2 text-[10px] sm:p-3 sm:text-xs"
-                                    disabled={idVerificationDisabled}
-                                    title={idVerificationDisabledReason}
+                                    disabled={claimedByOther || idVerificationDisabled}
+                                    title={claimedByOtherReason ?? idVerificationDisabledReason}
                                     onClick={() => handleRequireIdVerification()}
                                 />
                             )}
@@ -464,6 +659,8 @@ export default function Page() {
                                 icon={<CheckCircle2 className="h-5 w-5 text-green-600"/>}
                                 label="Resolve Case"
                                 className="p-2 text-[10px] sm:p-3 sm:text-xs"
+                                disabled={claimedByOther || ncmecDecisionPending || !canActOn(currentRole, selectedReportCase.reportCase.message.senderRole)}
+                                title={ncmecDecisionPending ? "An admin closes this case by filing an NCMEC report or recording it as not CSAM" : claimedByOtherReason}
                                 onClick={() => handleResolveCase()}
                             />
                         </div>
@@ -476,6 +673,8 @@ export default function Page() {
                         <div className="flex min-h-0 flex-1 flex-col">
                             <MessageCardList
                                 reportedMessageId={selectedReportCase?.reportCase?.message?.id}
+                                // Never bring child-safety media into view unprompted (HB-04).
+                                scrollToReported={!isCsamCase}
                                 messages={surroundingMessages || []}
                                 title="Message History"
                                 height="300px"

@@ -27,7 +27,8 @@ export default function ReportsPage() {
         },
     ];
 
-    const activeTab = filters.resolved ? 'resolved' : 'unresolved';
+    // The "Needs NCMEC decision" view spans both tabs, so neither is active.
+    const activeTab = filters.ncmecDecisionPending ? '' : filters.resolved ? 'resolved' : 'unresolved';
 
     return (
         <div className="flex h-full w-full flex-col px-2 sm:px-4 space-y-2 sm:space-y-4">

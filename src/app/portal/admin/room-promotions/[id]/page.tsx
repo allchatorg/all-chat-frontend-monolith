@@ -11,7 +11,9 @@ import {
     useCancelRoomPromotionMutation,
     useDenyRoomPromotionMutation,
     useGetRoomPromotionByIdQuery,
+    useRefundRoomPromotionMutation,
 } from "@ads/store/services/adminRoomPromotionsApi";
+import {useUser} from "@ads/hooks/use-user";
 import {RoomPromotionStatus} from "@ads/models/room-promotion";
 import {toast} from "sonner";
 
@@ -24,10 +26,13 @@ export default function AdminRoomPromotionDetailsPage() {
     const [approvePromotion, {isLoading: isApproving}] = useApproveRoomPromotionMutation();
     const [denyPromotion, {isLoading: isDenying}] = useDenyRoomPromotionMutation();
     const [cancelPromotion, {isLoading: isCanceling}] = useCancelRoomPromotionMutation();
+    const [refundPromotion, {isLoading: isRefunding}] = useRefundRoomPromotionMutation();
+    const {isSuperAdmin} = useUser();
 
     const isPending = data?.status === RoomPromotionStatus.PENDING;
     const isApproved = data?.status === RoomPromotionStatus.APPROVED;
-    const isMutating = isApproving || isDenying || isCanceling;
+    const canRefund = isSuperAdmin && data?.receiptStatus === "CAPTURED";
+    const isMutating = isApproving || isDenying || isCanceling || isRefunding;
 
     const handleApprove = async () => {
         if (!data) return;
@@ -58,6 +63,18 @@ export default function AdminRoomPromotionDetailsPage() {
                 : "Promotion canceled. The payment hold has been released.");
         } catch {
             toast.error("Failed to cancel the promotion. Please try again.");
+        }
+    };
+
+    const handleRefund = async (reason: string) => {
+        if (!data) return;
+        try {
+            const refunded = await refundPromotion({promotionId: data.id, reason}).unwrap();
+            toast.success(refunded.receiptStatus === "REFUND_PENDING"
+                ? "Refund requested. Stripe has not confirmed it yet."
+                : "Promotion payment refunded.");
+        } catch {
+            toast.error("Failed to refund the promotion. Please try again.");
         }
     };
 
@@ -138,6 +155,9 @@ export default function AdminRoomPromotionDetailsPage() {
                                     onSubmit={handleCancel}
                                     disabled={isMutating}
                                 />
+                            )}
+                            {canRefund && (
+                                <PromotionReasonModal mode="room-refund" onSubmit={handleRefund} disabled={isMutating}/>
                             )}
                             {!data.chatRoomArchived && (
                                 <ActionButton onClick={handleOpenRoom} variant="default"

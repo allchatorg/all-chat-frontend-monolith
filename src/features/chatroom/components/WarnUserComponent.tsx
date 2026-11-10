@@ -1,10 +1,9 @@
 "use client";
 
-import React, {useState} from "react";
+import React from "react";
 import {useForm} from "react-hook-form";
 import {Textarea} from "@/components/ui/textarea";
 import {Button} from "@/components/ui/button";
-import {Checkbox} from "@/components/ui/checkbox";
 import {AlertTriangle, Send} from "lucide-react";
 import {Label} from "@/components/ui/label";
 
@@ -17,8 +16,6 @@ interface WarnUserComponentProps {
 }
 
 const WarnUserComponent: React.FC<WarnUserComponentProps> = ({onSubmit}) => {
-    const [showMessage, setShowMessage] = useState(false);
-
     const {
         register,
         handleSubmit,
@@ -32,7 +29,7 @@ const WarnUserComponent: React.FC<WarnUserComponentProps> = ({onSubmit}) => {
     });
 
     const onFormSubmit = (data: WarnUserForm) => {
-        onSubmit(data.description);
+        onSubmit(data.description.trim());
         reset();
     };
 
@@ -48,38 +45,26 @@ const WarnUserComponent: React.FC<WarnUserComponentProps> = ({onSubmit}) => {
                 </div>
             </div>
 
-            <div className="flex items-center space-x-2">
-                <Checkbox
-                    id="add-message"
-                    checked={showMessage}
-                    onCheckedChange={(checked) => setShowMessage(!!checked)}
-                />
-                <Label
-                    htmlFor="add-message"
-                    className="text-sm font-medium text-foreground cursor-pointer"
-                >
-                    Add additional message
+            <div className="space-y-2">
+                <Label htmlFor="warning-description" className="text-sm font-medium text-foreground">
+                    Warning Description
                 </Label>
+                <Textarea
+                    id="warning-description"
+                    placeholder="Enter a detailed warning message..."
+                    maxLength={1000}
+                    {...register("description", {
+                        validate: value => value.trim().length > 0 || "Enter the reason for this warning",
+                    })}
+                    className="glass-input min-h-[150px] resize-none border-orange-200 focus:border-orange-400 focus:ring-orange-400 "
+                />
+                {errors.description && (
+                    <div className="flex items-center text-sm text-destructive space-x-2">
+                        <AlertTriangle className="h-4 w-4"/>
+                        <span>{errors.description.message}</span>
+                    </div>
+                )}
             </div>
-
-            {showMessage && (
-                <div className="space-y-2">
-                    <Label className="text-sm font-medium text-foreground">
-                        Warning Description
-                    </Label>
-                    <Textarea
-                        placeholder="Enter a detailed warning message..."
-                        {...register("description")}
-                        className="glass-input min-h-[150px] resize-none border-orange-200 focus:border-orange-400 focus:ring-orange-400 "
-                    />
-                    {errors.description && (
-                        <div className="flex items-center text-sm text-destructive space-x-2">
-                            <AlertTriangle className="h-4 w-4"/>
-                            <span>{errors.description.message}</span>
-                        </div>
-                    )}
-                </div>
-            )}
 
             <Button
                 type="submit"

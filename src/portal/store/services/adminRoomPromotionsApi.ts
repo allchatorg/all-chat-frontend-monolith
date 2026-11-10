@@ -76,6 +76,18 @@ export const adminRoomPromotionsApi = createApi({
                 'AdminRoomPromotions',
             ],
         }),
+        // Refund a captured promotion in full; stops it if still running (Super Admin)
+        refundRoomPromotion: builder.mutation<RoomPromotionDetail, PromotionReasonRequest>({
+            query: (request) => ({
+                url: '/admin/room-promotions/refund',
+                method: 'POST',
+                body: request,
+            }),
+            invalidatesTags: (result, error, request) => [
+                {type: 'AdminRoomPromotions', id: request.promotionId},
+                'AdminRoomPromotions',
+            ],
+        }),
         // Ban summary (Staff) — counts + release/refund totals for the ban form
         getBanRoomPromotionsSummary: builder.query<BanRoomPromotionsSummary, number>({
             query: (userId) => ({
@@ -110,6 +122,7 @@ export const {
     useApproveRoomPromotionMutation,
     useDenyRoomPromotionMutation,
     useCancelRoomPromotionMutation,
+    useRefundRoomPromotionMutation,
     useGetBanRoomPromotionsSummaryQuery,
     useGetRoomPromotedRevenueSummaryQuery,
     useGetRoomPromotedRevenueDailyQuery,

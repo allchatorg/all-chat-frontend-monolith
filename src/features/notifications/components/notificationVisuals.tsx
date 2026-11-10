@@ -1,5 +1,6 @@
 import {
     AlertTriangle,
+    ArrowRightLeft,
     Ban,
     Bell,
     CalendarDays,
@@ -9,7 +10,10 @@ import {
     LucideIcon,
     Megaphone,
     Rocket,
+    ShieldAlert,
     ShieldCheck,
+    Undo2,
+    UserCheck,
     XCircle
 } from "lucide-react";
 import {NotificationType} from "@/models/NotificationType";
@@ -105,6 +109,31 @@ const NOTIFICATION_VISUALS: Record<NotificationType, NotificationVisual> = {
         iconClass: "text-orange-500",
         bgClass: "bg-orange-500/15",
     },
+    [NotificationType.AD_REFUNDED]: {
+        icon: Undo2,
+        iconClass: "text-blue-500",
+        bgClass: "bg-blue-500/15",
+    },
+    [NotificationType.PROMOTION_REFUNDED]: {
+        icon: Undo2,
+        iconClass: "text-blue-500",
+        bgClass: "bg-blue-500/15",
+    },
+    [NotificationType.ROOM_PROMOTION_REFUNDED]: {
+        icon: Undo2,
+        iconClass: "text-blue-500",
+        bgClass: "bg-blue-500/15",
+    },
+    [NotificationType.PURCHASE_REFUND_PENDING]: {
+        icon: Clock3,
+        iconClass: "text-blue-500",
+        bgClass: "bg-blue-500/15",
+    },
+    [NotificationType.PURCHASE_REFUND_FAILED]: {
+        icon: XCircle,
+        iconClass: "text-red-500",
+        bgClass: "bg-red-500/15",
+    },
     [NotificationType.MODERATOR_ACCEPTED]: {
         icon: ShieldCheck,
         iconClass: "text-emerald-500",
@@ -114,6 +143,26 @@ const NOTIFICATION_VISUALS: Record<NotificationType, NotificationVisual> = {
         icon: CalendarDays,
         iconClass: "text-purple-500",
         bgClass: "bg-purple-500/15",
+    },
+    [NotificationType.REPORT_CASE_RESOLVED]: {
+        icon: Flag,
+        iconClass: "text-blue-500",
+        bgClass: "bg-blue-500/15",
+    },
+    [NotificationType.REPORT_CASE_ELEVATED]: {
+        icon: ShieldAlert,
+        iconClass: "text-purple-500",
+        bgClass: "bg-purple-500/15",
+    },
+    [NotificationType.REPORT_CASE_ASSIGNED]: {
+        icon: UserCheck,
+        iconClass: "text-blue-500",
+        bgClass: "bg-blue-500/15",
+    },
+    [NotificationType.REPORT_CASE_TAKEN_OVER]: {
+        icon: ArrowRightLeft,
+        iconClass: "text-sky-500",
+        bgClass: "bg-sky-500/15",
     },
 };
 

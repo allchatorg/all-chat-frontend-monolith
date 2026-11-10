@@ -159,7 +159,8 @@ export function useUserTableColumns({
                     };
 
                     return (
-                        <DropdownMenu>
+                        // Non-modal, as a modal menu leaves the page unclickable when an item opens a dialog.
+                        <DropdownMenu modal={false}>
                             <DropdownMenuTrigger asChild>
                                 <Button
                                     variant="ghost"
@@ -199,6 +200,7 @@ export function useUserTableColumns({
                                                 ).map(role => (
                                                     <DropdownMenuItem
                                                         key={role}
+                                                        disabled={user.role === role}
                                                         onClick={(e) => handleRoleClick(role, e)}
                                                         className={user.role === role ? "bg-accent" : ""}
                                                     >

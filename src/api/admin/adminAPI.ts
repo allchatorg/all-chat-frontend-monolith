@@ -28,8 +28,8 @@ export const banUser = async (banRequest: BanRequest): Promise<void> => {
     await api.post(`${ADMIN_PATH}/bans`, banRequest);
 };
 
-export const revokeBan = async (userId: number): Promise<void> => {
-    await api.delete(`${ADMIN_PATH}/bans/${userId}`);
+export const revokeBan = async (userId: number, reason: string): Promise<void> => {
+    await api.delete(`${ADMIN_PATH}/bans/${userId}`, {data: {reason}});
 };
 
 export const warnUser = async (warnRequest: WarnUserRequest): Promise<void> => {
@@ -57,8 +57,8 @@ export const searchUsers = async (request: UserSearchRequest
     return res.data;
 };
 
-export const updateUserRole = async (userId: number, role: string): Promise<void> => {
-    await api.put(`${ADMIN_PATH}/users/role`, {userId, role});
+export const updateUserRole = async (userId: number, role: string, reason: string): Promise<void> => {
+    await api.put(`${ADMIN_PATH}/users/role`, {userId, role, reason});
 };
 
 export const getUserAdminViewDetails = async (userId: number): Promise<UserAdminView> => {

@@ -301,7 +301,7 @@ export default function UserDetailsPage() {
                             <Clock className="h-4 w-4 text-muted-foreground"/>
                             <div>
                                 <p className="text-sm font-medium">Last Login</p>
-                                <p className="text-sm text-muted-foreground">{formatDate(user.lastLoginAt)}</p>
+                                <p className="text-sm text-muted-foreground">{user.lastLoginAt ? formatDate(user.lastLoginAt) : "Never"}</p>
                             </div>
                         </div>
                     </div>

@@ -47,6 +47,11 @@ export default function AdStatusDetails({data, className, isAdmin = false}: AdSt
                     bg: "bg-red-50 dark:bg-red-950/20 border-red-200 dark:border-red-900",
                     badgeClass: "bg-red-500 hover:bg-red-600 text-white",
                 };
+            case "STOPPED":
+                return {
+                    bg: "bg-orange-50 dark:bg-orange-950/20 border-orange-200 dark:border-orange-900",
+                    badgeClass: "bg-orange-500 hover:bg-orange-600 text-white",
+                };
             default:
                 return {
                     bg: "bg-muted/50",
@@ -239,20 +244,29 @@ export default function AdStatusDetails({data, className, isAdmin = false}: AdSt
                                 <p className="text-base font-semibold capitalize">
                                     {data.cardBrand} •••• {data.cardLast4}
                                 </p>
+                                {data.receiptStatus === "REFUNDED" && (
+                                    <p className="text-sm text-muted-foreground">Refunded</p>
+                                )}
+                                {data.receiptStatus === "REFUND_PENDING" && (
+                                    <p className="text-sm text-muted-foreground">Refund pending</p>
+                                )}
+                                {data.receiptStatus === "REFUND_FAILED" && (
+                                    <p className="text-sm text-muted-foreground">Refund failed</p>
+                                )}
                             </div>
                         </div>
                     </div>
                 </div>
 
-                {/* Rejection Section */}
-                {data.status === "REJECTED" && data.rejectionReason && (
+                {/* Rejection / Stop Section */}
+                {(data.status === "REJECTED" || data.status === "STOPPED") && data.rejectionReason && (
                     <div
                         className="rounded-lg bg-red-100 dark:bg-red-950/30 border border-red-200 dark:border-red-900 p-4">
                         <div className="flex items-start gap-3">
                             <AlertCircle className="h-5 w-5 text-red-600 dark:text-red-400 mt-0.5 flex-shrink-0"/>
                             <div>
                                 <h3 className="text-sm font-semibold text-red-900 dark:text-red-100">
-                                    Rejection Reason
+                                    {data.status === "STOPPED" ? "Stop Reason" : "Rejection Reason"}
                                 </h3>
                                 <p className="text-sm text-red-800 dark:text-red-200 mt-1">
                                     {data.rejectionReason}

@@ -5,13 +5,20 @@ import {ReportCaseSummary} from "@/models/ReportCaseSummary";
 import {Button} from "@/components/ui/button";
 import {ArrowUpDown, IdCard, ShieldAlert} from "lucide-react";
 import {ReportType} from "@/models/ReportTypeEnum";
+import {getReportTypeLabel, reportTypeSeverity} from "@/lib/reportUtils";
+import {ReportSeverityBadge} from "@/app/(admin)/report-cases/components/ReportSeverityBadge";
+import {ReportCaseTimer} from "@/app/(admin)/report-cases/components/ReportCaseTimer";
 
 type UseReportCasesTableColumnsProps = {
     onViewDetails?: (reportCaseId: string) => void;
+    onClaim?: (reportCaseId: number) => void;
+    currentUserId?: number;
 };
 
 export function useReportCasesTableColumns({
-                                               onViewDetails
+                                               onViewDetails,
+                                               onClaim,
+                                               currentUserId
                                            }: UseReportCasesTableColumnsProps = {}): ColumnDef<ReportCaseSummary>[] {
 
     return useMemo(() => {
@@ -33,6 +40,61 @@ export function useReportCasesTableColumns({
                     if (filterValue === undefined) return true;
                     const isResolved = row.original.resolutionDate !== null;
                     return isResolved === filterValue;
+                }
+            },
+            {
+                id: "severity",
+                header: "Severity",
+                accessorFn: (row) => row.severity,
+                cell: ({row}) => {
+                    const types = [...(row.original.reportTypes ?? [])]
+                        .sort((a, b) => reportTypeSeverity[a].localeCompare(reportTypeSeverity[b]))
+                        .map(getReportTypeLabel)
+                        .join(", ");
+                    return (
+                        <div className="flex max-w-48 flex-col items-start gap-1">
+                            <ReportSeverityBadge severity={row.original.severity}/>
+                            <span className="w-full truncate text-xs text-muted-foreground" title={types}>{types}</span>
+                        </div>
+                    );
+                }
+            },
+            {
+                id: "timer",
+                header: "Time",
+                cell: ({row}) => (
+                    <ReportCaseTimer
+                        createdAt={row.original.createdAt}
+                        firstActionDueAt={row.original.firstActionDueAt}
+                        firstActionAt={row.original.firstActionAt}
+                        resolutionDate={row.original.resolutionDate}
+                    />
+                )
+            },
+            {
+                id: "assignee",
+                header: "Assignee",
+                accessorFn: (row) => row.assignee?.username ?? null,
+                cell: ({row}) => {
+                    const {id, assignee, resolutionDate} = row.original;
+                    if (assignee) {
+                        return <span className="font-medium">{assignee.id === currentUserId ? "You" : assignee.username}</span>;
+                    }
+                    if (resolutionDate !== null) {
+                        return <span className="text-muted-foreground">—</span>;
+                    }
+                    return (
+                        <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={(event) => {
+                                event.stopPropagation();
+                                onClaim?.(id);
+                            }}
+                        >
+                            Claim
+                        </Button>
+                    );
                 }
             },
             {
@@ -146,5 +208,5 @@ export function useReportCasesTableColumns({
                 }
             }
         ];
-    }, [onViewDetails]);
+    }, [onViewDetails, onClaim, currentUserId]);
 }

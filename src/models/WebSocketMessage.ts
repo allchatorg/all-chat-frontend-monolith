@@ -45,6 +45,10 @@ export type WebSocketMessage =
     chatRoomName: string;
     data: Message;
 } | {
+    type: WebSocketMessageType.RESTORE_MESSAGE;
+    chatRoomName: string;
+    data: Message;
+} | {
     type: WebSocketMessageType.MESSAGE_REACTION_UPDATE;
     data: ReactionUpdateResponse;
 } | {

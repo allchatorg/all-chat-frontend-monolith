@@ -64,6 +64,7 @@ export default function UserAdsPage() {
                 pending: 0,
                 completed: 0,
                 rejected: 0,
+                stopped: 0,
             };
         }
 
@@ -80,6 +81,7 @@ export default function UserAdsPage() {
             pending: countMap['pending'] || 0,
             completed: countMap['completed'] || 0,
             rejected: countMap['rejected'] || 0,
+            stopped: countMap['stopped'] || 0,
         };
     }, [statusCounts]);
 

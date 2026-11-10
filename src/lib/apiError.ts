@@ -37,7 +37,10 @@ export function normalizeApiError(error: unknown, stage?: ApiError['stage']): Ap
     };
 }
 
+/** Only server failures get a support reference; a 4xx message already explains itself. */
 export function apiErrorMessage(error: unknown): string {
     const normalized = normalizeApiError(error);
-    return normalized.requestId ? `${normalized.message} Reference: ${normalized.requestId}` : normalized.message;
+    return normalized.requestId && normalized.status >= 500
+        ? `${normalized.message} Reference: ${normalized.requestId}`
+        : normalized.message;
 }

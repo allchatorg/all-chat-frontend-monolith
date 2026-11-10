@@ -27,6 +27,7 @@ interface AdsTableProps {
         pending: number
         completed: number
         rejected: number
+        stopped: number
     }
     viewDetailsPath?: string
     isAdmin?: boolean
@@ -40,9 +41,9 @@ interface AdsTableProps {
     onSearchQueryChange?: (value: string) => void
 }
 
-function getAllCount(counts?: { active: number; pending: number; completed: number; rejected: number }) {
+function getAllCount(counts?: { active: number; pending: number; completed: number; rejected: number; stopped: number }) {
     if (!counts) return 0
-    return (counts.active || 0) + (counts.pending || 0) + (counts.completed || 0) + (counts.rejected || 0)
+    return (counts.active || 0) + (counts.pending || 0) + (counts.completed || 0) + (counts.rejected || 0) + (counts.stopped || 0)
 }
 
 export function AdsTable({
@@ -146,6 +147,7 @@ export function AdsTable({
                                 <SelectItem value="pending">Pending ({counts?.pending || 0})</SelectItem>
                                 <SelectItem value="rejected">Rejected ({counts?.rejected || 0})</SelectItem>
                                 <SelectItem value="completed">Completed ({counts?.completed || 0})</SelectItem>
+                                <SelectItem value="stopped">Stopped ({counts?.stopped || 0})</SelectItem>
                             </SelectContent>
                         </Select>
 
@@ -168,6 +170,10 @@ export function AdsTable({
                             <TabsTrigger value="rejected">
                                 Rejected <Badge variant="secondary"
                                                 className="ml-2 rounded-full px-1">{counts?.rejected || 0}</Badge>
+                            </TabsTrigger>
+                            <TabsTrigger value="stopped">
+                                Stopped <Badge variant="secondary"
+                                               className="ml-2 rounded-full px-1">{counts?.stopped || 0}</Badge>
                             </TabsTrigger>
                         </TabsList>
 
