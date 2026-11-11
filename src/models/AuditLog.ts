@@ -6,6 +6,12 @@ import {ReportType} from "@/models/ReportTypeEnum";
 /** Action of the audit log for a case recorded as not CSAM. Must match the backend's ResolveCaseAuditLog.NOT_CSAM_ACTION. */
 export const NOT_CSAM_ACTION = "RESOLVE_CASE_NOT_CSAM";
 
+/**
+ * Action of the audit log for a case whose content is already in an NCMEC report it wasn't filed from.
+ * Must match the backend's ResolveCaseAuditLog.NCMEC_REPORTED_ACTION.
+ */
+export const NCMEC_REPORTED_ACTION = "RESOLVE_CASE_NCMEC_REPORTED";
+
 export enum AuditLogActorType {
     USER = "USER",
     SYSTEM = "SYSTEM",

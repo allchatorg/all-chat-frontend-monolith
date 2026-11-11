@@ -1,6 +1,7 @@
 "use client";
 
-import React, {useState} from "react";
+import React, {useEffect, useState} from "react";
+import Link from "next/link";
 import {Button} from "@/components/ui/button";
 import {Checkbox} from "@/components/ui/checkbox";
 import {Label} from "@/components/ui/label";
@@ -16,6 +17,8 @@ import {
     NcmecReportAnnotationLabels,
     NcmecReportRequest,
 } from "@/models/NcmecReportRequest";
+import {getCasesCoveredByFiling} from "@/api/reportCases/reportCasesAPI";
+import {ROUTES} from "@/routes";
 
 interface NcmecReportFormProps {
     reportCaseId: number;
@@ -35,6 +38,23 @@ export default function NcmecReportForm({
     const [fileAnnotations, setFileAnnotations] = useState<NcmecFileAnnotation[]>([]);
     const [confirmed, setConfirmed] = useState(false);
     const [isSubmitting, setIsSubmitting] = useState(false);
+    // The user's other cases still awaiting the decision; the filing takes them in. Null while loading.
+    const [coveredCaseIds, setCoveredCaseIds] = useState<number[] | null>(null);
+    const [coveredCasesFailed, setCoveredCasesFailed] = useState(false);
+
+    useEffect(() => {
+        let cancelled = false;
+        getCasesCoveredByFiling(reportCaseId)
+            .then((ids) => {
+                if (!cancelled) setCoveredCaseIds(ids);
+            })
+            .catch(() => {
+                if (!cancelled) setCoveredCasesFailed(true);
+            });
+        return () => {
+            cancelled = true;
+        };
+    }, [reportCaseId]);
 
     const toggleReportAnnotation = (annotation: NcmecReportAnnotation) => {
         setReportAnnotations((prev) =>
@@ -109,8 +129,13 @@ export default function NcmecReportForm({
                             enforcement.
                         </li>
                         <li>
+                            <strong>Include the user&apos;s other open child-safety cases</strong>, listed
+                            below. Their messages and files go in the same report, and those cases
+                            close with this one.
+                        </li>
+                        <li>
                             <strong>Permanently delete every file the user has ever uploaded</strong>,
-                            not only the reported files. Files that are not on the reported message
+                            not only the reported files. Files that are not on a reported message
                             are not sent to NCMEC.
                         </li>
                         <li>
@@ -128,6 +153,42 @@ export default function NcmecReportForm({
                     </p>
                 </AlertDescription>
             </Alert>
+
+            {/* The user's other cases this report takes in */}
+            <div className="rounded-md border p-3 text-sm space-y-1">
+                <p className="font-medium">Other child-safety cases about this user</p>
+                {coveredCasesFailed ? (
+                    <p className="text-amber-700 dark:text-amber-400">
+                        Could not check for them. Any that are still awaiting an NCMEC decision go into
+                        this report and close with it.
+                    </p>
+                ) : coveredCaseIds === null ? (
+                    <p className="text-muted-foreground">Checking…</p>
+                ) : coveredCaseIds.length === 0 ? (
+                    <p className="text-muted-foreground">None. This report covers this case only.</p>
+                ) : (
+                    <>
+                        <p className="text-muted-foreground">
+                            These go into this report and close with it. Review them first, and record any
+                            that are not CSAM before filing.
+                        </p>
+                        <ul className="flex flex-wrap gap-2">
+                            {coveredCaseIds.map((id) => (
+                                <li key={id}>
+                                    <Link
+                                        href={`${ROUTES.REPORTS}/${id}`}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className="font-mono text-blue-600 underline dark:text-blue-400"
+                                    >
+                                        #{id}
+                                    </Link>
+                                </li>
+                            ))}
+                        </ul>
+                    </>
+                )}
+            </div>
 
             <form onSubmit={handleSubmit} className="space-y-5">
                 {/* Incident Type */}
@@ -224,7 +285,8 @@ export default function NcmecReportForm({
                         className="text-sm font-medium leading-snug cursor-pointer text-red-800 dark:text-red-300"
                     >
                         I am absolutely certain that I want to proceed with this action. I
-                        understand that a report will be submitted to NCMEC, every file the user
+                        understand that a report will be submitted to NCMEC covering this case and
+                        the user&apos;s other open child-safety cases, every file the user
                         has ever uploaded will be permanently deleted, the user will be permanently
                         banned and quarantined, and this action cannot be reversed.
                     </Label>
