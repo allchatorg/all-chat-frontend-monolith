@@ -230,7 +230,7 @@ const renderLogDetails = (log: AuditLogUnion) => {
                     <div
                         className="rounded border-l-4 border-gray-300 bg-gray-50 p-3 dark:border-gray-700 dark:bg-gray-900/50">
                         <span className="text-sm italic text-gray-600 dark:text-gray-400">
-                            "{log.deletedMessage.content}"
+                            {log.deletedMessage.content == null ? "Content redacted" : `"${log.deletedMessage.content}"`}
                         </span>
                     </div>
                 </div>

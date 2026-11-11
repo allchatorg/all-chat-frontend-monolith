@@ -1,10 +1,10 @@
 'use client';
 import {UserName} from "@/components/UserName";
 import * as React from 'react';
-import {useCallback, useEffect} from 'react';
+import {useCallback, useEffect, useState} from 'react';
 import {AdminPageHeader} from "@/components/AdminPageHeader";
 import {AdminBreadcrumb} from "@/components/AdminBreadcrumb";
-import {Ban, CheckCircle2, Flag, IdCard, MessageSquare, RotateCcw, Shield, ShieldAlert, ShieldBan, ShieldCheck, Undo2, X} from "lucide-react";
+import {Ban, CheckCircle2, FileCheck2, Flag, IdCard, MessageSquare, RotateCcw, Shield, ShieldAlert, ShieldBan, ShieldCheck, Undo2, X} from "lucide-react";
 import {Card} from "@/components/ui/card";
 import {useThunk} from "@/lib/hooks/useThunk";
 import {useSelector} from "react-redux";
@@ -28,15 +28,17 @@ import {
     warnUserThunkReportCase
 } from "@/redux/report-cases/reportCasesThunk";
 import {selectSelectedReportCase, selectSelectedReportCaseMessages} from "@/redux/report-cases/reportCasesSelector";
-import {recordNotCsam, reopenCase, requestElevation} from "@/api/reportCases/reportCasesAPI";
+import {recordAlreadyReported, recordNotCsam, reopenCase, requestElevation} from "@/api/reportCases/reportCasesAPI";
 import {restoreMessage} from "@/api/chatting/chattingAPI";
 import {apiErrorMessage} from "@/lib/apiError";
+import {ApiError} from "@/models/ApiError";
 import {requireIdVerification} from "@/api/admin/adminAPI";
 import {ConfirmModal} from "@/components/ConfirmModal";
 import {IdVerificationStatusBadge} from "@/components/IdVerificationStatusBadge";
 import BanRequestForm from "@/features/chatroom/components/BanRequestForm";
 import NcmecReportForm from "@/app/(admin)/report-cases/[id]/components/NcmecReportForm";
 import NotCsamDecisionForm from "@/app/(admin)/report-cases/[id]/components/NotCsamDecisionForm";
+import AlreadyReportedForm from "@/app/(admin)/report-cases/[id]/components/AlreadyReportedForm";
 import {NcmecReportRequest} from "@/models/NcmecReportRequest";
 import {Alert, AlertDescription} from "@/components/ui/alert";
 import {BanRequest} from "@/models/BanRequest";
@@ -44,9 +46,9 @@ import {format} from "date-fns";
 import {useRoleAccess} from "@/lib/hooks/useRoleAccess";
 import {selectUser} from "@/redux/user/userSelectors";
 import {describeBan, useActiveBan} from "@/lib/hooks/useActiveBan";
-import {canActOn} from "@/models/Role";
+import {canActOn, Role} from "@/models/Role";
 import {isCsamReportCase} from "@/lib/reportUtils";
-import {AuditLogType, NOT_CSAM_ACTION} from "@/models/AuditLog";
+import {AuditLogType, NCMEC_REPORTED_ACTION, NOT_CSAM_ACTION} from "@/models/AuditLog";
 import {ReportType} from "@/models/ReportTypeEnum";
 import {ReportTypeUtils} from "@/lib/utils";
 import {ROUTES} from "@/routes";
@@ -65,6 +67,8 @@ export default function Page() {
     const [banUser, banUserLoading, banUserError] = useThunk(banUserThunkReportCase);
     const [resolveCase, resolveCaseLoading, resolveCaseError] = useThunk(resolveCaseThunk);
     const [submitNcmecReport, ncmecLoading] = useThunk(submitNcmecReportThunk);
+    // Set when a filing failed in a way that may have left a report at NCMEC; cleared only by a reload.
+    const [ncmecOutcomeUnknown, setNcmecOutcomeUnknown] = useState(false);
 
     const selectedReportCase = useSelector(selectSelectedReportCase);
     const currentUser = useSelector(selectUser);
@@ -77,15 +81,22 @@ export default function Page() {
     const hasNcmecLog = (selectedReportCase?.reportCase?.auditLogs ?? [])
         .some(log => log.auditLogType === AuditLogType.NCMEC_REPORT);
 
+    // Filed from this case, or recorded as already in an NCMEC report: either way its content is with NCMEC
+    const isReportedToNcmec = hasNcmecLog || (selectedReportCase?.reportCase?.auditLogs ?? [])
+        .some(log => log.action === NCMEC_REPORTED_ACTION);
+
     // Check if this case was recorded as not CSAM
     const hasNotCsamDecision = (selectedReportCase?.reportCase?.auditLogs ?? [])
         .some(log => log.action === NOT_CSAM_ACTION);
 
     const isCsamCase = Boolean(selectedReportCase?.reportCase?.csamCase) || isCsamReportCase(selectedReportCase?.reportCase?.reports ?? []);
 
-    // A CSAM-related case stays fileable, even once resolved, until it is filed or recorded as not CSAM
+    // A CSAM-related case stays fileable, even once resolved, until it is filed, recorded as already
+    // reported, or recorded as not CSAM
     const ncmecDecisionPending = Boolean(selectedReportCase?.reportCase?.ncmecDecisionPending);
     const canDecideNcmec = ncmecDecisionPending && isAdmin();
+    // Only super admins can close a case on their word that the report already reached NCMEC
+    const canRecordAlreadyReported = canDecideNcmec && currentRole === Role.SUPER_ADMIN;
 
     // Underage cases can require the reported user to verify their age via Stripe Identity
     const hasUnderageReport = (selectedReportCase?.reportCase?.reports ?? [])
@@ -96,8 +107,11 @@ export default function Page() {
     const reportedUserIdStatus = reportedMessage?.senderIdVerificationStatus ?? 'NONE';
     const idVerificationDisabled = reportedUserIdStatus === 'REQUIRED'
         || reportedUserIdStatus === 'PENDING'
-        || reportedUserIdStatus === 'VERIFIED';
-    const idVerificationDisabledReason = reportedUserIdStatus === 'VERIFIED'
+        || reportedUserIdStatus === 'VERIFIED'
+        || reportedUserIdStatus === 'REJECTED';
+    const idVerificationDisabledReason = reportedUserIdStatus === 'REJECTED'
+        ? "This user was verified as under 18. Access returns automatically at 18; an admin can order a new check from the user's page."
+        : reportedUserIdStatus === 'VERIFIED'
         ? "The user has already verified their age"
         : reportedUserIdStatus === 'PENDING'
             ? "The user's ID verification is already under review"
@@ -105,10 +119,10 @@ export default function Page() {
                 ? "ID verification has already been required for this user"
                 : undefined;
 
-    // Redact messages for resolved CSAM cases, when CSAM flag is true, or when an NCMEC log exists.
+    // Redact messages for resolved CSAM cases, when CSAM flag is true, or when the content is with NCMEC.
     // The admins who still have to make the NCMEC decision need to see the content,
     // and a case recorded as not CSAM has nothing to redact.
-    const shouldRedactMessages = hasNcmecLog || selectedReportCase?.reportCase?.csamCase || (isResolved && isCsamCase && !canDecideNcmec && !hasNotCsamDecision);
+    const shouldRedactMessages = isReportedToNcmec || selectedReportCase?.reportCase?.csamCase || (isResolved && isCsamCase && !canDecideNcmec && !hasNotCsamDecision);
 
     const defaultBanReportType = (selectedReportCase?.reportCase?.reports ?? []).reduce<ReportType | undefined>(
         (highestPriorityType, report) => {
@@ -362,8 +376,32 @@ export default function Page() {
             toast.success("NCMEC report submitted successfully. The user has been banned and quarantined, and their files have been deleted.");
             await refetchData();
         } catch (error) {
-            // The server refuses before filing when a precondition fails; show why.
-            toast.error(error instanceof Error && error.message ? error.message : "Failed to submit NCMEC report");
+            const {status = 0, requestId} = (error ?? {}) as Partial<ApiError>;
+            if (status >= 400 && status < 500) {
+                // The server refuses before filing when a precondition fails; show why.
+                toast.error(error instanceof Error && error.message ? error.message : "Failed to submit NCMEC report");
+                throw error;
+            }
+
+            // Any other failure may have come after the report reached NCMEC, and the server can't
+            // refuse a second filing then, so this page offers no retry.
+            setNcmecOutcomeUnknown(true);
+            close();
+            toast.error(`The NCMEC filing did not complete. Do not file again.${requestId ? ` Reference: ${requestId}` : ""}`);
+            await refetchData();
+            throw error;
+        }
+    };
+
+    const handleAlreadyReportedSubmit = async (ncmecReportId: number, reason: string): Promise<void> => {
+        try {
+            await recordAlreadyReported(reportCaseId, ncmecReportId, reason);
+            setNcmecOutcomeUnknown(false);
+            close();
+            toast.success(`Recorded as already reported to NCMEC (report #${ncmecReportId}). The case is resolved.`);
+            await refetchData();
+        } catch (error) {
+            toast.error(apiErrorMessage(error));
             throw error;
         }
     };
@@ -437,7 +475,8 @@ export default function Page() {
                 icon={<ShieldBan className="h-5 w-5 text-red-700"/>}
                 label="NCMEC Report"
                 className="p-2 text-[10px] sm:p-3 sm:text-xs"
-                disabled={!canActOn(currentRole, selectedReportCase.reportCase.message.senderRole)}
+                disabled={ncmecOutcomeUnknown || !canActOn(currentRole, selectedReportCase.reportCase.message.senderRole)}
+                title={ncmecOutcomeUnknown ? "The last filing did not complete. Engineering has to check the server logs before another one, and a super admin records a report that reached NCMEC with Already Reported." : undefined}
                 onClick={() => {
                     const rcId = selectedReportCase.reportCase.id;
                     const hasAttachments = (selectedReportCase.reportCase.message?.attachments?.length ?? 0) > 0;
@@ -458,6 +497,15 @@ export default function Page() {
                 disabled={!canActOn(currentRole, selectedReportCase.reportCase.message.senderRole)}
                 onClick={() => open(<NotCsamDecisionForm onSubmit={handleNotCsamSubmit} onClose={close}/>)}
             />
+            {canRecordAlreadyReported && (
+                <ActionButton
+                    icon={<FileCheck2 className="h-5 w-5 text-red-700"/>}
+                    label="Already Reported"
+                    className="p-2 text-[10px] sm:p-3 sm:text-xs"
+                    disabled={!canActOn(currentRole, selectedReportCase.reportCase.message.senderRole)}
+                    onClick={() => open(<AlreadyReportedForm onSubmit={handleAlreadyReportedSubmit} onClose={close}/>)}
+                />
+            )}
         </>
     );
 
@@ -494,6 +542,16 @@ export default function Page() {
                             </span>
                             <IdVerificationStatusBadge status={reportedUserIdStatus}/>
                         </div>
+                    )}
+                    {ncmecOutcomeUnknown && (
+                        <Alert className="border-red-300 bg-red-50">
+                            <AlertDescription className="text-red-800">
+                                The NCMEC filing did not complete, and the report may already be with NCMEC.
+                                Do not file again: engineering has to check the server logs first. If the
+                                report reached NCMEC, a super admin records it here with Already Reported
+                                and its report ID.
+                            </AlertDescription>
+                        </Alert>
                     )}
                     {!isResolved && claimedByOther && (
                         <Alert className="border-amber-200 bg-amber-50">
@@ -537,13 +595,14 @@ export default function Page() {
                             {canDecideNcmec && (
                                 <Alert className="border-amber-200 bg-amber-50">
                                     <AlertDescription className="text-amber-800">
-                                        This case still needs a decision: file an NCMEC report or record it as not CSAM.
+                                        This case still needs a decision: file an NCMEC report or record it as not CSAM
+                                        {canRecordAlreadyReported && " or as already reported"}.
                                     </AlertDescription>
                                 </Alert>
                             )}
 
-                            {/* Resolved cases keep navigation (hidden for NCMEC) and any NCMEC decision still owed */}
-                            {!hasNcmecLog && (
+                            {/* Resolved cases keep navigation (hidden once with NCMEC) and any NCMEC decision still owed */}
+                            {!isReportedToNcmec && (
                                 <div className="flex gap-2">
                                     <ActionButton
                                         icon={<MessageSquare className="h-5 w-5 text-blue-500"/>}

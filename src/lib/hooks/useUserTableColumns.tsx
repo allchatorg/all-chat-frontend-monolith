@@ -230,16 +230,6 @@ export function useUserTableColumns({
                                         View user details
                                     </DropdownMenuItem>
                                 }
-
-                                <DropdownMenuItem
-                                    onClick={(e) => {
-                                        e.stopPropagation();
-                                        console.log("Delete user:", user);
-                                    }}
-                                    className="text-red-600"
-                                >
-                                    Delete user
-                                </DropdownMenuItem>
                             </DropdownMenuContent>
                         </DropdownMenu>
                     );

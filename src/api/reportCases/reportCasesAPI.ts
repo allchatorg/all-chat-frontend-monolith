@@ -94,6 +94,18 @@ export const recordNotCsam = async (reportCaseId: number, reason: string): Promi
     return res.data;
 }
 
+/** Super admins only: closes a case whose content already reached NCMEC without a filing recorded here. */
+export const recordAlreadyReported = async (reportCaseId: number, ncmecReportId: number, reason: string): Promise<ReportCase> => {
+    const res = await api.patch<ReportCase>(`${REPORT_CASES_PATH}/${reportCaseId}/already-reported`, {ncmecReportId, reason});
+    return res.data;
+}
+
+/** The reported user's other cases that a filing from this one would take in and close. */
+export const getCasesCoveredByFiling = async (reportCaseId: number): Promise<number[]> => {
+    const res = await api.get<number[]>(`${REPORT_CASES_PATH}/${reportCaseId}/ncmec-report/covered-cases`);
+    return res.data;
+}
+
 export const submitNcmecReport = async (request: NcmecReportRequest): Promise<void> => {
     const res = await api.post<void>(
         `${REPORT_CASES_PATH}/${request.reportCaseId}/ncmec-report`, request

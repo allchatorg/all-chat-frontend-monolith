@@ -91,11 +91,14 @@ function BanRequestFormFields({
         ? defaultReportType
         : ReportType.SPAMMING_ADVERTISING_BEGGING;
     // The current ban's own type may be a group heading, which the list can't offer: then staff choose.
-    const initialReportType = allowedReportTypes.includes(preferredReportType)
-        ? preferredReportType
-        : currentBan && allowedReportTypes.includes(currentBan.reportType)
-            ? currentBan.reportType
-            : undefined;
+    // They also choose on a child-safety case: that type makes the ban final, so it is never pre-filled.
+    const initialReportType = defaultReportType && isCsamReportType(defaultReportType)
+        ? undefined
+        : allowedReportTypes.includes(preferredReportType)
+            ? preferredReportType
+            : currentBan && allowedReportTypes.includes(currentBan.reportType)
+                ? currentBan.reportType
+                : undefined;
 
     const form = useForm<BanRequest & {
         durationSelection?: string;
@@ -105,7 +108,8 @@ function BanRequestFormFields({
     }>({
         defaultValues: {
             userId,
-            banType: BanTypeEnum.PERMANENT,
+            // Only a permanently banned user is left with a single choice; otherwise staff pick the type.
+            banType: currentIsPermanent ? BanTypeEnum.PERMANENT : undefined,
             reportType: initialReportType,
             description: "",
             deleteMessages: false,
@@ -115,6 +119,7 @@ function BanRequestFormFields({
     const minimumMinutes = Math.max(1, Math.ceil(remainingSeconds / 60));
 
     const watchBanType = form.watch("banType");
+    const watchReportType = form.watch("reportType");
     const watchDeleteMessages = form.watch("deleteMessages");
     const watchDurationSelection = form.watch("durationSelection");
     const watchDeleteMessagesDurationSelection = form.watch("deleteMessagesDurationSelection");
@@ -211,6 +216,7 @@ function BanRequestFormFields({
                     <FormField
                         control={form.control}
                         name="banType"
+                        rules={{required: "Choose a ban type"}}
                         render={({field}) => (
                             <FormItem>
                                 <FormLabel>Ban Type</FormLabel>
@@ -339,6 +345,12 @@ function BanRequestFormFields({
                                         ))}
                                     </SelectContent>
                                 </Select>
+                                {watchReportType && isCsamReportType(watchReportType) && (
+                                    <FormDescription className="text-amber-700">
+                                        A ban with a child-safety type can&apos;t be revoked or appealed, and a
+                                        temporary one doesn&apos;t end on its own.
+                                    </FormDescription>
+                                )}
                                 <FormMessage/>
                             </FormItem>
                         )}

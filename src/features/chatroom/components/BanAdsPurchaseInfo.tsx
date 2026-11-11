@@ -1,9 +1,10 @@
 "use client";
 
-import React from "react";
+import React, {useEffect, useState} from "react";
 import {AlertTriangle, Info} from "lucide-react";
 import {Alert, AlertDescription, AlertTitle} from "@/components/ui/alert";
 import {BanTypeEnum} from "@/models/BanTypeEnum";
+import {getUserAdminDetails} from "@/api/admin/adminAPI";
 import {useGetBanAdsSummaryQuery} from "@ads/store/services/adminAdsApi";
 import {useGetBanPromotionsSummaryQuery} from "@ads/store/services/adminPromotedMessagesApi";
 import {useGetBanRoomPromotionsSummaryQuery} from "@ads/store/services/adminRoomPromotionsApi";
@@ -13,7 +14,8 @@ import {BanRoomPromotionsSummary} from "@ads/models/room-promotion";
 
 interface BanAdsPurchaseInfoProps {
     userId: string;
-    banType: BanTypeEnum;
+    // Undefined until staff pick one on the ban form
+    banType?: BanTypeEnum;
     // The "delete messages" option is checked on the ban form
     deleteMessagesEnabled?: boolean;
 }
@@ -133,6 +135,25 @@ export default function BanAdsPurchaseInfo({userId, banType, deleteMessagesEnabl
         isError: roomPromotionsError,
     } = useGetBanRoomPromotionsSummaryQuery(numericUserId, {skip});
 
+    // A failed lookup reads as "no membership", like the purchase summaries below.
+    const [vipActive, setVipActive] = useState(false);
+    useEffect(() => {
+        if (skip) return;
+
+        let cancelled = false;
+        getUserAdminDetails(numericUserId)
+            .then((user) => {
+                if (!cancelled) setVipActive(user.vipActive === true);
+            })
+            .catch(() => {
+                if (!cancelled) setVipActive(false);
+            });
+
+        return () => {
+            cancelled = true;
+        };
+    }, [numericUserId, skip]);
+
     // Never block the ban flow: no banner while loading, on error (e.g. the
     // ads module being down) or when the user has no purchases/promotions.
     const showAds = !isLoading && !isError && !!data && data.totalAds > 0;
@@ -141,7 +162,9 @@ export default function BanAdsPurchaseInfo({userId, banType, deleteMessagesEnabl
     const showRoomPromotions = !roomPromotionsLoading && !roomPromotionsError && !!roomPromotionsData
         && roomPromotionsData.totalPromotions > 0;
 
-    if (!showAds && !showPromotions && !showRoomPromotions) {
+    const showVipWarning = vipActive && banType === BanTypeEnum.PERMANENT;
+
+    if (!showAds && !showPromotions && !showRoomPromotions && !showVipWarning) {
         return null;
     }
 
@@ -170,6 +193,18 @@ export default function BanAdsPurchaseInfo({userId, banType, deleteMessagesEnabl
 
     return (
         <div className="space-y-3">
+            {showVipWarning && (
+                <Alert variant="warning">
+                    <AlertTriangle className="h-4 w-4"/>
+                    <AlertTitle>VIP renewal will stop</AlertTitle>
+                    <AlertDescription>
+                        This user is a VIP member. A permanent ban stops the membership from renewing: it runs
+                        to the end of the paid period, nothing is refunded, and revoking the ban does not
+                        turn renewal back on.
+                    </AlertDescription>
+                </Alert>
+            )}
+
             {showAds && (
                 <Alert>
                     <Info className="h-4 w-4"/>
