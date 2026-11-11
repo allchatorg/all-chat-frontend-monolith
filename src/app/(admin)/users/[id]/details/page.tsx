@@ -16,6 +16,8 @@ import {CountryFlag} from "@/features/chatroom/components/CountryFlag";
 import {Button} from "@/components/ui/button";
 import {useDialog} from "@/components/providers/DialogProvider";
 import {ConfirmModal} from "@/components/ConfirmModal";
+import {ReasonConfirmModal} from "@/components/ReasonConfirmModal";
+import {useRoleAccess} from "@/lib/hooks/useRoleAccess";
 import {IdVerificationStatusBadge} from "@/components/IdVerificationStatusBadge";
 import {clearIdVerification, requireIdVerification} from "@/api/admin/adminAPI";
 import {toast} from "sonner";
@@ -61,19 +63,30 @@ export default function UserDetailsPage() {
     const detailsState = useSelector(selectUserAdminDetailsState);
     const {open, close} = useDialog();
 
+    const {isAdmin} = useRoleAccess();
+
     const idVerificationStatus = user?.idVerificationStatus ?? 'NONE';
-    const requireDisabled = idVerificationStatus === 'REQUIRED'
+    // A user verified as under 18 gets access back on their own at 18; only an admin can undo that result.
+    const verifiedUnderage = idVerificationStatus === 'REJECTED';
+    const underageLocked = verifiedUnderage && !isAdmin();
+    const underageLockedReason = "This user was verified as under 18. Access returns automatically at 18; only an admin can change this.";
+    const requireDisabled = underageLocked
+        || idVerificationStatus === 'REQUIRED'
         || idVerificationStatus === 'PENDING'
         || idVerificationStatus === 'VERIFIED';
-    const requireDisabledReason = idVerificationStatus === 'VERIFIED'
+    const requireDisabledReason = underageLocked
+        ? underageLockedReason
+        : idVerificationStatus === 'VERIFIED'
         ? "The user has already verified their age"
         : idVerificationStatus === 'PENDING'
             ? "The user's ID verification is already under review"
             : idVerificationStatus === 'REQUIRED'
                 ? "ID verification has already been required for this user"
                 : undefined;
-    const clearDisabled = idVerificationStatus === 'NONE' || idVerificationStatus === 'VERIFIED';
-    const clearDisabledReason = idVerificationStatus === 'VERIFIED'
+    const clearDisabled = underageLocked || idVerificationStatus === 'NONE' || idVerificationStatus === 'VERIFIED';
+    const clearDisabledReason = underageLocked
+        ? underageLockedReason
+        : idVerificationStatus === 'VERIFIED'
         ? "The user has already passed verification; there is no requirement to clear"
         : idVerificationStatus === 'NONE'
             ? "No ID verification requirement to clear"
@@ -90,14 +103,17 @@ export default function UserDetailsPage() {
     const handleRequireIdVerification = () => {
         if (!user) return;
 
+        const Modal = verifiedUnderage ? ReasonConfirmModal : ConfirmModal;
         open(
-            <ConfirmModal
+            <Modal
                 title="Require ID verification?"
-                description={`${user.username} will be blocked from using the app until they verify their age with a government ID through Stripe Identity.`}
+                description={verifiedUnderage
+                    ? `${user.username} was verified as under 18. They will be able to run the ID check again, and access no longer returns automatically at 18.`
+                    : `${user.username} will be blocked from using the app until they verify their age with a government ID through Stripe Identity.`}
                 onClose={close}
-                onConfirm={async () => {
+                onConfirm={async (reason?: string) => {
                     try {
-                        await requireIdVerification(user.id);
+                        await requireIdVerification(user.id, undefined, reason);
                         close();
                         toast.success("ID verification required");
                     } catch (error) {
@@ -113,14 +129,17 @@ export default function UserDetailsPage() {
     const handleClearIdVerification = () => {
         if (!user) return;
 
+        const Modal = verifiedUnderage ? ReasonConfirmModal : ConfirmModal;
         open(
-            <ConfirmModal
+            <Modal
                 title="Clear ID verification requirement?"
-                description={`${user.username} will no longer be asked to verify their age and will regain access to the app.`}
+                description={verifiedUnderage
+                    ? `${user.username} was verified as under 18. Clearing removes that result and gives them full access now.`
+                    : `${user.username} will no longer be asked to verify their age and will regain access to the app.`}
                 onClose={close}
-                onConfirm={async () => {
+                onConfirm={async (reason?: string) => {
                     try {
-                        await clearIdVerification(user.id);
+                        await clearIdVerification(user.id, reason);
                         close();
                         toast.success("ID verification requirement cleared");
                     } catch (error) {

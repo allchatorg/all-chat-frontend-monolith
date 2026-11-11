@@ -96,8 +96,11 @@ export default function Page() {
     const reportedUserIdStatus = reportedMessage?.senderIdVerificationStatus ?? 'NONE';
     const idVerificationDisabled = reportedUserIdStatus === 'REQUIRED'
         || reportedUserIdStatus === 'PENDING'
-        || reportedUserIdStatus === 'VERIFIED';
-    const idVerificationDisabledReason = reportedUserIdStatus === 'VERIFIED'
+        || reportedUserIdStatus === 'VERIFIED'
+        || reportedUserIdStatus === 'REJECTED';
+    const idVerificationDisabledReason = reportedUserIdStatus === 'REJECTED'
+        ? "This user was verified as under 18. Access returns automatically at 18; an admin can order a new check from the user's page."
+        : reportedUserIdStatus === 'VERIFIED'
         ? "The user has already verified their age"
         : reportedUserIdStatus === 'PENDING'
             ? "The user's ID verification is already under review"
