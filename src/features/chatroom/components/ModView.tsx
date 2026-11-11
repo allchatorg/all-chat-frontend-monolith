@@ -19,6 +19,8 @@ import {BanRequest} from "@/models/BanRequest";
 import {Button} from "@/components/ui/button";
 import {useIsMobile} from "@/lib/hooks/useIsMobile";
 import {StaffMembershipBadge} from "@/components/StaffMembershipBadge";
+import {useActiveBan} from "@/lib/hooks/useActiveBan";
+import {isCsamReportType} from "@/lib/reportUtils";
 
 interface ModViewProps {
     isOpen?: boolean;
@@ -43,6 +45,7 @@ const ModView: React.FC<ModViewProps> = ({
     const [warnUser, warnUserLoading, warnUserError] = useThunk(warnUserThunk);
     const [banUser, banUserLoading, banUserError] = useThunk(banUserThunk);
     const isMobile = useIsMobile();
+    const activeBan = useActiveBan(isOpen && user?.banned && userId ? userId : undefined);
 
     const handleCopyId = () => {
         navigator.clipboard.writeText(userId?.toString() || '');
@@ -84,6 +87,8 @@ const ModView: React.FC<ModViewProps> = ({
     };
 
     const canActOnUser = canActOn(roleAccess.currentRole, user ? user.role : Role.UNCLAIMED_USER);
+    // The server never lifts a child-safety ban, so "Revoke Ban" isn't offered on one.
+    const csamBanned = activeBan != null && isCsamReportType(activeBan.reportType);
 
     return (
         <div className="glass-panel flex h-full min-h-0 w-full flex-col rounded-xl border">
@@ -102,7 +107,7 @@ const ModView: React.FC<ModViewProps> = ({
             </div>}
             <div className="shrink-0 border-b p-4">
                 <div className="flex gap-2 mb-3">
-                    {canActOnUser &&
+                    {canActOnUser && !csamBanned &&
                         <div className="flex-1">
                             {user?.banned ? (
                                 <button
