@@ -7,7 +7,7 @@ import {useCallback, useEffect, useState} from 'react';
 import {useParams, useRouter} from "next/navigation";
 import {useSelector} from "react-redux";
 import Link from "next/link";
-import {ArrowLeft, Gavel, Scale, Shield, User as UserIcon} from "lucide-react";
+import {ArrowLeft, Gavel, Scale, Shield, User as UserIcon, XCircle} from "lucide-react";
 import {toast} from 'sonner';
 import {AdminPageHeader} from "@/components/AdminPageHeader";
 import {Card, CardContent, CardHeader, CardTitle} from "@/components/ui/card";
@@ -23,7 +23,7 @@ import {claimAppealThunk, getAppealThunk, resolveAppealThunk} from "@/redux/appe
 import {selectSelectedAppeal} from "@/redux/appeals/appealsSelector";
 import {getUserMessagesThunk} from "@/redux/admin/adminThunk";
 import {searchAuditLogs} from "@/redux/audit-logs/auditLogsThunk";
-import {BanAppealResolutionRequest, BanAppealStatus} from "@/models/BanAppeal";
+import {BanAppealDecision, BanAppealResolutionRequest, BanAppealStatus} from "@/models/BanAppeal";
 import {AuditLogUnion} from "@/models/AuditLog";
 import {Message} from "@/models/message";
 import {getReportTypeLabel} from "@/lib/reportUtils";
@@ -98,19 +98,20 @@ export default function AppealDetailPage() {
             close();
             toast.success(request.decision === 'APPROVED'
                 ? `Appeal approved — ${summary.username} has been unbanned.`
-                : "Appeal denied — the ban stays in place.");
+                : "Appeal rejected — the ban stays in place.");
             refetch();
         } catch (error: any) {
             toast.error(error?.message || "Failed to resolve the appeal");
         }
     };
 
-    const openResolveDialog = () => {
+    const openResolveDialog = (initialDecision?: BanAppealDecision) => {
         open(
             <AppealResolutionForm
                 username={summary.username}
                 onSubmit={handleResolve}
                 onCancel={close}
+                initialDecision={initialDecision}
             />
         );
     };
@@ -135,7 +136,14 @@ export default function AppealDetailPage() {
                         </Button>
                     )}
                     {isOpen && isAdmin() && (
-                        <Button size="sm" onClick={openResolveDialog}>
+                        <Button variant="destructive" size="sm"
+                                onClick={() => openResolveDialog(BanAppealDecision.DENIED)}>
+                            <XCircle className="mr-1 h-4 w-4"/>
+                            Reject
+                        </Button>
+                    )}
+                    {isOpen && isAdmin() && (
+                        <Button size="sm" onClick={() => openResolveDialog()}>
                             <Gavel className="mr-1 h-4 w-4"/>
                             Resolve
                         </Button>

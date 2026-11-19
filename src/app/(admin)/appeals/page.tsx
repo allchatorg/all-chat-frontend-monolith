@@ -82,7 +82,7 @@ export default function Appeals() {
                                 <SelectItem value={BanAppealStatus.PENDING}>Pending</SelectItem>
                                 <SelectItem value={BanAppealStatus.UNDER_REVIEW}>Under review</SelectItem>
                                 <SelectItem value={BanAppealStatus.APPROVED}>Approved</SelectItem>
-                                <SelectItem value={BanAppealStatus.DENIED}>Denied</SelectItem>
+                                <SelectItem value={BanAppealStatus.DENIED}>Rejected</SelectItem>
                                 <SelectItem value={BanAppealStatus.EXPIRED}>Expired</SelectItem>
                             </SelectContent>
                         </Select>

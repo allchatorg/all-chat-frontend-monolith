@@ -53,7 +53,7 @@ export function VipPaymentsCard({userId}: { userId: number }) {
                             )}
                             {!fullyRefunded && (
                                 <PromotionReasonModal
-                                    mode="vip-refund"
+                                    mode={payment.current ? "vip-refund-current" : "vip-refund"}
                                     onSubmit={(reason) => handleRefund(payment.invoiceId, reason)}
                                     disabled={isRefunding}
                                 />

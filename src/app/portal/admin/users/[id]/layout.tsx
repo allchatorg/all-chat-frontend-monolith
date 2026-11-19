@@ -1,6 +1,6 @@
 "use client";
 import {Card} from "@ads/components/ui/card";
-import {Megaphone, ShoppingBag, UserCircle} from "lucide-react";
+import {Megaphone, ShoppingBag, TrendingUp, UserCircle} from "lucide-react";
 import {useParams, usePathname} from "next/navigation";
 import React, {ReactNode} from "react";
 import {NavigationTabs} from "@ads/components/NavigationTabs";
@@ -36,6 +36,12 @@ export default function UserLayout({children}: { children: ReactNode }) {
             label: "Promoted Messages",
             href: `${basePath}/promoted-messages`,
             icon: Megaphone
+        },
+        {
+            value: "room-promotions",
+            label: "Room Promotions",
+            href: `${basePath}/room-promotions`,
+            icon: TrendingUp
         },
     ];
 

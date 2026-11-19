@@ -27,6 +27,7 @@ import {useGetMyRoomPromotionsQuery} from "@ads/store/services/roomPromotionsApi
  *   inner routes:
  *     guest / not-logged-in                            -> register (returning here after auth)
  *     unclaimed (throwaway) account                    -> null (layout renders ClaimAccountGate)
+ *     staff on /portal/campaign                        -> their admin landing page
  *     non-staff, no ads, not campaign/payment-methods  -> /portal/campaign
  *     (dashboard is additionally exempt for promotion owners)
  *     otherwise                                        -> null
@@ -55,6 +56,10 @@ function resolvePortalRedirect(
     // Throwaway accounts stay put and get a "claim your account" notice instead
     // of a confusing bounce to the campaign page.
     if (isUnclaimed) return null;
+    // Staff can't buy ads (the API refuses them), so the campaign form isn't theirs to open.
+    if (isStaff && pathname.startsWith("/portal/campaign")) {
+        return isSuperAdmin ? "/portal/admin/dashboard" : "/portal/admin/ads";
+    }
     // Payment methods is exempt from the no-ads funnel: cards can be managed
     // before the first campaign is purchased (and right after claiming).
     // Promoted messages and room promotions are exempt too: both are bought
