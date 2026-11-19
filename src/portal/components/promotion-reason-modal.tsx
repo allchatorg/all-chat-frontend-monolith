@@ -22,7 +22,7 @@ interface PromotionReasonForm {
 export type PromotionReasonMode =
     | "deny" | "cancel-pending" | "cancel-approved" | "request-cancel"
     | "room-deny" | "room-cancel-pending" | "room-cancel-approved" | "room-request-cancel"
-    | "refund" | "room-refund" | "ad-stop" | "ad-refund" | "vip-refund";
+    | "refund" | "room-refund" | "ad-stop" | "ad-refund" | "vip-refund" | "vip-refund-current";
 
 interface PromotionReasonModalProps {
     // Admin: deny (PENDING), cancel-pending (hold released), cancel-approved
@@ -142,6 +142,14 @@ const MODE_CONFIG: Record<PromotionReasonMode, {
         description: "This refunds this payment to the user's card and cannot be undone. VIP access stays until " +
             "the paid period ends. A reason is required.",
         confirmLabel: "Refund in Full",
+        placeholder: "Enter a detailed reason for this refund...",
+    },
+    "vip-refund-current": {
+        triggerLabel: "Refund",
+        title: "Refund Current VIP Payment",
+        description: "This refunds the payment for the current VIP period and cannot be undone. VIP ends right " +
+            "away, the subscription is cancelled so it won't renew, and the user is notified. A reason is required.",
+        confirmLabel: "Refund and End VIP",
         placeholder: "Enter a detailed reason for this refund...",
     },
 };

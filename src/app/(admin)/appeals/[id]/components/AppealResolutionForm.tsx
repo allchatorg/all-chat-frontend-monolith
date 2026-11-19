@@ -18,12 +18,14 @@ interface AppealResolutionFormProps {
     username: string;
     onSubmit: (request: BanAppealResolutionRequest) => Promise<void>;
     onCancel: () => void;
+    // The Reject button opens the form with the decision already set.
+    initialDecision?: BanAppealDecision;
 }
 
-export default function AppealResolutionForm({username, onSubmit, onCancel}: AppealResolutionFormProps) {
+export default function AppealResolutionForm({username, onSubmit, onCancel, initialDecision}: AppealResolutionFormProps) {
     const form = useForm<BanAppealResolutionRequest>({
         defaultValues: {
-            decision: undefined,
+            decision: initialDecision,
             internalNote: "",
             userFacingMessage: "",
         }
@@ -43,9 +45,11 @@ export default function AppealResolutionForm({username, onSubmit, onCancel}: App
     return (
         <div className="w-[80vw] max-w-lg mx-auto p-2 sm:p-4 space-y-4">
             <div>
-                <h2 className="text-lg font-semibold">Resolve appeal</h2>
+                <h2 className="text-lg font-semibold">
+                    {initialDecision === BanAppealDecision.DENIED ? "Reject appeal" : "Resolve appeal"}
+                </h2>
                 <p className="text-sm text-muted-foreground">
-                    Approving unbans <span className="font-medium">{username}</span> immediately. Denying
+                    Approving unbans <span className="font-medium">{username}</span> immediately. Rejecting
                     keeps the ban and is final for this ban. The user is notified by email either way.
                 </p>
             </div>
@@ -79,7 +83,7 @@ export default function AppealResolutionForm({username, onSubmit, onCancel}: App
                                         >
                                             <RadioGroupItem value={BanAppealDecision.DENIED} id="decision-deny"/>
                                             <XCircle className="h-4 w-4 text-red-600"/>
-                                            <span>Deny — uphold ban</span>
+                                            <span>Reject — uphold ban</span>
                                         </Label>
                                     </RadioGroup>
                                 </FormControl>
@@ -156,7 +160,7 @@ export default function AppealResolutionForm({username, onSubmit, onCancel}: App
                             {isSubmitting
                                 ? "Resolving..."
                                 : decision === BanAppealDecision.DENIED
-                                    ? "Deny appeal"
+                                    ? "Reject appeal"
                                     : "Approve & unban"}
                         </Button>
                     </div>

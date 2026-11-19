@@ -13,7 +13,7 @@ const STATUS_LABELS: Record<BanAppealStatus, string> = {
     [BanAppealStatus.PENDING]: "Pending",
     [BanAppealStatus.UNDER_REVIEW]: "Under review",
     [BanAppealStatus.APPROVED]: "Approved",
-    [BanAppealStatus.DENIED]: "Denied",
+    [BanAppealStatus.DENIED]: "Rejected",
     [BanAppealStatus.EXPIRED]: "Expired",
 };
 
